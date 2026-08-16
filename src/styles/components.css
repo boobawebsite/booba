@@ -1,5 +1,6 @@
 /* ==========================================================================
    BOOBA (baby BNB) — Component Library & UI Elements
+   Google-Standard Aesthetics • X-Style Auth Page • Dark Crypto Luxury
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -9,12 +10,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: 0.95rem;
   padding: 0.75rem 1.4rem;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   border: 1px solid transparent;
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -77,15 +78,13 @@
 }
 
 .btn-sm {
-  padding: 0.45rem 0.85rem;
+  padding: 0.45rem 0.9rem;
   font-size: 0.825rem;
-  border-radius: var(--radius-xs);
 }
 
 .btn-lg {
-  padding: 0.95rem 2rem;
+  padding: 0.9rem 2rem;
   font-size: 1.05rem;
-  border-radius: var(--radius-md);
   font-weight: 700;
 }
 
@@ -93,14 +92,49 @@
   width: 100%;
 }
 
-.btn-icon {
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  border-radius: var(--radius-sm);
-  display: inline-flex;
+/* Auth Pill Button Style (X/Twitter Standard) */
+.btn-auth-pill {
+  width: 100%;
+  max-width: 380px;
+  background: #FFFFFF;
+  color: #0F1419;
+  border-radius: var(--radius-full);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.75rem 1.25rem;
+  display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.btn-auth-pill:hover {
+  background: #E6E6E6;
+  transform: scale(1.01);
+}
+
+.btn-auth-pill.btn-wallet {
+  background: linear-gradient(135deg, #F3BA2F 0%, #E0A71D 100%);
+  color: #000000;
+  box-shadow: 0 4px 15px rgba(243, 186, 47, 0.25);
+}
+
+.btn-auth-pill.btn-wallet:hover {
+  filter: brightness(1.08);
+}
+
+.btn-auth-pill.btn-apple {
+  background: #000000;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.btn-auth-pill.btn-apple:hover {
+  background: #181818;
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* --------------------------------------------------------------------------
@@ -193,14 +227,239 @@
 }
 
 /* --------------------------------------------------------------------------
-   3. Unified Auth Modal & Card (Login + Sign Up Combined)
+   3. X-STYLE AUTH PAGE & MODAL (Google, Email, Wallet Unified Design)
+   -------------------------------------------------------------------------- */
+.auth-page-container {
+  min-height: calc(100vh - var(--header-height));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem 4rem 1.5rem;
+  position: relative;
+}
+
+.x-auth-layout {
+  width: 100%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 4rem;
+  margin: 0 auto;
+}
+
+@media (max-width: 960px) {
+  .x-auth-layout {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    text-align: center;
+  }
+  .x-auth-left {
+    display: none;
+  }
+  .btn-auth-pill {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .x-auth-input-box {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.x-auth-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.x-auth-giant-logo {
+  width: 100%;
+  max-width: 440px;
+  filter: drop-shadow(0 0 50px rgba(243, 186, 47, 0.25));
+  border-radius: var(--radius-xl);
+  border: 2px solid rgba(243, 186, 47, 0.3);
+  animation: floatMascot 4s ease-in-out infinite;
+}
+
+@keyframes floatMascot {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.x-auth-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+@media (max-width: 960px) {
+  .x-auth-right {
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.x-auth-headline {
+  font-size: clamp(2.5rem, 5.5vw, 4.2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin-bottom: 2rem;
+  color: #FFFFFF;
+}
+
+.x-auth-subhead {
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-weight: 700;
+  margin-bottom: 1.75rem;
+  color: #FFFFFF;
+}
+
+.x-auth-actions-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+  max-width: 380px;
+}
+
+.x-auth-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 380px;
+  margin: 1rem 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.x-auth-divider::before, .x-auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.x-auth-divider span {
+  padding: 0 0.85rem;
+}
+
+.x-auth-input-box {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.x-input-field {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.1rem;
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+}
+
+.x-input-field:focus {
+  outline: none;
+  border-color: #1D9BF0;
+  box-shadow: 0 0 0 1px #1D9BF0;
+}
+
+.x-input-field::placeholder {
+  color: var(--text-muted);
+}
+
+.btn-x-submit {
+  width: 100%;
+  background: var(--brand-yellow);
+  color: #000000;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.85rem;
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-x-submit:hover {
+  filter: brightness(1.08);
+  transform: scale(1.01);
+}
+
+.x-legal-text {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-top: 0.75rem;
+  width: 100%;
+  max-width: 380px;
+}
+
+.x-legal-text a {
+  color: var(--brand-yellow);
+  text-decoration: underline;
+}
+
+.x-switch-account-row {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.x-switch-account-row a {
+  color: var(--brand-yellow);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Floating QR Code Badge (Bottom Right like X) */
+.x-floating-qr-card {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: rgba(14, 18, 27, 0.9);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-lg);
+  z-index: 90;
+  transition: transform var(--transition-fast);
+}
+
+.x-floating-qr-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--brand-yellow);
+}
+
+@media (max-width: 768px) {
+  .x-floating-qr-card {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Unified Auth Modal Card
    -------------------------------------------------------------------------- */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -218,11 +477,11 @@
 
 .auth-card {
   width: 100%;
-  max-width: 480px;
+  max-width: 500px;
   background: var(--bg-surface);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-xl);
-  padding: 2.25rem;
+  padding: 2.5rem 2rem;
   box-shadow: var(--shadow-lg), 0 0 60px rgba(243, 186, 47, 0.12);
   transform: scale(0.95) translateY(15px);
   transition: all var(--transition-smooth);
@@ -234,53 +493,9 @@
   transform: scale(1) translateY(0);
 }
 
-.auth-header {
-  text-align: center;
-  margin-bottom: 1.75rem;
-}
-
-.auth-mascot-preview {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  border: 3px solid var(--brand-yellow);
-  margin: 0 auto 0.75rem auto;
-  display: block;
-  box-shadow: 0 0 25px var(--brand-yellow-glow);
-}
-
-/* Tabs switcher for Sign In / Sign Up */
-.auth-tabs {
-  display: flex;
-  background: var(--bg-input);
-  border-radius: var(--radius-sm);
-  padding: 4px;
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--border-subtle);
-}
-
-.auth-tab-btn {
-  flex: 1;
-  padding: 0.65rem 0.5rem;
-  border-radius: calc(var(--radius-sm) - 2px);
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.auth-tab-btn.active {
-  background: var(--bg-surface-elevated);
-  color: var(--brand-yellow);
-  box-shadow: var(--shadow-sm);
-}
-
 /* Form Controls */
 .form-group {
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.1rem;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
@@ -311,31 +526,6 @@
   outline: none;
   border-color: var(--brand-yellow);
   box-shadow: 0 0 0 3px var(--brand-yellow-subtle);
-}
-
-.form-input::placeholder {
-  color: var(--text-muted);
-}
-
-.form-divider {
-  display: flex;
-  align-items: center;
-  margin: 1.25rem 0;
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.form-divider::before, .form-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border-subtle);
-}
-
-.form-divider span {
-  padding: 0 0.75rem;
 }
 
 /* Quick Demo Profile Switcher */
@@ -374,7 +564,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   4. The 3D Booba Passport Card
+   5. The 3D Booba Passport Card
    -------------------------------------------------------------------------- */
 .passport-container {
   perspective: 1200px;
@@ -545,7 +735,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   5. Quest Cards & Feed
+   6. Quest Cards & Feed
    -------------------------------------------------------------------------- */
 .quest-card {
   background: var(--bg-card);
@@ -596,7 +786,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   6. Leaderboard & Tables
+   7. Leaderboard & Tables
    -------------------------------------------------------------------------- */
 .leaderboard-table {
   width: 100%;
@@ -646,7 +836,7 @@
 .rank-3 { background: linear-gradient(135deg, #CD7F32 0%, #8C531B 100%); color: #fff; }
 
 /* --------------------------------------------------------------------------
-   7. Toast Notifications
+   8. Toast Notifications
    -------------------------------------------------------------------------- */
 .toast-container {
   position: fixed;
@@ -685,7 +875,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   8. Responsive Layout & Mobile Drawers
+   9. Responsive Layout & Mobile Drawers
    -------------------------------------------------------------------------- */
 @media (max-width: 900px) {
   .nav-links {

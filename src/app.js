@@ -1,6 +1,6 @@
 /* ==========================================================================
    BOOBA (baby BNB) — Main Application Controller
-   SPA Architecture • Real-time UI Updates • Google-Standard Polish
+   SPA Architecture • X-Style Auth Page • Google-Standard Polish
    ========================================================================== */
 
 import { db, calculateLevel, LEVEL_TIERS } from './services/db.js';
@@ -23,7 +23,7 @@ class BoobaApp {
     const refParam = urlParams.get('ref');
     if (refParam) {
       window.sessionStorage.setItem('booba_ref_code', refParam);
-      this.openAuthModal('signup', refParam);
+      window.location.hash = 'auth';
     }
 
     // Subscribe to DB state updates
@@ -46,7 +46,6 @@ class BoobaApp {
 
   handleRouting() {
     const hash = window.location.hash.replace(/^#/, '');
-    const validRoutes = ['home', 'dashboard', 'admin', 'auth'];
 
     if (hash.startsWith('dashboard')) {
       const parts = hash.split('/');
@@ -56,9 +55,9 @@ class BoobaApp {
       const parts = hash.split('/');
       this.currentRoute = 'admin';
       if (parts[1]) this.activeAdminTab = parts[1];
-    } else if (hash === 'auth') {
+    } else if (hash === 'auth' || hash === 'login' || hash === 'signup') {
       this.currentRoute = 'auth';
-      this.openAuthModal('signup');
+      this.authMode = hash === 'login' ? 'signin' : 'signup';
     } else {
       this.currentRoute = 'home';
     }
@@ -103,55 +102,13 @@ class BoobaApp {
     }, duration);
   }
 
-  openAuthModal(mode = 'signup', refCode = '') {
+  openAuthModal(mode = 'signup') {
     this.authMode = mode;
-    const modal = document.getElementById('authModal');
-    if (!modal) return;
-
-    const refInput = document.getElementById('authReferralInput');
-    const storedRef = refCode || window.sessionStorage.getItem('booba_ref_code') || '';
-    if (refInput && storedRef) {
-      refInput.value = storedRef;
-    }
-
-    this.updateAuthModalUI();
-    modal.classList.add('open');
+    window.location.hash = mode === 'signin' ? 'login' : 'signup';
   }
 
   closeModal() {
     document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
-  }
-
-  updateAuthModalUI() {
-    const isSignUp = this.authMode === 'signup';
-    const tabSignup = document.getElementById('tabAuthSignup');
-    const tabSignin = document.getElementById('tabAuthSignin');
-    const title = document.getElementById('authModalTitle');
-    const subtitle = document.getElementById('authModalSubtitle');
-    const signupFields = document.querySelectorAll('.signup-only-field');
-    const submitBtn = document.getElementById('authSubmitBtn');
-
-    if (tabSignup && tabSignin) {
-      tabSignup.classList.toggle('active', isSignUp);
-      tabSignin.classList.toggle('active', !isSignUp);
-    }
-
-    if (title) {
-      title.textContent = isSignUp ? 'Mint Your Booba Passport' : 'Welcome Back, Baby Panda';
-    }
-    if (subtitle) {
-      subtitle.textContent = isSignUp 
-        ? 'Join the Baby BNB revolution and claim +100 BOOBA welcome tokens!' 
-        : 'Access your Booba Passport, verify quests, and track rewards.';
-    }
-
-    signupFields.forEach(el => {
-      el.style.display = isSignUp ? 'flex' : 'none';
-    });
-
-    if (submitBtn) {
-      submitBtn.textContent = isSignUp ? 'Mint Passport & Join (+100 BOOBA)' : 'Sign In to Dashboard';
-    }
   }
 
   // Render entry dispatcher
@@ -169,10 +126,12 @@ class BoobaApp {
     if (this.currentRoute === 'home') {
       appEl.innerHTML = this.getHomepageHTML(state);
       this.attachHomeListeners();
+    } else if (this.currentRoute === 'auth') {
+      appEl.innerHTML = this.getXAuthPageHTML(state);
+      this.attachXAuthListeners();
     } else if (this.currentRoute === 'dashboard') {
       if (!currentUser) {
-        this.openAuthModal('signin');
-        window.location.hash = 'home';
+        window.location.hash = 'login';
         return;
       }
       appEl.innerHTML = this.getDashboardHTML(state);
@@ -226,18 +185,244 @@ class BoobaApp {
     } else {
       navRight.innerHTML = `
         <div class="flex items-center gap-3">
-          <button id="headerLoginBtn" class="btn btn-ghost btn-sm">Sign In</button>
-          <button id="headerMintBtn" class="btn btn-primary btn-sm">Create Passport</button>
+          <a href="#login" class="btn btn-ghost btn-sm">Sign In</a>
+          <a href="#signup" class="btn btn-primary btn-sm">Create Passport</a>
         </div>
       `;
-
-      document.getElementById('headerLoginBtn')?.addEventListener('click', () => this.openAuthModal('signin'));
-      document.getElementById('headerMintBtn')?.addEventListener('click', () => this.openAuthModal('signup'));
     }
   }
 
   /* --------------------------------------------------------------------------
-     1. HOMEPAGE VIEW
+     1. X-STYLE AUTH PAGE VIEW (Login & Sign Up Together)
+     -------------------------------------------------------------------------- */
+  getXAuthPageHTML(state) {
+    const isSignUp = this.authMode === 'signup';
+    const storedRef = window.sessionStorage.getItem('booba_ref_code') || '';
+
+    return `
+      <div class="auth-page-container">
+        <div class="x-auth-layout">
+          
+          <!-- LEFT SIDE: Grand 3D Baby BNB Mascot & Emblem -->
+          <div class="x-auth-left">
+            <div style="position: relative; text-align: center;">
+              <img src="assets/mascot.jpg" class="x-auth-giant-logo" alt="Booba Baby BNB Mascot">
+              
+              <!-- Floating Brand Tag -->
+              <div class="glass-panel" style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); padding: 0.6rem 1.25rem; border-radius: var(--radius-full); border: 1.5px solid var(--brand-yellow); display: flex; align-items: center; gap: 0.6rem; white-space: nowrap; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+                <span style="font-size: 1.2rem;">🍼</span>
+                <span style="font-weight: 800; font-size: 0.9rem; color: #FFFFFF;">BOOBA • baby BNB</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT SIDE: X-Style Auth Form & Actions -->
+          <div class="x-auth-right">
+            
+            <h1 class="x-auth-headline">Happening<br>now.</h1>
+            
+            <h2 class="x-auth-subhead">
+              ${isSignUp ? 'Join the Booba Universe today.' : 'Sign in to your Booba Passport.'}
+            </h2>
+
+            <div class="x-auth-actions-group">
+              
+              <!-- 1. Continue with Google -->
+              <button type="button" id="btnGoogleAuth" class="btn-auth-pill">
+                <svg width="18" height="18" viewBox="0 0 48 48">
+                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                Continue with Google
+              </button>
+
+              <!-- 2. Continue with Web3 Wallet -->
+              <button type="button" id="btnWalletAuth" class="btn-auth-pill btn-wallet">
+                <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
+                  <path d="M16 2L2 9L16 16L30 9L16 2Z" fill="#000000"/>
+                  <path d="M2 23L16 30L30 23V9L16 16L2 9V23Z" fill="#000000" fill-opacity="0.8"/>
+                </svg>
+                Continue with Web3 Wallet
+              </button>
+
+              <!-- 3. Continue with Apple -->
+              <button type="button" id="btnAppleAuth" class="btn-auth-pill btn-apple">
+                <svg width="18" height="18" viewBox="0 0 170 170" fill="#FFFFFF">
+                  <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-5.35.12-10.26-2.04-14.75-6.47-3.28-3.07-7.23-7.97-11.87-14.7-5.9-8.58-10.46-18.42-13.68-29.54-3.21-11.12-4.83-21.78-4.83-31.99 0-14.65 3.63-26.69 10.9-36.14 7.26-9.45 16.51-14.28 27.75-14.5 4.35 0 9.47 1.15 15.36 3.44 5.9 2.29 9.87 3.47 11.93 3.55 1.63 0 5.86-1.28 12.69-3.83 6.83-2.55 12.28-3.6 16.34-3.17 12.8.96 22.84 5.93 30.13 14.92-11.45 6.94-17.06 16.5-16.84 28.69.21 9.53 3.88 17.48 11.01 23.85 7.14 6.37 15.53 10.02 25.19 10.96-2.24 6.83-5.01 13.82-8.31 20.97zM119.22 31.02c0-7.3 2.66-14.1 7.98-20.4 5.32-6.3 11.83-10.05 19.53-11.24.65 6.94-1.68 13.79-7 20.55-5.32 6.76-11.82 10.74-19.51 11.93-.22-.28-.56-.56-1-.84z"/>
+                </svg>
+                Continue with Apple
+              </button>
+
+            </div>
+
+            <!-- Divider -->
+            <div class="x-auth-divider">
+              <span>or</span>
+            </div>
+
+            <!-- Input Box & Email Submit -->
+            <form id="xAuthForm" class="x-auth-input-box">
+              
+              ${isSignUp ? `
+                <input type="text" id="xUsernameInput" placeholder="Choose username (e.g. CryptoKing)" class="x-input-field" required>
+              ` : ''}
+
+              <input type="text" id="xEmailInput" placeholder="Email or username" class="x-input-field" required>
+
+              <input type="password" id="xPasswordInput" placeholder="Password" class="x-input-field">
+
+              ${isSignUp ? `
+                <input type="text" id="xReferralInput" value="${storedRef}" placeholder="Referral code (Optional)" class="x-input-field text-mono" style="text-transform: uppercase;">
+              ` : ''}
+
+              <button type="submit" id="xSubmitBtn" class="btn-x-submit">
+                ${isSignUp ? 'Create account & Mint Passport (+100 BOOBA)' : 'Sign In'}
+              </button>
+
+            </form>
+
+            <div class="x-legal-text">
+              By signing up, you agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>, including <a href="#">Cookie Use</a>.
+            </div>
+
+            <!-- Switch between Sign Up & Sign In -->
+            <div class="x-switch-account-row">
+              ${isSignUp ? `
+                Already have an account? <a id="toggleToSigninLink">Sign in</a>
+              ` : `
+                Don't have an account? <a id="toggleToSignupLink">Sign up</a>
+              `}
+            </div>
+
+            <!-- 1-Click Demo Profiles -->
+            <div class="demo-accounts-pill" style="width: 100%; max-width: 380px; margin-top: 2rem;">
+              <div style="font-size: 0.75rem; font-weight: 700; color: var(--brand-yellow); text-transform: uppercase;">🚀 Instant 1-Click Demo Logins</div>
+              <div class="demo-btn-group">
+                <button type="button" id="xDemoMemberBtn" class="demo-btn">
+                  👤 Member (@CryptoKing)
+                </button>
+                <button type="button" id="xDemoAdminBtn" class="demo-btn">
+                  🛡️ Admin (@BoobaBoss)
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Floating QR Card (Bottom Right like X) -->
+        <div class="x-floating-qr-card">
+          <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase;">Scan for Mobile Passport</div>
+          <div style="width: 60px; height: 60px; background: #fff; padding: 4px; border-radius: 6px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;">
+            <div style="background: #000;"></div><div style="background: #000;"></div><div></div><div style="background: #000;"></div>
+            <div style="background: #000;"></div><div></div><div style="background: #000;"></div><div></div>
+            <div></div><div style="background: #000;"></div><div style="background: #000;"></div><div style="background: #000;"></div>
+            <div style="background: #000;"></div><div></div><div style="background: #000;"></div><div style="background: #000;"></div>
+          </div>
+          <div style="font-size: 0.65rem; color: var(--brand-yellow);">baby BNB App</div>
+        </div>
+
+      </div>
+    `;
+  }
+
+  attachXAuthListeners() {
+    // Toggle Sign Up / Sign In
+    document.getElementById('toggleToSigninLink')?.addEventListener('click', () => {
+      this.authMode = 'signin';
+      window.location.hash = 'login';
+    });
+
+    document.getElementById('toggleToSignupLink')?.addEventListener('click', () => {
+      this.authMode = 'signup';
+      window.location.hash = 'signup';
+    });
+
+    // 1. Google Auth Click
+    document.getElementById('btnGoogleAuth')?.addEventListener('click', () => {
+      const mockEmail = 'cryptouser@gmail.com';
+      const res = db.login(mockEmail, '') || db.register({ username: 'GooglePanda', email: mockEmail });
+      if (res.user) {
+        db.currentUser = res.user;
+        this.showToast(`✨ Successfully authenticated with Google (${mockEmail})!`);
+        window.location.hash = 'dashboard/overview';
+      }
+    });
+
+    // 2. Web3 Wallet Auth Click
+    document.getElementById('btnWalletAuth')?.addEventListener('click', () => {
+      const mockWallet = '0x' + Math.random().toString(16).substring(2, 10) + '...' + Math.random().toString(16).substring(2, 6);
+      const res = db.loginWithWallet(mockWallet);
+      this.showToast(`🔗 Connected Web3 Wallet (${mockWallet})! Passport ready.`);
+      window.location.hash = 'dashboard/overview';
+    });
+
+    // 3. Apple Auth Click
+    document.getElementById('btnAppleAuth')?.addEventListener('click', () => {
+      const mockEmail = 'appleuser@icloud.com';
+      const res = db.register({ username: 'ApplePanda', email: mockEmail });
+      if (res.user) {
+        db.currentUser = res.user;
+        this.showToast(`🍎 Successfully authenticated with Apple ID!`);
+        window.location.hash = 'dashboard/overview';
+      }
+    });
+
+    // Email Form Submit
+    document.getElementById('xAuthForm')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const isSignUp = this.authMode === 'signup';
+      const email = document.getElementById('xEmailInput')?.value || '';
+      const password = document.getElementById('xPasswordInput')?.value || '';
+      const username = document.getElementById('xUsernameInput')?.value || '';
+      const refCode = document.getElementById('xReferralInput')?.value || '';
+
+      if (isSignUp) {
+        if (!username || !email) {
+          this.showToast('Please enter both username and email.', 'error');
+          return;
+        }
+        const res = db.register({ username, email, referralCodeInput: refCode });
+        if (res.success) {
+          this.showToast(`🎉 Passport Minted! ID: ${res.user.passportId}. Welcome bonus +100 BOOBA credited!`);
+          window.location.hash = 'dashboard/passport';
+        } else {
+          this.showToast(res.message, 'error');
+        }
+      } else {
+        if (!email) {
+          this.showToast('Please enter your email or username.', 'error');
+          return;
+        }
+        const res = db.login(email, password);
+        if (res.success) {
+          this.showToast(`Welcome back, @${res.user.username}!`);
+          window.location.hash = 'dashboard/overview';
+        } else {
+          this.showToast(res.message, 'error');
+        }
+      }
+    });
+
+    // Demo Switchers
+    document.getElementById('xDemoMemberBtn')?.addEventListener('click', () => {
+      db.switchDemoUser('member');
+      this.showToast('Logged in as Member: @CryptoKing (Level 7 Booba Elite)');
+      window.location.hash = 'dashboard/overview';
+    });
+
+    document.getElementById('xDemoAdminBtn')?.addEventListener('click', () => {
+      db.switchDemoUser('admin');
+      this.showToast('Logged in as Admin: @BoobaBoss');
+      window.location.hash = 'admin';
+    });
+  }
+
+  /* --------------------------------------------------------------------------
+     2. HOMEPAGE VIEW
      -------------------------------------------------------------------------- */
   getHomepageHTML(state) {
     const topLeaderboard = [...state.users]
@@ -269,9 +454,9 @@ class BoobaApp {
 
               <!-- Hero CTAs -->
               <div class="flex items-center gap-4" style="flex-wrap: wrap; margin-bottom: 2.5rem;">
-                <button id="heroCreatePassportBtn" class="btn btn-primary btn-lg">
+                <a href="#signup" class="btn btn-primary btn-lg">
                   🪪 Create Your Booba Passport
-                </button>
+                </a>
                 <a href="#dashboard/quests" class="btn btn-secondary btn-lg">
                   🎯 Explore Quests
                 </a>
@@ -304,7 +489,7 @@ class BoobaApp {
               <div style="position: relative; z-index: 2; text-align: center; margin-bottom: 1.5rem;">
                 <img src="assets/mascot.jpg" alt="Booba Mascot - Baby BNB Panda" style="width: 100%; max-width: 380px; border-radius: var(--radius-xl); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(243, 186, 47, 0.25); border: 2px solid rgba(243, 186, 47, 0.4);">
                 
-                <!-- Floating Floating Floating Badges -->
+                <!-- Floating Badges -->
                 <div class="glass-panel" style="position: absolute; bottom: -15px; left: 10px; padding: 0.6rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--brand-yellow); display: flex; align-items: center; gap: 0.5rem; box-shadow: var(--shadow-md);">
                   <span style="font-size: 1.2rem;">🍼</span>
                   <div>
@@ -414,9 +599,9 @@ class BoobaApp {
                 </div>
               </div>
 
-              <button id="passportSpotlightMintBtn" class="btn btn-primary">
+              <a href="#signup" class="btn btn-primary">
                 Claim Your Passport ID
-              </button>
+              </a>
             </div>
 
             <!-- Interactive 3D Passport Preview -->
@@ -479,11 +664,10 @@ class BoobaApp {
                   </div>
 
                   <div style="display: flex; gap: 1rem; align-items: center; margin: 0.75rem 0;">
-                    <!-- Stylized QR Code placeholder -->
                     <div style="width: 70px; height: 70px; background: #fff; padding: 5px; border-radius: 8px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;">
                       <div style="background: #000;"></div><div style="background: #000;"></div><div style="background: #000;"></div><div></div>
-                      <div style="background: #000;"></div><div></div><div style="background: #000;"></div><div style="background: #000;"></div>
-                      <div></div><div style="background: #000;"></div><div></div><div style="background: #000;"></div>
+                      <div style="background: #000;"></div><div></div><div style="background: #000;"></div><div></div>
+                      <div></div><div style="background: #000;"></div><div style="background: #000;"></div><div style="background: #000;"></div>
                       <div style="background: #000;"></div><div style="background: #000;"></div><div style="background: #000;"></div><div style="background: #000;"></div>
                     </div>
                     <div style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4;">
@@ -600,7 +784,7 @@ class BoobaApp {
                 Join thousands of baby BNB holders. Complete quests, build verified reputation, and unlock the next frontier of gamified crypto rewards.
               </p>
               <div class="flex items-center justify-center gap-4" style="flex-wrap: wrap;">
-                <button id="ctaCreatePassportBtn" class="btn btn-primary btn-lg">Mint Passport Now</button>
+                <a href="#signup" class="btn btn-primary btn-lg">Mint Passport Now</a>
                 <a href="https://t.me/boobababybnb" target="_blank" class="btn btn-secondary btn-lg">Join Telegram 💬</a>
               </div>
             </div>
@@ -611,10 +795,6 @@ class BoobaApp {
   }
 
   attachHomeListeners() {
-    document.getElementById('heroCreatePassportBtn')?.addEventListener('click', () => this.openAuthModal('signup'));
-    document.getElementById('passportSpotlightMintBtn')?.addEventListener('click', () => this.openAuthModal('signup'));
-    document.getElementById('ctaCreatePassportBtn')?.addEventListener('click', () => this.openAuthModal('signup'));
-
     // Passport 3D Flip
     const card = document.getElementById('spotlightPassportCard');
     const flipFront = document.getElementById('flipPassportBtn');
@@ -628,7 +808,7 @@ class BoobaApp {
   }
 
   /* --------------------------------------------------------------------------
-     2. USER DASHBOARD VIEW (All-In-One Member HQ)
+     3. USER DASHBOARD VIEW (All-In-One Member HQ)
      -------------------------------------------------------------------------- */
   getDashboardHTML(state) {
     const user = state.currentUser;
@@ -919,7 +1099,6 @@ class BoobaApp {
             <p style="font-size: 0.9rem;">Your accrued BOOBA points grant token allocation multipliers, exclusive perks, and tier privileges.</p>
           </div>
 
-          <!-- Balances Strip -->
           <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem;">
             <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-md); border-color: rgba(243, 186, 47, 0.3);">
               <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">BOOBA Points Balance</div>
@@ -946,7 +1125,6 @@ class BoobaApp {
             </div>
           </div>
 
-          <!-- Progression Tiers Grid -->
           <h4 style="margin-bottom: 1.25rem;">Level Unlock Hierarchy</h4>
           <div style="display: flex; flex-direction: column; gap: 0.75rem;">
             ${LEVEL_TIERS.map(tier => {
@@ -991,7 +1169,6 @@ class BoobaApp {
             <p style="font-size: 0.9rem;">Invite genuine members to the Booba ecosystem. Earn +300 BOOBA for every verified referral.</p>
           </div>
 
-          <!-- Personal Invite Link Box -->
           <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-md); border: 1.5px dashed rgba(243, 186, 47, 0.4); margin-bottom: 2.5rem; background: rgba(243, 186, 47, 0.03);">
             <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-yellow); text-transform: uppercase; margin-bottom: 0.5rem;">Your Unique Invite Link</div>
             <div class="flex items-center gap-3" style="flex-wrap: wrap;">
@@ -1005,7 +1182,6 @@ class BoobaApp {
             </div>
           </div>
 
-          <!-- Referral Stats Grid -->
           <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;">
             <div class="glass-panel" style="padding: 1.25rem; border-radius: var(--radius-sm); text-align: center;">
               <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Total Registrations</div>
@@ -1033,7 +1209,6 @@ class BoobaApp {
             </div>
           </div>
 
-          <!-- Referrals Table -->
           <h4 style="margin-bottom: 1rem;">Referred Members List</h4>
           <table class="leaderboard-table">
             <thead>
@@ -1177,7 +1352,6 @@ class BoobaApp {
             <p style="font-size: 0.9rem;">Manage your linked Web3 wallet, security, and Supabase cloud synchronization.</p>
           </div>
 
-          <!-- Account info -->
           <div style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 600px; margin-bottom: 3rem;">
             <div class="form-group">
               <label class="form-label">Username</label>
@@ -1193,7 +1367,6 @@ class BoobaApp {
             </div>
           </div>
 
-          <!-- Supabase Connection Panel -->
           <div class="glass-panel" style="padding: 1.75rem; border-radius: var(--radius-md); border-color: rgba(6, 182, 212, 0.3); background: rgba(6, 182, 212, 0.02);">
             <div class="flex items-center justify-between" style="margin-bottom: 1rem;">
               <div class="flex items-center gap-2">
@@ -1364,10 +1537,8 @@ class BoobaApp {
           const res = db.claimDailyCheckIn();
           this.showToast(`🔥 Claimed +${reward} BOOBA for ${title}!`);
         } else if (type === 'social') {
-          // Open social link and verify
           this.openSocialVerifyModal(id, title, reward);
         } else {
-          // Creative or proof quest
           this.openProofSubmissionModal(id, title, reward);
         }
       });
@@ -1423,7 +1594,7 @@ class BoobaApp {
   }
 
   /* --------------------------------------------------------------------------
-     3. ADMIN DASHBOARD VIEW
+     4. ADMIN DASHBOARD VIEW
      -------------------------------------------------------------------------- */
   getAdminHTML(state) {
     const pendingSubs = state.submissions.filter(s => s.status === 'pending');
@@ -1447,7 +1618,6 @@ class BoobaApp {
           </button>
         </div>
 
-        <!-- Admin Stats Strip -->
         <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem;">
           <div class="glass-panel" style="padding: 1.25rem; border-radius: var(--radius-md);">
             <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Total Citizens</div>
@@ -1475,7 +1645,6 @@ class BoobaApp {
           </div>
         </div>
 
-        <!-- Quest Review Queue -->
         <div class="glass-panel" style="padding: 2rem; border-radius: var(--radius-lg); margin-bottom: 2.5rem;">
           <h3 style="margin-bottom: 0.5rem;">Quest Proof Review Queue (${pendingSubs.length})</h3>
           <p style="font-size: 0.85rem; margin-bottom: 1.5rem;">Review creative submissions and community tasks. Approving automatically awards BOOBA points directly to the user's passport.</p>
@@ -1520,7 +1689,6 @@ class BoobaApp {
           `}
         </div>
 
-        <!-- Users Management Table -->
         <div class="glass-panel" style="padding: 2rem; border-radius: var(--radius-lg);">
           <h3 style="margin-bottom: 1.25rem;">User Passports & Balances</h3>
           <table class="leaderboard-table">
@@ -1635,77 +1803,6 @@ class BoobaApp {
 // Instantiate global app on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   window.boobaApp = new BoobaApp();
-
-  // Setup Auth Modal Tab switches
-  document.getElementById('tabAuthSignup')?.addEventListener('click', () => {
-    window.boobaApp.openAuthModal('signup');
-  });
-
-  document.getElementById('tabAuthSignin')?.addEventListener('click', () => {
-    window.boobaApp.openAuthModal('signin');
-  });
-
-  // Auth Form Submit
-  document.getElementById('authForm')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const isSignUp = window.boobaApp.authMode === 'signup';
-    const email = document.getElementById('authEmailInput')?.value || '';
-    const password = document.getElementById('authPasswordInput')?.value || '';
-    const username = document.getElementById('authUsernameInput')?.value || '';
-    const refCode = document.getElementById('authReferralInput')?.value || '';
-
-    if (isSignUp) {
-      if (!username || !email) {
-        window.boobaApp.showToast('Please enter both username and email.', 'error');
-        return;
-      }
-      const res = db.register({ username, email, referralCodeInput: refCode });
-      if (res.success) {
-        window.boobaApp.closeModal();
-        window.boobaApp.showToast(`🎉 Passport Minted! ID: ${res.user.passportId}. Welcome bonus +100 BOOBA credited!`);
-        window.location.hash = 'dashboard/passport';
-      } else {
-        window.boobaApp.showToast(res.message, 'error');
-      }
-    } else {
-      if (!email) {
-        window.boobaApp.showToast('Please enter your email or username.', 'error');
-        return;
-      }
-      const res = db.login(email, password);
-      if (res.success) {
-        window.boobaApp.closeModal();
-        window.boobaApp.showToast(`Welcome back, @${res.user.username}!`);
-        window.location.hash = 'dashboard/overview';
-      } else {
-        window.boobaApp.showToast(res.message, 'error');
-      }
-    }
-  });
-
-  // Demo Switchers
-  document.getElementById('demoCryptoKingBtn')?.addEventListener('click', () => {
-    db.switchDemoUser('member');
-    window.boobaApp.closeModal();
-    window.boobaApp.showToast('Logged in as Member: @CryptoKing (Level 7 Booba Elite)');
-    window.location.hash = 'dashboard/overview';
-  });
-
-  document.getElementById('demoAdminBtn')?.addEventListener('click', () => {
-    db.switchDemoUser('admin');
-    window.boobaApp.closeModal();
-    window.boobaApp.showToast('Logged in as Admin: @BoobaBoss');
-    window.location.hash = 'admin';
-  });
-
-  // Web3 Wallet Connect Button
-  document.getElementById('authWalletConnectBtn')?.addEventListener('click', () => {
-    const mockWallet = '0x' + Math.random().toString(16).substring(2, 10) + '...' + Math.random().toString(16).substring(2, 6);
-    db.loginWithWallet(mockWallet);
-    window.boobaApp.closeModal();
-    window.boobaApp.showToast(`🔗 Connected Web3 Wallet (${mockWallet})! Passport ready.`);
-    window.location.hash = 'dashboard/overview';
-  });
 
   // Creative Proof Submit Form
   document.getElementById('proofForm')?.addEventListener('submit', (e) => {

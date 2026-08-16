@@ -697,40 +697,128 @@ class BoobaApp {
         </div>
       </section>
 
-      <!-- LEADERBOARD SNEAK PEEK -->
-      <section style="padding: 5rem 0;">
+      <!-- GOOGLE-STANDARD LEADERBOARD SHOWCASE -->
+      <section style="padding: 5rem 0; position: relative;">
         <div class="container">
-          <div style="text-align: center; max-width: 600px; margin: 0 auto 3rem auto;">
-            <span class="badge-tag" style="margin-bottom: 0.5rem;">HALL OF FAME</span>
+          
+          <div style="text-align: center; max-width: 650px; margin: 0 auto 2.5rem auto;">
+            <span class="badge-tag" style="margin-bottom: 0.75rem;">🏆 HALL OF FAME</span>
             <h2>Top <span class="text-gradient-gold">Booba Legends</span></h2>
-            <p>Community champions leading the Baby BNB movement across quests, referrals, and content.</p>
+            <p>Real-time community rankings of top questers, content creators, and Baby BNB ambassadors.</p>
+            
+            <!-- Timeframe Segmented Switcher -->
+            <div style="margin-top: 1.5rem;">
+              <div class="leaderboard-segmented-control">
+                <button type="button" class="leaderboard-segment-btn active">🌟 All-Time</button>
+                <button type="button" class="leaderboard-segment-btn">⚡ This Week</button>
+                <button type="button" class="leaderboard-segment-btn">🔥 Monthly Sprint</button>
+              </div>
+            </div>
           </div>
 
-          <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg); max-width: 850px; margin: 0 auto;">
+          <!-- TOP 3 PODIUM CARDS -->
+          <div class="podium-grid">
+            
+            <!-- Rank 2 (Silver) -->
+            ${topLeaderboard[1] ? `
+              <div class="podium-card podium-rank-2">
+                <div class="podium-avatar-wrapper">
+                  <img src="${topLeaderboard[1].avatar || 'assets/mascot.jpg'}" class="podium-avatar" style="border-color: #C0C0C0;" alt="Rank 2">
+                  <div class="podium-rank-badge" style="background: #E0E0E0; color: #000;">2</div>
+                </div>
+                <div style="font-weight: 800; font-size: 1.1rem; color: var(--text-primary); margin-bottom: 0.15rem;">
+                  @${topLeaderboard[1].username}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  ${topLeaderboard[1].passportId} • ${calculateLevel(topLeaderboard[1].boobaPoints).title}
+                </div>
+                <div class="quest-reward-pill" style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+                  🍼 ${topLeaderboard[1].boobaPoints.toLocaleString()} BOOBA
+                </div>
+                <div style="font-size: 0.75rem; color: var(--accent-emerald);">⭐ ${topLeaderboard[1].reputation || 95}/100 Trust</div>
+              </div>
+            ` : ''}
+
+            <!-- Rank 1 (Gold Champion) -->
+            ${topLeaderboard[0] ? `
+              <div class="podium-card podium-rank-1">
+                <div class="podium-crown">👑</div>
+                <div class="podium-avatar-wrapper">
+                  <img src="${topLeaderboard[0].avatar || 'assets/mascot.jpg'}" class="podium-avatar" alt="Rank 1 Champion">
+                  <div class="podium-rank-badge" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000;">1</div>
+                </div>
+                <div class="badge-tag" style="margin-bottom: 0.4rem; background: rgba(243, 186, 47, 0.2); color: var(--brand-yellow); border-color: var(--brand-yellow);">
+                  GRANDMASTER
+                </div>
+                <div style="font-weight: 800; font-size: 1.35rem; color: #FFFFFF; margin-bottom: 0.15rem;">
+                  @${topLeaderboard[0].username}
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                  ${topLeaderboard[0].passportId} • ${calculateLevel(topLeaderboard[0].boobaPoints).title}
+                </div>
+                <div class="quest-reward-pill" style="font-size: 1.05rem; padding: 0.4rem 1rem; margin-bottom: 0.6rem; border-color: var(--brand-yellow);">
+                  🍼 ${topLeaderboard[0].boobaPoints.toLocaleString()} BOOBA
+                </div>
+                <div style="font-size: 0.8rem; color: var(--accent-emerald); font-weight: 700;">⭐ ${topLeaderboard[0].reputation || 99}/100 Reputation</div>
+              </div>
+            ` : ''}
+
+            <!-- Rank 3 (Bronze) -->
+            ${topLeaderboard[2] ? `
+              <div class="podium-card podium-rank-3">
+                <div class="podium-avatar-wrapper">
+                  <img src="${topLeaderboard[2].avatar || 'assets/mascot.jpg'}" class="podium-avatar" style="border-color: #CD7F32;" alt="Rank 3">
+                  <div class="podium-rank-badge" style="background: #CD7F32; color: #FFF;">3</div>
+                </div>
+                <div style="font-weight: 800; font-size: 1.1rem; color: var(--text-primary); margin-bottom: 0.15rem;">
+                  @${topLeaderboard[2].username}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  ${topLeaderboard[2].passportId} • ${calculateLevel(topLeaderboard[2].boobaPoints).title}
+                </div>
+                <div class="quest-reward-pill" style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+                  🍼 ${topLeaderboard[2].boobaPoints.toLocaleString()} BOOBA
+                </div>
+                <div style="font-size: 0.75rem; color: var(--accent-emerald);">⭐ ${topLeaderboard[2].reputation || 91}/100 Trust</div>
+              </div>
+            ` : ''}
+
+          </div>
+
+          <!-- RANKS 4-5 LIST CARD -->
+          <div class="glass-panel" style="padding: 1.75rem; border-radius: var(--radius-lg); max-width: 960px; margin: 0 auto;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 1rem; letter-spacing: 0.05em;">
+              Runner-Up Champions
+            </div>
+
             <table class="leaderboard-table">
               <tbody>
-                ${topLeaderboard.map((u, i) => {
+                ${topLeaderboard.slice(3).map((u, index) => {
                   const level = calculateLevel(u.boobaPoints);
-                  const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
                   return `
                     <tr class="leaderboard-row">
                       <td class="leaderboard-cell" style="width: 50px; text-align: center;">
-                        <span class="rank-badge ${rankClass}">${i + 1}</span>
+                        <span class="rank-badge" style="background: var(--bg-input); color: var(--text-secondary); border: 1px solid var(--border-subtle);">${index + 4}</span>
                       </td>
                       <td class="leaderboard-cell">
                         <div class="flex items-center gap-3">
-                          <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--brand-yellow);">
+                          <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border-medium);">
                           <div>
-                            <div style="font-weight: 700; color: var(--text-primary);">@${u.username}</div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted);">${u.passportId} • ${level.title}</div>
+                            <div style="font-weight: 700; color: var(--text-primary); font-size: 1rem;">@${u.username}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${u.passportId} • <span style="color: var(--brand-yellow);">${level.title}</span></div>
                           </div>
                         </div>
                       </td>
+                      <td class="leaderboard-cell">
+                        <span class="badge-tag" style="background: rgba(16, 185, 129, 0.12); color: #10B981;">
+                          ⭐ ${u.reputation || 90}/100
+                        </span>
+                      </td>
                       <td class="leaderboard-cell" style="text-align: right;">
-                        <div class="text-mono" style="font-weight: 700; color: var(--brand-yellow); font-size: 1.05rem;">
-                          ${u.boobaPoints.toLocaleString()} BOOBA
+                        <div class="text-mono" style="font-weight: 800; color: var(--brand-yellow); font-size: 1.15rem;">
+                          ${u.boobaPoints.toLocaleString()} 🍼
                         </div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">${u.verifiedReferralsCount} Referrals</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${u.completedQuestsCount || 0} quests • ${u.verifiedReferralsCount || 0} referrals</div>
                       </td>
                     </tr>
                   `;
@@ -738,10 +826,16 @@ class BoobaApp {
               </tbody>
             </table>
 
-            <div style="text-align: center; margin-top: 1.5rem;">
-              <a href="#dashboard/leaderboard" class="btn btn-secondary btn-sm">Explore Full Leaderboard →</a>
+            <div class="flex items-center justify-between" style="flex-wrap: wrap; gap: 1rem; margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle);">
+              <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                Want to climb the ranks? Mint your passport and start completing community quests.
+              </div>
+              <a href="#dashboard/leaderboard" class="btn btn-primary btn-sm">
+                View Full Top 100 Leaderboard →
+              </a>
             </div>
           </div>
+
         </div>
       </section>
 

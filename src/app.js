@@ -299,19 +299,6 @@ class BoobaApp {
               `}
             </div>
 
-            <!-- 1-Click Demo Profiles -->
-            <div class="demo-accounts-pill" style="width: 100%; max-width: 380px; margin-top: 2rem;">
-              <div style="font-size: 0.75rem; font-weight: 700; color: var(--brand-yellow); text-transform: uppercase;">🚀 Instant 1-Click Demo Logins</div>
-              <div class="demo-btn-group">
-                <button type="button" id="xDemoMemberBtn" class="demo-btn">
-                  👤 Member (@CryptoKing)
-                </button>
-                <button type="button" id="xDemoAdminBtn" class="demo-btn">
-                  🛡️ Admin (@BoobaBoss)
-                </button>
-              </div>
-            </div>
-
           </div>
 
         </div>

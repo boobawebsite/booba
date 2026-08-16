@@ -874,100 +874,151 @@ class BoobaApp {
   }
 
   /* --------------------------------------------------------------------------
-     3. USER DASHBOARD VIEW (All-In-One Member HQ)
+     3. USER DASHBOARD VIEW (Google-Standard App Shell & Hamburger Drawer)
      -------------------------------------------------------------------------- */
   getDashboardHTML(state) {
     const user = state.currentUser;
     const userLevel = calculateLevel(user.boobaPoints);
+    const tabTitles = {
+      overview: 'Overview',
+      passport: 'My Passport',
+      quests: 'Quests & Bounties',
+      rewards: 'BOOBA Rewards Vault',
+      referrals: 'Referral Headquarters',
+      achievements: 'Achievements',
+      leaderboard: 'Global Leaderboard',
+      settings: 'Settings & Supabase'
+    };
+    const currentTabTitle = tabTitles[this.activeDashboardTab] || 'Overview';
 
     return `
-      <div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+      <div class="dashboard-shell" id="dashboardShell">
         
-        <!-- DASHBOARD HEADER / PROFILE BANNER -->
-        <div class="glass-panel" style="padding: 1.75rem; border-radius: var(--radius-lg); margin-bottom: 2rem; border-color: rgba(243, 186, 47, 0.25);">
-          <div class="flex items-center justify-between" style="flex-wrap: wrap; gap: 1.5rem;">
+        <!-- GOOGLE-STYLE NAVIGATION DRAWER -->
+        <aside class="dashboard-drawer" id="dashboardDrawer">
+          <div>
             
-            <div class="flex items-center gap-4">
-              <div style="position: relative;">
-                <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 72px; height: 72px; border-radius: var(--radius-md); object-fit: cover; border: 2.5px solid var(--brand-yellow); box-shadow: 0 0 20px var(--brand-yellow-glow);">
-                <span class="badge-tag" style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; padding: 0.1rem 0.45rem;">
-                  Lvl ${userLevel.level}
-                </span>
-              </div>
-
-              <div>
-                <div class="flex items-center gap-2">
-                  <h2 style="font-size: 1.6rem;">@${user.username}</h2>
-                  <span class="badge-tag">${userLevel.title}</span>
-                </div>
-                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
-                  Passport ID: <strong class="text-gold text-mono">${user.passportId}</strong> • Member since ${user.memberSince}
+            <!-- Drawer Brand / Passport Preview Header -->
+            <div style="padding: 0.5rem 0.75rem 1.25rem 0.75rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 0.75rem;">
+              <div class="flex items-center gap-3">
+                <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--brand-yellow); box-shadow: 0 0 15px var(--brand-yellow-glow);">
+                <div class="nav-item-text" style="overflow: hidden;">
+                  <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                    @${user.username}
+                  </div>
+                  <div style="font-size: 0.72rem; color: var(--brand-yellow); font-family: var(--font-mono);">
+                    ${user.passportId}
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Quick Action & Daily Checkin -->
-            <div class="flex items-center gap-3" style="flex-wrap: wrap;">
-              <button id="dashDailyCheckInBtn" class="btn btn-primary">
-                🔥 Daily Check-in (+50 BOOBA)
-              </button>
-              <a href="#dashboard/passport" class="btn btn-secondary">
-                🪪 View 3D Passport
-              </a>
-            </div>
+            <!-- Nav Links List -->
+            <ul class="dashboard-nav-list">
+              <li class="nav-section-title">Main</li>
+              <li>
+                <a href="#dashboard/overview" class="dashboard-nav-item ${this.activeDashboardTab === 'overview' ? 'active' : ''}">
+                  <span class="nav-item-icon">🏠</span>
+                  <span class="nav-item-text">Overview</span>
+                </a>
+              </li>
+              <li>
+                <a href="#dashboard/passport" class="dashboard-nav-item ${this.activeDashboardTab === 'passport' ? 'active' : ''}">
+                  <span class="nav-item-icon">🪪</span>
+                  <span class="nav-item-text">My Passport</span>
+                </a>
+              </li>
+              <li>
+                <a href="#dashboard/quests" class="dashboard-nav-item ${this.activeDashboardTab === 'quests' ? 'active' : ''}">
+                  <span class="nav-item-icon">🎯</span>
+                  <span class="nav-item-text">Quests & Bounties</span>
+                </a>
+              </li>
+
+              <li class="nav-section-title" style="margin-top: 0.5rem;">Rewards & Growth</li>
+              <li>
+                <a href="#dashboard/rewards" class="dashboard-nav-item ${this.activeDashboardTab === 'rewards' ? 'active' : ''}">
+                  <span class="nav-item-icon">💰</span>
+                  <span class="nav-item-text">BOOBA Vault</span>
+                </a>
+              </li>
+              <li>
+                <a href="#dashboard/referrals" class="dashboard-nav-item ${this.activeDashboardTab === 'referrals' ? 'active' : ''}">
+                  <span class="nav-item-icon">👥</span>
+                  <span class="nav-item-text">Referrals</span>
+                </a>
+              </li>
+              <li>
+                <a href="#dashboard/achievements" class="dashboard-nav-item ${this.activeDashboardTab === 'achievements' ? 'active' : ''}">
+                  <span class="nav-item-icon">🏆</span>
+                  <span class="nav-item-text">Achievements</span>
+                </a>
+              </li>
+
+              <li class="nav-section-title" style="margin-top: 0.5rem;">Community & System</li>
+              <li>
+                <a href="#dashboard/leaderboard" class="dashboard-nav-item ${this.activeDashboardTab === 'leaderboard' ? 'active' : ''}">
+                  <span class="nav-item-icon">🥇</span>
+                  <span class="nav-item-text">Leaderboard</span>
+                </a>
+              </li>
+              <li>
+                <a href="#dashboard/settings" class="dashboard-nav-item ${this.activeDashboardTab === 'settings' ? 'active' : ''}">
+                  <span class="nav-item-icon">⚙️</span>
+                  <span class="nav-item-text">Settings & Cloud</span>
+                </a>
+              </li>
+            </ul>
 
           </div>
 
-          <!-- Level Progress Bar -->
-          <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle);">
-            <div class="flex items-center justify-between" style="font-size: 0.85rem; margin-bottom: 0.5rem;">
-              <span>Level ${userLevel.level}: <strong>${userLevel.title}</strong></span>
-              <span class="text-mono text-gold">
-                ${user.boobaPoints.toLocaleString()} / ${userLevel.nextTier ? userLevel.nextTier.min.toLocaleString() : 'MAX'} BOOBA
-              </span>
-            </div>
-            <div style="height: 10px; background: var(--bg-input); border-radius: var(--radius-full); overflow: hidden; border: 1px solid var(--border-subtle);">
-              <div style="width: ${userLevel.progressPercent}%; height: 100%; background: linear-gradient(90deg, var(--brand-yellow-dark) 0%, var(--brand-yellow) 100%); transition: width 0.5s ease;"></div>
-            </div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem;">
-              Next Tier Unlock: ${userLevel.nextTier ? userLevel.nextTier.unlock : 'Grandmaster Ambassador Status Achieved!'}
+          <!-- Drawer Footer Mini Card -->
+          <div style="padding: 0.85rem; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-top: 1rem;">
+            <div class="flex items-center justify-between">
+              <div class="nav-item-text">
+                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Tier Level</div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: var(--brand-yellow);">${userLevel.title}</div>
+              </div>
+              <span class="badge-tag" style="padding: 0.15rem 0.45rem; font-size: 0.65rem;">Lvl ${userLevel.level}</span>
             </div>
           </div>
-        </div>
+        </aside>
 
-        <!-- DASHBOARD NAVIGATION TABS (Sidebar on desktop / horizontal bar on mobile) -->
-        <div style="display: flex; gap: 2rem; align-items: flex-start;" class="dashboard-layout">
+        <!-- MAIN DASHBOARD WRAPPER -->
+        <div class="dashboard-main-wrapper">
           
-          <!-- Sidebar -->
-          <div class="glass-panel dashboard-sidebar" style="width: 260px; padding: 1rem; border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 0.35rem; flex-shrink: 0;">
-            <a href="#dashboard/overview" class="btn ${this.activeDashboardTab === 'overview' ? 'btn-primary' : 'btn-ghost'} btn-block" style="justify-content: flex-start;">
-              🏠 Overview
-            </a>
-            <a href="#dashboard/passport" class="btn ${this.activeDashboardTab === 'passport' ? 'btn-primary' : 'btn-ghost'} btn-block" style="justify-content: flex-start;">
-              🪪 My Passport
-            </a>
-            <a href="#dashboard/quests" class="btn ${this.activeDashboardTab === 'quests' ? 'btn-primary' : 'btn-ghost'} btn-block" style="justify-content: flex-start;">
-              🎯 Quests & Bounties
-            </a>
-            <a href="#dashboard/rewards" class="btn ${this.activeDashboardTab === 'rewards' ? 'btn-primary' : 'btn-ghost'} btn-block" style="justify-content: flex-start;">
-              💰 BOOBA Rewards Vault
-            </a>
-            <a href="#dashboard/referrals" class="btn ${this.activeDashboardTab === 'referrals' ? 'btn-primary' : 'btn-ghost'} btn-block" style="justify-content: flex-start;">
-              👥 Referrals
-            </a>
-            <a href="#dashboard/achievements" class="btn ${this.activeDashboardTab === 'achievements' ? 'btn-primary' : 'btn-ghost'} btn-block" style="justify-content: flex-start;">
-              🏆 Achievements
-            </a>
-            <a href="#dashboard/leaderboard" class="btn ${this.activeDashboardTab === 'leaderboard' ? 'btn-primary' : 'btn-ghost'} btn-block" style="justify-content: flex-start;">
-              🥇 Leaderboard
-            </a>
-            <a href="#dashboard/settings" class="btn ${this.activeDashboardTab === 'settings' ? 'btn-primary' : 'btn-ghost'} btn-block" style="justify-content: flex-start;">
-              ⚙️ Settings & Supabase
-            </a>
+          <!-- GOOGLE APP BAR (Sticky Top Toolbar) -->
+          <div class="dashboard-top-bar">
+            
+            <div class="flex items-center gap-3">
+              <!-- Hamburger Toggle Button -->
+              <button type="button" class="hamburger-btn" id="dashHamburgerBtn" title="Toggle Navigation Drawer">
+                ☰
+              </button>
+              
+              <!-- Breadcrumb -->
+              <div class="dashboard-breadcrumb">
+                <span style="color: var(--text-muted);">Dashboard</span>
+                <span style="color: var(--text-muted);">›</span>
+                <span style="color: var(--brand-yellow); font-weight: 700;">${currentTabTitle}</span>
+              </div>
+            </div>
+
+            <!-- Right Toolbar Actions -->
+            <div class="flex items-center gap-3">
+              <button id="topDailyCheckInBtn" class="btn btn-primary btn-sm flex items-center gap-1">
+                🔥 Check-in (+50)
+              </button>
+
+              <div class="quest-reward-pill text-mono" style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">
+                🍼 ${user.boobaPoints.toLocaleString()} BOOBA
+              </div>
+            </div>
+
           </div>
 
-          <!-- Main Tab Content Area -->
-          <div style="flex: 1; width: 100%;">
+          <!-- DASHBOARD CONTENT CONTAINER -->
+          <div class="dashboard-content-container">
             ${this.renderDashboardTabContent(state)}
           </div>
 
@@ -1466,66 +1517,154 @@ class BoobaApp {
       `;
     }
 
-    // Default Overview
+    // Default Overview (Google-Standard Material Experience)
     return `
-      <div style="display: flex; flex-direction: column; gap: 1.75rem;">
+      <div style="display: flex; flex-direction: column; gap: 2rem;">
         
-        <!-- Summary Stats Grid -->
+        <!-- Google Material Welcome & Progress Card -->
+        <div class="glass-panel" style="padding: 2rem; border-radius: var(--radius-lg); border-color: rgba(243, 186, 47, 0.3); background: linear-gradient(135deg, rgba(243, 186, 47, 0.07) 0%, var(--bg-surface-elevated) 100%);">
+          <div class="flex items-center justify-between" style="flex-wrap: wrap; gap: 1.5rem;">
+            
+            <div class="flex items-center gap-4">
+              <div style="position: relative;">
+                <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 72px; height: 72px; border-radius: var(--radius-md); object-fit: cover; border: 2.5px solid var(--brand-yellow); box-shadow: 0 0 20px var(--brand-yellow-glow);">
+                <span class="badge-tag" style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; padding: 0.1rem 0.45rem;">
+                  Lvl ${userLevel.level}
+                </span>
+              </div>
+
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 style="font-size: 1.6rem; color: #FFFFFF;">Welcome back, @${user.username}</h2>
+                  <span class="badge-tag">${userLevel.title}</span>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                  Passport ID: <strong class="text-gold text-mono">${user.passportId}</strong> • Member since ${user.memberSince}
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="flex items-center gap-3" style="flex-wrap: wrap;">
+              <a href="#dashboard/passport" class="btn btn-secondary btn-sm">
+                🪪 View 3D Passport
+              </a>
+              <button id="dashDailyCheckInBtn" class="btn btn-primary btn-sm">
+                🔥 Daily Check-in (+50 BOOBA)
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Level Progress Bar Strip -->
+          <div style="margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle);">
+            <div class="flex items-center justify-between" style="font-size: 0.85rem; margin-bottom: 0.5rem;">
+              <span>Level ${userLevel.level}: <strong>${userLevel.title}</strong></span>
+              <span class="text-mono text-gold">
+                ${user.boobaPoints.toLocaleString()} / ${userLevel.nextTier ? userLevel.nextTier.min.toLocaleString() : 'MAX'} BOOBA
+              </span>
+            </div>
+            <div style="height: 10px; background: var(--bg-input); border-radius: var(--radius-full); overflow: hidden; border: 1px solid var(--border-subtle);">
+              <div style="width: ${userLevel.progressPercent}%; height: 100%; background: linear-gradient(90deg, var(--brand-yellow-dark) 0%, var(--brand-yellow) 100%); transition: width 0.5s ease;"></div>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">
+              Next Tier Perk: <span style="color: var(--text-secondary);">${userLevel.nextTier ? userLevel.nextTier.unlock : 'Grandmaster Ambassador Status Achieved!'}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Google-Standard Metric Cards -->
         <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
           
-          <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-md); border-color: rgba(243, 186, 47, 0.3);">
-            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">BOOBA Points</div>
-            <div class="text-mono" style="font-size: 1.8rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.25rem;">
+          <div class="google-stat-card">
+            <div class="flex items-center justify-between">
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">BOOBA Points</span>
+              <span class="badge-tag" style="background: rgba(16, 185, 129, 0.12); color: #10B981;">+50 Ready</span>
+            </div>
+            <div class="text-mono" style="font-size: 1.85rem; font-weight: 800; color: var(--brand-yellow);">
               ${user.boobaPoints.toLocaleString()} 🍼
             </div>
-            <div style="font-size: 0.75rem; color: var(--accent-emerald); margin-top: 0.25rem;">+50 Daily Claim Ready</div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary);">Accrued Community Tokens</div>
           </div>
 
-          <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-md);">
-            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Reputation Rating</div>
-            <div class="text-mono" style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF; margin-top: 0.25rem;">
+          <div class="google-stat-card">
+            <div class="flex items-center justify-between">
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Reputation Score</span>
+              <span class="badge-tag" style="background: rgba(6, 182, 212, 0.12); color: #06B6D4;">Top 5%</span>
+            </div>
+            <div class="text-mono" style="font-size: 1.85rem; font-weight: 800; color: #FFFFFF;">
               ${user.reputation || 91} / 100
             </div>
-            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">Top 5% Verified Citizen</div>
+            <div style="font-size: 0.75rem; color: var(--accent-emerald);">High Trust Index</div>
           </div>
 
-          <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-md);">
-            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Quests Completed</div>
-            <div class="text-mono" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-cyan); margin-top: 0.25rem;">
+          <div class="google-stat-card">
+            <div class="flex items-center justify-between">
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Quests Completed</span>
+              <span class="badge-tag" style="background: rgba(139, 92, 246, 0.12); color: #8B5CF6;">Active</span>
+            </div>
+            <div class="text-mono" style="font-size: 1.85rem; font-weight: 800; color: var(--accent-cyan);">
               ${user.completedQuestsCount || 96}
             </div>
-            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">Across all categories</div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary);">Across All Categories</div>
           </div>
 
-          <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-md);">
-            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Verified Referrals</div>
-            <div class="text-mono" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-emerald); margin-top: 0.25rem;">
+          <div class="google-stat-card">
+            <div class="flex items-center justify-between">
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Verified Referrals</span>
+              <span class="badge-tag" style="background: rgba(243, 186, 47, 0.12); color: var(--brand-yellow);">+12.6k BOOBA</span>
+            </div>
+            <div class="text-mono" style="font-size: 1.85rem; font-weight: 800; color: var(--accent-emerald);">
               ${user.verifiedReferralsCount || 42}
             </div>
-            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">+12,600 BOOBA generated</div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary);">Verified Community Members</div>
           </div>
 
         </div>
 
-        <!-- Quick Quests Feed -->
+        <!-- 7-Day Streak & Daily Check-in Widget -->
+        <div class="glass-panel" style="padding: 1.5rem 1.75rem; border-radius: var(--radius-md);">
+          <div class="flex items-center justify-between" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <h4 style="font-size: 1.05rem;">🔥 Daily Check-In Streak: ${user.streakDays || 7} Days Active</h4>
+              <p style="font-size: 0.85rem; color: var(--text-secondary);">Check in consecutively every 24h to unlock streak bonus multipliers.</p>
+            </div>
+            <button id="streakClaimBtn" class="btn btn-outline btn-sm">Claim Today's +50 BOOBA</button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.75rem; margin-top: 1rem;">
+            ${['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7 (Bonus)'].map((day, idx) => {
+              const isPassed = idx < (user.streakDays % 7 || 7);
+              return `
+                <div style="background: ${isPassed ? 'rgba(243, 186, 47, 0.12)' : 'var(--bg-input)'}; border: 1px solid ${isPassed ? 'var(--brand-yellow)' : 'var(--border-subtle)'}; border-radius: var(--radius-sm); padding: 0.75rem 0.5rem; text-align: center;">
+                  <div style="font-size: 0.7rem; color: ${isPassed ? 'var(--brand-yellow)' : 'var(--text-muted)'}; font-weight: 700;">${day}</div>
+                  <div style="font-size: 1.25rem; margin: 0.35rem 0;">${isPassed ? '🔥' : '🔒'}</div>
+                  <div style="font-size: 0.65rem; color: ${isPassed ? '#FFFFFF' : 'var(--text-muted)'}; font-family: var(--font-mono);">+50</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- Recommended Quests Feed -->
         <div class="glass-panel" style="padding: 1.75rem; border-radius: var(--radius-lg);">
           <div class="flex items-center justify-between" style="margin-bottom: 1.25rem;">
             <h4>Recommended Quests For You</h4>
-            <a href="#dashboard/quests" class="btn btn-ghost btn-sm">See All →</a>
+            <a href="#dashboard/quests" class="btn btn-ghost btn-sm">See All Bounties →</a>
           </div>
 
           <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
             ${state.quests.slice(0, 3).map(q => `
-              <div class="quest-card" style="padding: 1.2rem;">
+              <div class="quest-card" style="padding: 1.25rem;">
                 <div>
                   <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
                     <span class="quest-category-badge cat-${q.category}">${q.category}</span>
                     <span class="quest-reward-pill">+${q.rewardBooba} BOOBA</span>
                   </div>
                   <h4 style="font-size: 1rem; margin-bottom: 0.3rem;">${q.title}</h4>
-                  <p style="font-size: 0.8rem; color: var(--text-secondary);">${q.description}</p>
+                  <p style="font-size: 0.825rem; color: var(--text-secondary);">${q.description}</p>
                 </div>
-                <div style="margin-top: 0.75rem; text-align: right;">
+                <div style="margin-top: 0.85rem; text-align: right;">
                   <button class="btn btn-secondary btn-sm quest-action-btn" data-id="${q.id}" data-type="${q.type}" data-title="${q.title}" data-reward="${q.rewardBooba}">
                     ${q.actionText}
                   </button>
@@ -1540,13 +1679,28 @@ class BoobaApp {
   }
 
   attachDashboardListeners() {
-    // Daily Check-in Button
-    document.getElementById('dashDailyCheckInBtn')?.addEventListener('click', () => {
+    // Hamburger Drawer Toggle
+    const drawer = document.getElementById('dashboardDrawer');
+    const hamburger = document.getElementById('dashHamburgerBtn');
+    hamburger?.addEventListener('click', () => {
+      if (window.innerWidth <= 900) {
+        drawer?.classList.toggle('mobile-open');
+      } else {
+        drawer?.classList.toggle('collapsed');
+      }
+    });
+
+    // Daily Check-in Buttons
+    const handleDailyClaim = () => {
       const res = db.claimDailyCheckIn();
       if (res.success) {
         this.showToast(`🔥 Daily Check-in Claimed! +${res.bonus} BOOBA. Current streak: ${res.streak} days!`);
       }
-    });
+    };
+
+    document.getElementById('dashDailyCheckInBtn')?.addEventListener('click', handleDailyClaim);
+    document.getElementById('topDailyCheckInBtn')?.addEventListener('click', handleDailyClaim);
+    document.getElementById('streakClaimBtn')?.addEventListener('click', handleDailyClaim);
 
     // Passport Flipping
     const myCard = document.getElementById('myPassportCard');

@@ -92,6 +92,232 @@
   width: 100%;
 }
 
+/* --------------------------------------------------------------------------
+   Google-Standard Dashboard App Shell & Hamburger Drawer
+   -------------------------------------------------------------------------- */
+.dashboard-shell {
+  display: flex;
+  min-height: calc(100vh - var(--header-height));
+  position: relative;
+  background: var(--bg-primary);
+}
+
+.dashboard-drawer {
+  width: 270px;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.25rem 0.85rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 95;
+  flex-shrink: 0;
+}
+
+.dashboard-drawer.collapsed {
+  width: 78px;
+  padding: 1.25rem 0.5rem;
+}
+
+.dashboard-drawer.collapsed .nav-item-text,
+.dashboard-drawer.collapsed .nav-section-title,
+.dashboard-drawer.collapsed .drawer-footer-user-info,
+.dashboard-drawer.collapsed .nav-badge {
+  display: none;
+}
+
+.dashboard-drawer.collapsed .dashboard-nav-item {
+  justify-content: center;
+  padding: 0.85rem 0;
+}
+
+.dashboard-drawer.collapsed .nav-item-icon {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+@media (max-width: 900px) {
+  .dashboard-drawer {
+    position: fixed;
+    top: var(--header-height);
+    bottom: 0;
+    left: -290px;
+    width: 270px !important;
+    box-shadow: var(--shadow-lg);
+    background: rgba(14, 18, 27, 0.98);
+    backdrop-filter: blur(20px);
+  }
+  .dashboard-drawer.mobile-open {
+    left: 0;
+  }
+}
+
+.dashboard-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  list-style: none;
+}
+
+.nav-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.75rem 0.85rem 0.35rem 0.85rem;
+}
+
+.dashboard-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.92rem;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  position: relative;
+}
+
+.dashboard-nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.dashboard-nav-item.active {
+  background: var(--brand-yellow-subtle);
+  color: var(--brand-yellow);
+  font-weight: 700;
+}
+
+.dashboard-nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 4px;
+  background: var(--brand-yellow);
+  border-radius: 0 4px 4px 0;
+}
+
+.nav-item-icon {
+  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+}
+
+.dashboard-main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Top Dashboard Toolbar (Google App Bar Style) */
+.dashboard-top-bar {
+  height: 64px;
+  background: rgba(14, 18, 27, 0.6);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.75rem;
+  gap: 1rem;
+  position: sticky;
+  top: var(--header-height);
+  z-index: 90;
+}
+
+.hamburger-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.hamburger-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-medium);
+}
+
+.dashboard-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.dashboard-content-container {
+  padding: 2rem 2.25rem;
+  flex: 1;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .dashboard-content-container {
+    padding: 1.25rem 1rem;
+  }
+}
+
+/* Google-Standard Stat Cards */
+.google-stat-card {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.4rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.google-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-md);
+}
+
+.google-stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--brand-yellow), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.google-stat-card:hover::after {
+  opacity: 1;
+}
+
 /* Auth Pill Button Style (X/Twitter Standard) */
 .btn-auth-pill {
   width: 100%;

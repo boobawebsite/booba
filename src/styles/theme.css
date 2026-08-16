@@ -1,0 +1,246 @@
+/* ==========================================================================
+   BOOBA (baby BNB) — Premium Design System & Tokens
+   Google-Standard Aesthetics • Dark Crypto Luxury • Amber Gold Accent
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+  /* Core Color Palette */
+  --bg-primary: #07090E;
+  --bg-surface: #0E121B;
+  --bg-surface-elevated: #151B27;
+  --bg-card: rgba(18, 23, 34, 0.75);
+  --bg-card-hover: rgba(26, 33, 48, 0.85);
+  --bg-glass: rgba(14, 18, 27, 0.65);
+  --bg-input: #121724;
+
+  /* Brand Colors (Baby BNB Theme) */
+  --brand-yellow: #F3BA2F;
+  --brand-yellow-light: #FFD043;
+  --brand-yellow-dark: #C99414;
+  --brand-yellow-glow: rgba(243, 186, 47, 0.25);
+  --brand-yellow-subtle: rgba(243, 186, 47, 0.1);
+
+  /* Secondary Accents */
+  --accent-gold: #FFB800;
+  --accent-orange: #FF7A00;
+  --accent-emerald: #10B981;
+  --accent-emerald-subtle: rgba(16, 185, 129, 0.15);
+  --accent-ruby: #EF4444;
+  --accent-ruby-subtle: rgba(239, 68, 68, 0.15);
+  --accent-cyan: #06B6D4;
+  --accent-purple: #8B5CF6;
+
+  /* Typography Colors */
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-inverse: #07090E;
+
+  /* Borders & Dividers */
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-medium: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(243, 186, 47, 0.3);
+  --border-active: #F3BA2F;
+
+  /* Shadows & Glows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 30px rgba(243, 186, 47, 0.2);
+  --shadow-glow-strong: 0 0 50px rgba(243, 186, 47, 0.4);
+
+  /* Typography Rules */
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Space Grotesk', monospace, sans-serif;
+
+  /* Layout Constants */
+  --header-height: 76px;
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
+  --container-max-width: 1280px;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Reset & Global Foundation */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  background-image: 
+    radial-gradient(circle at 50% -20%, rgba(243, 186, 47, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 100% 50%, rgba(255, 184, 0, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 0% 80%, rgba(243, 186, 47, 0.04) 0%, transparent 50%);
+  background-attachment: fixed;
+}
+
+/* Background Ambient Lighting */
+.ambient-glow {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ambient-glow::before {
+  content: '';
+  position: absolute;
+  top: -10vw;
+  left: 20%;
+  width: 40vw;
+  height: 40vw;
+  background: radial-gradient(circle, rgba(243, 186, 47, 0.1) 0%, rgba(243, 186, 47, 0) 70%);
+  filter: blur(80px);
+  border-radius: 50%;
+}
+
+.ambient-glow::after {
+  content: '';
+  position: absolute;
+  top: 40vh;
+  right: 10%;
+  width: 35vw;
+  height: 35vw;
+  background: radial-gradient(circle, rgba(255, 122, 0, 0.05) 0%, rgba(243, 186, 47, 0) 70%);
+  filter: blur(90px);
+  border-radius: 50%;
+}
+
+/* Typography Utilities */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; }
+h2 { font-size: clamp(1.8rem, 3.5vw, 2.6rem); }
+h3 { font-size: clamp(1.3rem, 2.2vw, 1.75rem); }
+h4 { font-size: 1.25rem; }
+
+p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.text-gold {
+  color: var(--brand-yellow);
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #FFFFFF 0%, var(--brand-yellow-light) 50%, var(--brand-yellow) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.text-mono {
+  font-family: var(--font-mono);
+}
+
+/* Layout Utilities */
+.container {
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.gap-6 { gap: 1.5rem; }
+.gap-8 { gap: 2rem; }
+
+.grid { display: grid; }
+
+/* Glass Surfaces */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+}
+
+.glass-panel:hover {
+  border-color: var(--border-medium);
+}
+
+.glass-panel-elevated {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-surface-elevated);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

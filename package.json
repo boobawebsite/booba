@@ -1,0 +1,20 @@
+{
+  "name": "booba-website",
+  "version": "1.0.0",
+  "description": "BOOBA (baby BNB) — Gamified Community & Rewards Website featuring the Booba Passport",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve -l 3000 .",
+    "start": "npx serve -l 3000 ."
+  },
+  "keywords": [
+    "booba",
+    "baby-bnb",
+    "crypto",
+    "gamified-community",
+    "passport",
+    "rewards"
+  ],
+  "author": "Booba Team",
+  "license": "MIT"
+}

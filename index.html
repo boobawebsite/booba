@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BOOBA (baby BNB) — Gamified Community & Rewards Platform</title>
+  <meta name="description" content="Welcome to the Booba Universe. Complete quests, mint your digital Booba Passport, build on-chain reputation, and earn $BOOBA rewards on BNB Chain.">
+  <meta name="keywords" content="Booba, baby BNB, BOOBA crypto, Booba passport, gamified crypto community, BNB rewards">
+
+  <!-- Favicon / Mascot Touch -->
+  <link rel="icon" type="image/jpeg" href="assets/mascot.jpg">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="src/styles/theme.css">
+  <link rel="stylesheet" href="src/styles/components.css">
+</head>
+<body>
+
+  <!-- Ambient Light Effects -->
+  <div class="ambient-glow"></div>
+
+  <!-- SITE HEADER -->
+  <header class="site-header">
+    <div class="container nav-container">
+      
+      <!-- Brand Logo -->
+      <a href="#home" class="logo-brand">
+        <img src="assets/mascot.jpg" alt="Booba Baby BNB Mascot" class="logo-avatar">
+        <div>
+          <div class="flex items-center gap-2">
+            <span>BOOBA</span>
+            <span class="badge-tag">baby BNB</span>
+          </div>
+          <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0.05em;">GAMIFIED REWARDS</div>
+        </div>
+      </a>
+
+      <!-- Center Nav Links -->
+      <ul class="nav-links">
+        <li><a href="#home" class="nav-link">Home</a></li>
+        <li><a href="#dashboard/overview" class="nav-link">Dashboard</a></li>
+        <li><a href="#dashboard/passport" class="nav-link">My Passport</a></li>
+        <li><a href="#dashboard/quests" class="nav-link">Quests</a></li>
+        <li><a href="#dashboard/leaderboard" class="nav-link">Leaderboard</a></li>
+      </ul>
+
+      <!-- Right Nav Actions -->
+      <div id="headerNavActions" class="nav-actions">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN APPLICATION VIEW ROUTER -->
+  <main id="app">
+    <!-- Dynamic Content Rendered Here -->
+  </main>
+
+  <!-- FOOTER -->
+  <footer style="border-top: 1px solid var(--border-subtle); padding: 3.5rem 0 2rem 0; background: rgba(7, 9, 14, 0.95);">
+    <div class="container">
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2.5rem; margin-bottom: 3rem;">
+        
+        <!-- Brand Info -->
+        <div>
+          <div class="flex items-center gap-2" style="margin-bottom: 1rem;">
+            <img src="assets/mascot.jpg" style="width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--brand-yellow);">
+            <strong style="font-size: 1.2rem; color: var(--text-primary);">BOOBA (baby BNB)</strong>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+            The interactive community reputation and rewards platform powering the Baby BNB movement. Mint your Passport and build your legacy.
+          </p>
+        </div>
+
+        <!-- Ecosystem Links -->
+        <div>
+          <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--brand-yellow); margin-bottom: 1rem;">Ecosystem</h4>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem; color: var(--text-secondary);">
+            <li><a href="#dashboard/passport" class="nav-link">Booba Passport</a></li>
+            <li><a href="#dashboard/quests" class="nav-link">Community Quests</a></li>
+            <li><a href="#dashboard/rewards" class="nav-link">BOOBA Rewards Vault</a></li>
+            <li><a href="#dashboard/referrals" class="nav-link">Referral Headquarters</a></li>
+          </ul>
+        </div>
+
+        <!-- Official Channels -->
+        <div>
+          <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--brand-yellow); margin-bottom: 1rem;">Official Channels</h4>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem; color: var(--text-secondary);">
+            <li><a href="https://twitter.com/boobababybnb" target="_blank" class="nav-link">🐦 X (Twitter)</a></li>
+            <li><a href="https://t.me/boobababybnb" target="_blank" class="nav-link">💬 Telegram Lounge</a></li>
+            <li><a href="https://discord.gg/booba" target="_blank" class="nav-link">🎮 Discord Community</a></li>
+            <li><a href="https://bscscan.com" target="_blank" class="nav-link">🔍 BscScan Explorer</a></li>
+          </ul>
+        </div>
+
+        <!-- Token Specs -->
+        <div>
+          <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--brand-yellow); margin-bottom: 1rem;">Token Details</h4>
+          <div style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.6;">
+            <div><strong>Token Name:</strong> BOOBA</div>
+            <div><strong>Nickname:</strong> baby BNB</div>
+            <div><strong>Symbol:</strong> BOOBA</div>
+            <div><strong>Network:</strong> BNB Smart Chain (BEP-20)</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted); padding-top: 2rem; border-top: 1px solid var(--border-subtle);">
+        © 2026 BOOBA (baby BNB). All rights reserved. Gamified Community & Rewards Platform.
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       MODALS
+       ========================================================================= -->
+
+  <!-- 1. UNIFIED AUTH MODAL (Login + Sign Up Together) -->
+  <div class="modal-backdrop" id="authModal">
+    <div class="auth-card">
+      
+      <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.closeModal()" style="position: absolute; top: 1rem; right: 1rem; font-size: 1.2rem; padding: 0.2rem 0.5rem;">✕</button>
+
+      <div class="auth-header">
+        <img src="assets/mascot.jpg" class="auth-mascot-preview" alt="Booba Mascot">
+        <h3 id="authModalTitle" style="font-size: 1.4rem;">Mint Your Booba Passport</h3>
+        <p id="authModalSubtitle" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.35rem;">
+          Join the Baby BNB revolution and claim +100 BOOBA welcome tokens!
+        </p>
+      </div>
+
+      <!-- Auth Tabs -->
+      <div class="auth-tabs">
+        <button id="tabAuthSignup" class="auth-tab-btn active">🪪 Mint Passport (Sign Up)</button>
+        <button id="tabAuthSignin" class="auth-tab-btn">🔑 Sign In (Login)</button>
+      </div>
+
+      <!-- Auth Form -->
+      <form id="authForm">
+        
+        <div class="form-group signup-only-field">
+          <label class="form-label">Choose Username</label>
+          <input type="text" id="authUsernameInput" placeholder="e.g. CryptoKing" class="form-input" autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email or Username</label>
+          <input type="text" id="authEmailInput" placeholder="user@example.com" class="form-input" autocomplete="email" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="authPasswordInput" placeholder="••••••••" class="form-input" autocomplete="current-password">
+        </div>
+
+        <div class="form-group signup-only-field">
+          <label class="form-label">Referral Code (Optional)</label>
+          <input type="text" id="authReferralInput" placeholder="e.g. BOOBABOSS" class="form-input text-mono" style="text-transform: uppercase;">
+        </div>
+
+        <button type="submit" id="authSubmitBtn" class="btn btn-primary btn-block btn-lg" style="margin-top: 0.5rem;">
+          Mint Passport & Join (+100 BOOBA)
+        </button>
+
+      </form>
+
+      <div class="form-divider">
+        <span>OR CONNECT WALLET</span>
+      </div>
+
+      <button type="button" id="authWalletConnectBtn" class="btn btn-secondary btn-block">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" style="width: 20px; height: 20px;">
+        1-Click Web3 Wallet Connect (MetaMask / Trust)
+      </button>
+
+      <!-- Instant Quick Switcher for Demo Preview -->
+      <div class="demo-accounts-pill">
+        <div style="font-size: 0.75rem; font-weight: 700; color: var(--brand-yellow); text-transform: uppercase;">🚀 Quick 1-Click Demo Profiles</div>
+        <div class="demo-btn-group">
+          <button type="button" id="demoCryptoKingBtn" class="demo-btn">
+            👤 Member (@CryptoKing - Lvl 7)
+          </button>
+          <button type="button" id="demoAdminBtn" class="demo-btn">
+            🛡️ Admin (@BoobaBoss)
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 2. SOCIAL QUEST VERIFY MODAL -->
+  <div class="modal-backdrop" id="socialVerifyModal">
+    <div class="auth-card" style="max-width: 440px; text-align: center;">
+      <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.closeModal()" style="position: absolute; top: 1rem; right: 1rem; font-size: 1.2rem;">✕</button>
+      <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎯</div>
+      <h3 id="socialModalTitle">Social Task Verification</h3>
+      <div class="quest-reward-pill" id="socialModalReward" style="margin: 0.75rem auto 1.25rem auto;">+100 BOOBA</div>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+        Click below to perform the action and claim your instant BOOBA tokens into your passport balance.
+      </p>
+      <div class="flex items-center gap-3">
+        <button type="button" onclick="window.boobaApp.closeModal()" class="btn btn-secondary btn-block">Cancel</button>
+        <button type="button" id="confirmSocialVerifyBtn" class="btn btn-primary btn-block">Verify & Claim</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. CREATIVE PROOF SUBMISSION MODAL -->
+  <div class="modal-backdrop" id="proofModal">
+    <div class="auth-card">
+      <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.closeModal()" style="position: absolute; top: 1rem; right: 1rem; font-size: 1.2rem;">✕</button>
+      
+      <div class="auth-header" style="text-align: left;">
+        <div class="flex items-center justify-between" style="margin-bottom: 0.35rem;">
+          <span class="badge-tag">CREATIVE SUBMISSION</span>
+          <span class="quest-reward-pill" id="proofModalReward">+500 BOOBA</span>
+        </div>
+        <h3 id="proofModalTitle">Submit Quest Proof</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+          Provide your public URL link or post proof for admin review.
+        </p>
+      </div>
+
+      <form id="proofForm">
+        <input type="hidden" id="proofQuestId">
+        
+        <div class="form-group">
+          <label class="form-label">Proof Link (X / TikTok / YouTube / Imgur / Article)</label>
+          <input type="url" id="proofUrlInput" placeholder="https://x.com/yourhandle/status/..." class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Additional Description / Notes (Optional)</label>
+          <textarea id="proofNotesInput" rows="3" placeholder="Briefly describe what you created or your contribution..." class="form-input" style="resize: vertical;"></textarea>
+        </div>
+
+        <div class="flex items-center gap-3" style="margin-top: 1.5rem;">
+          <button type="button" onclick="window.boobaApp.closeModal()" class="btn btn-secondary btn-block">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-block">Submit Proof to Admin</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. ADMIN CREATE QUEST MODAL -->
+  <div class="modal-backdrop" id="createQuestModal">
+    <div class="auth-card">
+      <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.closeModal()" style="position: absolute; top: 1rem; right: 1rem; font-size: 1.2rem;">✕</button>
+      
+      <div class="auth-header" style="text-align: left;">
+        <span class="badge-tag" style="background: rgba(239, 68, 68, 0.15); color: #EF4444;">ADMIN TOOL</span>
+        <h3 style="margin-top: 0.35rem;">Mint New Community Quest</h3>
+      </div>
+
+      <form id="createQuestForm">
+        <div class="form-group">
+          <label class="form-label">Quest Title</label>
+          <input type="text" id="newQuestTitle" placeholder="e.g. Create Booba Art Banner" class="form-input" required>
+        </div>
+
+        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="newQuestCategory" class="form-input">
+              <option value="creative">Creative</option>
+              <option value="community">Community</option>
+              <option value="social">Social</option>
+              <option value="special">Special</option>
+              <option value="daily">Daily</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Reward (BOOBA)</label>
+            <input type="number" id="newQuestReward" value="500" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="newQuestDesc" rows="2" placeholder="Explain what the quester needs to do..." class="form-input" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Submission Requirements</label>
+          <input type="text" id="newQuestReqs" placeholder="e.g. Post on X with #BOOBA and submit link" class="form-input" required>
+        </div>
+
+        <div class="flex items-center gap-3" style="margin-top: 1.25rem;">
+          <button type="button" onclick="window.boobaApp.closeModal()" class="btn btn-secondary btn-block">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-block">Publish Quest to Community</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Main JavaScript App Entry -->
+  <script type="module" src="src/app.js"></script>
+
+</body>
+</html>

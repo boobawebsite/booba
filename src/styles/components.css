@@ -1,0 +1,703 @@
+/* ==========================================================================
+   BOOBA (baby BNB) — Component Library & UI Elements
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Buttons & Action Elements
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.75rem 1.4rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--brand-yellow-light) 0%, var(--brand-yellow) 100%);
+  color: #000000;
+  font-weight: 700;
+  box-shadow: 0 4px 18px var(--brand-yellow-glow);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(243, 186, 47, 0.45);
+  filter: brightness(1.06);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+  backdrop-filter: blur(8px);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-medium);
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--brand-yellow);
+  border-color: var(--brand-yellow);
+}
+
+.btn-outline:hover {
+  background: var(--brand-yellow-subtle);
+  transform: translateY(-2px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-sm {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.825rem;
+  border-radius: var(--radius-xs);
+}
+
+.btn-lg {
+  padding: 0.95rem 2rem;
+  font-size: 1.05rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-icon {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --------------------------------------------------------------------------
+   2. Header & Navigation
+   -------------------------------------------------------------------------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  background: rgba(7, 9, 14, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: 100;
+  transition: all var(--transition-normal);
+}
+
+.nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.logo-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.logo-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--brand-yellow);
+  box-shadow: 0 0 15px var(--brand-yellow-glow);
+  transition: transform var(--transition-fast);
+}
+
+.logo-brand:hover .logo-avatar {
+  transform: scale(1.08) rotate(4deg);
+}
+
+.badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: var(--radius-full);
+  background: var(--brand-yellow-subtle);
+  color: var(--brand-yellow);
+  border: 1px solid rgba(243, 186, 47, 0.25);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  list-style: none;
+}
+
+.nav-link {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+  cursor: pointer;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--brand-yellow);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* --------------------------------------------------------------------------
+   3. Unified Auth Modal & Card (Login + Sign Up Combined)
+   -------------------------------------------------------------------------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-normal);
+}
+
+.modal-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xl);
+  padding: 2.25rem;
+  box-shadow: var(--shadow-lg), 0 0 60px rgba(243, 186, 47, 0.12);
+  transform: scale(0.95) translateY(15px);
+  transition: all var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-backdrop.open .auth-card {
+  transform: scale(1) translateY(0);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.auth-mascot-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid var(--brand-yellow);
+  margin: 0 auto 0.75rem auto;
+  display: block;
+  box-shadow: 0 0 25px var(--brand-yellow-glow);
+}
+
+/* Tabs switcher for Sign In / Sign Up */
+.auth-tabs {
+  display: flex;
+  background: var(--bg-input);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-subtle);
+}
+
+.auth-tab-btn {
+  flex: 1;
+  padding: 0.65rem 0.5rem;
+  border-radius: calc(var(--radius-sm) - 2px);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.auth-tab-btn.active {
+  background: var(--bg-surface-elevated);
+  color: var(--brand-yellow);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Form Controls */
+.form-group {
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  text-align: left;
+}
+
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+}
+
+.form-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 1rem;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  transition: all var(--transition-fast);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--brand-yellow);
+  box-shadow: 0 0 0 3px var(--brand-yellow-subtle);
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+.form-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.25rem 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-divider::before, .form-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+.form-divider span {
+  padding: 0 0.75rem;
+}
+
+/* Quick Demo Profile Switcher */
+.demo-accounts-pill {
+  background: rgba(243, 186, 47, 0.06);
+  border: 1px dashed rgba(243, 186, 47, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem;
+  margin-top: 1.25rem;
+  text-align: center;
+}
+
+.demo-btn-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.demo-btn {
+  flex: 1;
+  padding: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: var(--radius-xs);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.demo-btn:hover {
+  background: var(--brand-yellow-subtle);
+  color: var(--brand-yellow);
+  border-color: var(--brand-yellow);
+}
+
+/* --------------------------------------------------------------------------
+   4. The 3D Booba Passport Card
+   -------------------------------------------------------------------------- */
+.passport-container {
+  perspective: 1200px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.passport-card-3d {
+  position: relative;
+  width: 100%;
+  min-height: 270px;
+  border-radius: var(--radius-lg);
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.passport-card-3d.flipped {
+  transform: rotateY(180deg);
+}
+
+.passport-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: var(--radius-lg);
+  padding: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg), 0 0 35px rgba(243, 186, 47, 0.15);
+}
+
+.passport-front {
+  background: linear-gradient(145deg, #131826 0%, #0c0f17 100%);
+  border: 1.5px solid rgba(243, 186, 47, 0.35);
+}
+
+.passport-front::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 45%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 55%
+  );
+  transform: rotate(25deg);
+  pointer-events: none;
+  animation: passportHoloShine 6s infinite linear;
+}
+
+@keyframes passportHoloShine {
+  0% { transform: translateY(-100%) rotate(25deg); }
+  100% { transform: translateY(100%) rotate(25deg); }
+}
+
+.passport-back {
+  background: linear-gradient(145deg, #0d111a 0%, #161c2b 100%);
+  border: 1.5px solid rgba(243, 186, 47, 0.35);
+  transform: rotateY(180deg);
+}
+
+.passport-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.passport-emblem {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.passport-emblem-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--brand-yellow);
+}
+
+.passport-chip {
+  width: 40px;
+  height: 30px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #d4af37 0%, #aa820a 100%);
+  position: relative;
+  border: 1px solid #ffe57f;
+}
+
+.passport-body {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  margin: 0.8rem 0;
+}
+
+.passport-user-avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  border: 2px solid var(--brand-yellow);
+  box-shadow: 0 0 16px var(--brand-yellow-glow);
+}
+
+.passport-info-grid {
+  flex: 1;
+}
+
+.passport-username {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.passport-id-badge {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--brand-yellow);
+  background: var(--brand-yellow-subtle);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-xs);
+  display: inline-block;
+  margin-top: 0.2rem;
+}
+
+.passport-metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+}
+
+.passport-metric-item {
+  text-align: center;
+}
+
+.passport-metric-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.passport-metric-value {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   5. Quest Cards & Feed
+   -------------------------------------------------------------------------- */
+.quest-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: all var(--transition-normal);
+  position: relative;
+}
+
+.quest-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(243, 186, 47, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 20px rgba(243, 186, 47, 0.08);
+}
+
+.quest-category-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-full);
+}
+
+.cat-daily { background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); }
+.cat-social { background: rgba(6, 182, 212, 0.15); color: #06B6D4; border: 1px solid rgba(6, 182, 212, 0.3); }
+.cat-community { background: rgba(139, 92, 246, 0.15); color: #8B5CF6; border: 1px solid rgba(139, 92, 246, 0.3); }
+.cat-creative { background: rgba(243, 186, 47, 0.15); color: #F3BA2F; border: 1px solid rgba(243, 186, 47, 0.3); }
+.cat-special { background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+.quest-reward-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--brand-yellow-subtle);
+  border: 1px solid rgba(243, 186, 47, 0.3);
+  color: var(--brand-yellow);
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* --------------------------------------------------------------------------
+   6. Leaderboard & Tables
+   -------------------------------------------------------------------------- */
+.leaderboard-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+}
+
+.leaderboard-row {
+  background: var(--bg-surface-elevated);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.leaderboard-row:hover {
+  background: var(--bg-card-hover);
+  transform: translateX(4px);
+}
+
+.leaderboard-cell {
+  padding: 1rem 1.25rem;
+  font-size: 0.95rem;
+}
+
+.leaderboard-cell:first-child {
+  border-top-left-radius: var(--radius-sm);
+  border-bottom-left-radius: var(--radius-sm);
+}
+
+.leaderboard-cell:last-child {
+  border-top-right-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
+}
+
+.rank-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.rank-1 { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
+.rank-2 { background: linear-gradient(135deg, #E0E0E0 0%, #9E9E9E 100%); color: #000; }
+.rank-3 { background: linear-gradient(135deg, #CD7F32 0%, #8C531B 100%); color: #fff; }
+
+/* --------------------------------------------------------------------------
+   7. Toast Notifications
+   -------------------------------------------------------------------------- */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  min-width: 300px;
+  max-width: 420px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
+  border-left: 4px solid var(--brand-yellow);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-lg);
+  animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all var(--transition-fast);
+}
+
+.toast.toast-success { border-left-color: var(--accent-emerald); }
+.toast.toast-error { border-left-color: var(--accent-ruby); }
+
+@keyframes toastSlideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* --------------------------------------------------------------------------
+   8. Responsive Layout & Mobile Drawers
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .nav-links {
+    display: none;
+  }
+  
+  .dashboard-layout {
+    flex-direction: column;
+  }
+  
+  .dashboard-sidebar {
+    width: 100% !important;
+    position: static !important;
+  }
+}

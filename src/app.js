@@ -123,6 +123,11 @@ class BoobaApp {
     this.renderHeader(currentUser);
 
     // Route Views
+    const footerEl = document.getElementById('siteFooter');
+    if (footerEl) {
+      footerEl.style.display = this.currentRoute === 'auth' ? 'none' : 'block';
+    }
+
     if (this.currentRoute === 'home') {
       appEl.innerHTML = this.getHomepageHTML(state);
       this.attachHomeListeners();
@@ -219,10 +224,8 @@ class BoobaApp {
           <!-- RIGHT SIDE: X-Style Auth Form & Actions -->
           <div class="x-auth-right">
             
-            <h1 class="x-auth-headline">Happening<br>now.</h1>
-            
-            <h2 class="x-auth-subhead">
-              ${isSignUp ? 'Join the Booba Universe today.' : 'Sign in to your Booba Passport.'}
+            <h2 class="x-auth-subhead" style="font-size: clamp(1.8rem, 3.5vw, 2.75rem); line-height: 1.2; margin-bottom: 2rem;">
+              ${isSignUp ? 'Join the Booba Universe today.' : 'Sign in to get your Booba Passport.'}
             </h2>
 
             <div class="x-auth-actions-group">

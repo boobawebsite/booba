@@ -429,11 +429,6 @@ class BoobaApp {
             
             <!-- Left Hero Content -->
             <div>
-              <div style="margin-bottom: 1.25rem;">
-                <span class="badge-tag" style="padding: 0.35rem 0.9rem; font-size: 0.8rem; background: rgba(243, 186, 47, 0.12);">
-                  ✨ THE OFFICIAL BABY BNB ECOSYSTEM
-                </span>
-              </div>
               <h1 style="margin-bottom: 1.25rem; line-height: 1.15;">
                 WELCOME TO THE <br>
                 <span class="text-gradient-gold">BOOBA UNIVERSE</span>
@@ -452,49 +447,36 @@ class BoobaApp {
                 </a>
               </div>
 
-              <!-- Live Stats Counter Strip -->
-              <div class="glass-panel" style="padding: 1.25rem 1.5rem; border-radius: var(--radius-md); display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+              <!-- Live Stats Counter Strip (4 items) -->
+              <div class="glass-panel" style="padding: 1.25rem 1.5rem; border-radius: var(--radius-md); display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 1rem;">
                 <div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Active Passports</div>
-                  <div class="text-mono" style="font-size: 1.4rem; font-weight: 700; color: var(--brand-yellow);">14,820+</div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Active Passports</div>
+                  <div class="text-mono" style="font-size: 1.35rem; font-weight: 700; color: var(--brand-yellow);">14,820+</div>
                 </div>
                 <div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">BOOBA Distributed</div>
-                  <div class="text-mono" style="font-size: 1.4rem; font-weight: 700; color: #FFFFFF;">4.85M 🍼</div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">BOOBA Distributed</div>
+                  <div class="text-mono" style="font-size: 1.35rem; font-weight: 700; color: #FFFFFF;">4.85M 🍼</div>
                 </div>
                 <div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Ticker Symbol</div>
-                  <div class="text-mono" style="font-size: 1.4rem; font-weight: 700; color: var(--accent-emerald);">$BOOBA</div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Ticker Symbol</div>
+                  <div class="text-mono" style="font-size: 1.35rem; font-weight: 700; color: var(--accent-emerald);">$BOOBA</div>
+                </div>
+                <div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Nickname</div>
+                  <div class="text-mono" style="font-size: 1.35rem; font-weight: 700; color: #FFFFFF;">baby BNB</div>
                 </div>
               </div>
             </div>
 
-            <!-- Right Hero Mascot & 3D Passport Showcase -->
+            <!-- Right Hero Mascot & 3D Showcase -->
             <div style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;">
               
               <!-- Ambient Mascot Light Ring -->
               <div style="position: absolute; width: 340px; height: 340px; border-radius: 50%; background: radial-gradient(circle, rgba(243, 186, 47, 0.25) 0%, transparent 70%); filter: blur(40px); z-index: 1;"></div>
               
               <!-- Mascot Image Frame -->
-              <div style="position: relative; z-index: 2; text-align: center; margin-bottom: 1.5rem;">
+              <div style="position: relative; z-index: 2; text-align: center;">
                 <img src="assets/mascot.jpg" alt="Booba Mascot - Baby BNB Panda" style="width: 100%; max-width: 380px; border-radius: var(--radius-xl); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(243, 186, 47, 0.25); border: 2px solid rgba(243, 186, 47, 0.4);">
-                
-                <!-- Floating Badges -->
-                <div class="glass-panel" style="position: absolute; bottom: -15px; left: 10px; padding: 0.6rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--brand-yellow); display: flex; align-items: center; gap: 0.5rem; box-shadow: var(--shadow-md);">
-                  <span style="font-size: 1.2rem;">🍼</span>
-                  <div>
-                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Nickname</div>
-                    <div style="font-size: 0.85rem; font-weight: 700; color: #FFFFFF;">baby BNB</div>
-                  </div>
-                </div>
-
-                <div class="glass-panel" style="position: absolute; top: 15px; right: 10px; padding: 0.6rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--accent-emerald); display: flex; align-items: center; gap: 0.5rem; box-shadow: var(--shadow-md);">
-                  <span style="font-size: 1.2rem;">⚡</span>
-                  <div>
-                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Symbol</div>
-                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--brand-yellow);">BOOBA</div>
-                  </div>
-                </div>
               </div>
 
             </div>

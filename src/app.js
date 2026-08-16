@@ -960,7 +960,7 @@ class BoobaApp {
                 </li>
                 <li>
                   <a href="#dashboard/settings" class="dashboard-nav-item ${this.activeDashboardTab === 'settings' ? 'active' : ''}">
-                    <span class="nav-item-text">Settings & Supabase</span>
+                    <span class="nav-item-text">Settings</span>
                   </a>
                 </li>
               </ul>
@@ -1493,58 +1493,83 @@ class BoobaApp {
     }
 
     if (tab === 'settings') {
-      const supaConfig = SupabaseService.getConfig();
-
       return `
-        <div class="glass-panel" style="padding: 2.25rem; border-radius: var(--radius-lg);">
+        <div>
+          <div class="google-info-banner">
+            <strong>Account Security:</strong> Your Booba Passport <strong>${user.passportId}</strong> is bound to wallet <strong>${user.walletAddress || '0x71C...49b2'}</strong> on BNB Chain.
+          </div>
+
           <div style="margin-bottom: 2rem;">
-            <h3>Profile & Cloud Database Settings</h3>
-            <p style="font-size: 0.9rem;">Manage your linked Web3 wallet, security, and Supabase cloud synchronization.</p>
+            <h1 style="font-size: 1.85rem; font-weight: 700; margin-bottom: 0.25rem;">Account Settings</h1>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Manage your profile details, connected Web3 wallet, and privacy preferences.</p>
           </div>
 
-          <div style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 600px; margin-bottom: 3rem;">
-            <div class="form-group">
-              <label class="form-label">Username</label>
-              <input type="text" readonly value="@${user.username}" class="form-input" style="opacity: 0.8;">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Passport ID</label>
-              <input type="text" readonly value="${user.passportId}" class="form-input text-mono text-gold" style="opacity: 0.8;">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Linked Web3 Wallet (BNB Chain)</label>
-              <input type="text" readonly value="${user.walletAddress || '0x71C...49b2'}" class="form-input text-mono">
-            </div>
-          </div>
-
-          <div class="glass-panel" style="padding: 1.75rem; border-radius: var(--radius-md); border-color: rgba(6, 182, 212, 0.3); background: rgba(6, 182, 212, 0.02);">
-            <div class="flex items-center justify-between" style="margin-bottom: 1rem;">
-              <div class="flex items-center gap-2">
-                <span style="font-size: 1.4rem;">⚡</span>
-                <h4 style="color: #06B6D4;">Supabase Cloud Database Connection</h4>
-              </div>
-              <span class="badge-tag" style="${supaConfig.isConnected ? 'background: rgba(16, 185, 129, 0.15); color: #10B981;' : 'background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow);'}">
-                ${supaConfig.isConnected ? 'SUPABASE CONNECTED ✓' : 'LOCAL STORAGE ACTIVE'}
-              </span>
-            </div>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
-              When ready, paste your Supabase Project URL and Public Anon Key below to automatically synchronize all passports, quests, and referrals to your cloud database.
-            </p>
-
-            <form id="supabaseConfigForm" style="display: flex; flex-direction: column; gap: 1rem;">
+          <div class="google-card" style="margin-bottom: 1.75rem;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.25rem;">Profile Information</h3>
+            
+            <form id="userProfileSettingsForm" style="display: flex; flex-direction: column; gap: 1.25rem; max-width: 600px;">
               <div class="form-group">
-                <label class="form-label">Supabase Project URL</label>
-                <input type="text" id="supaUrlInput" value="${supaConfig.url || ''}" placeholder="https://your-project.supabase.co" class="form-input">
+                <label class="form-label" style="font-size: 0.8rem;">Passport ID</label>
+                <input type="text" readonly value="${user.passportId}" class="form-input text-mono" style="opacity: 0.7; background: var(--bg-input); font-weight: 700; color: var(--brand-yellow);">
               </div>
+
               <div class="form-group">
-                <label class="form-label">Supabase Anon Key</label>
-                <input type="password" id="supaKeyInput" value="${supaConfig.anonKey || ''}" placeholder="eyJhbGciOiJIUzI1NiIsIn..." class="form-input">
+                <label class="form-label" style="font-size: 0.8rem;">Username</label>
+                <input type="text" readonly value="@${user.username}" class="form-input" style="opacity: 0.7; background: var(--bg-input);">
               </div>
-              <div class="flex items-center gap-3">
-                <button type="submit" class="btn btn-primary btn-sm">Save & Connect Supabase</button>
-                <button type="button" id="copySqlMigrationBtn" class="btn btn-secondary btn-sm">📋 Copy Supabase SQL Schema</button>
+
+              <div class="form-group">
+                <label class="form-label" style="font-size: 0.8rem;">Display Name</label>
+                <input type="text" id="settingsDisplayName" value="${user.username}" placeholder="Enter your display name" class="form-input">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" style="font-size: 0.8rem;">Email Address</label>
+                <input type="email" id="settingsEmail" value="${user.email || user.username + '@gmail.com'}" class="form-input">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" style="font-size: 0.8rem;">Connected Web3 Wallet (BNB Chain)</label>
+                <div class="flex items-center gap-2">
+                  <input type="text" readonly value="${user.walletAddress || '0x71C...49b2'}" class="form-input text-mono" style="flex: 1; opacity: 0.85;">
+                  <span class="badge-tag" style="background: rgba(16, 185, 129, 0.12); color: #10B981; font-size: 0.75rem;">Connected</span>
+                </div>
+              </div>
+
+              <div style="margin-top: 0.5rem;">
+                <button type="submit" class="btn btn-primary btn-sm">Save Profile Changes</button>
               </div>
             </form>
+          </div>
+
+          <div class="google-card">
+            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;">Privacy & Preferences</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem; max-width: 600px;">
+              <div class="flex items-center justify-between" style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-subtle);">
+                <div>
+                  <div style="font-weight: 600; font-size: 0.9rem;">Public Passport Record</div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Allow other community members to view your passport badges and level.</div>
+                </div>
+                <input type="checkbox" checked style="accent-color: var(--brand-yellow); width: 18px; height: 18px; cursor: pointer;">
+              </div>
+
+              <div class="flex items-center justify-between" style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-subtle);">
+                <div>
+                  <div style="font-weight: 600; font-size: 0.9rem;">Global Leaderboard Visibility</div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Display your username and points on the Hall of Fame.</div>
+                </div>
+                <input type="checkbox" checked style="accent-color: var(--brand-yellow); width: 18px; height: 18px; cursor: pointer;">
+              </div>
+
+              <div class="flex items-center justify-between" style="padding: 0.75rem 0;">
+                <div>
+                  <div style="font-weight: 600; font-size: 0.9rem;">Bounty & Quest Alerts</div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Receive notifications when new high-reward community tasks drop.</div>
+                </div>
+                <input type="checkbox" checked style="accent-color: var(--brand-yellow); width: 18px; height: 18px; cursor: pointer;">
+              </div>
+            </div>
           </div>
         </div>
       `;
@@ -1767,24 +1792,20 @@ class BoobaApp {
       });
     });
 
-    // Supabase Config Form
-    document.getElementById('supabaseConfigForm')?.addEventListener('submit', async (e) => {
+    // User Profile Settings Form
+    document.getElementById('userProfileSettingsForm')?.addEventListener('submit', (e) => {
       e.preventDefault();
-      const url = document.getElementById('supaUrlInput')?.value;
-      const key = document.getElementById('supaKeyInput')?.value;
-      const res = await SupabaseService.testConnection(url, key);
-      if (res.success) {
-        this.showToast(res.message, 'success');
+      const displayName = document.getElementById('settingsDisplayName')?.value;
+      const email = document.getElementById('settingsEmail')?.value;
+      
+      const user = db.getState().currentUser;
+      if (user) {
+        user.displayName = displayName || user.username;
+        user.email = email || user.email;
+        db.saveState();
+        this.showToast('Profile and preferences updated successfully.', 'success');
         this.render();
-      } else {
-        this.showToast(res.message, 'error');
       }
-    });
-
-    document.getElementById('copySqlMigrationBtn')?.addEventListener('click', () => {
-      const sql = SupabaseService.getSchemaSQL();
-      navigator.clipboard.writeText(sql);
-      this.showToast('📋 Supabase SQL Schema copied! Paste into Supabase SQL editor.');
     });
   }
 

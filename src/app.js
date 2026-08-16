@@ -982,44 +982,6 @@ class BoobaApp {
         <!-- MAIN DASHBOARD CONTENT AREA -->
         <div class="dashboard-main-wrapper">
           
-          <!-- GOOGLE DEVELOPER APP BAR -->
-          <div class="dashboard-top-bar">
-            
-            <div class="flex items-center gap-3">
-              <button type="button" class="hamburger-btn" id="dashHamburgerBtn" title="Toggle Navigation Drawer">
-                ☰
-              </button>
-              
-              <!-- Clean Breadcrumbs -->
-              <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
-                <a href="#home" style="color: var(--text-muted);">Home</a>
-                <span>›</span>
-                <span>Dashboard</span>
-                <span>›</span>
-                <span style="color: var(--text-primary); font-weight: 600;">${currentTabTitle}</span>
-              </div>
-            </div>
-
-            <!-- Center Search Bar (Google Style) -->
-            <div class="google-search-box">
-              <span style="color: var(--text-muted); font-size: 0.85rem;">🔍</span>
-              <input type="text" placeholder="Search quests, passports..." class="google-search-input">
-              <span class="google-kbd-shortcut">/</span>
-            </div>
-
-            <!-- Right Toolbar Status Indicators -->
-            <div class="flex items-center gap-3">
-              <button id="topDailyCheckInBtn" class="btn btn-primary btn-sm" style="font-size: 0.8rem; padding: 0.35rem 0.85rem;">
-                Daily Check-in (+50)
-              </button>
-
-              <div class="quest-reward-pill text-mono" style="font-size: 0.825rem; padding: 0.3rem 0.75rem;">
-                ${user.boobaPoints.toLocaleString()} BOOBA
-              </div>
-            </div>
-
-          </div>
-
           <!-- DASHBOARD TAB CONTENT -->
           <div class="dashboard-content-container">
             ${this.renderDashboardTabContent(state)}

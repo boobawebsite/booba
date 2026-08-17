@@ -1,10 +1,10 @@
-# BOOBA (baby BNB) — Gamified Community & Rewards Platform
+# BOOBA (BNB baby) — Gamified Community & Rewards Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![BNB Chain](https://img.shields.io/badge/Network-BNB%20Chain-F3BA2F.svg)](https://binance.org)
-[![Mascot](https://img.shields.io/badge/Mascot-Baby%20Panda-black.svg)](assets/mascot.jpg)
+[![BNB Chain](https://img.shields.io/badge/Network-BNB%20Chain-F3BA2F?logo=binance)](https://bscscan.com)
+[![Status: Production](https://img.shields.io/badge/Status-Production%20Ready-emerald)](https://booba.crypto)
 
-**BOOBA** (nickname: **baby BNB**, symbol: **BOOBA**) is a next-generation gamified crypto community & rewards platform built to Google design standards.
+**BOOBA** (nickname: **BNB baby**, symbol: **BOOBA**) is a next-generation gamified crypto community & rewards platform built to Google design standards.
 
 ---
 

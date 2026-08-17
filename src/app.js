@@ -1,5 +1,5 @@
 /* ==========================================================================
-   BOOBA (baby BNB) — Main Application Controller
+   BOOBA (BNB baby) — Main Application Controller
    SPA Architecture • X-Style Auth Page • Google-Standard Polish
    ========================================================================== */
 
@@ -283,15 +283,15 @@ class BoobaApp {
       <div class="auth-page-container">
         <div class="x-auth-layout">
           
-          <!-- LEFT SIDE: Grand 3D Baby BNB Mascot & Emblem -->
+          <!-- LEFT SIDE: Grand 3D BNB baby Mascot & Emblem -->
           <div class="x-auth-left">
             <div style="position: relative; text-align: center;">
-              <img src="assets/mascot.jpg" class="x-auth-giant-logo" alt="Booba Baby BNB Mascot">
+              <img src="assets/mascot.jpg" class="x-auth-giant-logo" alt="Booba BNB baby Mascot">
               
               <!-- Floating Brand Tag -->
               <div class="glass-panel" style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); padding: 0.6rem 1.25rem; border-radius: var(--radius-full); border: 1.5px solid var(--brand-yellow); display: flex; align-items: center; gap: 0.6rem; white-space: nowrap; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
                 <span style="font-size: 1.2rem;">🍼</span>
-                <span style="font-weight: 800; font-size: 0.9rem; color: #FFFFFF;">BOOBA • baby BNB</span>
+                <span style="font-weight: 800; font-size: 0.9rem; color: #FFFFFF;">BOOBA • BNB baby</span>
               </div>
             </div>
           </div>
@@ -387,7 +387,7 @@ class BoobaApp {
             <div></div><div style="background: #000;"></div><div style="background: #000;"></div><div style="background: #000;"></div>
             <div style="background: #000;"></div><div></div><div style="background: #000;"></div><div style="background: #000;"></div>
           </div>
-          <div style="font-size: 0.65rem; color: var(--brand-yellow);">baby BNB App</div>
+          <div style="font-size: 0.65rem; color: var(--brand-yellow);">BNB baby App</div>
         </div>
 
       </div>
@@ -564,7 +564,7 @@ class BoobaApp {
                 </div>
                 <div>
                   <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Nickname</div>
-                  <div class="text-mono" style="font-size: 1.35rem; font-weight: 700; color: #FFFFFF;">baby BNB</div>
+                  <div class="text-mono" style="font-size: 1.35rem; font-weight: 700; color: #FFFFFF;">BNB baby</div>
                 </div>
               </div>
             </div>
@@ -577,7 +577,7 @@ class BoobaApp {
               
               <!-- Mascot Image Frame -->
               <div style="position: relative; z-index: 2; text-align: center;">
-                <img src="assets/mascot.jpg" alt="Booba Mascot - Baby BNB Panda" style="width: 100%; max-width: 380px; border-radius: var(--radius-xl); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(243, 186, 47, 0.25); border: 2px solid rgba(243, 186, 47, 0.4);">
+                <img src="assets/mascot.jpg" alt="Booba Mascot - BNB baby Panda" style="width: 100%; max-width: 380px; border-radius: var(--radius-xl); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(243, 186, 47, 0.25); border: 2px solid rgba(243, 186, 47, 0.4);">
               </div>
 
             </div>
@@ -645,7 +645,7 @@ class BoobaApp {
               <span class="badge-tag" style="margin-bottom: 0.75rem;">THE CENTRAL FEATURE</span>
               <h2 style="margin-bottom: 1.25rem;">The <span class="text-gradient-gold">Booba Passport</span></h2>
               <p style="font-size: 1.05rem; margin-bottom: 1.5rem;">
-                More than a profile — the Booba Passport is your immutable digital identity and reputation record within the entire Baby BNB ecosystem.
+                More than a profile — the Booba Passport is your immutable digital identity and reputation record within the entire BNB baby ecosystem.
               </p>
 
               <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
@@ -688,7 +688,7 @@ class BoobaApp {
                       <img src="assets/mascot.jpg" class="passport-emblem-icon" alt="Booba">
                       <div>
                         <div style="font-size: 0.75rem; font-weight: 800; color: var(--brand-yellow); letter-spacing: 0.08em;">BOOBA PASSPORT</div>
-                        <div style="font-size: 0.6rem; color: var(--text-muted);">BABY BNB OFFICIAL IDENTITY</div>
+                        <div style="font-size: 0.6rem; color: var(--text-muted);">BNB BABY OFFICIAL IDENTITY</div>
                       </div>
                     </div>
                     <div class="passport-chip"></div>
@@ -751,7 +751,7 @@ class BoobaApp {
                   </div>
 
                   <div style="font-size: 0.65rem; color: var(--text-muted); line-height: 1.3;">
-                    This passport certifies active, verified status in the Booba (baby BNB) decentralized community. Non-transferable digital credential.
+                    This passport certifies active, verified status in the Booba (BNB baby) decentralized community. Non-transferable digital credential.
                   </div>
 
                   <div style="text-align: right; margin-top: 0.5rem;">
@@ -805,7 +805,7 @@ class BoobaApp {
           <div style="text-align: center; max-width: 650px; margin: 0 auto 2.5rem auto;">
             <span class="badge-tag" style="margin-bottom: 0.75rem;">🏆 HALL OF FAME</span>
             <h2>Top <span class="text-gradient-gold">Booba Legends</span></h2>
-            <p>Real-time community rankings of top questers, content creators, and Baby BNB ambassadors.</p>
+            <p>Real-time community rankings of top questers, content creators, and BNB baby ambassadors.</p>
             
             <!-- Timeframe Segmented Switcher -->
             <div style="margin-top: 1.5rem;">
@@ -944,7 +944,7 @@ class BoobaApp {
               <img src="assets/mascot.jpg" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--brand-yellow); margin-bottom: 1.25rem; box-shadow: 0 0 25px var(--brand-yellow-glow);">
               <h2 style="margin-bottom: 1rem;">Ready to Claim Your <span class="text-gradient-gold">Booba Passport?</span></h2>
               <p style="font-size: 1.05rem; max-width: 580px; margin: 0 auto 2rem auto;">
-                Join thousands of baby BNB holders. Complete quests, build verified reputation, and unlock the next frontier of gamified crypto rewards.
+                Join thousands of BNB baby holders. Complete quests, build verified reputation, and unlock the next frontier of gamified crypto rewards.
               </p>
               <div class="flex items-center justify-center gap-4" style="flex-wrap: wrap;">
                 <a href="#signup" class="btn btn-primary btn-lg">Mint Passport Now</a>
@@ -1120,7 +1120,7 @@ class BoobaApp {
           <div class="flex items-center justify-between" style="margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem;">
             <div>
               <h1 style="font-size: 1.85rem; font-weight: 700; margin-bottom: 0.25rem;">Booba Passport</h1>
-              <p style="font-size: 0.9rem; color: var(--text-secondary);">Digital identity, reputation record, and verifiable credentials inside Baby BNB.</p>
+              <p style="font-size: 0.9rem; color: var(--text-secondary);">Digital identity, reputation record, and verifiable credentials inside BNB Baby.</p>
             </div>
             <div class="flex items-center gap-2">
               <button id="sharePassportBtn" class="btn btn-secondary btn-sm">
@@ -1143,7 +1143,7 @@ class BoobaApp {
                     <img src="assets/mascot.jpg" class="passport-emblem-icon">
                     <div>
                       <div style="font-size: 0.75rem; font-weight: 800; color: var(--brand-yellow); letter-spacing: 0.06em;">BOOBA PASSPORT</div>
-                      <div style="font-size: 0.6rem; color: var(--text-muted);">BABY BNB DIGITAL IDENTITY</div>
+                      <div style="font-size: 0.6rem; color: var(--text-muted);">BNB BABY DIGITAL IDENTITY</div>
                     </div>
                   </div>
                   <div class="passport-chip"></div>
@@ -1206,7 +1206,7 @@ class BoobaApp {
                 </div>
 
                 <div style="font-size: 0.68rem; color: var(--text-muted);">
-                  The Booba Passport is your immutable digital soulbound credential. All rights reserved by Baby BNB ecosystem.
+                  The Booba Passport is your immutable digital soulbound credential. All rights reserved by BNB Baby ecosystem.
                 </div>
 
                 <div style="text-align: right; margin-top: 0.75rem;">
@@ -1225,7 +1225,7 @@ class BoobaApp {
             </div>
             
             <div class="achievements-grid" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem;">
-              ${(user.badges || ['Pioneer', 'Baby BNB OG']).map(b => `
+              ${(user.badges || ['Pioneer', 'BNB Baby OG']).map(b => `
                 <div class="google-card" style="padding: 1.1rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
                   <div>
                     <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);">${b}</div>
@@ -1486,7 +1486,7 @@ class BoobaApp {
       return `
         <div>
           <div class="google-info-banner">
-            <strong>Milestone Badges & Trophy Room:</strong> Permanent ecosystem credentials acknowledging your accomplishments in Baby BNB. (${completedCount}/${totalCount} Unlocked • ${completionPercent}%)
+            <strong>Milestone Badges & Trophy Room:</strong> Permanent ecosystem credentials acknowledging your accomplishments in BNB Baby. (${completedCount}/${totalCount} Unlocked • ${completionPercent}%)
           </div>
 
           <div class="flex items-center justify-between" style="margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
@@ -1535,7 +1535,7 @@ class BoobaApp {
 
           <div style="margin-bottom: 2rem;">
             <h1 style="font-size: 1.85rem; font-weight: 700; margin-bottom: 0.25rem;">Global Leaderboard</h1>
-            <p style="font-size: 0.9rem; color: var(--text-secondary);">Top community contributors and ambassadors in the Baby BNB universe.</p>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Top community contributors and ambassadors in the BNB Baby universe.</p>
           </div>
 
           <!-- Top 3 Podium Showcase -->
@@ -1914,7 +1914,7 @@ class BoobaApp {
 
     document.getElementById('shareRefXBtn')?.addEventListener('click', () => {
       const u = db.getState().currentUser;
-      const tweet = encodeURIComponent(`Join me on Booba (baby BNB) — Complete quests, level up your Booba Passport, and earn $BOOBA rewards! 🍼🐼 https://booba.crypto/invite/${u?.username}`);
+      const tweet = encodeURIComponent(`Join me on Booba (BNB baby) — Complete quests, level up your Booba Passport, and earn $BOOBA rewards! 🍼🐼 https://booba.crypto/invite/${u?.username}`);
       window.open(`https://twitter.com/intent/tweet?text=${tweet}`, '_blank');
     });
 

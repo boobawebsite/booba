@@ -1,7 +1,7 @@
 {
   "name": "booba-website",
   "version": "1.0.0",
-  "description": "BOOBA (baby BNB) — Gamified Community & Rewards Website featuring the Booba Passport",
+  "description": "BOOBA (BNB baby) — Gamified Community & Rewards Website featuring the Booba Passport",
   "main": "index.html",
   "scripts": {
     "dev": "npx serve -l 3000 .",

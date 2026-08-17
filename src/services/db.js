@@ -1,5 +1,5 @@
 /* ==========================================================================
-   BOOBA (baby BNB) — Database & State Management Service
+   BOOBA (BNB baby) — Database & State Management Service
    Supports LocalStorage persistence + Real-time events + Supabase bridge
    ========================================================================== */
 
@@ -23,7 +23,7 @@ export const LEVEL_TIERS = [
   { level: 6, title: 'Booba Warrior', min: 10000, max: 24999, unlock: 'Early Access to BOOBA Airdrop Allocation' },
   { level: 7, title: 'Booba Elite', min: 25000, max: 49999, unlock: 'VIP Pass to Virtual AMAs & Special Merch Drops' },
   { level: 8, title: 'Booba Legend', min: 50000, max: 99999, unlock: 'Exclusive Governance Voting Rights' },
-  { level: 9, title: 'Booba OG', min: 100000, max: 249999, unlock: 'Baby BNB Treasury Allocation Perks' },
+  { level: 9, title: 'Booba OG', min: 100000, max: 249999, unlock: 'BNB Baby Treasury Allocation Perks' },
   { level: 10, title: 'Booba Master', min: 250000, max: Infinity, unlock: 'Ambassador Status & Direct Team Advisory' }
 ];
 
@@ -67,7 +67,7 @@ const INITIAL_USERS = [
     referredBy: 'BOOBABOSS',
     lastCheckIn: null,
     streakDays: 7,
-    badges: ['Pioneer', 'Meme Champion', 'Elite Referrer', 'Whale Scout', 'Baby BNB OG']
+    badges: ['Pioneer', 'Meme Champion', 'Elite Referrer', 'Whale Scout', 'BNB Baby OG']
   },
   {
     id: 'usr-002',
@@ -87,7 +87,7 @@ const INITIAL_USERS = [
     referredBy: null,
     lastCheckIn: null,
     streakDays: 45,
-    badges: ['Project Founder', 'Baby BNB Architect', 'Grandmaster', 'Top Influencer']
+    badges: ['Project Founder', 'BNB Baby Architect', 'Grandmaster', 'Top Influencer']
   },
   {
     id: 'usr-003',
@@ -149,7 +149,7 @@ const INITIAL_QUESTS = [
   {
     id: 'qst-1',
     title: 'Daily Booba Check-in',
-    description: 'Claim your daily check-in reward and keep your Baby BNB streak alive!',
+    description: 'Claim your daily check-in reward and keep your BNB Baby streak alive!',
     category: 'daily',
     rewardBooba: 50,
     type: 'instant',
@@ -243,7 +243,7 @@ const INITIAL_QUESTS = [
   {
     id: 'qst-8',
     title: 'Write an Educational X Thread on Booba',
-    description: 'Craft an insightful thread explaining the Booba Passport, tokenomics, and Baby BNB ecosystem.',
+    description: 'Craft an insightful thread explaining the Booba Passport, tokenomics, and BNB Baby ecosystem.',
     category: 'creative',
     rewardBooba: 600,
     type: 'proof',
@@ -256,7 +256,7 @@ const INITIAL_QUESTS = [
   {
     id: 'qst-9',
     title: 'Produce a Booba TikTok / Reels / YouTube Short',
-    description: 'Create an engaging short video animation or review of Booba Baby BNB.',
+    description: 'Create an engaging short video animation or review of Booba BNB Baby.',
     category: 'creative',
     rewardBooba: 750,
     type: 'proof',
@@ -307,7 +307,7 @@ const INITIAL_SUBMISSIONS = [
     questTitle: 'Write an Educational X Thread on Booba',
     rewardBooba: 600,
     proofUrl: 'https://x.com/PandaHodler/status/18247019283711',
-    proofDescription: '6-part deep dive thread on Booba Passport utility and Baby BNB tokenomics.',
+    proofDescription: '6-part deep dive thread on Booba Passport utility and BNB Baby tokenomics.',
     submittedAt: '2026-08-16 10:05:00',
     status: 'pending',
     reviewedBy: null,
@@ -514,7 +514,7 @@ class DatabaseService {
           referredBy: null,
           lastCheckIn: null,
           streakDays: 45,
-          badges: ['Project Founder', 'Baby BNB Architect', 'Grandmaster', 'Top Influencer']
+          badges: ['Project Founder', 'BNB Baby Architect', 'Grandmaster', 'Top Influencer']
         };
         this.users.unshift(adminUser);
       }

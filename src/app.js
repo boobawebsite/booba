@@ -986,6 +986,20 @@ class BoobaApp {
         <!-- MAIN DASHBOARD CONTENT AREA -->
         <div class="dashboard-main-wrapper">
           
+          <!-- GOOGLE-STYLE MOBILE SUB-NAVIGATION TABS (Mobile/Tablet Only) -->
+          <nav class="dashboard-mobile-nav-bar" aria-label="Dashboard Tabs">
+            <div class="dashboard-mobile-nav-scroll">
+              <a href="#dashboard/overview" class="dashboard-mobile-tab-btn ${this.activeDashboardTab === 'overview' ? 'active' : ''}">Overview</a>
+              <a href="#dashboard/passport" class="dashboard-mobile-tab-btn ${this.activeDashboardTab === 'passport' ? 'active' : ''}">Passport</a>
+              <a href="#dashboard/quests" class="dashboard-mobile-tab-btn ${this.activeDashboardTab === 'quests' ? 'active' : ''}">Quests</a>
+              <a href="#dashboard/rewards" class="dashboard-mobile-tab-btn ${this.activeDashboardTab === 'rewards' ? 'active' : ''}">Vault</a>
+              <a href="#dashboard/referrals" class="dashboard-mobile-tab-btn ${this.activeDashboardTab === 'referrals' ? 'active' : ''}">Referrals</a>
+              <a href="#dashboard/achievements" class="dashboard-mobile-tab-btn ${this.activeDashboardTab === 'achievements' ? 'active' : ''}">Achievements</a>
+              <a href="#dashboard/leaderboard" class="dashboard-mobile-tab-btn ${this.activeDashboardTab === 'leaderboard' ? 'active' : ''}">Leaderboard</a>
+              <a href="#dashboard/settings" class="dashboard-mobile-tab-btn ${this.activeDashboardTab === 'settings' ? 'active' : ''}">Settings</a>
+            </div>
+          </nav>
+
           <!-- DASHBOARD TAB CONTENT -->
           <div class="dashboard-content-container">
             ${this.renderDashboardTabContent(state)}

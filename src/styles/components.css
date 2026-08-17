@@ -296,6 +296,11 @@
   box-sizing: border-box;
 }
 
+/* Google-Standard Mobile Sub-Navigation Bar */
+.dashboard-mobile-nav-bar {
+  display: none;
+}
+
 /* Responsive Grid Layouts - Full Width Auto-Distributing */
 .achievements-grid {
   display: grid;
@@ -322,7 +327,8 @@
 .table-container {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--bg-surface);
   width: 100%;
 }
@@ -330,6 +336,7 @@
 .table-container .leaderboard-table {
   border-spacing: 0;
   width: 100%;
+  min-width: 520px;
 }
 
 .table-container .leaderboard-row {
@@ -353,13 +360,136 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
+  .dashboard-drawer {
+    display: none !important;
+  }
+  
+  .dashboard-mobile-nav-bar {
+    display: block;
+    position: sticky;
+    top: var(--header-height);
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 0.6rem 0.75rem;
+    z-index: 85;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .dashboard-mobile-nav-scroll {
+    display: flex;
+    gap: 0.45rem;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .dashboard-mobile-nav-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dashboard-mobile-tab-btn {
+    padding: 0.38rem 0.85rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: all var(--transition-fast);
+  }
+
+  .dashboard-mobile-tab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .dashboard-mobile-tab-btn.active {
+    background: rgba(243, 186, 47, 0.15);
+    color: var(--brand-yellow);
+    border-color: rgba(243, 186, 47, 0.4);
+    font-weight: 700;
+  }
+
   .dashboard-content-container {
-    padding: 1.25rem 1rem 3rem 1rem;
+    padding: 1.25rem 1rem 3.5rem 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .metric-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
   }
   .achievements-grid,
   .quests-grid {
     grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  .google-card {
+    padding: 1.15rem 1rem;
+  }
+  .google-info-banner {
+    padding: 0.85rem 1rem;
+    font-size: 0.825rem;
+    margin-bottom: 1.25rem;
+  }
+  .nav-links {
+    display: none !important;
+  }
+  .nav-container {
+    padding: 0 1rem;
+  }
+  .logo-brand {
+    font-size: 1.15rem;
+    gap: 0.5rem;
+  }
+  .logo-avatar {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+@media (max-width: 480px) {
+  .metric-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .google-card .text-mono {
+    font-size: 1.5rem !important;
+  }
+  .passport-container {
+    max-width: 100%;
+  }
+  .passport-card-3d {
+    min-height: 245px;
+  }
+  .passport-face {
+    padding: 1.15rem 1rem;
+  }
+  .passport-user-avatar {
+    width: 58px;
+    height: 58px;
+  }
+  .passport-username {
+    font-size: 1.05rem;
+  }
+  .passport-body {
+    gap: 0.75rem;
+    margin: 0.5rem 0;
+  }
+  .passport-metrics-strip {
+    padding: 0.4rem 0.5rem;
+    gap: 0.25rem;
+  }
+  .passport-metric-label {
+    font-size: 0.58rem;
+  }
+  .passport-metric-value {
+    font-size: 0.78rem;
   }
 }
 

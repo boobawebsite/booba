@@ -17,16 +17,24 @@
 </head>
 <body>
 
+  <!-- MOBILE SIDEBAR BACKDROP -->
+  <div class="admin-sidebar-backdrop" id="adminSidebarBackdrop"></div>
+
   <div class="admin-shell">
     
     <!-- ADMIN SIDEBAR NAVIGATION -->
-    <aside class="admin-sidebar" aria-label="Team Admin Navigation">
+    <aside class="admin-sidebar" id="adminSidebar" aria-label="Team Admin Navigation">
       <div class="admin-sidebar-header">
-        <img src="assets/mascot.jpg" alt="Booba Mascot" class="admin-logo-img">
-        <div>
-          <div style="font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; color: #FFFFFF;">BOOBA ADMIN</div>
-          <div style="font-size: 0.72rem; color: var(--brand-yellow); font-weight: 700;">BNB baby Core Studio</div>
+        <div style="display: flex; align-items: center; gap: 0.85rem; flex: 1;">
+          <img src="assets/mascot.jpg" alt="Booba Mascot" class="admin-logo-img">
+          <div>
+            <div style="font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; color: #FFFFFF;">BOOBA ADMIN</div>
+            <div style="font-size: 0.72rem; color: var(--brand-yellow); font-weight: 700;">BNB baby Core Studio</div>
+          </div>
         </div>
+        <button class="mobile-sidebar-close-btn" id="mobileSidebarCloseBtn" aria-label="Close sidebar">
+          ✕
+        </button>
       </div>
 
       <nav class="admin-nav">
@@ -61,7 +69,7 @@
             <div style="font-size: 0.7rem; color: var(--accent-emerald);">🛡️ Master Admin</div>
           </div>
         </div>
-        <a href="index.html#home" class="btn-admin btn-admin-secondary btn-sm" style="width: 100%;">
+        <a href="index.html#home" class="btn-admin btn-admin-secondary btn-sm" style="width: 100%; text-align: center;">
           🌐 Open Main Website
         </a>
       </div>
@@ -72,23 +80,32 @@
       
       <!-- Topbar Header -->
       <header class="admin-topbar">
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <button class="mobile-admin-toggle" id="mobileAdminToggle" aria-label="Toggle Sidebar Menu">
-            ☰
+        <div class="admin-topbar-left">
+          <button class="mobile-admin-toggle" id="mobileAdminToggle" aria-label="Toggle Navigation Menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
           </button>
-          <div style="display: flex; align-items: center; gap: 0.6rem;">
-            <span class="admin-badge badge-green" style="font-size: 0.72rem;">● BNB Chain Mainnet</span>
-            <span style="font-size: 0.85rem; color: var(--text-muted);">|</span>
-            <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Booba Core Team Console</span>
+          
+          <div class="admin-topbar-brand">
+            <img src="assets/mascot.jpg" alt="Booba" class="admin-topbar-logo">
+            <span class="admin-topbar-title">Booba Admin</span>
           </div>
+
+          <span class="admin-badge badge-green admin-topbar-badge">● BNB Mainnet</span>
+          <span class="admin-topbar-divider">|</span>
+          <span class="admin-topbar-subtitle">Core Studio</span>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <a href="index.html#dashboard/overview" class="btn-admin btn-admin-secondary btn-sm" target="_blank">
-            User Dashboard View ↗
+        <div class="admin-topbar-right">
+          <a href="index.html#dashboard/overview" class="btn-admin btn-admin-secondary btn-sm admin-topbar-btn-desktop" target="_blank">
+            User Dashboard ↗
           </a>
-          <a href="index.html#dashboard/quests" class="btn-admin btn-admin-primary btn-sm" target="_blank">
-            View Live Quests ↗
+          <a href="index.html#dashboard/quests" class="btn-admin btn-admin-primary btn-sm admin-topbar-btn-action" target="_blank">
+            <span class="btn-text-full">View Live Quests ↗</span>
+            <span class="btn-text-short">Live App ↗</span>
           </a>
         </div>
       </header>

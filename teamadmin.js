@@ -40,16 +40,35 @@ class TeamAdminApp {
       });
     });
 
+    const sidebar = document.getElementById('adminSidebar');
+    const backdrop = document.getElementById('adminSidebarBackdrop');
+
+    const openSidebar = () => {
+      sidebar?.classList.add('open');
+      backdrop?.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeSidebar = () => {
+      sidebar?.classList.remove('open');
+      backdrop?.classList.remove('active');
+      document.body.style.overflow = '';
+    };
+
     // Mobile Sidebar Toggle
-    document.getElementById('mobileAdminToggle')?.addEventListener('click', () => {
-      document.querySelector('.admin-sidebar')?.classList.toggle('open');
+    document.getElementById('mobileAdminToggle')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openSidebar();
     });
 
-    // Close mobile sidebar on backdrop click
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.admin-sidebar') && !e.target.closest('#mobileAdminToggle')) {
-        document.querySelector('.admin-sidebar')?.classList.remove('open');
-      }
+    // Close button inside sidebar
+    document.getElementById('mobileSidebarCloseBtn')?.addEventListener('click', () => {
+      closeSidebar();
+    });
+
+    // Close on backdrop click
+    backdrop?.addEventListener('click', () => {
+      closeSidebar();
     });
   }
 
@@ -63,7 +82,12 @@ class TeamAdminApp {
       }
     });
 
-    document.querySelector('.admin-sidebar')?.classList.remove('open');
+    const sidebar = document.getElementById('adminSidebar');
+    const backdrop = document.getElementById('adminSidebarBackdrop');
+    sidebar?.classList.remove('open');
+    backdrop?.classList.remove('active');
+    document.body.style.overflow = '';
+    
     this.render();
   }
 

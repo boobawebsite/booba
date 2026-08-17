@@ -69,15 +69,50 @@ class BoobaApp {
   setupGlobalEvents() {
     // Close modal on escape
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') this.closeModal();
+      if (e.key === 'Escape') {
+        this.closeModal();
+        this.closeMobileNav();
+      }
     });
 
-    // Close modal when clicking outside card
+    // Global Click Delegation
     document.addEventListener('click', (e) => {
       if (e.target.classList.contains('modal-backdrop')) {
         this.closeModal();
       }
+      if (e.target.id === 'mobileNavBackdrop' || e.target.closest('#mobileNavCloseBtn')) {
+        this.closeMobileNav();
+      }
+      if (e.target.closest('#mobileNavToggleBtn')) {
+        this.toggleMobileNav();
+      }
+      if (e.target.closest('.mobile-nav-link')) {
+        this.closeMobileNav();
+      }
     });
+  }
+
+  toggleMobileNav() {
+    const drawer = document.getElementById('mobileNavDrawer');
+    const backdrop = document.getElementById('mobileNavBackdrop');
+    if (drawer && backdrop) {
+      const isOpen = drawer.classList.contains('open');
+      if (isOpen) {
+        this.closeMobileNav();
+      } else {
+        drawer.classList.add('open');
+        backdrop.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+  }
+
+  closeMobileNav() {
+    const drawer = document.getElementById('mobileNavDrawer');
+    const backdrop = document.getElementById('mobileNavBackdrop');
+    if (drawer) drawer.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+    document.body.style.overflow = '';
   }
 
   showToast(message, type = 'success', duration = 3500) {
@@ -156,35 +191,58 @@ class BoobaApp {
 
   renderHeader(currentUser) {
     const navRight = document.getElementById('headerNavActions');
-    if (!navRight) return;
+    const mobileDrawerFooter = document.getElementById('mobileNavFooter');
 
     if (currentUser) {
       const userLevel = calculateLevel(currentUser.boobaPoints);
-      navRight.innerHTML = `
-        <div class="flex items-center gap-2 nav-actions-user">
-          <a href="#dashboard/overview" class="btn btn-secondary btn-sm flex items-center gap-2 header-user-pill" style="border-radius: var(--radius-full); padding: 0.35rem 0.75rem;">
-            <img src="${currentUser.avatar || 'assets/mascot.jpg'}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--brand-yellow); flex-shrink: 0;">
-            <span class="header-username" style="font-weight: 700; color: var(--text-primary);">@${currentUser.username}</span>
-            <span class="badge-tag header-lvl-tag" style="padding: 0.1rem 0.35rem; font-size: 0.65rem;">Lvl ${userLevel.level}</span>
-          </a>
-          <div class="quest-reward-pill header-points-pill" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
-            <span>🍼</span>
-            <span>${currentUser.boobaPoints.toLocaleString()} BOOBA</span>
-          </div>
-          ${currentUser.role === 'admin' ? `
-            <a href="#admin" class="btn btn-outline btn-sm header-admin-btn" style="font-size: 0.8rem; padding: 0.35rem 0.65rem;">
-              🛡️ Admin
+      if (navRight) {
+        navRight.innerHTML = `
+          <div class="flex items-center gap-2 nav-actions-user">
+            <a href="#dashboard/overview" class="btn btn-secondary btn-sm flex items-center gap-2 header-user-pill" style="border-radius: var(--radius-full); padding: 0.35rem 0.75rem;">
+              <img src="${currentUser.avatar || 'assets/mascot.jpg'}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--brand-yellow); flex-shrink: 0;">
+              <span class="header-username" style="font-weight: 700; color: var(--text-primary);">@${currentUser.username}</span>
+              <span class="badge-tag header-lvl-tag" style="padding: 0.1rem 0.35rem; font-size: 0.65rem;">Lvl ${userLevel.level}</span>
             </a>
-          ` : ''}
-          <button id="logoutBtn" class="btn btn-ghost btn-sm btn-icon-action" title="Sign Out" aria-label="Sign Out" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; min-width: 32px; padding: 0; border-radius: var(--radius-full); flex-shrink: 0;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
+            <div class="quest-reward-pill header-points-pill" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
+              <span>🍼</span>
+              <span>${currentUser.boobaPoints.toLocaleString()} BOOBA</span>
+            </div>
+            ${currentUser.role === 'admin' ? `
+              <a href="#admin" class="btn btn-outline btn-sm header-admin-btn" style="font-size: 0.8rem; padding: 0.35rem 0.65rem;">
+                🛡️ Admin
+              </a>
+            ` : ''}
+            <button id="logoutBtn" class="btn btn-ghost btn-sm btn-icon-action" title="Sign Out" aria-label="Sign Out" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; min-width: 32px; padding: 0; border-radius: var(--radius-full); flex-shrink: 0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+        `;
+      }
+
+      if (mobileDrawerFooter) {
+        mobileDrawerFooter.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.85rem; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <img src="${currentUser.avatar || 'assets/mascot.jpg'}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--brand-yellow); flex-shrink: 0;">
+            <div style="min-width: 0; overflow: hidden;">
+              <div style="font-weight: 700; color: var(--text-primary); font-size: 0.95rem; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">@${currentUser.username}</div>
+              <div style="font-size: 0.75rem; color: var(--brand-yellow); font-family: var(--font-mono);">${currentUser.passportId} • ${currentUser.boobaPoints.toLocaleString()} BOOBA</div>
+            </div>
+          </div>
+          <button id="mobileDrawerLogoutBtn" class="btn btn-secondary btn-block btn-sm" style="color: #EF4444; border-color: rgba(239, 68, 68, 0.3); font-weight: 600;">
+            Sign Out
           </button>
-        </div>
-      `;
+        `;
+        document.getElementById('mobileDrawerLogoutBtn')?.addEventListener('click', () => {
+          this.closeMobileNav();
+          db.logout();
+          this.showToast('You have been logged out.');
+          window.location.hash = 'home';
+        });
+      }
 
       document.getElementById('logoutBtn')?.addEventListener('click', () => {
         db.logout();
@@ -192,12 +250,25 @@ class BoobaApp {
         window.location.hash = 'home';
       });
     } else {
-      navRight.innerHTML = `
-        <div class="flex items-center gap-2">
-          <a href="#login" class="btn btn-ghost btn-sm">Sign In</a>
-          <a href="#signup" class="btn btn-primary btn-sm">Create Passport</a>
-        </div>
-      `;
+      if (navRight) {
+        navRight.innerHTML = `
+          <div class="flex items-center gap-2">
+            <a href="#login" class="btn btn-ghost btn-sm" style="font-size: 0.85rem; padding: 0.4rem 0.65rem;">Sign In</a>
+            <a href="#signup" class="btn btn-primary btn-sm header-signup-btn" style="font-size: 0.825rem; padding: 0.4rem 0.85rem;">Create Passport</a>
+          </div>
+        `;
+      }
+
+      if (mobileDrawerFooter) {
+        mobileDrawerFooter.innerHTML = `
+          <a href="#signup" class="btn btn-primary btn-block mobile-nav-link" style="justify-content: center; font-weight: 700;">
+            🪪 Create Your Booba Passport
+          </a>
+          <a href="#login" class="btn btn-secondary btn-block mobile-nav-link" style="justify-content: center;">
+            Sign In to Existing Account
+          </a>
+        `;
+      }
     }
   }
 

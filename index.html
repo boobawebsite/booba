@@ -42,12 +42,62 @@
       </ul>
 
       <!-- Right Nav Actions -->
-      <div id="headerNavActions" class="nav-actions">
-        <!-- Rendered dynamically by app.js -->
+      <div class="flex items-center gap-2">
+        <div id="headerNavActions" class="nav-actions">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+
+        <!-- Mobile Hamburger Toggle Button -->
+        <button id="mobileNavToggleBtn" class="mobile-nav-toggle-btn" aria-label="Open Navigation Menu" title="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
       </div>
 
     </div>
   </header>
+
+  <!-- MOBILE NAVIGATION DRAWER OVERLAY -->
+  <div id="mobileNavBackdrop" class="mobile-nav-backdrop"></div>
+  <aside id="mobileNavDrawer" class="mobile-nav-drawer" aria-label="Mobile Navigation">
+    <div class="mobile-nav-header">
+      <a href="#home" class="logo-brand mobile-drawer-logo">
+        <img src="assets/mascot.jpg" alt="Booba" class="logo-avatar">
+        <div class="flex items-center gap-2">
+          <span>BOOBA</span>
+          <span class="badge-tag">baby BNB</span>
+        </div>
+      </a>
+      <button id="mobileNavCloseBtn" class="btn btn-ghost btn-sm btn-icon-action" aria-label="Close menu" style="width: 34px; height: 34px; border-radius: 50%;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Nav Link Items -->
+    <div class="mobile-nav-body">
+      <ul class="mobile-nav-list">
+        <li><a href="#home" class="mobile-nav-link"><span>🏠</span> Home</a></li>
+        <li><a href="#dashboard/overview" class="mobile-nav-link"><span>📊</span> Dashboard Overview</a></li>
+        <li><a href="#dashboard/passport" class="mobile-nav-link"><span>🪪</span> My Booba Passport</a></li>
+        <li><a href="#dashboard/quests" class="mobile-nav-link"><span>🎯</span> Quests & Bounties</a></li>
+        <li><a href="#dashboard/rewards" class="mobile-nav-link"><span>🍼</span> BOOBA Vault</a></li>
+        <li><a href="#dashboard/referrals" class="mobile-nav-link"><span>👥</span> Referrals</a></li>
+        <li><a href="#dashboard/achievements" class="mobile-nav-link"><span>🏆</span> Achievements</a></li>
+        <li><a href="#dashboard/leaderboard" class="mobile-nav-link"><span>🌟</span> Leaderboard</a></li>
+        <li><a href="#dashboard/settings" class="mobile-nav-link"><span>⚙️</span> Settings & Cloud</a></li>
+      </ul>
+    </div>
+
+    <div id="mobileNavFooter" class="mobile-nav-footer">
+      <!-- Dynamic auth buttons rendered here -->
+    </div>
+  </aside>
 
   <!-- MAIN APPLICATION VIEW ROUTER -->
   <main id="app">

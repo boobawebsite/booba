@@ -6,12 +6,22 @@
 const SUPABASE_CONFIG_KEY = 'booba_supabase_config';
 
 export const SupabaseService = {
+  defaultConfig: {
+    url: 'https://aitjqnfliraspychotrl.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpdGpxbmZsaXJhc3B5Y2hvdHJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NDgyMzQsImV4cCI6MjEwMjUyNDIzNH0.OqDFSeT2Olj2sAD4_Gh3prtGzvob7EX9xdChXeRVq3M',
+    isConnected: true
+  },
+
   getConfig() {
     try {
       const saved = localStorage.getItem(SUPABASE_CONFIG_KEY);
-      return saved ? JSON.parse(saved) : { url: '', anonKey: '', isConnected: false };
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.url && parsed.anonKey) return parsed;
+      }
+      return this.defaultConfig;
     } catch (e) {
-      return { url: '', anonKey: '', isConnected: false };
+      return this.defaultConfig;
     }
   },
 

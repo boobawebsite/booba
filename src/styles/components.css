@@ -481,6 +481,37 @@
   flex-shrink: 0;
 }
 
+/* Responsive Header Navigation Breakpoint (1024px) */
+.mobile-nav-toggle-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.mobile-nav-toggle-btn:hover {
+  background: rgba(243, 186, 47, 0.15);
+  border-color: var(--brand-yellow);
+  color: var(--brand-yellow);
+}
+
+@media (max-width: 1024px) {
+  .nav-links {
+    display: none !important;
+  }
+  .mobile-nav-toggle-btn {
+    display: inline-flex !important;
+  }
+}
+
 @media (max-width: 768px) {
   .metric-cards-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -501,9 +532,6 @@
   }
   .site-header {
     height: 58px;
-  }
-  .nav-links {
-    display: none !important;
   }
   .nav-container {
     padding: 0 0.85rem;
@@ -537,34 +565,6 @@
   .runner-up-avatar {
     width: 34px;
     height: 34px;
-  }
-}
-
-/* Mobile Hamburger Toggle Button */
-.mobile-nav-toggle-btn {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  flex-shrink: 0;
-}
-
-.mobile-nav-toggle-btn:hover {
-  background: rgba(243, 186, 47, 0.15);
-  border-color: var(--brand-yellow);
-  color: var(--brand-yellow);
-}
-
-@media (max-width: 768px) {
-  .mobile-nav-toggle-btn {
-    display: inline-flex;
   }
 }
 
@@ -1629,10 +1629,6 @@
    9. Responsive Layout & Mobile Drawers
    -------------------------------------------------------------------------- */
 @media (max-width: 900px) {
-  .nav-links {
-    display: none;
-  }
-  
   .dashboard-layout {
     flex-direction: column;
   }

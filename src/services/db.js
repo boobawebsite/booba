@@ -362,18 +362,18 @@ const INITIAL_REFERRALS = [
 ];
 
 const INITIAL_ACHIEVEMENTS = [
-  { id: 'ach-1', title: 'Passport Minted', desc: 'Mint your official Booba Passport digital identity', icon: '🪪', rewardBooba: 100, completed: true },
-  { id: 'ach-2', title: 'First Quest Cleared', desc: 'Complete your first community quest', icon: '🎯', rewardBooba: 100, completed: true },
-  { id: 'ach-3', title: 'Social Pioneer', desc: 'Connect with Booba on X, Telegram and Discord', icon: '🌐', rewardBooba: 250, completed: true },
-  { id: 'ach-4', title: '7-Day Streak Master', desc: 'Maintain a 7-day consecutive daily check-in streak', icon: '🔥', rewardBooba: 350, completed: true },
-  { id: 'ach-5', title: 'Referral Pioneer', desc: 'Successfully bring 5 verified baby pandas to Booba', icon: '👥', rewardBooba: 500, completed: true },
-  { id: 'ach-6', title: 'Meme Maestro', desc: 'Have an approved creative meme submission', icon: '🎨', rewardBooba: 500, completed: true },
-  { id: 'ach-7', title: 'Booba Hustler', desc: 'Ascend to Level 4 (3,000+ BOOBA)', icon: '⚡', rewardBooba: 500, completed: true },
-  { id: 'ach-8', title: 'Elite Referrer', desc: 'Successfully refer 25+ verified members', icon: '👑', rewardBooba: 1500, completed: true },
-  { id: 'ach-9', title: 'Booba Elite', desc: 'Ascend to Level 7 (25,000+ BOOBA)', icon: '💎', rewardBooba: 2500, completed: true },
-  { id: 'ach-10', title: 'AMA Regular', desc: 'Attend at least 5 live Community AMAs', icon: '🎙️', rewardBooba: 750, completed: false, progress: '3/5' },
-  { id: 'ach-11', title: 'Content Champion', desc: 'Submit 5 approved educational threads or videos', icon: '🚀', rewardBooba: 2000, completed: false, progress: '2/5' },
-  { id: 'ach-12', title: 'Legendary Panda', desc: 'Reach Level 8 and maintain a 90+ Reputation Score', icon: '🌟', rewardBooba: 5000, completed: false, progress: '28.4k / 50k' }
+  { id: 'ach-1', title: 'Passport Minted', desc: 'Mint your official Booba Passport digital identity', icon: 'ID', rewardBooba: 100, completed: true },
+  { id: 'ach-2', title: 'First Quest Cleared', desc: 'Complete your first community quest', icon: 'Q1', rewardBooba: 100, completed: true },
+  { id: 'ach-3', title: 'Social Pioneer', desc: 'Connect with Booba on X, Telegram and Discord', icon: 'SOC', rewardBooba: 250, completed: true },
+  { id: 'ach-4', title: '7-Day Streak Master', desc: 'Maintain a 7-day consecutive daily check-in streak', icon: '7D', rewardBooba: 350, completed: true },
+  { id: 'ach-5', title: 'Referral Pioneer', desc: 'Successfully bring 5 verified baby pandas to Booba', icon: 'REF', rewardBooba: 500, completed: true },
+  { id: 'ach-6', title: 'Meme Maestro', desc: 'Have an approved creative meme submission', icon: 'ART', rewardBooba: 500, completed: true },
+  { id: 'ach-7', title: 'Booba Hustler', desc: 'Ascend to Level 4 (3,000+ BOOBA)', icon: 'LV4', rewardBooba: 500, completed: true },
+  { id: 'ach-8', title: 'Elite Referrer', desc: 'Successfully refer 25+ verified members', icon: 'VIP', rewardBooba: 1500, completed: true },
+  { id: 'ach-9', title: 'Booba Elite', desc: 'Ascend to Level 7 (25,000+ BOOBA)', icon: 'LV7', rewardBooba: 2500, completed: true },
+  { id: 'ach-10', title: 'AMA Regular', desc: 'Attend at least 5 live Community AMAs', icon: 'AMA', rewardBooba: 750, completed: false, progress: '3/5' },
+  { id: 'ach-11', title: 'Content Champion', desc: 'Submit 5 approved educational threads or videos', icon: 'EDU', rewardBooba: 2000, completed: false, progress: '2/5' },
+  { id: 'ach-12', title: 'Legendary Panda', desc: 'Reach Level 8 and maintain a 90+ Reputation Score', icon: 'LV8', rewardBooba: 5000, completed: false, progress: '28.4k / 50k' }
 ];
 
 // Helper to load from LocalStorage or seed

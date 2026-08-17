@@ -121,10 +121,8 @@ class BoobaApp {
 
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    const icon = type === 'success' ? '✅' : type === 'error' ? '⚠️' : 'ℹ️';
     
     toast.innerHTML = `
-      <div style="font-size: 1.25rem;">${icon}</div>
       <div style="flex: 1; font-size: 0.9rem; font-weight: 500;">${message}</div>
     `;
 
@@ -204,7 +202,6 @@ class BoobaApp {
               <span class="badge-tag header-lvl-tag" style="padding: 0.1rem 0.35rem; font-size: 0.65rem;">Lvl ${userLevel.level}</span>
             </a>
             <div class="quest-reward-pill header-points-pill" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
-              <span>🍼</span>
               <span>${currentUser.boobaPoints.toLocaleString()} BOOBA</span>
             </div>
             <button id="logoutBtn" class="btn btn-ghost btn-sm btn-icon-action" title="Sign Out" aria-label="Sign Out" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; min-width: 32px; padding: 0; border-radius: var(--radius-full); flex-shrink: 0;">
@@ -257,7 +254,7 @@ class BoobaApp {
       if (mobileDrawerFooter) {
         mobileDrawerFooter.innerHTML = `
           <a href="#signup" class="btn btn-primary btn-block mobile-nav-link" style="justify-content: center; font-weight: 700;">
-            🪪 Create Your Booba Passport
+            Create Your Booba Passport
           </a>
           <a href="#login" class="btn btn-secondary btn-block mobile-nav-link" style="justify-content: center;">
             Sign In to Existing Account
@@ -285,7 +282,6 @@ class BoobaApp {
               
               <!-- Floating Brand Tag -->
               <div class="glass-panel" style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); padding: 0.6rem 1.25rem; border-radius: var(--radius-full); border: 1.5px solid var(--brand-yellow); display: flex; align-items: center; gap: 0.6rem; white-space: nowrap; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
-                <span style="font-size: 1.2rem;">🍼</span>
                 <span style="font-weight: 800; font-size: 0.9rem; color: #FFFFFF;">BOOBA • BNB baby</span>
               </div>
             </div>
@@ -407,7 +403,7 @@ class BoobaApp {
       const res = db.login(mockEmail, '') || db.register({ username: 'GooglePanda', email: mockEmail });
       if (res.user) {
         db.currentUser = res.user;
-        this.showToast(`✨ Successfully authenticated with Google (${mockEmail})!`);
+        this.showToast(`Successfully authenticated with Google (${mockEmail})!`);
         window.location.hash = 'dashboard/overview';
       }
     });
@@ -416,7 +412,7 @@ class BoobaApp {
     document.getElementById('btnWalletAuth')?.addEventListener('click', () => {
       const mockWallet = '0x' + Math.random().toString(16).substring(2, 10) + '...' + Math.random().toString(16).substring(2, 6);
       const res = db.loginWithWallet(mockWallet);
-      this.showToast(`🔗 Connected Web3 Wallet (${mockWallet})! Passport ready.`);
+      this.showToast(`Connected Web3 Wallet (${mockWallet})! Passport ready.`);
       window.location.hash = 'dashboard/overview';
     });
 
@@ -426,7 +422,7 @@ class BoobaApp {
       const res = db.register({ username: 'ApplePanda', email: mockEmail });
       if (res.user) {
         db.currentUser = res.user;
-        this.showToast(`🍎 Successfully authenticated with Apple ID!`);
+        this.showToast(`Successfully authenticated with Apple ID!`);
         window.location.hash = 'dashboard/overview';
       }
     });
@@ -447,7 +443,7 @@ class BoobaApp {
       // Core Team Admin Login / Signup
       if (isAdminCredentials) {
         db.switchDemoUser('admin');
-        this.showToast('🛡️ Welcome Core Admin! Opening Team Admin Console...');
+        this.showToast('Welcome Core Admin! Opening Team Admin Console...');
         setTimeout(() => {
           window.location.href = 'teamadmin.html';
         }, 400);
@@ -462,10 +458,10 @@ class BoobaApp {
         const res = db.register({ username, email, password, referralCodeInput: refCode });
         if (res.success) {
           if (res.isAdmin || res.user.role === 'admin') {
-            this.showToast('🛡️ Admin Passport Minted! Redirecting to Admin Console...');
+            this.showToast('Admin Passport Minted! Redirecting to Admin Console...');
             setTimeout(() => { window.location.href = 'teamadmin.html'; }, 400);
           } else {
-            this.showToast(`🎉 Passport Minted! ID: ${res.user.passportId}. Welcome bonus +100 BOOBA credited!`);
+            this.showToast(`Passport Minted! ID: ${res.user.passportId}. Welcome bonus +100 BOOBA credited!`);
             window.location.hash = 'dashboard/passport';
           }
         } else {
@@ -479,7 +475,7 @@ class BoobaApp {
         const res = db.login(email, password);
         if (res.success) {
           if (res.isAdmin || res.user.role === 'admin') {
-            this.showToast(`🛡️ Welcome back, Admin @${res.user.username}! Opening Admin Console...`);
+            this.showToast(`Welcome back, Admin @${res.user.username}! Opening Admin Console...`);
             setTimeout(() => { window.location.href = 'teamadmin.html'; }, 400);
           } else {
             this.showToast(`Welcome back, @${res.user.username}!`);
@@ -500,7 +496,7 @@ class BoobaApp {
 
     document.getElementById('xDemoAdminBtn')?.addEventListener('click', () => {
       db.switchDemoUser('admin');
-      this.showToast('🛡️ Logged in as Admin: @BoobaBoss. Opening Team Admin Console...');
+      this.showToast('Logged in as Admin: @BoobaBoss. Opening Team Admin Console...');
       setTimeout(() => {
         window.location.href = 'teamadmin.html';
       }, 400);
@@ -536,10 +532,10 @@ class BoobaApp {
               <!-- Hero CTAs -->
               <div class="flex items-center gap-4" style="flex-wrap: wrap; margin-bottom: 2.5rem;">
                 <a href="#signup" class="btn btn-primary btn-lg">
-                  🪪 Create Your Booba Passport
+                  Create Your Booba Passport
                 </a>
                 <a href="#dashboard/quests" class="btn btn-secondary btn-lg">
-                  🎯 Explore Quests
+                  Explore Quests
                 </a>
               </div>
 
@@ -551,7 +547,7 @@ class BoobaApp {
                 </div>
                 <div>
                   <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">BOOBA Distributed</div>
-                  <div class="text-mono" style="font-size: 1.35rem; font-weight: 700; color: #FFFFFF;">4.85M 🍼</div>
+                  <div class="text-mono" style="font-size: 1.35rem; font-weight: 700; color: #FFFFFF;">4.85M BOOBA</div>
                 </div>
                 <div>
                   <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Ticker Symbol</div>
@@ -593,35 +589,30 @@ class BoobaApp {
           <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
             
             <div class="glass-panel" style="padding: 1.75rem; border-radius: var(--radius-md); position: relative;">
-              <div style="font-size: 2rem; margin-bottom: 1rem;">🪪</div>
               <div style="font-size: 0.75rem; font-weight: 800; color: var(--brand-yellow); text-transform: uppercase; margin-bottom: 0.35rem;">STEP 1</div>
               <h4 style="margin-bottom: 0.6rem;">JOIN</h4>
               <p style="font-size: 0.88rem;">Create your Booba account and automatically mint your unique digital Booba Passport ID.</p>
             </div>
 
             <div class="glass-panel" style="padding: 1.75rem; border-radius: var(--radius-md); position: relative;">
-              <div style="font-size: 2rem; margin-bottom: 1rem;">🎯</div>
               <div style="font-size: 0.75rem; font-weight: 800; color: var(--brand-yellow); text-transform: uppercase; margin-bottom: 0.35rem;">STEP 2</div>
               <h4 style="margin-bottom: 0.6rem;">PARTICIPATE</h4>
               <p style="font-size: 0.88rem;">Complete daily check-ins, social actions, and community activities to earn BOOBA rewards.</p>
             </div>
 
             <div class="glass-panel" style="padding: 1.75rem; border-radius: var(--radius-md); position: relative;">
-              <div style="font-size: 2rem; margin-bottom: 1rem;">📈</div>
               <div style="font-size: 0.75rem; font-weight: 800; color: var(--brand-yellow); text-transform: uppercase; margin-bottom: 0.35rem;">STEP 3</div>
               <h4 style="margin-bottom: 0.6rem;">GROW</h4>
               <p style="font-size: 0.88rem;">Earn BOOBA points to level up through 10 progressive tiers from Booba Baby to Booba Master.</p>
             </div>
 
             <div class="glass-panel" style="padding: 1.75rem; border-radius: var(--radius-md); position: relative;">
-              <div style="font-size: 2rem; margin-bottom: 1rem;">🤝</div>
               <div style="font-size: 0.75rem; font-weight: 800; color: var(--brand-yellow); text-transform: uppercase; margin-bottom: 0.35rem;">STEP 4</div>
               <h4 style="margin-bottom: 0.6rem;">CONTRIBUTE</h4>
               <p style="font-size: 0.88rem;">Refer verified genuine members, create memes, write threads, and build community reputation.</p>
             </div>
 
             <div class="glass-panel" style="padding: 1.75rem; border-radius: var(--radius-md); position: relative;">
-              <div style="font-size: 2rem; margin-bottom: 1rem;">👑</div>
               <div style="font-size: 0.75rem; font-weight: 800; color: var(--brand-yellow); text-transform: uppercase; margin-bottom: 0.35rem;">STEP 5</div>
               <h4 style="margin-bottom: 0.6rem;">UNLOCK</h4>
               <p style="font-size: 0.88rem;">Gain exclusive token airdrop multipliers, VIP AMA access, governance voting, and badges.</p>
@@ -645,23 +636,29 @@ class BoobaApp {
 
               <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
                 <div class="flex items-center gap-3">
-                  <span style="font-size: 1.3rem;">🛡️</span>
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--brand-yellow-subtle); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow); flex-shrink: 0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                  </div>
                   <div>
                     <div style="font-weight: 700; color: var(--text-primary);">Unique Passport ID</div>
                     <div style="font-size: 0.85rem; color: var(--text-secondary);">Permanent tracking for every contribution and verified milestone.</div>
                   </div>
                 </div>
                 <div class="flex items-center gap-3">
-                  <span style="font-size: 1.3rem;">⭐</span>
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--brand-yellow-subtle); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow); flex-shrink: 0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </div>
                   <div>
                     <div style="font-weight: 700; color: var(--text-primary);">Reputation Score (0 - 100)</div>
                     <div style="font-size: 0.85rem; color: var(--text-secondary);">Dynamic trust rating built from genuine engagement and verified referrals.</div>
                   </div>
                 </div>
                 <div class="flex items-center gap-3">
-                  <span style="font-size: 1.3rem;">🎖️</span>
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--brand-yellow-subtle); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow); flex-shrink: 0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                  </div>
                   <div>
-                    <div style="font-weight: 700; color: var(--text-primary);">Holographic Collectible Badges</div>
+                    <div style="font-weight: 700; color: var(--text-primary);">Collectible Milestone Badges</div>
                     <div style="font-size: 0.85rem; color: var(--text-secondary);">Unlock milestone insignias to display on your passport and share on socials.</div>
                   </div>
                 </div>
@@ -706,7 +703,7 @@ class BoobaApp {
                   <div class="passport-metrics-strip">
                     <div class="passport-metric-item">
                       <div class="passport-metric-label">BOOBA Balance</div>
-                      <div class="passport-metric-value text-gold">28,450 🍼</div>
+                      <div class="passport-metric-value text-gold">28,450 BOOBA</div>
                     </div>
                     <div class="passport-metric-item">
                       <div class="passport-metric-label">Reputation</div>
@@ -784,7 +781,7 @@ class BoobaApp {
                   <p style="font-size: 0.85rem; color: var(--text-secondary);">${q.description}</p>
                 </div>
                 <div style="margin-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-                  <span style="font-size: 0.75rem; color: var(--text-muted);">🕒 ${q.deadline}</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Deadline: ${q.deadline}</span>
                   <a href="#dashboard/quests" class="btn btn-secondary btn-sm">${q.actionText}</a>
                 </div>
               </div>
@@ -798,16 +795,16 @@ class BoobaApp {
         <div class="container">
           
           <div style="text-align: center; max-width: 650px; margin: 0 auto 2.5rem auto;">
-            <span class="badge-tag" style="margin-bottom: 0.75rem;">🏆 HALL OF FAME</span>
+            <span class="badge-tag" style="margin-bottom: 0.75rem;">HALL OF FAME</span>
             <h2>Top <span class="text-gradient-gold">Booba Legends</span></h2>
             <p>Real-time community rankings of top questers, content creators, and BNB baby ambassadors.</p>
             
             <!-- Timeframe Segmented Switcher -->
             <div style="margin-top: 1.5rem;">
               <div class="leaderboard-segmented-control">
-                <button type="button" class="leaderboard-segment-btn active">🌟 All-Time</button>
-                <button type="button" class="leaderboard-segment-btn">⚡ This Week</button>
-                <button type="button" class="leaderboard-segment-btn">🔥 Monthly Sprint</button>
+                <button type="button" class="leaderboard-segment-btn active">All-Time</button>
+                <button type="button" class="leaderboard-segment-btn">This Week</button>
+                <button type="button" class="leaderboard-segment-btn">Monthly Sprint</button>
               </div>
             </div>
           </div>
@@ -829,16 +826,15 @@ class BoobaApp {
                   ${topLeaderboard[1].passportId} • ${calculateLevel(topLeaderboard[1].boobaPoints).title}
                 </div>
                 <div class="quest-reward-pill" style="font-size: 0.9rem; margin-bottom: 0.5rem;">
-                  🍼 ${topLeaderboard[1].boobaPoints.toLocaleString()} BOOBA
+                  ${topLeaderboard[1].boobaPoints.toLocaleString()} BOOBA
                 </div>
-                <div style="font-size: 0.75rem; color: var(--accent-emerald);">⭐ ${topLeaderboard[1].reputation || 95}/100 Trust</div>
+                <div style="font-size: 0.75rem; color: var(--accent-emerald);">Trust: ${topLeaderboard[1].reputation || 95}/100</div>
               </div>
             ` : ''}
 
             <!-- Rank 1 (Gold Champion) -->
             ${topLeaderboard[0] ? `
               <div class="podium-card podium-rank-1">
-                <div class="podium-crown">👑</div>
                 <div class="podium-avatar-wrapper">
                   <img src="${topLeaderboard[0].avatar || 'assets/mascot.jpg'}" class="podium-avatar" alt="Rank 1 Champion">
                   <div class="podium-rank-badge" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000;">1</div>
@@ -853,9 +849,9 @@ class BoobaApp {
                   ${topLeaderboard[0].passportId} • ${calculateLevel(topLeaderboard[0].boobaPoints).title}
                 </div>
                 <div class="quest-reward-pill" style="font-size: 1.05rem; padding: 0.4rem 1rem; margin-bottom: 0.6rem; border-color: var(--brand-yellow);">
-                  🍼 ${topLeaderboard[0].boobaPoints.toLocaleString()} BOOBA
+                  ${topLeaderboard[0].boobaPoints.toLocaleString()} BOOBA
                 </div>
-                <div style="font-size: 0.8rem; color: var(--accent-emerald); font-weight: 700;">⭐ ${topLeaderboard[0].reputation || 99}/100 Reputation</div>
+                <div style="font-size: 0.8rem; color: var(--accent-emerald); font-weight: 700;">Reputation: ${topLeaderboard[0].reputation || 99}/100</div>
               </div>
             ` : ''}
 
@@ -873,9 +869,9 @@ class BoobaApp {
                   ${topLeaderboard[2].passportId} • ${calculateLevel(topLeaderboard[2].boobaPoints).title}
                 </div>
                 <div class="quest-reward-pill" style="font-size: 0.9rem; margin-bottom: 0.5rem;">
-                  🍼 ${topLeaderboard[2].boobaPoints.toLocaleString()} BOOBA
+                  ${topLeaderboard[2].boobaPoints.toLocaleString()} BOOBA
                 </div>
-                <div style="font-size: 0.75rem; color: var(--accent-emerald);">⭐ ${topLeaderboard[2].reputation || 91}/100 Trust</div>
+                <div style="font-size: 0.75rem; color: var(--accent-emerald);">Trust: ${topLeaderboard[2].reputation || 91}/100</div>
               </div>
             ` : ''}
 
@@ -907,10 +903,10 @@ class BoobaApp {
 
                     <div style="text-align: right; flex-shrink: 0; margin-left: 0.75rem;">
                       <div class="text-mono" style="font-weight: 800; color: var(--brand-yellow); font-size: 1.05rem;">
-                        ${u.boobaPoints.toLocaleString()} 🍼
+                        ${u.boobaPoints.toLocaleString()} BOOBA
                       </div>
                       <div style="font-size: 0.72rem; color: var(--accent-emerald);">
-                        ⭐ ${u.reputation || 90}/100 Trust
+                        Trust: ${u.reputation || 90}/100
                       </div>
                     </div>
                   </div>
@@ -943,7 +939,7 @@ class BoobaApp {
               </p>
               <div class="flex items-center justify-center gap-4" style="flex-wrap: wrap;">
                 <a href="#signup" class="btn btn-primary btn-lg">Mint Passport Now</a>
-                <a href="https://t.me/boobababybnb" target="_blank" class="btn btn-secondary btn-lg">Join Telegram 💬</a>
+                <a href="https://t.me/boobababybnb" target="_blank" class="btn btn-secondary btn-lg">Join Telegram</a>
               </div>
             </div>
           </div>
@@ -1224,9 +1220,9 @@ class BoobaApp {
                 <div class="google-card" style="padding: 1.1rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
                   <div>
                     <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);">${b}</div>
-                    <div style="font-size: 0.72rem; color: var(--accent-emerald); margin-top: 0.2rem;">Verified ✓</div>
+                    <div style="font-size: 0.72rem; color: var(--accent-emerald); margin-top: 0.2rem;">Verified</div>
                   </div>
-                  <span style="font-size: 1.25rem;">🎖️</span>
+                  <span class="badge-tag" style="background: var(--brand-yellow-subtle); color: var(--brand-yellow);">Tier Badge</span>
                 </div>
               `).join('')}
             </div>
@@ -1500,7 +1496,7 @@ class BoobaApp {
               <div class="google-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: ${ach.completed ? 'rgba(16, 185, 129, 0.4)' : 'var(--border-subtle)'}; background: ${ach.completed ? 'rgba(16, 185, 129, 0.03)' : 'var(--bg-surface)'};">
                 <div>
                   <div class="flex items-center justify-between" style="margin-bottom: 0.75rem;">
-                    <div style="font-size: 1.75rem;">${ach.icon || '🏆'}</div>
+                    <span class="badge-tag" style="font-size: 0.75rem; font-weight: 800; background: var(--brand-yellow-subtle); color: var(--brand-yellow);">${ach.icon || 'ACH'}</span>
                     <span class="text-mono" style="font-size: 0.8rem; color: var(--brand-yellow); font-weight: 700;">+${ach.rewardBooba} BOOBA</span>
                   </div>
                   <h4 style="font-weight: 700; font-size: 1rem; color: var(--text-primary); margin-bottom: 0.35rem;">${ach.title}</h4>
@@ -1508,7 +1504,7 @@ class BoobaApp {
                 </div>
                 <div class="flex items-center justify-between" style="font-size: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-subtle);">
                   <span style="color: ${ach.completed ? 'var(--accent-emerald)' : 'var(--text-muted)'}; font-weight: 600; display: flex; align-items: center; gap: 0.25rem;">
-                    ${ach.completed ? '✅ Unlocked' : ach.progress ? `⏳ Progress: ${ach.progress}` : '🔒 In Progress'}
+                    ${ach.completed ? 'Unlocked' : ach.progress ? `Progress: ${ach.progress}` : 'In Progress'}
                   </span>
                   ${ach.completed ? '<span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: #10B981; font-size: 0.65rem;">Claimed</span>' : `<span class="badge-tag" style="opacity: 0.6; font-size: 0.65rem;">Locked</span>`}
                 </div>
@@ -1553,7 +1549,6 @@ class BoobaApp {
             <!-- Rank 1 -->
             ${sortedUsers[0] ? `
               <div class="podium-card podium-rank-1">
-                <div class="podium-crown">👑</div>
                 <div class="podium-avatar-wrapper">
                   <img src="${sortedUsers[0].avatar || 'assets/mascot.jpg'}" class="podium-avatar">
                   <div class="podium-rank-badge" style="background: var(--brand-yellow); color: #000;">1</div>
@@ -1903,13 +1898,13 @@ class BoobaApp {
       if (input) {
         input.select();
         navigator.clipboard.writeText(input.value);
-        this.showToast('📋 Referral link copied to clipboard!');
+        this.showToast('Referral link copied to clipboard!');
       }
     });
 
     document.getElementById('shareRefXBtn')?.addEventListener('click', () => {
       const u = db.getState().currentUser;
-      const tweet = encodeURIComponent(`Join me on Booba (BNB baby) — Complete quests, level up your Booba Passport, and earn $BOOBA rewards! 🍼🐼 https://booba.crypto/invite/${u?.username}`);
+      const tweet = encodeURIComponent(`Join me on Booba (BNB baby) — Complete quests, level up your Booba Passport, and earn $BOOBA rewards! https://booba.crypto/invite/${u?.username}`);
       window.open(`https://twitter.com/intent/tweet?text=${tweet}`, '_blank');
     });
 
@@ -1931,7 +1926,7 @@ class BoobaApp {
 
         if (type === 'instant') {
           const res = db.claimDailyCheckIn();
-          this.showToast(`🔥 Claimed +${reward} BOOBA for ${title}!`);
+          this.showToast(`Claimed +${reward} BOOBA for ${title}!`);
         } else if (type === 'social') {
           this.openSocialVerifyModal(id, title, reward);
         } else {
@@ -1968,7 +1963,7 @@ class BoobaApp {
     confirmBtn.onclick = () => {
       db.completeSocialQuest(questId);
       this.closeModal();
-      this.showToast(`🎉 Verified! +${reward} BOOBA added to your passport.`);
+      this.showToast(`Verified! +${reward} BOOBA added to your passport.`);
     };
 
     modal.classList.add('open');
@@ -2000,7 +1995,7 @@ class BoobaApp {
           <div>
             <div class="flex items-center gap-2">
               <span class="badge-tag" style="background: rgba(239, 68, 68, 0.15); color: #EF4444; border-color: rgba(239, 68, 68, 0.3);">
-                🛡️ ADMIN MANAGEMENT CONSOLE
+                ADMIN MANAGEMENT CONSOLE
               </span>
             </div>
             <h2 style="margin-top: 0.35rem;">Booba Platform Administration</h2>
@@ -2020,7 +2015,7 @@ class BoobaApp {
           <div class="google-card">
             <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Total BOOBA Distributed</div>
             <div class="text-mono text-gold" style="font-size: 1.6rem; font-weight: 800; margin-top: 0.25rem;">
-              ${totalBooba.toLocaleString()} 🍼
+              ${totalBooba.toLocaleString()} BOOBA
             </div>
           </div>
           <div class="google-card" style="border-color: rgba(243, 186, 47, 0.4);">
@@ -2066,10 +2061,10 @@ class BoobaApp {
                     <div style="font-size: 0.75rem; color: var(--text-muted);">Verification Status: <strong>Awaiting Approval</strong></div>
                     <div class="flex items-center gap-2">
                       <button class="btn btn-secondary btn-sm admin-reject-btn" data-id="${sub.id}">
-                        ✕ Reject
+                        Reject
                       </button>
                       <button class="btn btn-primary btn-sm admin-approve-btn" data-id="${sub.id}" data-reward="${sub.rewardBooba}" data-user="${sub.username}">
-                        ✓ Approve & Award +${sub.rewardBooba} BOOBA
+                        Approve & Award +${sub.rewardBooba} BOOBA
                       </button>
                     </div>
                   </div>
@@ -2078,7 +2073,7 @@ class BoobaApp {
             </div>
           ` : `
             <div style="text-align: center; padding: 2.5rem; color: var(--text-muted); border: 1px dashed var(--border-subtle); border-radius: var(--radius-sm);">
-              ✅ All quest submissions have been reviewed!
+              All quest submissions have been reviewed!
             </div>
           `}
         </div>
@@ -2136,7 +2131,7 @@ class BoobaApp {
         const reward = e.currentTarget.dataset.reward;
         const user = e.currentTarget.dataset.user;
         db.reviewSubmission(id, 'approved');
-        this.showToast(`✅ Approved submission! Awarded +${reward} BOOBA to @${user}.`);
+        this.showToast(`Approved submission! Awarded +${reward} BOOBA to @${user}.`);
       });
     });
 
@@ -2217,7 +2212,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     db.submitCreativeProof({ questId, proofUrl, proofDescription });
     window.boobaApp.closeModal();
-    window.boobaApp.showToast('🚀 Proof submitted successfully! Sent to Admin review queue.');
+    window.boobaApp.showToast('Proof submitted successfully! Sent to Admin review queue.');
   });
 
   // Admin Create Quest Form
@@ -2231,6 +2226,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     db.createQuest({ title, category, rewardBooba, description, requirements, actionText: 'Submit Proof' });
     window.boobaApp.closeModal();
-    window.boobaApp.showToast(`✨ New quest "${title}" successfully minted & published!`);
+    window.boobaApp.showToast(`New quest "${title}" successfully minted & published!`);
   });
 });

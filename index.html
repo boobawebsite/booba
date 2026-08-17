@@ -82,15 +82,15 @@
     <!-- Mobile Nav Link Items -->
     <div class="mobile-nav-body">
       <ul class="mobile-nav-list">
-        <li><a href="#home" class="mobile-nav-link"><span>🏠</span> Home</a></li>
-        <li><a href="#dashboard/overview" class="mobile-nav-link"><span>📊</span> Dashboard Overview</a></li>
-        <li><a href="#dashboard/passport" class="mobile-nav-link"><span>🪪</span> My Booba Passport</a></li>
-        <li><a href="#dashboard/quests" class="mobile-nav-link"><span>🎯</span> Quests & Bounties</a></li>
-        <li><a href="#dashboard/rewards" class="mobile-nav-link"><span>🍼</span> BOOBA Vault</a></li>
-        <li><a href="#dashboard/referrals" class="mobile-nav-link"><span>👥</span> Referrals</a></li>
-        <li><a href="#dashboard/achievements" class="mobile-nav-link"><span>🏆</span> Achievements</a></li>
-        <li><a href="#dashboard/leaderboard" class="mobile-nav-link"><span>🌟</span> Leaderboard</a></li>
-        <li><a href="#dashboard/settings" class="mobile-nav-link"><span>⚙️</span> Settings & Cloud</a></li>
+        <li><a href="#home" class="mobile-nav-link">Home</a></li>
+        <li><a href="#dashboard/overview" class="mobile-nav-link">Dashboard Overview</a></li>
+        <li><a href="#dashboard/passport" class="mobile-nav-link">My Booba Passport</a></li>
+        <li><a href="#dashboard/quests" class="mobile-nav-link">Quests & Bounties</a></li>
+        <li><a href="#dashboard/rewards" class="mobile-nav-link">BOOBA Vault</a></li>
+        <li><a href="#dashboard/referrals" class="mobile-nav-link">Referrals</a></li>
+        <li><a href="#dashboard/achievements" class="mobile-nav-link">Achievements</a></li>
+        <li><a href="#dashboard/leaderboard" class="mobile-nav-link">Leaderboard</a></li>
+        <li><a href="#dashboard/settings" class="mobile-nav-link">Settings & Cloud</a></li>
       </ul>
     </div>
 
@@ -135,10 +135,10 @@
         <div>
           <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--brand-yellow); margin-bottom: 1rem;">Official Channels</h4>
           <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem; color: var(--text-secondary);">
-            <li><a href="https://twitter.com/boobababybnb" target="_blank" class="nav-link">🐦 X (Twitter)</a></li>
-            <li><a href="https://t.me/boobababybnb" target="_blank" class="nav-link">💬 Telegram Lounge</a></li>
-            <li><a href="https://discord.gg/booba" target="_blank" class="nav-link">🎮 Discord Community</a></li>
-            <li><a href="https://bscscan.com" target="_blank" class="nav-link">🔍 BscScan Explorer</a></li>
+            <li><a href="https://twitter.com/boobababybnb" target="_blank" class="nav-link">X (Twitter)</a></li>
+            <li><a href="https://t.me/boobababybnb" target="_blank" class="nav-link">Telegram Lounge</a></li>
+            <li><a href="https://discord.gg/booba" target="_blank" class="nav-link">Discord Community</a></li>
+            <li><a href="https://bscscan.com" target="_blank" class="nav-link">BscScan Explorer</a></li>
           </ul>
         </div>
 
@@ -181,8 +181,8 @@
 
       <!-- Auth Tabs -->
       <div class="auth-tabs">
-        <button id="tabAuthSignup" class="auth-tab-btn active">🪪 Mint Passport (Sign Up)</button>
-        <button id="tabAuthSignin" class="auth-tab-btn">🔑 Sign In (Login)</button>
+        <button id="tabAuthSignup" class="auth-tab-btn active">Mint Passport (Sign Up)</button>
+        <button id="tabAuthSignin" class="auth-tab-btn">Sign In (Login)</button>
       </div>
 
       <!-- Auth Form -->
@@ -230,7 +230,11 @@
   <div class="modal-backdrop" id="socialVerifyModal">
     <div class="auth-card" style="max-width: 440px; text-align: center;">
       <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.closeModal()" style="position: absolute; top: 1rem; right: 1rem; font-size: 1.2rem;">✕</button>
-      <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎯</div>
+      <div style="margin-bottom: 0.75rem; display: flex; justify-content: center;">
+        <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--brand-yellow-subtle); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+        </div>
+      </div>
       <h3 id="socialModalTitle">Social Task Verification</h3>
       <div class="quest-reward-pill" id="socialModalReward" style="margin: 0.75rem auto 1.25rem auto;">+100 BOOBA</div>
       <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">

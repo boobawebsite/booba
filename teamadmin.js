@@ -1,5 +1,5 @@
 /* ==========================================================================
-   BOOBA (baby BNB) — Team Admin Console Logic (teamadmin.js)
+   BOOBA (BNB baby) — Team Admin Console Logic (teamadmin.js)
    ========================================================================== */
 
 import { db, calculateLevel, LEVEL_TIERS } from './src/services/db.js';
@@ -97,10 +97,8 @@ class TeamAdminApp {
 
     const toast = document.createElement('div');
     toast.className = `admin-toast toast-${type}`;
-    const icon = type === 'success' ? '✅' : type === 'error' ? '⚠️' : 'ℹ️';
 
     toast.innerHTML = `
-      <div style="font-size: 1.25rem;">${icon}</div>
       <div style="flex: 1; font-size: 0.9rem; font-weight: 600;">${message}</div>
     `;
 
@@ -167,7 +165,9 @@ class TeamAdminApp {
     return `
       <div class="admin-stats-grid">
         <div class="stat-widget">
-          <div class="stat-icon-wrapper" style="background: var(--brand-yellow-subtle); color: var(--brand-yellow);">🍼</div>
+          <div class="stat-icon-wrapper" style="background: var(--brand-yellow-subtle); color: var(--brand-yellow);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><line x1="12" y1="6" x2="12" y2="8"></line><line x1="12" y1="16" x2="12" y2="18"></line></svg>
+          </div>
           <div>
             <div class="stat-val">${totalTokensDistributed.toLocaleString()}</div>
             <div class="stat-lbl">BOOBA Distributed</div>
@@ -175,7 +175,9 @@ class TeamAdminApp {
         </div>
 
         <div class="stat-widget">
-          <div class="stat-icon-wrapper" style="background: var(--accent-blue-subtle); color: var(--accent-blue);">👥</div>
+          <div class="stat-icon-wrapper" style="background: var(--accent-blue-subtle); color: var(--accent-blue);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
           <div>
             <div class="stat-val">${totalUsers}</div>
             <div class="stat-lbl">Registered Passports</div>
@@ -183,7 +185,9 @@ class TeamAdminApp {
         </div>
 
         <div class="stat-widget">
-          <div class="stat-icon-wrapper" style="background: var(--accent-emerald-subtle); color: var(--accent-emerald);">🎯</div>
+          <div class="stat-icon-wrapper" style="background: var(--accent-emerald-subtle); color: var(--accent-emerald);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+          </div>
           <div>
             <div class="stat-val">${totalQuests}</div>
             <div class="stat-lbl">Active Quests & Bounties</div>
@@ -191,7 +195,9 @@ class TeamAdminApp {
         </div>
 
         <div class="stat-widget">
-          <div class="stat-icon-wrapper" style="background: var(--accent-ruby-subtle); color: var(--accent-ruby);">⏳</div>
+          <div class="stat-icon-wrapper" style="background: var(--accent-ruby-subtle); color: var(--accent-ruby);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
           <div>
             <div class="stat-val">${pendingSubmissions}</div>
             <div class="stat-lbl">Pending Submissions</div>
@@ -202,20 +208,20 @@ class TeamAdminApp {
       <!-- Quick Actions Grid -->
       <div class="admin-card">
         <div class="admin-card-header">
-          <h3 class="admin-card-title">⚡ Quick Management Actions</h3>
+          <h3 class="admin-card-title">Quick Management Actions</h3>
         </div>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
           <button class="btn-admin btn-admin-primary" id="quickNewQuestBtn">
-            ➕ Upload New Quest
+            Upload New Quest
           </button>
           <button class="btn-admin btn-admin-secondary" id="quickAirdropBtn">
-            🚀 Launch Token Airdrop
+            Launch Token Airdrop
           </button>
           <button class="btn-admin btn-admin-secondary" id="quickReviewSubmissionsBtn">
-            📥 Review Proof Submissions (${pendingSubmissions})
+            Review Proof Submissions (${pendingSubmissions})
           </button>
           <a href="index.html#home" class="btn-admin btn-admin-secondary" target="_blank">
-            🌐 Visit Public Website ↗
+            Visit Public Website ↗
           </a>
         </div>
       </div>
@@ -223,7 +229,7 @@ class TeamAdminApp {
       <!-- Top Leaderboard Snapshot -->
       <div class="admin-card">
         <div class="admin-card-header">
-          <h3 class="admin-card-title">🏆 Top User Rankings</h3>
+          <h3 class="admin-card-title">Top User Rankings</h3>
           <button class="btn-admin btn-admin-secondary btn-sm" id="viewAllUsersBtn">View All Users →</button>
         </div>
         <div class="table-responsive">
@@ -251,11 +257,11 @@ class TeamAdminApp {
                     </td>
                     <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary);">${u.walletAddress || 'Not Connected'}</td>
                     <td><span class="admin-badge badge-purple">${lvl.title} (Lvl ${lvl.level})</span></td>
-                    <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">🍼 ${u.boobaPoints.toLocaleString()}</td>
-                    <td><span class="admin-badge badge-green">⭐ ${u.reputation || 90}/100</span></td>
+                    <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">${u.boobaPoints.toLocaleString()} BOOBA</td>
+                    <td><span class="admin-badge badge-green">Rep: ${u.reputation || 90}/100</span></td>
                     <td>
                       <button class="btn-admin btn-admin-primary btn-sm direct-credit-btn" data-userid="${u.id}" data-username="${u.username}">
-                        + Credit Tokens
+                        Credit Tokens
                       </button>
                     </td>
                   </tr>
@@ -294,7 +300,7 @@ class TeamAdminApp {
       <!-- Quest Upload Form Card -->
       <div class="admin-card">
         <div class="admin-card-header">
-          <h3 class="admin-card-title">✨ Create & Publish New Quest</h3>
+          <h3 class="admin-card-title">Create & Publish New Quest</h3>
           <span class="admin-badge badge-gold">Live Website Upload</span>
         </div>
 
@@ -308,24 +314,24 @@ class TeamAdminApp {
             <div class="form-group">
               <label class="form-label">Category *</label>
               <select id="questCategoryInput" class="form-control">
-                <option value="social">🐦 Social (Twitter / X, Discord, TG)</option>
-                <option value="community">💬 Community (Ambassador, Onboarding)</option>
-                <option value="creative">🎨 Creative (Memes, Threads, TikTok/Reels)</option>
-                <option value="special">🔥 Special Launch Campaign</option>
+                <option value="social">Social (Twitter / X, Discord, TG)</option>
+                <option value="community">Community (Ambassador, Onboarding)</option>
+                <option value="creative">Creative (Memes, Threads, TikTok/Reels)</option>
+                <option value="special">Special Launch Campaign</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label class="form-label">Reward Amount (🍼 BOOBA Points) *</label>
+              <label class="form-label">Reward Amount (BOOBA Points) *</label>
               <input type="number" id="questRewardInput" class="form-control" placeholder="500" min="10" step="10" required>
             </div>
 
             <div class="form-group">
               <label class="form-label">Verification Type *</label>
               <select id="questTypeInput" class="form-control">
-                <option value="proof">📸 Manual Proof Submission (Links, Screenshots)</option>
-                <option value="social">🔗 Instant Link / Social Follow</option>
-                <option value="special">⭐ Milestone / Special Criteria</option>
+                <option value="proof">Manual Proof Submission (Links, Screenshots)</option>
+                <option value="social">Instant Link / Social Follow</option>
+                <option value="special">Milestone / Special Criteria</option>
               </select>
             </div>
 
@@ -359,12 +365,12 @@ class TeamAdminApp {
 
           <div class="form-group">
             <label class="form-label">Detailed Requirements & Instructions</label>
-            <input type="text" id="questRequirementsInput" class="form-control" placeholder="e.g. Must include #BOOBA #babyBNB in your post. Minimum 20 followers.">
+            <input type="text" id="questRequirementsInput" class="form-control" placeholder="e.g. Must include #BOOBA #BNBbaby in your post. Minimum 20 followers.">
           </div>
 
           <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem;">
             <button type="reset" class="btn-admin btn-admin-secondary">Clear Form</button>
-            <button type="submit" class="btn-admin btn-admin-primary">🚀 Publish Quest to Live Site</button>
+            <button type="submit" class="btn-admin btn-admin-primary">Publish Quest to Live Site</button>
           </div>
         </form>
       </div>
@@ -372,7 +378,7 @@ class TeamAdminApp {
       <!-- Published Quests Table -->
       <div class="admin-card">
         <div class="admin-card-header">
-          <h3 class="admin-card-title">📋 Published Quests & Bounties (${state.quests.length})</h3>
+          <h3 class="admin-card-title">Published Quests & Bounties (${state.quests.length})</h3>
         </div>
 
         <div class="table-responsive">
@@ -399,13 +405,13 @@ class TeamAdminApp {
                     </div>
                   </td>
                   <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">
-                    🍼 +${q.rewardBooba.toLocaleString()}
+                    +${q.rewardBooba.toLocaleString()} BOOBA
                   </td>
                   <td><span class="admin-badge badge-blue">${q.type}</span></td>
                   <td style="font-size: 0.825rem; color: var(--text-secondary);">${q.deadline}</td>
                   <td>
                     <button class="btn-admin btn-admin-danger btn-sm delete-quest-btn" data-questid="${q.id}" title="Delete Quest">
-                      🗑️ Delete
+                      Delete
                     </button>
                   </td>
                 </tr>
@@ -451,7 +457,7 @@ class TeamAdminApp {
       });
 
       if (res.success) {
-        this.showToast(`🎉 Quest "${title}" successfully published to the live website!`);
+        this.showToast(`Quest "${title}" successfully published to the live website!`);
         document.getElementById('createQuestForm')?.reset();
         this.render();
       }
@@ -481,7 +487,7 @@ class TeamAdminApp {
         <!-- Single User Token Grant -->
         <div class="admin-card">
           <div class="admin-card-header">
-            <h3 class="admin-card-title">👤 Individual User Token Distribution</h3>
+            <h3 class="admin-card-title">Individual User Token Distribution</h3>
             <span class="admin-badge badge-gold">Direct Credit</span>
           </div>
 
@@ -491,13 +497,13 @@ class TeamAdminApp {
               <select id="airdropUserSelect" class="form-control" required>
                 <option value="">-- Choose User / Passport --</option>
                 ${state.users.map(u => `
-                  <option value="${u.id}">@${u.username} (${u.passportId}) — Current: ${u.boobaPoints.toLocaleString()} BOOBA</option>
+                  <option value="${u.id}">@${u.username} (${u.passportId}) — Balance: ${u.boobaPoints.toLocaleString()} BOOBA</option>
                 `).join('')}
               </select>
             </div>
 
             <div class="form-group">
-              <label class="form-label">Token Amount to Credit (🍼 BOOBA) *</label>
+              <label class="form-label">Token Amount to Credit (BOOBA) *</label>
               <input type="number" id="singleAmountInput" class="form-control" placeholder="1000" min="1" step="10" required>
             </div>
 
@@ -507,7 +513,7 @@ class TeamAdminApp {
             </div>
 
             <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; margin-top: 1rem;">
-              🍼 Credit Tokens to User Passport
+              Credit Tokens to User Passport
             </button>
           </form>
         </div>
@@ -515,7 +521,7 @@ class TeamAdminApp {
         <!-- Mass / Batch Airdrop Engine -->
         <div class="admin-card">
           <div class="admin-card-header">
-            <h3 class="admin-card-title">🚀 Mass Community Airdrop</h3>
+            <h3 class="admin-card-title">Mass Community Airdrop</h3>
             <span class="admin-badge badge-purple">Batch Engine</span>
           </div>
 
@@ -523,10 +529,10 @@ class TeamAdminApp {
             <div class="form-group">
               <label class="form-label">Target Audience Criteria *</label>
               <select id="massTargetCriteria" class="form-control">
-                <option value="all">🌐 All Registered Passport Holders (${state.users.length} Users)</option>
-                <option value="lvl5">⚔️ Level 5+ Grinders & Warriors Only</option>
-                <option value="lvl7">👑 Level 7+ Booba Elites & Legends Only</option>
-                <option value="referrers">👥 Top Referrers (1+ Verified Referrals)</option>
+                <option value="all">All Registered Passport Holders (${state.users.length} Users)</option>
+                <option value="lvl5">Level 5+ Grinders & Warriors Only</option>
+                <option value="lvl7">Level 7+ Booba Elites & Legends Only</option>
+                <option value="referrers">Top Referrers (1+ Verified Referrals)</option>
               </select>
             </div>
 
@@ -541,7 +547,7 @@ class TeamAdminApp {
             </div>
 
             <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; margin-top: 1rem; background: linear-gradient(135deg, #F3BA2F 0%, #E0A800 100%);">
-              ⚡ Execute Mass Airdrop Payout
+              Execute Mass Airdrop Payout
             </button>
           </form>
         </div>
@@ -551,7 +557,7 @@ class TeamAdminApp {
       <!-- Airdrop Transaction & Audit Log -->
       <div class="admin-card" style="margin-top: 1.5rem;">
         <div class="admin-card-header">
-          <h3 class="admin-card-title">📜 Token Distribution Ledger (${this.distributionLogs.length} Records)</h3>
+          <h3 class="admin-card-title">Token Distribution Ledger (${this.distributionLogs.length} Records)</h3>
           <button class="btn-admin btn-admin-secondary btn-sm" id="clearAirdropLogsBtn">Clear Log History</button>
         </div>
 
@@ -575,9 +581,9 @@ class TeamAdminApp {
                   <td style="font-size: 0.8rem; color: var(--text-secondary); font-family: var(--font-mono);">${log.timestamp}</td>
                   <td><span class="admin-badge ${log.type === 'Mass Airdrop' ? 'badge-purple' : 'badge-gold'}">${log.type}</span></td>
                   <td style="font-weight: 700; color: var(--text-primary);">${log.recipient}</td>
-                  <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">🍼 +${log.amount.toLocaleString()}</td>
+                  <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">+${log.amount.toLocaleString()} BOOBA</td>
                   <td style="font-size: 0.85rem; color: var(--text-secondary);">${log.reason}</td>
-                  <td style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-emerald);">🛡️ ${log.admin}</td>
+                  <td style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-emerald);">${log.admin}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -613,7 +619,7 @@ class TeamAdminApp {
         });
         localStorage.setItem('booba_admin_airdrop_logs', JSON.stringify(this.distributionLogs));
 
-        this.showToast(`✅ Successfully credited ${amount.toLocaleString()} BOOBA to @${res.user.username}!`);
+        this.showToast(`Successfully credited ${amount.toLocaleString()} BOOBA to @${res.user.username}!`);
         document.getElementById('singleDistributeForm')?.reset();
         this.render();
       }
@@ -671,7 +677,7 @@ class TeamAdminApp {
       });
       localStorage.setItem('booba_admin_airdrop_logs', JSON.stringify(this.distributionLogs));
 
-      this.showToast(`🎉 Mass Airdrop Completed! ${totalTokens.toLocaleString()} BOOBA sent to ${targetUsers.length} users!`);
+      this.showToast(`Mass Airdrop Completed: ${totalTokens.toLocaleString()} BOOBA sent to ${targetUsers.length} users!`);
       document.getElementById('massAirdropForm')?.reset();
       this.render();
     });
@@ -693,7 +699,7 @@ class TeamAdminApp {
     return `
       <div class="admin-card">
         <div class="admin-card-header">
-          <h3 class="admin-card-title">📥 Community Proof Submissions Queue (${submissions.length})</h3>
+          <h3 class="admin-card-title">Community Proof Submissions Queue (${submissions.length})</h3>
         </div>
 
         <div class="table-responsive">
@@ -719,10 +725,10 @@ class TeamAdminApp {
                     <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">${sub.passportId}</div>
                   </td>
                   <td style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">${sub.questTitle}</td>
-                  <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">🍼 +${sub.rewardBooba}</td>
+                  <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">+${sub.rewardBooba} BOOBA</td>
                   <td>
                     <a href="${sub.proofUrl}" target="_blank" class="btn-admin btn-admin-secondary btn-sm" style="color: var(--accent-blue);">
-                      🔗 View Proof ↗
+                      View Proof ↗
                     </a>
                     <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; max-width: 260px;">${sub.proofDescription || ''}</div>
                   </td>
@@ -736,10 +742,10 @@ class TeamAdminApp {
                     ${sub.status === 'pending' ? `
                       <div style="display: flex; gap: 0.5rem;">
                         <button class="btn-admin btn-admin-success btn-sm approve-sub-btn" data-subid="${sub.id}">
-                          ✅ Approve (+${sub.rewardBooba})
+                          Approve (+${sub.rewardBooba})
                         </button>
                         <button class="btn-admin btn-admin-danger btn-sm reject-sub-btn" data-subid="${sub.id}">
-                          ❌ Reject
+                          Reject
                         </button>
                       </div>
                     ` : `
@@ -761,7 +767,7 @@ class TeamAdminApp {
         const subId = btn.getAttribute('data-subid');
         const res = db.reviewSubmission(subId, 'approved', 'Verified by Team Admin');
         if (res.success) {
-          this.showToast(`✅ Submission approved! Tokens credited to user's passport.`);
+          this.showToast(`Submission approved! Tokens credited to user's passport.`);
         }
       });
     });
@@ -785,7 +791,7 @@ class TeamAdminApp {
     return `
       <div class="admin-card">
         <div class="admin-card-header">
-          <h3 class="admin-card-title">👥 All Registered Passports (${state.users.length})</h3>
+          <h3 class="admin-card-title">All Registered Passports (${state.users.length})</h3>
           <div style="display: flex; gap: 0.75rem;">
             <input type="text" id="userSearchInput" class="form-control" placeholder="Search by username, ID, or wallet..." style="width: 260px; padding: 0.4rem 0.8rem; font-size: 0.85rem;">
           </div>
@@ -819,7 +825,7 @@ class TeamAdminApp {
                     <td><span class="admin-badge ${u.role === 'admin' ? 'badge-gold' : 'badge-blue'}">${u.role.toUpperCase()}</span></td>
                     <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary);">${u.walletAddress || 'Not Connected'}</td>
                     <td><span class="admin-badge badge-purple">${lvl.title} (Lvl ${lvl.level})</span></td>
-                    <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">🍼 ${u.boobaPoints.toLocaleString()}</td>
+                    <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">${u.boobaPoints.toLocaleString()} BOOBA</td>
                     <td>${u.completedQuestsCount || 0}</td>
                     <td>${u.verifiedReferralsCount || 0}</td>
                     <td>

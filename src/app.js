@@ -1106,18 +1106,21 @@ class BoobaApp {
             </div>
           </div>
 
-          <!-- Google Clean Badges Grid -->
-          <div class="google-card" style="margin-top: 2rem;">
-            <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Unlocked Badges & Insignias</h3>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">Earned milestones on your Booba journey.</p>
+          <!-- Unlocked Badges Section (Clean Google Standard) -->
+          <div style="margin-top: 3rem;">
+            <div style="margin-bottom: 1.25rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Unlocked Badges & Insignias</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary);">Earned milestones on your Booba journey.</p>
+            </div>
             
-            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            <div class="achievements-grid" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem;">
               ${(user.badges || ['Pioneer', 'Baby BNB OG']).map(b => `
-                <div style="padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-input); display: flex; align-items: center; justify-content: space-between;">
+                <div class="google-card" style="padding: 1.1rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
                   <div>
-                    <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-primary);">${b}</div>
-                    <div style="font-size: 0.72rem; color: var(--accent-emerald); margin-top: 0.15rem;">Verified ✓</div>
+                    <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);">${b}</div>
+                    <div style="font-size: 0.72rem; color: var(--accent-emerald); margin-top: 0.2rem;">Verified ✓</div>
                   </div>
+                  <span style="font-size: 1.25rem;">🎖️</span>
                 </div>
               `).join('')}
             </div>
@@ -1148,7 +1151,7 @@ class BoobaApp {
           </div>
 
           <!-- Category Filter Tabs -->
-          <div class="flex items-center gap-2" style="flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <div class="flex items-center gap-2" style="flex-wrap: wrap; margin-bottom: 1.75rem;">
             ${['all', 'daily', 'social', 'community', 'creative', 'special'].map(cat => `
               <button class="btn btn-sm ${this.activeQuestFilter === cat ? 'btn-primary' : 'btn-secondary'} quest-filter-btn" data-category="${cat}" style="font-size: 0.8rem; text-transform: capitalize;">
                 ${cat === 'all' ? 'All Bounties' : cat}
@@ -1156,8 +1159,8 @@ class BoobaApp {
             `).join('')}
           </div>
 
-          <!-- Quests Grid -->
-          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1.25rem;">
+          <!-- Quests Grid - Full Width Auto Distributing -->
+          <div class="quests-grid">
             ${filteredQuests.map(q => `
               <div class="google-card" style="display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
@@ -1166,13 +1169,13 @@ class BoobaApp {
                     <span class="text-mono" style="font-size: 0.85rem; font-weight: 700; color: var(--brand-yellow);">+${q.rewardBooba} BOOBA</span>
                   </div>
                   <h3 style="font-size: 1.05rem; font-weight: 600; margin-bottom: 0.4rem;">${q.title}</h3>
-                  <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; line-height: 1.4;">${q.description}</p>
+                  <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.85rem; line-height: 1.45;">${q.description}</p>
                   <div style="font-size: 0.75rem; color: var(--text-muted); background: var(--bg-input); padding: 0.5rem 0.75rem; border-radius: var(--radius-xs); border: 1px solid var(--border-subtle);">
                     <strong>Requirement:</strong> ${q.requirements}
                   </div>
                 </div>
 
-                <div style="margin-top: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+                <div style="margin-top: 1.25rem; display: flex; justify-content: space-between; align-items: center; padding-top: 0.75rem; border-top: 1px solid var(--border-subtle);">
                   <span style="font-size: 0.75rem; color: var(--text-muted);">Deadline: ${q.deadline}</span>
                   <button class="btn btn-secondary btn-sm quest-action-btn" data-id="${q.id}" data-type="${q.type}" data-title="${q.title}" data-reward="${q.rewardBooba}" style="font-size: 0.8rem;">
                     ${q.actionText}
@@ -1197,7 +1200,7 @@ class BoobaApp {
             <p style="font-size: 0.9rem; color: var(--text-secondary);">Your token balance, allocation tier multipliers, and level unlocks.</p>
           </div>
 
-          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem;">
+          <div class="metric-cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
             <div class="google-card">
               <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">BOOBA Balance</div>
               <div class="text-mono" style="font-size: 1.85rem; font-weight: 700; color: var(--brand-yellow); margin-top: 0.25rem;">
@@ -1223,14 +1226,17 @@ class BoobaApp {
             </div>
           </div>
 
-          <div class="google-card">
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.25rem;">Level Unlock Hierarchy</h3>
+          <div style="margin-top: 1rem;">
+            <div style="margin-bottom: 1.25rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Level Unlock Hierarchy</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary);">Progression perks, multiplier boosts, and governance access across all 10 ranks.</p>
+            </div>
             <div style="display: flex; flex-direction: column; gap: 0.6rem;">
               ${LEVEL_TIERS.map(tier => {
                 const isUnlocked = user.boobaPoints >= tier.min;
                 const isCurrent = userLevel.level === tier.level;
                 return `
-                  <div style="padding: 0.85rem 1.25rem; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between; border: 1px solid ${isCurrent ? 'var(--brand-yellow)' : isUnlocked ? 'var(--border-medium)' : 'var(--border-subtle)'}; background: ${isCurrent ? 'rgba(243, 186, 47, 0.08)' : 'var(--bg-input)'};">
+                  <div class="google-card" style="padding: 0.9rem 1.25rem; display: flex; align-items: center; justify-content: space-between; ${isCurrent ? 'border-color: var(--brand-yellow); background: rgba(243, 186, 47, 0.05);' : ''}">
                     <div class="flex items-center gap-3">
                       <span class="badge-tag" style="${isCurrent ? 'background: var(--brand-yellow); color: #000;' : ''}">
                         Lvl ${tier.level}
@@ -1272,8 +1278,8 @@ class BoobaApp {
             <p style="font-size: 0.9rem; color: var(--text-secondary);">Track invited community members, verification states, and rewards.</p>
           </div>
 
-          <div class="google-card" style="margin-bottom: 2rem;">
-            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Your Referral URL</div>
+          <div style="margin-bottom: 2rem;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em;">Your Referral URL</div>
             <div class="flex items-center gap-3" style="flex-wrap: wrap;">
               <input type="text" readonly value="${inviteUrl}" id="userReferralLinkInput" class="form-input" style="flex: 1; min-width: 260px; font-family: var(--font-mono); font-weight: 600; color: var(--brand-yellow);">
               <button id="copyRefLinkBtn" class="btn btn-primary btn-sm">
@@ -1285,7 +1291,7 @@ class BoobaApp {
             </div>
           </div>
 
-          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;">
+          <div class="metric-cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));">
             <div class="google-card" style="text-align: center;">
               <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Total Clicks</div>
               <div class="text-mono" style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-top: 0.25rem;">
@@ -1312,75 +1318,93 @@ class BoobaApp {
             </div>
           </div>
 
-          <div class="google-card">
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;">Invited Members</h3>
-            <table class="leaderboard-table">
-              <thead>
-                <tr style="color: var(--text-muted); font-size: 0.78rem; text-align: left;">
-                  <th style="padding: 0.5rem 1rem;">MEMBER</th>
-                  <th style="padding: 0.5rem 1rem;">JOINED</th>
-                  <th style="padding: 0.5rem 1rem;">STATUS</th>
-                  <th style="padding: 0.5rem 1rem; text-align: right;">REWARD</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${userReferrals.length > 0 ? userReferrals.map(ref => `
-                  <tr class="leaderboard-row">
-                    <td class="leaderboard-cell">
-                      <div style="font-weight: 600;">@${ref.referredUsername}</div>
-                      <div style="font-size: 0.72rem; color: var(--text-muted);">${ref.passportId}</div>
-                    </td>
-                    <td class="leaderboard-cell" style="font-size: 0.85rem; color: var(--text-secondary);">
-                      ${ref.joinedDate}
-                    </td>
-                    <td class="leaderboard-cell">
-                      <span class="badge-tag" style="${ref.status === 'verified' ? 'background: rgba(16, 185, 129, 0.15); color: #10B981;' : 'background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow);'}">
-                        ${ref.status === 'verified' ? 'Verified' : 'Pending'}
-                      </span>
-                    </td>
-                    <td class="leaderboard-cell text-mono" style="text-align: right; font-weight: 600; color: ${ref.status === 'verified' ? 'var(--brand-yellow)' : 'var(--text-muted)'};">
-                      +${ref.status === 'verified' ? 300 : 0} BOOBA
-                    </td>
+          <div>
+            <div style="margin-bottom: 1rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Invited Members</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary);">Direct record of community members registered with your code.</p>
+            </div>
+            <div class="table-container">
+              <table class="leaderboard-table">
+                <thead>
+                  <tr style="color: var(--text-muted); font-size: 0.78rem; text-align: left; background: var(--bg-surface-elevated);">
+                    <th style="padding: 0.75rem 1rem;">MEMBER</th>
+                    <th style="padding: 0.75rem 1rem;">JOINED</th>
+                    <th style="padding: 0.75rem 1rem;">STATUS</th>
+                    <th style="padding: 0.75rem 1rem; text-align: right;">REWARD</th>
                   </tr>
-                `).join('') : `
-                  <tr>
-                    <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                      No referrals yet. Share your invite link above to start earning +300 BOOBA per member.
-                    </td>
-                  </tr>
-                `}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  ${userReferrals.length > 0 ? userReferrals.map(ref => `
+                    <tr class="leaderboard-row">
+                      <td class="leaderboard-cell">
+                        <div style="font-weight: 600;">@${ref.referredUsername}</div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted);">${ref.passportId}</div>
+                      </td>
+                      <td class="leaderboard-cell" style="font-size: 0.85rem; color: var(--text-secondary);">
+                        ${ref.joinedDate}
+                      </td>
+                      <td class="leaderboard-cell">
+                        <span class="badge-tag" style="${ref.status === 'verified' ? 'background: rgba(16, 185, 129, 0.15); color: #10B981;' : 'background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow);'}">
+                          ${ref.status === 'verified' ? 'Verified' : 'Pending'}
+                        </span>
+                      </td>
+                      <td class="leaderboard-cell text-mono" style="text-align: right; font-weight: 600; color: ${ref.status === 'verified' ? 'var(--brand-yellow)' : 'var(--text-muted)'};">
+                        +${ref.status === 'verified' ? 300 : 0} BOOBA
+                      </td>
+                    </tr>
+                  `).join('') : `
+                    <tr>
+                      <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        No referrals yet. Share your invite link above to start earning +300 BOOBA per member.
+                      </td>
+                    </tr>
+                  `}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       `;
     }
 
     if (tab === 'achievements') {
+      const completedCount = state.achievements.filter(a => a.completed).length;
+      const totalCount = state.achievements.length;
+      const completionPercent = Math.round((completedCount / totalCount) * 100);
+
       return `
         <div>
           <div class="google-info-banner">
-            <strong>Milestone Badges:</strong> Earn permanent ecosystem credentials by completing milestones.
+            <strong>Milestone Badges & Trophy Room:</strong> Permanent ecosystem credentials acknowledging your accomplishments in Baby BNB. (${completedCount}/${totalCount} Unlocked • ${completionPercent}%)
           </div>
 
-          <div style="margin-bottom: 2rem;">
-            <h1 style="font-size: 1.85rem; font-weight: 700; margin-bottom: 0.25rem;">Achievements</h1>
-            <p style="font-size: 0.9rem; color: var(--text-secondary);">Milestone trophies acknowledging your participation in Baby BNB.</p>
+          <div class="flex items-center justify-between" style="margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <h1 style="font-size: 1.85rem; font-weight: 700; margin-bottom: 0.25rem;">Achievements & Trophies</h1>
+              <p style="font-size: 0.9rem; color: var(--text-secondary);">Earn prestigious milestone badges and boost your soulbound passport trust rank.</p>
+            </div>
+            <div class="quest-reward-pill text-mono" style="font-size: 0.85rem;">
+              Unlocked: ${completedCount} / ${totalCount} (${completionPercent}%)
+            </div>
           </div>
 
-          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+          <!-- Achievements Grid - Fills Full Width Across Columns and Flows to Next Rows -->
+          <div class="achievements-grid">
             ${state.achievements.map(ach => `
-              <div class="google-card" style="border-color: ${ach.completed ? 'rgba(16, 185, 129, 0.4)' : 'var(--border-subtle)'};">
-                <div class="flex items-center justify-between" style="margin-bottom: 0.75rem;">
-                  <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">${ach.title}</span>
-                  <span class="text-mono" style="font-size: 0.8rem; color: var(--brand-yellow); font-weight: 700;">+${ach.rewardBooba} BOOBA</span>
+              <div class="google-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: ${ach.completed ? 'rgba(16, 185, 129, 0.4)' : 'var(--border-subtle)'}; background: ${ach.completed ? 'rgba(16, 185, 129, 0.03)' : 'var(--bg-surface)'};">
+                <div>
+                  <div class="flex items-center justify-between" style="margin-bottom: 0.75rem;">
+                    <div style="font-size: 1.75rem;">${ach.icon || '🏆'}</div>
+                    <span class="text-mono" style="font-size: 0.8rem; color: var(--brand-yellow); font-weight: 700;">+${ach.rewardBooba} BOOBA</span>
+                  </div>
+                  <h4 style="font-weight: 700; font-size: 1rem; color: var(--text-primary); margin-bottom: 0.35rem;">${ach.title}</h4>
+                  <p style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 1rem;">${ach.desc}</p>
                 </div>
-                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.4;">${ach.desc}</p>
-                <div class="flex items-center justify-between" style="font-size: 0.75rem;">
-                  <span style="color: ${ach.completed ? 'var(--accent-emerald)' : 'var(--text-muted)'}; font-weight: 600;">
-                    ${ach.completed ? 'Unlocked ✓' : ach.progress ? `Progress: ${ach.progress}` : 'In Progress'}
+                <div class="flex items-center justify-between" style="font-size: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-subtle);">
+                  <span style="color: ${ach.completed ? 'var(--accent-emerald)' : 'var(--text-muted)'}; font-weight: 600; display: flex; align-items: center; gap: 0.25rem;">
+                    ${ach.completed ? '✅ Unlocked' : ach.progress ? `⏳ Progress: ${ach.progress}` : '🔒 In Progress'}
                   </span>
-                  ${ach.completed ? '' : `<button class="btn btn-secondary btn-sm" disabled style="opacity: 0.5; font-size: 0.75rem;">Locked</button>`}
+                  ${ach.completed ? '<span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: #10B981; font-size: 0.65rem;">Claimed</span>' : `<span class="badge-tag" style="opacity: 0.6; font-size: 0.65rem;">Locked</span>`}
                 </div>
               </div>
             `).join('')}
@@ -1400,17 +1424,67 @@ class BoobaApp {
 
           <div style="margin-bottom: 2rem;">
             <h1 style="font-size: 1.85rem; font-weight: 700; margin-bottom: 0.25rem;">Global Leaderboard</h1>
-            <p style="font-size: 0.9rem; color: var(--text-secondary);">Top community contributors and ambassadors.</p>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Top community contributors and ambassadors in the Baby BNB universe.</p>
           </div>
 
-          <div class="google-card">
+          <!-- Top 3 Podium Showcase -->
+          <div class="podium-grid">
+            <!-- Rank 2 -->
+            ${sortedUsers[1] ? `
+              <div class="podium-card podium-rank-2">
+                <div class="podium-avatar-wrapper">
+                  <img src="${sortedUsers[1].avatar || 'assets/mascot.jpg'}" class="podium-avatar">
+                  <div class="podium-rank-badge" style="background: #C0C0C0; color: #000;">2</div>
+                </div>
+                <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">@${sortedUsers[1].username}</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">${sortedUsers[1].passportId}</div>
+                <div class="text-mono" style="font-size: 1.25rem; font-weight: 800; color: #C0C0C0; margin-top: 0.5rem;">
+                  ${sortedUsers[1].boobaPoints.toLocaleString()} BOOBA
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- Rank 1 -->
+            ${sortedUsers[0] ? `
+              <div class="podium-card podium-rank-1">
+                <div class="podium-crown">👑</div>
+                <div class="podium-avatar-wrapper">
+                  <img src="${sortedUsers[0].avatar || 'assets/mascot.jpg'}" class="podium-avatar">
+                  <div class="podium-rank-badge" style="background: var(--brand-yellow); color: #000;">1</div>
+                </div>
+                <div style="font-weight: 800; font-size: 1.2rem; color: var(--brand-yellow);">@${sortedUsers[0].username}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">${sortedUsers[0].passportId}</div>
+                <div class="text-mono text-gold" style="font-size: 1.5rem; font-weight: 800; margin-top: 0.5rem;">
+                  ${sortedUsers[0].boobaPoints.toLocaleString()} BOOBA
+                </div>
+                <span class="badge-tag" style="margin-top: 0.5rem; background: var(--brand-yellow); color: #000;">Reign Leader</span>
+              </div>
+            ` : ''}
+
+            <!-- Rank 3 -->
+            ${sortedUsers[2] ? `
+              <div class="podium-card podium-rank-3">
+                <div class="podium-avatar-wrapper">
+                  <img src="${sortedUsers[2].avatar || 'assets/mascot.jpg'}" class="podium-avatar">
+                  <div class="podium-rank-badge" style="background: #CD7F32; color: #000;">3</div>
+                </div>
+                <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">@${sortedUsers[2].username}</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">${sortedUsers[2].passportId}</div>
+                <div class="text-mono" style="font-size: 1.25rem; font-weight: 800; color: #CD7F32; margin-top: 0.5rem;">
+                  ${sortedUsers[2].boobaPoints.toLocaleString()} BOOBA
+                </div>
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="table-container">
             <table class="leaderboard-table">
               <thead>
-                <tr style="color: var(--text-muted); font-size: 0.78rem; text-align: left;">
-                  <th style="padding: 0.5rem 1rem; width: 60px;">RANK</th>
-                  <th style="padding: 0.5rem 1rem;">MEMBER & PASSPORT</th>
-                  <th style="padding: 0.5rem 1rem;">REPUTATION</th>
-                  <th style="padding: 0.5rem 1rem; text-align: right;">TOTAL BOOBA</th>
+                <tr style="color: var(--text-muted); font-size: 0.78rem; text-align: left; background: var(--bg-surface-elevated);">
+                  <th style="padding: 0.75rem 1rem; width: 60px;">RANK</th>
+                  <th style="padding: 0.75rem 1rem;">MEMBER & PASSPORT</th>
+                  <th style="padding: 0.75rem 1rem;">REPUTATION</th>
+                  <th style="padding: 0.75rem 1rem; text-align: right;">TOTAL BOOBA</th>
                 </tr>
               </thead>
               <tbody>
@@ -1466,10 +1540,13 @@ class BoobaApp {
             <p style="font-size: 0.9rem; color: var(--text-secondary);">Manage your profile details, connected Web3 wallet, and privacy preferences.</p>
           </div>
 
-          <div class="google-card" style="margin-bottom: 1.75rem;">
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.25rem;">Profile Information</h3>
+          <div style="margin-bottom: 2.5rem; max-width: 650px;">
+            <div style="padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 1.5rem;">
+              <h3 style="font-size: 1.2rem; font-weight: 700;">Profile Information</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">Public identification details associated with your Booba Passport.</p>
+            </div>
             
-            <form id="userProfileSettingsForm" style="display: flex; flex-direction: column; gap: 1.25rem; max-width: 600px;">
+            <form id="userProfileSettingsForm" style="display: flex; flex-direction: column; gap: 1.25rem;">
               <div class="form-group">
                 <label class="form-label" style="font-size: 0.8rem;">Passport ID</label>
                 <input type="text" readonly value="${user.passportId}" class="form-input text-mono" style="opacity: 0.7; background: var(--bg-input); font-weight: 700; color: var(--brand-yellow);">
@@ -1504,10 +1581,13 @@ class BoobaApp {
             </form>
           </div>
 
-          <div class="google-card">
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;">Privacy & Preferences</h3>
+          <div style="max-width: 650px;">
+            <div style="padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 1.5rem;">
+              <h3 style="font-size: 1.2rem; font-weight: 700;">Privacy & Preferences</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">Manage your visibility across public leaderboards and alert preferences.</p>
+            </div>
             
-            <div style="display: flex; flex-direction: column; gap: 1rem; max-width: 600px;">
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
               <div class="flex items-center justify-between" style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-subtle);">
                 <div>
                   <div style="font-weight: 600; font-size: 0.9rem;">Public Passport Record</div>
@@ -1552,7 +1632,7 @@ class BoobaApp {
         </div>
 
         <!-- 4 Google-Standard Metric Cards -->
-        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+        <div class="metric-cards-grid">
           
           <div class="google-card">
             <div class="flex items-center justify-between" style="margin-bottom: 0.75rem;">
@@ -1600,12 +1680,12 @@ class BoobaApp {
 
         </div>
 
-        <!-- Google-Style Level & Check-in Console Card -->
-        <div class="google-card" style="margin-bottom: 2rem;">
-          <div class="flex items-center justify-between" style="margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+        <!-- Tier Progression (Clean Google Standard) -->
+        <div style="margin-bottom: 2.5rem;">
+          <div class="flex items-center justify-between" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
             <div>
-              <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Tier Progression</div>
-              <h3 style="font-size: 1.2rem; font-weight: 700; margin-top: 0.2rem;">
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Tier Progression</div>
+              <h3 style="font-size: 1.35rem; font-weight: 700; margin-top: 0.2rem;">
                 Level ${userLevel.level} — <span style="color: var(--brand-yellow);">${userLevel.title}</span>
               </h3>
             </div>
@@ -1620,7 +1700,7 @@ class BoobaApp {
           </div>
 
           <!-- Progression Bar -->
-          <div style="height: 8px; background: var(--bg-input); border-radius: var(--radius-full); overflow: hidden; border: 1px solid var(--border-subtle); margin-bottom: 0.6rem;">
+          <div style="height: 8px; background: var(--bg-surface-elevated); border-radius: var(--radius-full); overflow: hidden; border: 1px solid var(--border-subtle); margin-bottom: 0.6rem;">
             <div style="width: ${userLevel.progressPercent}%; height: 100%; background: var(--brand-yellow); transition: width 0.4s ease;"></div>
           </div>
           <div class="flex items-center justify-between" style="font-size: 0.78rem; color: var(--text-muted);">
@@ -1629,28 +1709,28 @@ class BoobaApp {
           </div>
         </div>
 
-        <!-- Recommended Bounties Section -->
-        <div class="google-card">
+        <!-- Recommended Bounties Section (Clean Google Standard) -->
+        <div>
           <div class="flex items-center justify-between" style="margin-bottom: 1.25rem;">
             <div>
-              <h3 style="font-size: 1.15rem; font-weight: 700;">Recommended Bounties</h3>
-              <p style="font-size: 0.85rem; color: var(--text-secondary);">Tasks available for submission.</p>
+              <h3 style="font-size: 1.25rem; font-weight: 700;">Recommended Bounties</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">Tasks available for submission.</p>
             </div>
             <a href="#dashboard/quests" class="btn btn-ghost btn-sm">View All Bounties →</a>
           </div>
 
-          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+          <div class="quests-grid">
             ${state.quests.slice(0, 3).map(q => `
-              <div style="padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-input); display: flex; flex-direction: column; justify-content: space-between;">
+              <div class="google-card" style="display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                   <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
                     <span class="badge-tag" style="font-size: 0.7rem;">${q.category}</span>
                     <span class="text-mono" style="font-size: 0.825rem; font-weight: 700; color: var(--brand-yellow);">+${q.rewardBooba} BOOBA</span>
                   </div>
-                  <h4 style="font-size: 0.95rem; margin-bottom: 0.35rem;">${q.title}</h4>
-                  <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">${q.description}</p>
+                  <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.35rem;">${q.title}</h4>
+                  <p style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.45;">${q.description}</p>
                 </div>
-                <div style="margin-top: 1rem; text-align: right;">
+                <div style="margin-top: 1.25rem; text-align: right;">
                   <button class="btn btn-secondary btn-sm quest-action-btn" data-id="${q.id}" data-type="${q.type}" data-title="${q.title}" data-reward="${q.rewardBooba}" style="font-size: 0.8rem;">
                     ${q.actionText}
                   </button>
@@ -1825,40 +1905,42 @@ class BoobaApp {
         </div>
 
         <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem;">
-          <div class="glass-panel" style="padding: 1.25rem; border-radius: var(--radius-md);">
-            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Total Citizens</div>
+          <div class="google-card">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Total Citizens</div>
             <div class="text-mono" style="font-size: 1.6rem; font-weight: 800; color: #FFFFFF; margin-top: 0.25rem;">
               ${totalUsers.toLocaleString()}
             </div>
           </div>
-          <div class="glass-panel" style="padding: 1.25rem; border-radius: var(--radius-md);">
-            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Total BOOBA Distributed</div>
+          <div class="google-card">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Total BOOBA Distributed</div>
             <div class="text-mono text-gold" style="font-size: 1.6rem; font-weight: 800; margin-top: 0.25rem;">
               ${totalBooba.toLocaleString()} 🍼
             </div>
           </div>
-          <div class="glass-panel" style="padding: 1.25rem; border-radius: var(--radius-md); border-color: rgba(243, 186, 47, 0.4);">
-            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Pending Submissions</div>
+          <div class="google-card" style="border-color: rgba(243, 186, 47, 0.4);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Pending Submissions</div>
             <div class="text-mono" style="font-size: 1.6rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.25rem;">
               ${pendingSubs.length}
             </div>
           </div>
-          <div class="glass-panel" style="padding: 1.25rem; border-radius: var(--radius-md);">
-            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Active Bounties</div>
+          <div class="google-card">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Active Bounties</div>
             <div class="text-mono" style="font-size: 1.6rem; font-weight: 800; color: var(--accent-emerald); margin-top: 0.25rem;">
               ${state.quests.length}
             </div>
           </div>
         </div>
 
-        <div class="glass-panel" style="padding: 2rem; border-radius: var(--radius-lg); margin-bottom: 2.5rem;">
-          <h3 style="margin-bottom: 0.5rem;">Quest Proof Review Queue (${pendingSubs.length})</h3>
-          <p style="font-size: 0.85rem; margin-bottom: 1.5rem;">Review creative submissions and community tasks. Approving automatically awards BOOBA points directly to the user's passport.</p>
+        <div style="margin-bottom: 3rem;">
+          <div style="margin-bottom: 1.25rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Quest Proof Review Queue (${pendingSubs.length})</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Review creative submissions and community tasks. Approving automatically awards BOOBA points directly to the user's passport.</p>
+          </div>
 
           ${pendingSubs.length > 0 ? `
             <div style="display: flex; flex-direction: column; gap: 1rem;">
               ${pendingSubs.map(sub => `
-                <div class="glass-panel" style="padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); background: var(--bg-surface-elevated);">
+                <div class="google-card" style="padding: 1.25rem; background: var(--bg-surface);">
                   <div class="flex items-center justify-between" style="flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem;">
                     <div>
                       <strong style="font-size: 1.05rem; color: var(--text-primary);">${sub.questTitle}</strong>
@@ -1869,7 +1951,7 @@ class BoobaApp {
                     </div>
                   </div>
 
-                  <div style="background: var(--bg-input); padding: 0.75rem 1rem; border-radius: var(--radius-xs); margin-bottom: 1rem; font-size: 0.85rem;">
+                  <div style="background: var(--bg-input); padding: 0.75rem 1rem; border-radius: var(--radius-xs); margin-bottom: 1rem; font-size: 0.85rem; border: 1px solid var(--border-subtle);">
                     <div><strong>Proof Link / Content:</strong> <a href="${sub.proofUrl}" target="_blank" style="color: var(--brand-yellow); text-decoration: underline;">${sub.proofUrl}</a></div>
                     ${sub.proofDescription ? `<div style="color: var(--text-secondary); margin-top: 0.25rem;"><strong>Notes:</strong> ${sub.proofDescription}</div>` : ''}
                   </div>
@@ -1889,46 +1971,51 @@ class BoobaApp {
               `).join('')}
             </div>
           ` : `
-            <div style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+            <div style="text-align: center; padding: 2.5rem; color: var(--text-muted); border: 1px dashed var(--border-subtle); border-radius: var(--radius-sm);">
               ✅ All quest submissions have been reviewed!
             </div>
           `}
         </div>
 
-        <div class="glass-panel" style="padding: 2rem; border-radius: var(--radius-lg);">
-          <h3 style="margin-bottom: 1.25rem;">User Passports & Balances</h3>
-          <table class="leaderboard-table">
-            <thead>
-              <tr style="color: var(--text-muted); font-size: 0.8rem; text-align: left;">
-                <th style="padding: 0.5rem 1rem;">CITIZEN</th>
-                <th style="padding: 0.5rem 1rem;">PASSPORT ID</th>
-                <th style="padding: 0.5rem 1rem;">BOOBA BALANCE</th>
-                <th style="padding: 0.5rem 1rem; text-align: right;">ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${state.users.map(u => `
-                <tr class="leaderboard-row">
-                  <td class="leaderboard-cell">
-                    <div class="flex items-center gap-2">
-                      <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
-                      <div>
-                        <strong>@${u.username}</strong>
-                        <span class="badge-tag" style="font-size: 0.6rem;">${u.role}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="leaderboard-cell text-mono text-gold">${u.passportId}</td>
-                  <td class="leaderboard-cell text-mono" style="font-weight: 700;">${u.boobaPoints.toLocaleString()} BOOBA</td>
-                  <td class="leaderboard-cell" style="text-align: right;">
-                    <button class="btn btn-secondary btn-sm admin-bonus-btn" data-id="${u.id}" data-user="${u.username}">
-                      + Award Bonus
-                    </button>
-                  </td>
+        <div>
+          <div style="margin-bottom: 1.25rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">User Passports & Balances</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Audit registered community members and manage bonus rewards.</p>
+          </div>
+          <div class="table-container">
+            <table class="leaderboard-table">
+              <thead>
+                <tr style="color: var(--text-muted); font-size: 0.8rem; text-align: left; background: var(--bg-surface-elevated);">
+                  <th style="padding: 0.75rem 1rem;">CITIZEN</th>
+                  <th style="padding: 0.75rem 1rem;">PASSPORT ID</th>
+                  <th style="padding: 0.75rem 1rem;">BOOBA BALANCE</th>
+                  <th style="padding: 0.75rem 1rem; text-align: right;">ACTIONS</th>
                 </tr>
-              `).join('')}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                ${state.users.map(u => `
+                  <tr class="leaderboard-row">
+                    <td class="leaderboard-cell">
+                      <div class="flex items-center gap-2">
+                        <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                        <div>
+                          <strong>@${u.username}</strong>
+                          <span class="badge-tag" style="font-size: 0.6rem;">${u.role}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="leaderboard-cell text-mono text-gold">${u.passportId}</td>
+                    <td class="leaderboard-cell text-mono" style="font-weight: 700;">${u.boobaPoints.toLocaleString()} BOOBA</td>
+                    <td class="leaderboard-cell" style="text-align: right;">
+                      <button class="btn btn-secondary btn-sm admin-bonus-btn" data-id="${u.id}" data-user="${u.username}">
+                        + Award Bonus
+                      </button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
         </div>
 
       </div>

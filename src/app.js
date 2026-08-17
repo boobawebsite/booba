@@ -207,11 +207,6 @@ class BoobaApp {
               <span>🍼</span>
               <span>${currentUser.boobaPoints.toLocaleString()} BOOBA</span>
             </div>
-            ${currentUser.role === 'admin' ? `
-              <a href="teamadmin.html" class="btn btn-outline btn-sm header-admin-btn" style="font-size: 0.8rem; padding: 0.35rem 0.65rem;" title="Open Team Admin Console">
-                🛡️ Admin
-              </a>
-            ` : ''}
             <button id="logoutBtn" class="btn btn-ghost btn-sm btn-icon-action" title="Sign Out" aria-label="Sign Out" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; min-width: 32px; padding: 0; border-radius: var(--radius-full); flex-shrink: 0;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>

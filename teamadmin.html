@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booba Team Admin Console — Quest Creator & Token Airdrop Hub</title>
+  <meta name="description" content="Core team administrator console for the Booba (baby BNB) ecosystem to publish quests, manage user submissions, and distribute BOOBA tokens.">
+  <link rel="icon" type="image/jpeg" href="assets/mascot.jpg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <!-- Team Admin Stylesheet -->
+  <link rel="stylesheet" href="teamadmin.css">
+</head>
+<body>
+
+  <div class="admin-shell">
+    
+    <!-- ADMIN SIDEBAR NAVIGATION -->
+    <aside class="admin-sidebar" aria-label="Team Admin Navigation">
+      <div class="admin-sidebar-header">
+        <img src="assets/mascot.jpg" alt="Booba Mascot" class="admin-logo-img">
+        <div>
+          <div style="font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; color: #FFFFFF;">BOOBA ADMIN</div>
+          <div style="font-size: 0.72rem; color: var(--brand-yellow); font-weight: 700;">baby BNB Core Studio</div>
+        </div>
+      </div>
+
+      <nav class="admin-nav">
+        <a href="#overview" class="admin-nav-item active" data-tab="overview">
+          <span>📊</span>
+          <span>Dashboard Overview</span>
+        </a>
+        <a href="#quests" class="admin-nav-item" data-tab="quests">
+          <span>➕</span>
+          <span>Upload & Manage Quests</span>
+        </a>
+        <a href="#airdrop" class="admin-nav-item" data-tab="airdrop">
+          <span>🚀</span>
+          <span>Token & Airdrop Hub</span>
+        </a>
+        <a href="#submissions" class="admin-nav-item" data-tab="submissions">
+          <span>📥</span>
+          <span>Proof Submissions</span>
+          <span class="admin-nav-badge" id="pendingSubmissionsBadge" style="display: none;">0</span>
+        </a>
+        <a href="#users" class="admin-nav-item" data-tab="users">
+          <span>👥</span>
+          <span>Passports & Users</span>
+        </a>
+      </nav>
+
+      <div class="admin-sidebar-footer">
+        <div style="display: flex; align-items: center; gap: 0.65rem; padding: 0.65rem; background: var(--admin-bg-elevated); border-radius: var(--radius-sm); border: 1px solid var(--admin-border-subtle);">
+          <img src="assets/mascot.jpg" style="width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--brand-yellow);">
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: #FFFFFF;">@BoobaBoss</div>
+            <div style="font-size: 0.7rem; color: var(--accent-emerald);">🛡️ Master Admin</div>
+          </div>
+        </div>
+        <a href="index.html#home" class="btn-admin btn-admin-secondary btn-sm" style="width: 100%;">
+          🌐 Open Main Website
+        </a>
+      </div>
+    </aside>
+
+    <!-- ADMIN MAIN WORKSPACE -->
+    <div class="admin-main">
+      
+      <!-- Topbar Header -->
+      <header class="admin-topbar">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <button class="mobile-admin-toggle" id="mobileAdminToggle" aria-label="Toggle Sidebar Menu">
+            ☰
+          </button>
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span class="admin-badge badge-green" style="font-size: 0.72rem;">● BNB Chain Mainnet</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">|</span>
+            <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Booba Core Team Console</span>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <a href="index.html#dashboard/overview" class="btn-admin btn-admin-secondary btn-sm" target="_blank">
+            User Dashboard View ↗
+          </a>
+          <a href="index.html#dashboard/quests" class="btn-admin btn-admin-primary btn-sm" target="_blank">
+            View Live Quests ↗
+          </a>
+        </div>
+      </header>
+
+      <!-- Dynamic Content Injection Container -->
+      <main class="admin-content-body" id="adminContentBody">
+        <!-- Rendered by teamadmin.js -->
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- Toast Container -->
+  <div class="admin-toast-container" id="adminToastContainer"></div>
+
+  <!-- Team Admin Script Module -->
+  <script type="module" src="teamadmin.js"></script>
+</body>
+</html>

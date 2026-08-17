@@ -161,23 +161,23 @@ class BoobaApp {
     if (currentUser) {
       const userLevel = calculateLevel(currentUser.boobaPoints);
       navRight.innerHTML = `
-        <div class="flex items-center gap-3">
-          <a href="#dashboard/overview" class="btn btn-secondary btn-sm flex items-center gap-2" style="border-radius: var(--radius-full); padding: 0.35rem 0.85rem;">
-            <img src="${currentUser.avatar || 'assets/mascot.jpg'}" style="width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--brand-yellow);">
-            <span style="font-weight: 700; color: var(--text-primary);">@${currentUser.username}</span>
-            <span class="badge-tag" style="padding: 0.1rem 0.4rem; font-size: 0.65rem;">Lvl ${userLevel.level}</span>
+        <div class="flex items-center gap-2 nav-actions-user">
+          <a href="#dashboard/overview" class="btn btn-secondary btn-sm flex items-center gap-2 header-user-pill" style="border-radius: var(--radius-full); padding: 0.35rem 0.75rem;">
+            <img src="${currentUser.avatar || 'assets/mascot.jpg'}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--brand-yellow); flex-shrink: 0;">
+            <span class="header-username" style="font-weight: 700; color: var(--text-primary);">@${currentUser.username}</span>
+            <span class="badge-tag header-lvl-tag" style="padding: 0.1rem 0.35rem; font-size: 0.65rem;">Lvl ${userLevel.level}</span>
           </a>
-          <div class="quest-reward-pill" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
+          <div class="quest-reward-pill header-points-pill" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
             <span>🍼</span>
             <span>${currentUser.boobaPoints.toLocaleString()} BOOBA</span>
           </div>
           ${currentUser.role === 'admin' ? `
-            <a href="#admin" class="btn btn-outline btn-sm" style="font-size: 0.8rem;">
+            <a href="#admin" class="btn btn-outline btn-sm header-admin-btn" style="font-size: 0.8rem; padding: 0.35rem 0.65rem;">
               🛡️ Admin
             </a>
           ` : ''}
-          <button id="logoutBtn" class="btn btn-ghost btn-sm btn-icon-action" title="Sign Out" aria-label="Sign Out" style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border-radius: var(--radius-full);">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <button id="logoutBtn" class="btn btn-ghost btn-sm btn-icon-action" title="Sign Out" aria-label="Sign Out" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; min-width: 32px; padding: 0; border-radius: var(--radius-full); flex-shrink: 0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
               <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -193,7 +193,7 @@ class BoobaApp {
       });
     } else {
       navRight.innerHTML = `
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
           <a href="#login" class="btn btn-ghost btn-sm">Sign In</a>
           <a href="#signup" class="btn btn-primary btn-sm">Create Passport</a>
         </div>
@@ -790,51 +790,47 @@ class BoobaApp {
           </div>
 
           <!-- RANKS 4-5 LIST CARD -->
-          <div class="glass-panel" style="padding: 1.75rem; border-radius: var(--radius-lg); max-width: 960px; margin: 0 auto;">
-            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 1rem; letter-spacing: 0.05em;">
+          <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg); max-width: 960px; margin: 0 auto; box-sizing: border-box; width: 100%; overflow: hidden;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 1.25rem; letter-spacing: 0.05em;">
               Runner-Up Champions
             </div>
 
-            <table class="leaderboard-table">
-              <tbody>
-                ${topLeaderboard.slice(3).map((u, index) => {
-                  const level = calculateLevel(u.boobaPoints);
-                  return `
-                    <tr class="leaderboard-row">
-                      <td class="leaderboard-cell" style="width: 50px; text-align: center;">
-                        <span class="rank-badge" style="background: var(--bg-input); color: var(--text-secondary); border: 1px solid var(--border-subtle);">${index + 4}</span>
-                      </td>
-                      <td class="leaderboard-cell">
-                        <div class="flex items-center gap-3">
-                          <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border-medium);">
-                          <div>
-                            <div style="font-weight: 700; color: var(--text-primary); font-size: 1rem;">@${u.username}</div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted);">${u.passportId} • <span style="color: var(--brand-yellow);">${level.title}</span></div>
-                          </div>
+            <div class="runner-ups-list">
+              ${topLeaderboard.slice(3).map((u, index) => {
+                const level = calculateLevel(u.boobaPoints);
+                return `
+                  <div class="runner-up-item">
+                    <div class="flex items-center gap-3" style="min-width: 0;">
+                      <span class="rank-badge rank-sub">${index + 4}</span>
+                      <img src="${u.avatar || 'assets/mascot.jpg'}" class="runner-up-avatar" alt="${u.username}">
+                      <div style="min-width: 0; overflow: hidden;">
+                        <div style="font-weight: 700; color: var(--text-primary); font-size: 0.95rem; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                          @${u.username}
                         </div>
-                      </td>
-                      <td class="leaderboard-cell">
-                        <span class="badge-tag" style="background: rgba(16, 185, 129, 0.12); color: #10B981;">
-                          ⭐ ${u.reputation || 90}/100
-                        </span>
-                      </td>
-                      <td class="leaderboard-cell" style="text-align: right;">
-                        <div class="text-mono" style="font-weight: 800; color: var(--brand-yellow); font-size: 1.15rem;">
-                          ${u.boobaPoints.toLocaleString()} 🍼
+                        <div style="font-size: 0.72rem; color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                          ${u.passportId} • <span style="color: var(--brand-yellow);">${level.title}</span>
                         </div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">${u.completedQuestsCount || 0} quests • ${u.verifiedReferralsCount || 0} referrals</div>
-                      </td>
-                    </tr>
-                  `;
-                }).join('')}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
 
-            <div class="flex items-center justify-between" style="flex-wrap: wrap; gap: 1rem; margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle);">
+                    <div style="text-align: right; flex-shrink: 0; margin-left: 0.75rem;">
+                      <div class="text-mono" style="font-weight: 800; color: var(--brand-yellow); font-size: 1.05rem;">
+                        ${u.boobaPoints.toLocaleString()} 🍼
+                      </div>
+                      <div style="font-size: 0.72rem; color: var(--accent-emerald);">
+                        ⭐ ${u.reputation || 90}/100 Trust
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <div class="flex items-center justify-between" style="flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle);">
               <div style="font-size: 0.85rem; color: var(--text-secondary);">
                 Want to climb the ranks? Mint your passport and start completing community quests.
               </div>
-              <a href="#dashboard/leaderboard" class="btn btn-primary btn-sm">
+              <a href="#dashboard/leaderboard" class="btn btn-primary btn-sm" style="width: auto;">
                 View Full Top 100 Leaderboard →
               </a>
             </div>

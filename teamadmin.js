@@ -476,7 +476,7 @@ class TeamAdminApp {
      -------------------------------------------------------------------------- */
   getAirdropHTML(state) {
     return `
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+      <div class="airdrop-hub-grid">
         
         <!-- Single User Token Grant -->
         <div class="admin-card">

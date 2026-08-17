@@ -92,6 +92,21 @@
   width: 100%;
 }
 
+.btn-icon-action {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.btn-icon-action:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #EF4444;
+  transform: scale(1.05);
+}
+
 /* --------------------------------------------------------------------------
    Google-Standard Developer & Cloud Console Dashboard Layout
    ========================================================================== */

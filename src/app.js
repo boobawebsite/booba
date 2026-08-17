@@ -208,7 +208,7 @@ class BoobaApp {
               <span>${currentUser.boobaPoints.toLocaleString()} BOOBA</span>
             </div>
             ${currentUser.role === 'admin' ? `
-              <a href="#admin" class="btn btn-outline btn-sm header-admin-btn" style="font-size: 0.8rem; padding: 0.35rem 0.65rem;">
+              <a href="teamadmin.html" class="btn btn-outline btn-sm header-admin-btn" style="font-size: 0.8rem; padding: 0.35rem 0.65rem;" title="Open Team Admin Console">
                 🛡️ Admin
               </a>
             ` : ''}
@@ -440,20 +440,39 @@ class BoobaApp {
     document.getElementById('xAuthForm')?.addEventListener('submit', (e) => {
       e.preventDefault();
       const isSignUp = this.authMode === 'signup';
-      const email = document.getElementById('xEmailInput')?.value || '';
-      const password = document.getElementById('xPasswordInput')?.value || '';
-      const username = document.getElementById('xUsernameInput')?.value || '';
-      const refCode = document.getElementById('xReferralInput')?.value || '';
+      const email = (document.getElementById('xEmailInput')?.value || '').trim();
+      const password = (document.getElementById('xPasswordInput')?.value || '').trim();
+      const username = (document.getElementById('xUsernameInput')?.value || '').trim();
+      const refCode = (document.getElementById('xReferralInput')?.value || '').trim();
+
+      const cleanEmail = email.toLowerCase();
+      const cleanUsername = username.toLowerCase();
+      const isAdminCredentials = (cleanEmail === 'admin@gmail.com' || cleanEmail === 'admin@booba.crypto' || cleanUsername === 'admin' || cleanUsername === 'boobaboss') && (password === 'booba' || isSignUp);
+
+      // Core Team Admin Login / Signup
+      if (isAdminCredentials) {
+        db.switchDemoUser('admin');
+        this.showToast('🛡️ Welcome Core Admin! Opening Team Admin Console...');
+        setTimeout(() => {
+          window.location.href = 'teamadmin.html';
+        }, 400);
+        return;
+      }
 
       if (isSignUp) {
         if (!username || !email) {
           this.showToast('Please enter both username and email.', 'error');
           return;
         }
-        const res = db.register({ username, email, referralCodeInput: refCode });
+        const res = db.register({ username, email, password, referralCodeInput: refCode });
         if (res.success) {
-          this.showToast(`🎉 Passport Minted! ID: ${res.user.passportId}. Welcome bonus +100 BOOBA credited!`);
-          window.location.hash = 'dashboard/passport';
+          if (res.isAdmin || res.user.role === 'admin') {
+            this.showToast('🛡️ Admin Passport Minted! Redirecting to Admin Console...');
+            setTimeout(() => { window.location.href = 'teamadmin.html'; }, 400);
+          } else {
+            this.showToast(`🎉 Passport Minted! ID: ${res.user.passportId}. Welcome bonus +100 BOOBA credited!`);
+            window.location.hash = 'dashboard/passport';
+          }
         } else {
           this.showToast(res.message, 'error');
         }
@@ -464,8 +483,13 @@ class BoobaApp {
         }
         const res = db.login(email, password);
         if (res.success) {
-          this.showToast(`Welcome back, @${res.user.username}!`);
-          window.location.hash = 'dashboard/overview';
+          if (res.isAdmin || res.user.role === 'admin') {
+            this.showToast(`🛡️ Welcome back, Admin @${res.user.username}! Opening Admin Console...`);
+            setTimeout(() => { window.location.href = 'teamadmin.html'; }, 400);
+          } else {
+            this.showToast(`Welcome back, @${res.user.username}!`);
+            window.location.hash = 'dashboard/overview';
+          }
         } else {
           this.showToast(res.message, 'error');
         }
@@ -481,8 +505,10 @@ class BoobaApp {
 
     document.getElementById('xDemoAdminBtn')?.addEventListener('click', () => {
       db.switchDemoUser('admin');
-      this.showToast('Logged in as Admin: @BoobaBoss');
-      window.location.hash = 'admin';
+      this.showToast('🛡️ Logged in as Admin: @BoobaBoss. Opening Team Admin Console...');
+      setTimeout(() => {
+        window.location.href = 'teamadmin.html';
+      }, 400);
     });
   }
 

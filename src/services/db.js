@@ -72,7 +72,8 @@ const INITIAL_USERS = [
   {
     id: 'usr-002',
     username: 'BoobaBoss',
-    email: 'admin@booba.crypto',
+    email: 'admin@gmail.com',
+    password: 'booba',
     role: 'admin',
     passportId: 'BB-000001',
     memberSince: 'January 01, 2026',
@@ -433,14 +434,25 @@ class DatabaseService {
 
   // Authentication & Session
   login(identifier, password) {
+    const cleanId = (identifier || '').trim().toLowerCase();
+    
+    // Special admin override
+    if (cleanId === 'admin@gmail.com' || cleanId === 'admin@booba.crypto' || cleanId === 'boobaboss') {
+      const adminUser = this.users.find(u => u.role === 'admin') || this.users[1];
+      this.currentUser = adminUser;
+      saveStorage(STORAGE_KEYS.CURRENT_USER, this.currentUser);
+      this.notify();
+      return { success: true, user: adminUser, isAdmin: true };
+    }
+
     const user = this.users.find(u => 
-      (u.username.toLowerCase() === identifier.toLowerCase() || u.email.toLowerCase() === identifier.toLowerCase())
+      (u.username.toLowerCase() === cleanId || u.email.toLowerCase() === cleanId)
     );
     if (user) {
       this.currentUser = user;
       saveStorage(STORAGE_KEYS.CURRENT_USER, this.currentUser);
       this.notify();
-      return { success: true, user };
+      return { success: true, user, isAdmin: user.role === 'admin' };
     }
     return { success: false, message: 'User not found. Please check your credentials or create an account.' };
   }
@@ -474,9 +486,46 @@ class DatabaseService {
     return this.currentUser;
   }
 
-  register({ username, email, walletAddress = '', referralCodeInput = '' }) {
+  register({ username, email, password = '', walletAddress = '', referralCodeInput = '' }) {
+    const cleanEmail = (email || '').trim().toLowerCase();
+    const cleanUsername = (username || '').replace(/^@/, '').trim();
+
+    // Check if registering with admin@gmail.com
+    const isAdmin = cleanEmail === 'admin@gmail.com' || cleanUsername.toLowerCase() === 'boobaboss' || (cleanUsername.toLowerCase() === 'admin' && password === 'booba');
+
+    if (isAdmin) {
+      let adminUser = this.users.find(u => u.role === 'admin');
+      if (!adminUser) {
+        adminUser = {
+          id: 'usr-admin-001',
+          username: cleanUsername || 'BoobaBoss',
+          email: 'admin@gmail.com',
+          password: 'booba',
+          role: 'admin',
+          passportId: 'BB-000001',
+          memberSince: 'January 01, 2026',
+          boobaPoints: 265000,
+          reputation: 99,
+          walletAddress: '0x88A...33f1',
+          avatar: 'assets/mascot.jpg',
+          completedQuestsCount: 150,
+          verifiedReferralsCount: 180,
+          referralCode: 'BOOBABOSS',
+          referredBy: null,
+          lastCheckIn: null,
+          streakDays: 45,
+          badges: ['Project Founder', 'Baby BNB Architect', 'Grandmaster', 'Top Influencer']
+        };
+        this.users.unshift(adminUser);
+      }
+      this.currentUser = adminUser;
+      saveStorage(STORAGE_KEYS.USERS, this.users);
+      saveStorage(STORAGE_KEYS.CURRENT_USER, this.currentUser);
+      this.notify();
+      return { success: true, user: adminUser, isAdmin: true };
+    }
+
     // Check if exists
-    const cleanUsername = username.replace(/^@/, '').trim();
     if (this.users.some(u => u.username.toLowerCase() === cleanUsername.toLowerCase())) {
       return { success: false, message: 'Username already taken. Please choose another.' };
     }
@@ -489,7 +538,8 @@ class DatabaseService {
     const newUser = {
       id: 'usr-' + Date.now(),
       username: cleanUsername,
-      email: email.trim(),
+      email: cleanEmail,
+      password: password || 'booba',
       role: 'member',
       passportId,
       memberSince: today,

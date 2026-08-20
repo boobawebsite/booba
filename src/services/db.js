@@ -1,12 +1,23 @@
 /* ==========================================================================
-   BOOBA (BNB baby) — Live Supabase Database & State Service
-   Single Source of Truth: Real Accounts, Live Quests, Real Leaderboards
+   BOOBA (BNB baby) — Live Supabase Database & Secure State Service
+   Single Source of Truth: Real Accounts, Secure Hashed Passwords, Live Quests
    ========================================================================== */
 
 import { supabase, isUserAdmin, ADMIN_EMAILS } from './supabaseClient.js';
 
 // Local storage session key
 const SESSION_KEY = 'booba_active_session_user';
+
+// Secure Password Hashing with SHA-256 and Salt
+export async function hashPassword(password) {
+  if (!password) return '';
+  const salt = 'booba_secure_salt_2026_';
+  const encoder = new TextEncoder();
+  const data = encoder.encode(salt + password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 // Level definitions
 export const LEVEL_TIERS = [
@@ -55,7 +66,6 @@ class DatabaseService {
     this.listeners = [];
     this.isInitialized = false;
 
-    // Load local session if available
     this.loadLocalSession();
   }
 
@@ -64,7 +74,6 @@ class DatabaseService {
       const saved = localStorage.getItem(SESSION_KEY);
       if (saved) {
         this.currentUser = JSON.parse(saved);
-        // Refresh admin role based on whitelist
         if (this.currentUser && isUserAdmin(this.currentUser.email)) {
           this.currentUser.role = 'admin';
         }
@@ -87,7 +96,6 @@ class DatabaseService {
   subscribe(listener) {
     if (typeof listener === 'function') {
       this.listeners.push(listener);
-      // Immediately notify with current state
       listener(this.getState());
     }
     return () => {
@@ -130,7 +138,6 @@ class DatabaseService {
       this.fetchAirdropLogs()
     ]);
 
-    // If logged in, refresh current user record from database
     if (this.currentUser && this.currentUser.id) {
       const fresh = this.users.find(u => u.id === this.currentUser.id || u.email === this.currentUser.email);
       if (fresh) {
@@ -158,7 +165,7 @@ class DatabaseService {
   }
 
   // --------------------------------------------------------------------------
-  // USER AUTHENTICATION & MANAGEMENT
+  // USER AUTHENTICATION WITH SECURE PASSWORD HASHING
   // --------------------------------------------------------------------------
 
   async fetchUsers() {
@@ -199,6 +206,12 @@ class DatabaseService {
 
     const cleanUsername = username.trim();
     const cleanEmail = email.trim().toLowerCase();
+
+    if (!password || password.length < 6) {
+      return { success: false, message: 'Password must be at least 6 characters long.' };
+    }
+
+    const hashed = await hashPassword(password);
     const isAdmin = isUserAdmin(cleanEmail);
     const passportId = 'BB-' + Math.floor(100000 + Math.random() * 900000);
     const userRefCode = cleanUsername.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10) || ('BB' + Math.floor(1000 + Math.random() * 9000));
@@ -206,6 +219,7 @@ class DatabaseService {
     const newUserPayload = {
       username: cleanUsername,
       email: cleanEmail,
+      password_hash: hashed,
       role: isAdmin ? 'admin' : 'member',
       passport_id: passportId,
       booba_points: 100, // Welcome bonus
@@ -228,7 +242,7 @@ class DatabaseService {
 
       if (error) {
         if (error.code === '23505') {
-          return { success: false, message: 'Username or Email is already registered. Please sign in.' };
+          return { success: false, message: 'Username or Email is already registered. Please sign in with your password.' };
         }
         return { success: false, message: error.message };
       }
@@ -251,7 +265,6 @@ class DatabaseService {
         streakDays: 1
       };
 
-      // If referred, log referral
       if (referralCode) {
         await this.recordReferral(referralCode.trim().toUpperCase(), formattedUser.username, formattedUser.passportId);
       }
@@ -270,8 +283,11 @@ class DatabaseService {
     if (!supabase) return { success: false, message: 'Supabase client not connected' };
 
     const query = emailOrUsername.trim();
+    if (!password) {
+      return { success: false, message: 'Please enter your secret password.' };
+    }
+
     try {
-      // Find by email or username
       const { data, error } = await supabase
         .from('booba_users')
         .select('*')
@@ -284,6 +300,19 @@ class DatabaseService {
       }
 
       const raw = data[0];
+
+      // If user has a password_hash, verify it
+      if (raw.password_hash) {
+        const hashedInput = await hashPassword(password);
+        if (hashedInput !== raw.password_hash) {
+          return { success: false, message: 'Incorrect password. Please try again.' };
+        }
+      } else {
+        // Upgrade legacy account on first password login
+        const hashedInput = await hashPassword(password);
+        await supabase.from('booba_users').update({ password_hash: hashedInput }).eq('id', raw.id);
+      }
+
       const isAdmin = isUserAdmin(raw.email);
 
       const user = {
@@ -485,7 +514,6 @@ class DatabaseService {
 
       if (subError) throw subError;
 
-      // If approved, update target user's points & completed quests
       if (action === 'approved' && sub.userId) {
         const { data: userData } = await supabase
           .from('booba_users')
@@ -590,7 +618,6 @@ class DatabaseService {
   async recordReferral(referrerCode, newUsername, newPassportId) {
     if (!supabase) return;
     try {
-      // Find referrer username
       const referrer = this.users.find(u => u.referralCode?.toUpperCase() === referrerCode.toUpperCase());
       const referrerUsername = referrer ? referrer.username : referrerCode;
 
@@ -602,7 +629,6 @@ class DatabaseService {
         reward_claimed: 300
       }]);
 
-      // Award bonus points to referrer
       if (referrer && referrer.id) {
         await supabase
           .from('booba_users')
@@ -677,7 +703,6 @@ class DatabaseService {
     }
 
     try {
-      // Update each user in Supabase
       for (const u of recipients) {
         await supabase
           .from('booba_users')
@@ -687,7 +712,6 @@ class DatabaseService {
 
       const totalDist = amount * recipients.length;
 
-      // Log airdrop
       await supabase.from('booba_airdrop_logs').insert([{
         admin_username: this.currentUser?.username || 'Booba Admin',
         amount_per_user: amount,
@@ -732,5 +756,4 @@ class DatabaseService {
 }
 
 export const db = new DatabaseService();
-// Auto-initialize connection
 db.init();

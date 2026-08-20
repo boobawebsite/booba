@@ -282,6 +282,8 @@ class BoobaApp {
     }
 
     try {
+      const password = document.getElementById('authPasswordInput')?.value;
+
       if (this.authMode === 'signup') {
         const username = document.getElementById('authUsernameInput')?.value.trim();
         const email = document.getElementById('authEmailInput')?.value.trim();
@@ -292,7 +294,12 @@ class BoobaApp {
           return;
         }
 
-        const res = await db.signup({ username, email, referralCode });
+        if (!password || password.length < 6) {
+          alert('Please choose a password with at least 6 characters.');
+          return;
+        }
+
+        const res = await db.signup({ username, email, password, referralCode });
         if (res.success) {
           this.closeModal();
           alert(`🎉 Welcome to BOOBA, ${res.user.username}! Your digital passport (${res.user.passportId}) has been minted with +100 BOOBA!`);
@@ -306,7 +313,12 @@ class BoobaApp {
           return;
         }
 
-        const res = await db.login({ emailOrUsername });
+        if (!password) {
+          alert('Please enter your password to sign in.');
+          return;
+        }
+
+        const res = await db.login({ emailOrUsername, password });
         if (res.success) {
           this.closeModal();
           alert(`👋 Welcome back, ${res.user.username}!`);

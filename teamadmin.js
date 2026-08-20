@@ -152,6 +152,13 @@ class TeamAdminApp {
             </label>
             <input type="email" id="adminEmailInput" placeholder="admin@gmail.com" class="form-input" style="width: 100%;" required>
           </div>
+
+          <div style="margin-bottom: 1.25rem;">
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">
+              Your Account Password
+            </label>
+            <input type="password" id="adminPasswordInput" placeholder="••••••••" class="form-input" style="width: 100%;" required>
+          </div>
           
           <button type="submit" class="btn btn-primary btn-block" style="margin-top: 0.5rem;">
             Authenticate Admin Access ↗
@@ -172,29 +179,21 @@ class TeamAdminApp {
   async handleAdminLogin(e) {
     e.preventDefault();
     const email = document.getElementById('adminEmailInput')?.value.trim().toLowerCase();
-    if (!email) return;
+    const password = document.getElementById('adminPasswordInput')?.value;
+    if (!email || !password) return;
 
     if (!isUserAdmin(email)) {
-      alert(`❌ Access Denied: "${email}" is not listed in the ADMIN_EMAILS whitelist in code.`);
+      alert(`❌ Access Denied: "${email}" is not registered in the ADMIN_EMAILS whitelist.`);
       return;
     }
 
-    // Attempt to log in or create the admin session
-    let res = await db.login({ emailOrUsername: email });
-    if (!res.success) {
-      // Auto-register admin account if first time
-      res = await db.signup({
-        username: 'BoobaBoss',
-        email: email,
-        referralCode: 'ADMIN'
-      });
-    }
-
+    // Authenticate with Supabase
+    const res = await db.login({ emailOrUsername: email, password });
     if (res.success) {
       alert(`🎉 Welcome to the Admin Studio, ${res.user.username}!`);
       this.render();
     } else {
-      alert(res.message || 'Login failed');
+      alert(res.message || 'Authentication failed. Please check your password.');
     }
   }
 

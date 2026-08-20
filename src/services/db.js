@@ -1,19 +1,14 @@
 /* ==========================================================================
-   BOOBA (BNB baby) — Database & State Management Service
-   Supports LocalStorage persistence + Real-time events + Supabase bridge
+   BOOBA (BNB baby) — Live Supabase Database & State Service
+   Single Source of Truth: Real Accounts, Live Quests, Real Leaderboards
    ========================================================================== */
 
-const STORAGE_KEYS = {
-  CURRENT_USER: 'booba_current_user',
-  USERS: 'booba_users_data',
-  QUESTS: 'booba_quests_data',
-  SUBMISSIONS: 'booba_submissions_data',
-  REFERRALS: 'booba_referrals_data',
-  ACHIEVEMENTS: 'booba_achievements_data',
-  SETTINGS: 'booba_settings_data'
-};
+import { supabase, isUserAdmin, ADMIN_EMAILS } from './supabaseClient.js';
 
-// Level definitions based on user specification
+// Local storage session key
+const SESSION_KEY = 'booba_active_session_user';
+
+// Level definitions
 export const LEVEL_TIERS = [
   { level: 1, title: 'Booba Baby', min: 0, max: 499, unlock: 'Basic Booba Passport & Community Access' },
   { level: 2, title: 'Booba Rookie', min: 500, max: 1499, unlock: 'Custom Passport Badge & Daily Streak Bonus' },
@@ -28,14 +23,15 @@ export const LEVEL_TIERS = [
 ];
 
 export function calculateLevel(boobaPoints) {
+  const pts = Number(boobaPoints) || 0;
   for (let i = LEVEL_TIERS.length - 1; i >= 0; i--) {
-    if (boobaPoints >= LEVEL_TIERS[i].min) {
+    if (pts >= LEVEL_TIERS[i].min) {
       const currentTier = LEVEL_TIERS[i];
       const nextTier = LEVEL_TIERS[i + 1] || null;
       let progressPercent = 100;
       if (nextTier) {
         const range = nextTier.min - currentTier.min;
-        const currentProgress = boobaPoints - currentTier.min;
+        const currentProgress = pts - currentTier.min;
         progressPercent = Math.min(100, Math.max(0, Math.round((currentProgress / range) * 100)));
       }
       return {
@@ -48,377 +44,62 @@ export function calculateLevel(boobaPoints) {
   return { ...LEVEL_TIERS[0], progressPercent: 0, nextTier: LEVEL_TIERS[1] };
 }
 
-// Initial Seed Data
-const INITIAL_USERS = [
-  {
-    id: 'usr-001',
-    username: 'CryptoKing',
-    email: 'user@example.com',
-    role: 'member',
-    passportId: 'BB-008421',
-    memberSince: 'August 15, 2026',
-    boobaPoints: 28450,
-    reputation: 91,
-    walletAddress: '0x71C...49b2',
-    avatar: 'assets/mascot.jpg',
-    completedQuestsCount: 96,
-    verifiedReferralsCount: 42,
-    referralCode: 'CRYPTOKING',
-    referredBy: 'BOOBABOSS',
-    lastCheckIn: null,
-    streakDays: 7,
-    badges: ['Pioneer', 'Meme Champion', 'Elite Referrer', 'Whale Scout', 'BNB Baby OG']
-  },
-  {
-    id: 'usr-002',
-    username: 'BoobaBoss',
-    email: 'admin@gmail.com',
-    password: 'booba',
-    role: 'admin',
-    passportId: 'BB-000001',
-    memberSince: 'January 01, 2026',
-    boobaPoints: 265000,
-    reputation: 99,
-    walletAddress: '0x88A...33f1',
-    avatar: 'assets/mascot.jpg',
-    completedQuestsCount: 150,
-    verifiedReferralsCount: 180,
-    referralCode: 'BOOBABOSS',
-    referredBy: null,
-    lastCheckIn: null,
-    streakDays: 45,
-    badges: ['Project Founder', 'BNB Baby Architect', 'Grandmaster', 'Top Influencer']
-  },
-  {
-    id: 'usr-003',
-    username: 'BabyWhale',
-    email: 'whale@bsc.crypto',
-    role: 'member',
-    passportId: 'BB-001290',
-    memberSince: 'March 10, 2026',
-    boobaPoints: 85200,
-    reputation: 95,
-    walletAddress: '0x32A...88bc',
-    avatar: 'assets/mascot.jpg',
-    completedQuestsCount: 88,
-    verifiedReferralsCount: 76,
-    referralCode: 'BABYWHALE',
-    referredBy: 'BOOBABOSS',
-    streakDays: 14,
-    badges: ['Whale Scout', 'Elite Referrer']
-  },
-  {
-    id: 'usr-004',
-    username: 'PandaHodler',
-    email: 'panda@crypto.org',
-    role: 'member',
-    passportId: 'BB-003418',
-    memberSince: 'April 02, 2026',
-    boobaPoints: 48900,
-    reputation: 89,
-    walletAddress: '0x99B...12ca',
-    avatar: 'assets/mascot.jpg',
-    completedQuestsCount: 72,
-    verifiedReferralsCount: 34,
-    referralCode: 'PANDAHODL',
-    referredBy: 'CRYPTOKING',
-    streakDays: 5,
-    badges: ['Meme Champion', 'Community Helper']
-  },
-  {
-    id: 'usr-005',
-    username: 'BNBQueen',
-    email: 'queen@web3.io',
-    role: 'member',
-    passportId: 'BB-005112',
-    memberSince: 'May 18, 2026',
-    boobaPoints: 34200,
-    reputation: 92,
-    walletAddress: '0x55E...90ea',
-    avatar: 'assets/mascot.jpg',
-    completedQuestsCount: 59,
-    verifiedReferralsCount: 29,
-    referralCode: 'BNBQUEEN',
-    referredBy: 'CRYPTOKING',
-    streakDays: 9,
-    badges: ['Community Star', 'Content Creator']
-  }
-];
-
-const INITIAL_QUESTS = [
-  {
-    id: 'qst-1',
-    title: 'Daily Booba Check-in',
-    description: 'Claim your daily check-in reward and keep your BNB Baby streak alive!',
-    category: 'daily',
-    rewardBooba: 50,
-    type: 'instant',
-    requirements: 'Click once every 24 hours to earn BOOBA and level up your passport.',
-    repeatable: true,
-    deadline: 'Refreshes Daily',
-    actionText: 'Check In (+50 BOOBA)',
-    isCompleted: false
-  },
-  {
-    id: 'qst-2',
-    title: 'Follow Official @BoobaBabyBNB on X',
-    description: 'Follow our official X handle to stay tuned with all major announcements and airdrops.',
-    category: 'social',
-    rewardBooba: 100,
-    type: 'social',
-    requirements: 'Follow @BoobaBabyBNB and enter your X handle to verify.',
-    targetUrl: 'https://twitter.com/boobababybnb',
-    repeatable: false,
-    deadline: 'Permanent Bounty',
-    actionText: 'Follow & Verify',
-    isCompleted: true
-  },
-  {
-    id: 'qst-3',
-    title: 'Join the Official Booba Telegram',
-    description: 'Enter the bustling Booba Panda lounge on Telegram to chat with the team and fellow holders.',
-    category: 'social',
-    rewardBooba: 150,
-    type: 'social',
-    requirements: 'Join t.me/boobababybnb and pass the anti-bot verification.',
-    targetUrl: 'https://t.me/boobababybnb',
-    repeatable: false,
-    deadline: 'Permanent Bounty',
-    actionText: 'Join Telegram',
-    isCompleted: true
-  },
-  {
-    id: 'qst-4',
-    title: 'Join the Booba Discord Community',
-    description: 'Hang out in Discord, claim your verified Passport role, and join voice stage AMAs.',
-    category: 'social',
-    rewardBooba: 150,
-    type: 'social',
-    requirements: 'Join discord.gg/booba and verify your Booba Passport ID.',
-    targetUrl: 'https://discord.gg/booba',
-    repeatable: false,
-    deadline: 'Permanent Bounty',
-    actionText: 'Join Discord',
-    isCompleted: false
-  },
-  {
-    id: 'qst-5',
-    title: 'Attend the Weekly Community AMA',
-    description: 'Join our weekly Twitter Space or Discord Stage AMA with the core founders.',
-    category: 'community',
-    rewardBooba: 250,
-    type: 'proof',
-    requirements: 'Submit your live AMA attendance secret code or screenshot.',
-    repeatable: true,
-    deadline: 'Every Thursday 18:00 UTC',
-    actionText: 'Submit Attendance Code',
-    isCompleted: false
-  },
-  {
-    id: 'qst-6',
-    title: 'Help Answer Questions in Community',
-    description: 'Help onboard new baby pandas in Telegram or Discord and guide them to mint their passport.',
-    category: 'community',
-    rewardBooba: 200,
-    type: 'proof',
-    requirements: 'Submit a screenshot or link of you assisting community members.',
-    repeatable: true,
-    deadline: 'Weekly Bounty',
-    actionText: 'Submit Proof',
-    isCompleted: false
-  },
-  {
-    id: 'qst-7',
-    title: 'Create a Viral Booba Meme',
-    description: 'Design a hilarious, high-quality meme featuring the Booba baby panda mascot and share on X.',
-    category: 'creative',
-    rewardBooba: 500,
-    type: 'proof',
-    requirements: 'Post on X with tags #BOOBA #babyBNB @BoobaBabyBNB and submit your post link.',
-    repeatable: true,
-    deadline: 'Open Submission',
-    actionText: 'Submit Meme Link',
-    isCompleted: false
-  },
-  {
-    id: 'qst-8',
-    title: 'Write an Educational X Thread on Booba',
-    description: 'Craft an insightful thread explaining the Booba Passport, tokenomics, and BNB Baby ecosystem.',
-    category: 'creative',
-    rewardBooba: 600,
-    type: 'proof',
-    requirements: 'Minimum 4-tweet thread with graphics/charts and post link submitted.',
-    repeatable: true,
-    deadline: 'Open Submission',
-    actionText: 'Submit Thread Link',
-    isCompleted: false
-  },
-  {
-    id: 'qst-9',
-    title: 'Produce a Booba TikTok / Reels / YouTube Short',
-    description: 'Create an engaging short video animation or review of Booba BNB Baby.',
-    category: 'creative',
-    rewardBooba: 750,
-    type: 'proof',
-    requirements: 'Upload video to TikTok/YouTube/Instagram and provide live link.',
-    repeatable: true,
-    deadline: 'Open Submission',
-    actionText: 'Submit Video Link',
-    isCompleted: false
-  },
-  {
-    id: 'qst-10',
-    title: 'Genesis Launch Special Campaign',
-    description: 'Complete 5 quests and refer at least 2 friends during the Launch Week.',
-    category: 'special',
-    rewardBooba: 1000,
-    type: 'special',
-    requirements: 'Achieve Level 3+ and verify 2 genuine invited members.',
-    repeatable: false,
-    deadline: 'Ends in 4 Days',
-    actionText: 'Claim Special Bonus',
-    isCompleted: false
-  }
-];
-
-const INITIAL_SUBMISSIONS = [
-  {
-    id: 'sub-001',
-    userId: 'usr-001',
-    username: 'CryptoKing',
-    passportId: 'BB-008421',
-    questId: 'qst-7',
-    questTitle: 'Create a Viral Booba Meme',
-    rewardBooba: 500,
-    proofUrl: 'https://x.com/CryptoKing/status/18247192837192',
-    proofDescription: 'Created a top tier animated gif meme with the Booba panda holding BNB milk bottle!',
-    submittedAt: '2026-08-16 11:20:00',
-    status: 'pending', // pending, approved, rejected
-    reviewedBy: null,
-    reviewedAt: null,
-    adminNotes: ''
-  },
-  {
-    id: 'sub-002',
-    userId: 'usr-004',
-    username: 'PandaHodler',
-    passportId: 'BB-003418',
-    questId: 'qst-8',
-    questTitle: 'Write an Educational X Thread on Booba',
-    rewardBooba: 600,
-    proofUrl: 'https://x.com/PandaHodler/status/18247019283711',
-    proofDescription: '6-part deep dive thread on Booba Passport utility and BNB Baby tokenomics.',
-    submittedAt: '2026-08-16 10:05:00',
-    status: 'pending',
-    reviewedBy: null,
-    reviewedAt: null,
-    adminNotes: ''
-  }
-];
-
-const INITIAL_REFERRALS = [
-  {
-    id: 'ref-001',
-    referrerUsername: 'CryptoKing',
-    referredUsername: 'PandaHodler',
-    passportId: 'BB-003418',
-    joinedDate: '2026-08-10',
-    status: 'verified', // verified or pending
-    rewardClaimed: 300,
-    questsCompleted: 72
-  },
-  {
-    id: 'ref-002',
-    referrerUsername: 'CryptoKing',
-    referredUsername: 'BNBQueen',
-    passportId: 'BB-005112',
-    joinedDate: '2026-08-12',
-    status: 'verified',
-    rewardClaimed: 300,
-    questsCompleted: 59
-  },
-  {
-    id: 'ref-003',
-    referrerUsername: 'CryptoKing',
-    referredUsername: 'MoonSeeker',
-    passportId: 'BB-009941',
-    joinedDate: '2026-08-15',
-    status: 'pending',
-    rewardClaimed: 0,
-    questsCompleted: 1,
-    verificationRequirement: 'Needs to complete 2 more quests to verify referral'
-  },
-  {
-    id: 'ref-004',
-    referrerUsername: 'CryptoKing',
-    referredUsername: 'DiamondPaws',
-    passportId: 'BB-010243',
-    joinedDate: '2026-08-16',
-    status: 'pending',
-    rewardClaimed: 0,
-    questsCompleted: 0,
-    verificationRequirement: 'Needs to verify email & complete initial quest'
-  }
-];
-
-const INITIAL_ACHIEVEMENTS = [
-  { id: 'ach-1', title: 'Passport Minted', desc: 'Mint your official Booba Passport digital identity', icon: 'ID', rewardBooba: 100, completed: true },
-  { id: 'ach-2', title: 'First Quest Cleared', desc: 'Complete your first community quest', icon: 'Q1', rewardBooba: 100, completed: true },
-  { id: 'ach-3', title: 'Social Pioneer', desc: 'Connect with Booba on X, Telegram and Discord', icon: 'SOC', rewardBooba: 250, completed: true },
-  { id: 'ach-4', title: '7-Day Streak Master', desc: 'Maintain a 7-day consecutive daily check-in streak', icon: '7D', rewardBooba: 350, completed: true },
-  { id: 'ach-5', title: 'Referral Pioneer', desc: 'Successfully bring 5 verified baby pandas to Booba', icon: 'REF', rewardBooba: 500, completed: true },
-  { id: 'ach-6', title: 'Meme Maestro', desc: 'Have an approved creative meme submission', icon: 'ART', rewardBooba: 500, completed: true },
-  { id: 'ach-7', title: 'Booba Hustler', desc: 'Ascend to Level 4 (3,000+ BOOBA)', icon: 'LV4', rewardBooba: 500, completed: true },
-  { id: 'ach-8', title: 'Elite Referrer', desc: 'Successfully refer 25+ verified members', icon: 'VIP', rewardBooba: 1500, completed: true },
-  { id: 'ach-9', title: 'Booba Elite', desc: 'Ascend to Level 7 (25,000+ BOOBA)', icon: 'LV7', rewardBooba: 2500, completed: true },
-  { id: 'ach-10', title: 'AMA Regular', desc: 'Attend at least 5 live Community AMAs', icon: 'AMA', rewardBooba: 750, completed: false, progress: '3/5' },
-  { id: 'ach-11', title: 'Content Champion', desc: 'Submit 5 approved educational threads or videos', icon: 'EDU', rewardBooba: 2000, completed: false, progress: '2/5' },
-  { id: 'ach-12', title: 'Legendary Panda', desc: 'Reach Level 8 and maintain a 90+ Reputation Score', icon: 'LV8', rewardBooba: 5000, completed: false, progress: '28.4k / 50k' }
-];
-
-// Helper to load from LocalStorage or seed
-function loadStorage(key, fallback) {
-  try {
-    const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : fallback;
-  } catch (e) {
-    return fallback;
-  }
-}
-
-function saveStorage(key, value) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (e) {
-    console.error('Storage save error:', e);
-  }
-}
-
-// Database Service Class
 class DatabaseService {
   constructor() {
-    this.users = loadStorage(STORAGE_KEYS.USERS, INITIAL_USERS);
-    this.quests = loadStorage(STORAGE_KEYS.QUESTS, INITIAL_QUESTS);
-    this.submissions = loadStorage(STORAGE_KEYS.SUBMISSIONS, INITIAL_SUBMISSIONS);
-    this.referrals = loadStorage(STORAGE_KEYS.REFERRALS, INITIAL_REFERRALS);
-    this.achievements = loadStorage(STORAGE_KEYS.ACHIEVEMENTS, INITIAL_ACHIEVEMENTS);
-    
-    // Check saved session or default to CryptoKing
-    const savedUser = loadStorage(STORAGE_KEYS.CURRENT_USER, this.users[0]);
-    this.currentUser = this.users.find(u => u.id === savedUser.id) || this.users[0];
-    
+    this.currentUser = null;
+    this.users = [];
+    this.quests = [];
+    this.submissions = [];
+    this.referrals = [];
+    this.airdropLogs = [];
     this.listeners = [];
+    this.isInitialized = false;
+
+    // Load local session if available
+    this.loadLocalSession();
+  }
+
+  loadLocalSession() {
+    try {
+      const saved = localStorage.getItem(SESSION_KEY);
+      if (saved) {
+        this.currentUser = JSON.parse(saved);
+        // Refresh admin role based on whitelist
+        if (this.currentUser && isUserAdmin(this.currentUser.email)) {
+          this.currentUser.role = 'admin';
+        }
+      }
+    } catch (e) {
+      this.currentUser = null;
+    }
+  }
+
+  saveLocalSession(user) {
+    this.currentUser = user;
+    if (user) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(SESSION_KEY);
+    }
+    this.notify();
   }
 
   subscribe(listener) {
-    this.listeners.push(listener);
+    if (typeof listener === 'function') {
+      this.listeners.push(listener);
+      // Immediately notify with current state
+      listener(this.getState());
+    }
     return () => {
       this.listeners = this.listeners.filter(l => l !== listener);
     };
   }
 
   notify() {
-    this.listeners.forEach(fn => fn(this.getState()));
+    const state = this.getState();
+    this.listeners.forEach(fn => {
+      try { fn(state); } catch (err) { console.error('DB notify error:', err); }
+    });
   }
 
   getState() {
@@ -428,326 +109,628 @@ class DatabaseService {
       quests: this.quests,
       submissions: this.submissions,
       referrals: this.referrals,
-      achievements: this.achievements
+      airdropLogs: this.airdropLogs,
+      stats: this.getStats()
     };
   }
 
-  // Authentication & Session
-  login(identifier, password) {
-    const cleanId = (identifier || '').trim().toLowerCase();
-    
-    // Special admin override
-    if (cleanId === 'admin@gmail.com' || cleanId === 'admin@booba.crypto' || cleanId === 'boobaboss') {
-      const adminUser = this.users.find(u => u.role === 'admin') || this.users[1];
-      this.currentUser = adminUser;
-      saveStorage(STORAGE_KEYS.CURRENT_USER, this.currentUser);
-      this.notify();
-      return { success: true, user: adminUser, isAdmin: true };
-    }
-
-    const user = this.users.find(u => 
-      (u.username.toLowerCase() === cleanId || u.email.toLowerCase() === cleanId)
-    );
-    if (user) {
-      this.currentUser = user;
-      saveStorage(STORAGE_KEYS.CURRENT_USER, this.currentUser);
-      this.notify();
-      return { success: true, user, isAdmin: user.role === 'admin' };
-    }
-    return { success: false, message: 'User not found. Please check your credentials or create an account.' };
+  async init() {
+    if (this.isInitialized) return;
+    await this.refreshAll();
+    this.isInitialized = true;
+    this.setupRealtime();
   }
 
-  loginWithWallet(walletAddress) {
-    let user = this.users.find(u => u.walletAddress?.toLowerCase() === walletAddress?.toLowerCase());
-    if (!user) {
-      // Auto-register via wallet
-      const cleanAddress = walletAddress.substring(0, 6) + '...' + walletAddress.substring(walletAddress.length - 4);
-      user = this.register({
-        username: 'Panda_' + walletAddress.substring(2, 6),
-        email: `wallet_${walletAddress.substring(2, 8)}@booba.crypto`,
-        walletAddress: cleanAddress,
-        referralCodeInput: ''
-      }).user;
-    }
-    this.currentUser = user;
-    saveStorage(STORAGE_KEYS.CURRENT_USER, this.currentUser);
-    this.notify();
-    return { success: true, user };
-  }
+  async refreshAll() {
+    await Promise.all([
+      this.fetchUsers(),
+      this.fetchQuests(),
+      this.fetchSubmissions(),
+      this.fetchReferrals(),
+      this.fetchAirdropLogs()
+    ]);
 
-  switchDemoUser(role) {
-    if (role === 'admin') {
-      this.currentUser = this.users.find(u => u.role === 'admin') || this.users[1];
-    } else {
-      this.currentUser = this.users.find(u => u.username === 'CryptoKing') || this.users[0];
-    }
-    saveStorage(STORAGE_KEYS.CURRENT_USER, this.currentUser);
-    this.notify();
-    return this.currentUser;
-  }
-
-  register({ username, email, password = '', walletAddress = '', referralCodeInput = '' }) {
-    const cleanEmail = (email || '').trim().toLowerCase();
-    const cleanUsername = (username || '').replace(/^@/, '').trim();
-
-    // Check if registering with admin@gmail.com
-    const isAdmin = cleanEmail === 'admin@gmail.com' || cleanUsername.toLowerCase() === 'boobaboss' || (cleanUsername.toLowerCase() === 'admin' && password === 'booba');
-
-    if (isAdmin) {
-      let adminUser = this.users.find(u => u.role === 'admin');
-      if (!adminUser) {
-        adminUser = {
-          id: 'usr-admin-001',
-          username: cleanUsername || 'BoobaBoss',
-          email: 'admin@gmail.com',
-          password: 'booba',
-          role: 'admin',
-          passportId: 'BB-000001',
-          memberSince: 'January 01, 2026',
-          boobaPoints: 265000,
-          reputation: 99,
-          walletAddress: '0x88A...33f1',
-          avatar: 'assets/mascot.jpg',
-          completedQuestsCount: 150,
-          verifiedReferralsCount: 180,
-          referralCode: 'BOOBABOSS',
-          referredBy: null,
-          lastCheckIn: null,
-          streakDays: 45,
-          badges: ['Project Founder', 'BNB Baby Architect', 'Grandmaster', 'Top Influencer']
-        };
-        this.users.unshift(adminUser);
+    // If logged in, refresh current user record from database
+    if (this.currentUser && this.currentUser.id) {
+      const fresh = this.users.find(u => u.id === this.currentUser.id || u.email === this.currentUser.email);
+      if (fresh) {
+        if (isUserAdmin(fresh.email)) fresh.role = 'admin';
+        this.saveLocalSession(fresh);
       }
-      this.currentUser = adminUser;
-      saveStorage(STORAGE_KEYS.USERS, this.users);
-      saveStorage(STORAGE_KEYS.CURRENT_USER, this.currentUser);
-      this.notify();
-      return { success: true, user: adminUser, isAdmin: true };
     }
 
-    // Check if exists
-    if (this.users.some(u => u.username.toLowerCase() === cleanUsername.toLowerCase())) {
-      return { success: false, message: 'Username already taken. Please choose another.' };
+    this.notify();
+  }
+
+  setupRealtime() {
+    if (!supabase) return;
+    try {
+      supabase
+        .channel('public_db_changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_quests' }, () => this.fetchQuests())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_users' }, () => this.fetchUsers())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_submissions' }, () => this.fetchSubmissions())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_airdrop_logs' }, () => this.fetchAirdropLogs())
+        .subscribe();
+    } catch (e) {
+      console.warn('Realtime subscription skipped:', e);
     }
+  }
 
-    // Generate Passport ID
-    const randomDigits = Math.floor(10000 + Math.random() * 90000);
-    const passportId = `BB-0${randomDigits}`;
-    const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  // --------------------------------------------------------------------------
+  // USER AUTHENTICATION & MANAGEMENT
+  // --------------------------------------------------------------------------
 
-    const newUser = {
-      id: 'usr-' + Date.now(),
+  async fetchUsers() {
+    if (!supabase) return [];
+    try {
+      const { data, error } = await supabase
+        .from('booba_users')
+        .select('*')
+        .order('booba_points', { ascending: false });
+
+      if (!error && data) {
+        this.users = data.map(u => ({
+          id: u.id,
+          username: u.username,
+          email: u.email,
+          role: isUserAdmin(u.email) ? 'admin' : (u.role || 'member'),
+          passportId: u.passport_id,
+          memberSince: u.member_since ? new Date(u.member_since).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent',
+          boobaPoints: Number(u.booba_points) || 0,
+          reputation: Number(u.reputation) || 75,
+          walletAddress: u.wallet_address || '0x...BNB',
+          avatar: u.avatar_url || 'assets/mascot.jpg',
+          completedQuestsCount: Number(u.completed_quests) || 0,
+          verifiedReferralsCount: Number(u.verified_referrals) || 0,
+          referralCode: u.referral_code,
+          referredBy: u.referred_by,
+          streakDays: Number(u.streak_days) || 1
+        }));
+      }
+    } catch (e) {
+      console.error('fetchUsers error:', e);
+    }
+    return this.users;
+  }
+
+  async signup({ username, email, password, referralCode = '', walletAddress = '' }) {
+    if (!supabase) return { success: false, message: 'Supabase client not connected' };
+
+    const cleanUsername = username.trim();
+    const cleanEmail = email.trim().toLowerCase();
+    const isAdmin = isUserAdmin(cleanEmail);
+    const passportId = 'BB-' + Math.floor(100000 + Math.random() * 900000);
+    const userRefCode = cleanUsername.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10) || ('BB' + Math.floor(1000 + Math.random() * 9000));
+
+    const newUserPayload = {
       username: cleanUsername,
       email: cleanEmail,
-      password: password || 'booba',
-      role: 'member',
-      passportId,
-      memberSince: today,
-      boobaPoints: 100, // Welcome bonus
+      role: isAdmin ? 'admin' : 'member',
+      passport_id: passportId,
+      booba_points: 100, // Welcome bonus
       reputation: 75,
-      walletAddress: walletAddress || '0x' + Math.random().toString(16).substring(2, 10) + '...' + Math.random().toString(16).substring(2, 6),
-      avatar: 'assets/mascot.jpg',
-      completedQuestsCount: 0,
-      verifiedReferralsCount: 0,
-      referralCode: cleanUsername.toUpperCase(),
-      referredBy: referralCodeInput ? referralCodeInput.toUpperCase() : null,
-      lastCheckIn: null,
-      streakDays: 1,
-      badges: ['Passport Minted']
+      wallet_address: walletAddress || `0x${Math.random().toString(16).substring(2, 6)}...${Math.random().toString(16).substring(2, 6)}`,
+      avatar_url: 'assets/mascot.jpg',
+      completed_quests: 0,
+      verified_referrals: 0,
+      referral_code: userRefCode,
+      referred_by: referralCode ? referralCode.trim().toUpperCase() : null,
+      streak_days: 1
     };
 
-    this.users.unshift(newUser);
-    this.currentUser = newUser;
-    
-    // If referred by someone, track referral
-    if (referralCodeInput) {
-      const referrer = this.users.find(u => u.referralCode === referralCodeInput.toUpperCase());
-      if (referrer) {
-        this.referrals.unshift({
-          id: 'ref-' + Date.now(),
-          referrerUsername: referrer.username,
-          referredUsername: newUser.username,
-          passportId: newUser.passportId,
-          joinedDate: new Date().toISOString().split('T')[0],
-          status: 'pending',
-          rewardClaimed: 0,
-          questsCompleted: 0,
-          verificationRequirement: 'Needs to complete 2 initial quests to verify'
-        });
-        saveStorage(STORAGE_KEYS.REFERRALS, this.referrals);
-      }
-    }
+    try {
+      const { data, error } = await supabase
+        .from('booba_users')
+        .insert([newUserPayload])
+        .select()
+        .single();
 
-    saveStorage(STORAGE_KEYS.USERS, this.users);
-    saveStorage(STORAGE_KEYS.CURRENT_USER, this.currentUser);
-    this.notify();
-    return { success: true, user: newUser };
+      if (error) {
+        if (error.code === '23505') {
+          return { success: false, message: 'Username or Email is already registered. Please sign in.' };
+        }
+        return { success: false, message: error.message };
+      }
+
+      const formattedUser = {
+        id: data.id,
+        username: data.username,
+        email: data.email,
+        role: isAdmin ? 'admin' : data.role,
+        passportId: data.passport_id,
+        memberSince: 'Just now',
+        boobaPoints: Number(data.booba_points),
+        reputation: Number(data.reputation),
+        walletAddress: data.wallet_address,
+        avatar: data.avatar_url,
+        completedQuestsCount: 0,
+        verifiedReferralsCount: 0,
+        referralCode: data.referral_code,
+        referredBy: data.referred_by,
+        streakDays: 1
+      };
+
+      // If referred, log referral
+      if (referralCode) {
+        await this.recordReferral(referralCode.trim().toUpperCase(), formattedUser.username, formattedUser.passportId);
+      }
+
+      this.saveLocalSession(formattedUser);
+      await this.fetchUsers();
+      this.notify();
+
+      return { success: true, user: formattedUser };
+    } catch (e) {
+      return { success: false, message: e.message || 'Signup failed' };
+    }
+  }
+
+  async login({ emailOrUsername, password }) {
+    if (!supabase) return { success: false, message: 'Supabase client not connected' };
+
+    const query = emailOrUsername.trim();
+    try {
+      // Find by email or username
+      const { data, error } = await supabase
+        .from('booba_users')
+        .select('*')
+        .or(`email.ilike.${query},username.ilike.${query}`)
+        .limit(1);
+
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        return { success: false, message: 'No account found with this email or username. Please mint your passport first!' };
+      }
+
+      const raw = data[0];
+      const isAdmin = isUserAdmin(raw.email);
+
+      const user = {
+        id: raw.id,
+        username: raw.username,
+        email: raw.email,
+        role: isAdmin ? 'admin' : (raw.role || 'member'),
+        passportId: raw.passport_id,
+        memberSince: raw.member_since ? new Date(raw.member_since).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Member',
+        boobaPoints: Number(raw.booba_points) || 0,
+        reputation: Number(raw.reputation) || 75,
+        walletAddress: raw.wallet_address || '0x...BNB',
+        avatar: raw.avatar_url || 'assets/mascot.jpg',
+        completedQuestsCount: Number(raw.completed_quests) || 0,
+        verifiedReferralsCount: Number(raw.verified_referrals) || 0,
+        referralCode: raw.referral_code,
+        referredBy: raw.referred_by,
+        streakDays: Number(raw.streak_days) || 1
+      };
+
+      this.saveLocalSession(user);
+      await this.fetchUsers();
+      this.notify();
+
+      return { success: true, user };
+    } catch (e) {
+      return { success: false, message: e.message || 'Login failed' };
+    }
   }
 
   logout() {
-    this.currentUser = null;
-    localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
-    this.notify();
+    this.saveLocalSession(null);
   }
 
-  // Quests & Points
-  claimDailyCheckIn() {
-    if (!this.currentUser) return { success: false, message: 'Please log in' };
+  // --------------------------------------------------------------------------
+  // QUESTS MANAGEMENT
+  // --------------------------------------------------------------------------
 
-    const bonus = 50;
-    this.currentUser.boobaPoints += bonus;
-    this.currentUser.streakDays = (this.currentUser.streakDays || 0) + 1;
-    this.currentUser.lastCheckIn = new Date().toISOString();
-    this.currentUser.completedQuestsCount += 1;
+  async fetchQuests() {
+    if (!supabase) return [];
+    try {
+      const { data, error } = await supabase
+        .from('booba_quests')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    // Update in users array
-    const idx = this.users.findIndex(u => u.id === this.currentUser.id);
-    if (idx !== -1) {
-      this.users[idx] = { ...this.currentUser };
+      if (!error && data) {
+        this.quests = data.map(q => ({
+          id: q.id,
+          title: q.title,
+          description: q.description,
+          category: q.category,
+          rewardBooba: Number(q.reward_booba),
+          type: q.quest_type,
+          requirements: q.requirements,
+          targetUrl: q.target_url,
+          repeatable: Boolean(q.repeatable),
+          deadline: q.deadline || 'Active Bounty',
+          actionText: q.quest_type === 'social' ? 'Follow & Verify' : q.quest_type === 'instant' ? 'Claim (+50 BOOBA)' : 'Submit Proof',
+          isCompleted: false
+        }));
+      }
+    } catch (e) {
+      console.error('fetchQuests error:', e);
     }
-
-    saveStorage(STORAGE_KEYS.USERS, this.users);
-    saveStorage(STORAGE_KEYS.CURRENT_USER, this.currentUser);
-    this.notify();
-    return { success: true, bonus, streak: this.currentUser.streakDays };
+    return this.quests;
   }
 
-  completeSocialQuest(questId) {
-    if (!this.currentUser) return { success: false, message: 'Please log in' };
+  async createQuest(questData) {
+    if (!supabase) return { success: false, message: 'Supabase client not connected' };
+
+    const payload = {
+      title: questData.title.trim(),
+      description: questData.description.trim(),
+      category: questData.category || 'community',
+      reward_booba: parseInt(questData.rewardBooba, 10) || 100,
+      quest_type: questData.type || 'proof',
+      requirements: questData.requirements || 'Follow the instructions and submit proof',
+      target_url: questData.targetUrl || '',
+      repeatable: Boolean(questData.repeatable),
+      deadline: questData.deadline || 'Active Bounty'
+    };
+
+    try {
+      const { data, error } = await supabase
+        .from('booba_quests')
+        .insert([payload])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await this.fetchQuests();
+      this.notify();
+      return { success: true, quest: data };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  async deleteQuest(questId) {
+    if (!supabase) return { success: false, message: 'Supabase client not connected' };
+    try {
+      const { error } = await supabase.from('booba_quests').delete().eq('id', questId);
+      if (error) throw error;
+      await this.fetchQuests();
+      this.notify();
+      return { success: true };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // PROOF SUBMISSIONS & REVIEWS
+  // --------------------------------------------------------------------------
+
+  async fetchSubmissions() {
+    if (!supabase) return [];
+    try {
+      const { data, error } = await supabase
+        .from('booba_submissions')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        this.submissions = data.map(s => ({
+          id: s.id,
+          userId: s.user_id,
+          questId: s.quest_id,
+          username: s.username,
+          passportId: s.passport_id,
+          questTitle: s.quest_title,
+          rewardBooba: Number(s.reward_booba),
+          proofUrl: s.proof_url,
+          proofDescription: s.proof_description,
+          status: s.status || 'pending',
+          reviewedBy: s.reviewed_by,
+          reviewedAt: s.reviewed_at ? new Date(s.reviewed_at).toLocaleDateString() : null,
+          adminNotes: s.admin_notes || '',
+          submittedAt: s.created_at ? new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently'
+        }));
+      }
+    } catch (e) {
+      console.error('fetchSubmissions error:', e);
+    }
+    return this.submissions;
+  }
+
+  async submitProof({ questId, proofUrl, proofDescription }) {
+    if (!this.currentUser) return { success: false, message: 'Please sign in or mint your passport first.' };
+    const quest = this.quests.find(q => q.id === questId);
+    if (!quest) return { success: false, message: 'Quest not found.' };
+
+    const payload = {
+      user_id: this.currentUser.id,
+      quest_id: quest.id,
+      username: this.currentUser.username,
+      passport_id: this.currentUser.passportId,
+      quest_title: quest.title,
+      reward_booba: quest.rewardBooba,
+      proof_url: proofUrl,
+      proof_description: proofDescription,
+      status: 'pending'
+    };
+
+    try {
+      const { data, error } = await supabase
+        .from('booba_submissions')
+        .insert([payload])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await this.fetchSubmissions();
+      this.notify();
+      return { success: true, submission: data };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  async reviewSubmission(submissionId, action, adminNotes = '') {
+    if (!supabase) return { success: false, message: 'Supabase client not connected' };
+    const sub = this.submissions.find(s => s.id === submissionId);
+    if (!sub) return { success: false, message: 'Submission not found' };
+
+    try {
+      const { error: subError } = await supabase
+        .from('booba_submissions')
+        .update({
+          status: action,
+          reviewed_by: this.currentUser?.username || 'Booba Admin',
+          reviewed_at: new Date().toISOString(),
+          admin_notes: adminNotes
+        })
+        .eq('id', submissionId);
+
+      if (subError) throw subError;
+
+      // If approved, update target user's points & completed quests
+      if (action === 'approved' && sub.userId) {
+        const { data: userData } = await supabase
+          .from('booba_users')
+          .select('booba_points, completed_quests, reputation')
+          .eq('id', sub.userId)
+          .single();
+
+        if (userData) {
+          const updatedPoints = (Number(userData.booba_points) || 0) + sub.rewardBooba;
+          const updatedCount = (Number(userData.completed_quests) || 0) + 1;
+          const updatedRep = Math.min(100, (Number(userData.reputation) || 75) + 2);
+
+          await supabase
+            .from('booba_users')
+            .update({
+              booba_points: updatedPoints,
+              completed_quests: updatedCount,
+              reputation: updatedRep
+            })
+            .eq('id', sub.userId);
+        }
+      }
+
+      await Promise.all([this.fetchSubmissions(), this.fetchUsers()]);
+      this.notify();
+      return { success: true, status: action };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // SOCIAL & DAILY INSTANT QUESTS
+  // --------------------------------------------------------------------------
+
+  async completeSocialQuest(questId) {
+    if (!this.currentUser) return { success: false, message: 'Please sign in first' };
     const quest = this.quests.find(q => q.id === questId);
     if (!quest) return { success: false, message: 'Quest not found' };
 
     const reward = quest.rewardBooba;
-    this.currentUser.boobaPoints += reward;
-    this.currentUser.completedQuestsCount += 1;
+    const newPoints = (this.currentUser.boobaPoints || 0) + reward;
+    const newCount = (this.currentUser.completedQuestsCount || 0) + 1;
 
-    // Update user
-    const idx = this.users.findIndex(u => u.id === this.currentUser.id);
-    if (idx !== -1) this.users[idx] = { ...this.currentUser };
-
-    saveStorage(STORAGE_KEYS.USERS, this.users);
-    saveStorage(STORAGE_KEYS.CURRENT_USER, this.currentUser);
-    this.notify();
-    return { success: true, reward, title: quest.title };
-  }
-
-  submitCreativeProof({ questId, proofUrl, proofDescription }) {
-    if (!this.currentUser) return { success: false, message: 'Please log in' };
-    const quest = this.quests.find(q => q.id === questId);
-    if (!quest) return { success: false, message: 'Quest not found' };
-
-    const newSub = {
-      id: 'sub-' + Date.now(),
-      userId: this.currentUser.id,
-      username: this.currentUser.username,
-      passportId: this.currentUser.passportId,
-      questId,
-      questTitle: quest.title,
-      rewardBooba: quest.rewardBooba,
-      proofUrl,
-      proofDescription,
-      submittedAt: new Date().toLocaleString(),
-      status: 'pending',
-      reviewedBy: null,
-      reviewedAt: null,
-      adminNotes: ''
-    };
-
-    this.submissions.unshift(newSub);
-    saveStorage(STORAGE_KEYS.SUBMISSIONS, this.submissions);
-    this.notify();
-    return { success: true, submission: newSub };
-  }
-
-  // Admin Actions
-  reviewSubmission(submissionId, action, adminNotes = '') {
-    const sub = this.submissions.find(s => s.id === submissionId);
-    if (!sub) return { success: false, message: 'Submission not found' };
-
-    sub.status = action; // 'approved' or 'rejected'
-    sub.reviewedBy = this.currentUser?.username || 'Admin';
-    sub.reviewedAt = new Date().toLocaleString();
-    sub.adminNotes = adminNotes;
-
-    // If approved, award BOOBA points to the user's passport
-    if (action === 'approved') {
-      const targetUser = this.users.find(u => u.id === sub.userId);
-      if (targetUser) {
-        targetUser.boobaPoints += sub.rewardBooba;
-        targetUser.completedQuestsCount += 1;
-        targetUser.reputation = Math.min(100, (targetUser.reputation || 80) + 1);
-        
-        // If target user is current user, update session
-        if (this.currentUser && this.currentUser.id === targetUser.id) {
-          this.currentUser = { ...targetUser };
-          saveStorage(STORAGE_KEYS.CURRENT_USER, this.currentUser);
-        }
+    try {
+      if (supabase && this.currentUser.id) {
+        await supabase
+          .from('booba_users')
+          .update({ booba_points: newPoints, completed_quests: newCount })
+          .eq('id', this.currentUser.id);
       }
-    }
 
-    saveStorage(STORAGE_KEYS.SUBMISSIONS, this.submissions);
-    saveStorage(STORAGE_KEYS.USERS, this.users);
-    this.notify();
-    return { success: true, status: action, sub };
+      this.currentUser.boobaPoints = newPoints;
+      this.currentUser.completedQuestsCount = newCount;
+      this.saveLocalSession(this.currentUser);
+      await this.fetchUsers();
+      this.notify();
+
+      return { success: true, reward, title: quest.title };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
   }
 
-  createQuest(questData) {
-    const newQuest = {
-      id: 'qst-' + Date.now(),
-      title: questData.title,
-      description: questData.description,
-      category: questData.category || 'community',
-      rewardBooba: parseInt(questData.rewardBooba, 10) || 100,
-      type: questData.type || 'proof',
-      requirements: questData.requirements || 'Follow guidelines and submit proof',
-      targetUrl: questData.targetUrl || '',
-      repeatable: Boolean(questData.repeatable),
-      deadline: questData.deadline || 'Active Campaign',
-      actionText: questData.actionText || 'Complete Quest',
-      isCompleted: false
+  async dailyCheckIn() {
+    if (!this.currentUser) return { success: false, message: 'Please sign in first' };
+
+    const bonus = 50;
+    const newPoints = (this.currentUser.boobaPoints || 0) + bonus;
+    const newStreak = (this.currentUser.streakDays || 1) + 1;
+    const newCount = (this.currentUser.completedQuestsCount || 0) + 1;
+
+    try {
+      if (supabase && this.currentUser.id) {
+        await supabase
+          .from('booba_users')
+          .update({
+            booba_points: newPoints,
+            streak_days: newStreak,
+            completed_quests: newCount
+          })
+          .eq('id', this.currentUser.id);
+      }
+
+      this.currentUser.boobaPoints = newPoints;
+      this.currentUser.streakDays = newStreak;
+      this.currentUser.completedQuestsCount = newCount;
+      this.saveLocalSession(this.currentUser);
+      await this.fetchUsers();
+      this.notify();
+
+      return { success: true, bonus, streak: newStreak };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // REFERRALS & AIRDROPS
+  // --------------------------------------------------------------------------
+
+  async recordReferral(referrerCode, newUsername, newPassportId) {
+    if (!supabase) return;
+    try {
+      // Find referrer username
+      const referrer = this.users.find(u => u.referralCode?.toUpperCase() === referrerCode.toUpperCase());
+      const referrerUsername = referrer ? referrer.username : referrerCode;
+
+      await supabase.from('booba_referrals').insert([{
+        referrer_username: referrerUsername,
+        referred_username: newUsername,
+        passport_id: newPassportId,
+        status: 'verified',
+        reward_claimed: 300
+      }]);
+
+      // Award bonus points to referrer
+      if (referrer && referrer.id) {
+        await supabase
+          .from('booba_users')
+          .update({
+            booba_points: (referrer.boobaPoints || 0) + 300,
+            verified_referrals: (referrer.verifiedReferralsCount || 0) + 1
+          })
+          .eq('id', referrer.id);
+      }
+    } catch (e) {
+      console.warn('recordReferral error:', e);
+    }
+  }
+
+  async fetchReferrals() {
+    if (!supabase) return [];
+    try {
+      const { data, error } = await supabase.from('booba_referrals').select('*').order('created_at', { ascending: false });
+      if (!error && data) {
+        this.referrals = data.map(r => ({
+          id: r.id,
+          referrerUsername: r.referrer_username,
+          referredUsername: r.referred_username,
+          passportId: r.passport_id,
+          status: r.status,
+          rewardClaimed: Number(r.reward_claimed) || 0,
+          joinedDate: r.joined_date || new Date().toISOString().split('T')[0]
+        }));
+      }
+    } catch (e) {
+      console.error('fetchReferrals error:', e);
+    }
+    return this.referrals;
+  }
+
+  async fetchAirdropLogs() {
+    if (!supabase) return [];
+    try {
+      const { data, error } = await supabase.from('booba_airdrop_logs').select('*').order('created_at', { ascending: false });
+      if (!error && data) {
+        this.airdropLogs = data.map(a => ({
+          id: a.id,
+          adminUsername: a.admin_username,
+          amountPerUser: Number(a.amount_per_user),
+          targetGroup: a.target_group,
+          recipientCount: Number(a.recipient_count),
+          totalDistributed: Number(a.total_distributed),
+          reason: a.reason,
+          date: a.created_at ? new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'
+        }));
+      }
+    } catch (e) {
+      console.error('fetchAirdropLogs error:', e);
+    }
+    return this.airdropLogs;
+  }
+
+  async distributeAirdrop({ targetGroup, amountPerUser, reason }) {
+    if (!supabase) return { success: false, message: 'Supabase client not connected' };
+    const amount = Number(amountPerUser) || 0;
+    if (amount <= 0) return { success: false, message: 'Invalid airdrop amount' };
+
+    let recipients = [...this.users];
+    if (targetGroup === 'top10') {
+      recipients = recipients.slice(0, 10);
+    } else if (targetGroup === 'active') {
+      recipients = recipients.filter(u => u.completedQuestsCount > 0);
+    }
+
+    if (recipients.length === 0) {
+      return { success: false, message: 'No eligible recipients found in this target group.' };
+    }
+
+    try {
+      // Update each user in Supabase
+      for (const u of recipients) {
+        await supabase
+          .from('booba_users')
+          .update({ booba_points: (u.boobaPoints || 0) + amount })
+          .eq('id', u.id);
+      }
+
+      const totalDist = amount * recipients.length;
+
+      // Log airdrop
+      await supabase.from('booba_airdrop_logs').insert([{
+        admin_username: this.currentUser?.username || 'Booba Admin',
+        amount_per_user: amount,
+        target_group: targetGroup,
+        recipient_count: recipients.length,
+        total_distributed: totalDist,
+        reason: reason || 'Community Airdrop'
+      }]);
+
+      await Promise.all([this.fetchUsers(), this.fetchAirdropLogs()]);
+      this.notify();
+
+      return {
+        success: true,
+        recipientCount: recipients.length,
+        totalDistributed: totalDist
+      };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // AGGREGATE STATS
+  // --------------------------------------------------------------------------
+
+  getStats() {
+    const totalUsers = this.users.length;
+    const totalQuestsCompleted = this.users.reduce((acc, u) => acc + (u.completedQuestsCount || 0), 0);
+    const totalPointsDistributed = this.users.reduce((acc, u) => acc + (u.boobaPoints || 0), 0);
+    const activeQuestsCount = this.quests.length;
+    const pendingSubmissions = this.submissions.filter(s => s.status === 'pending').length;
+
+    return {
+      totalUsers,
+      totalQuestsCompleted,
+      totalPointsDistributed,
+      activeQuestsCount,
+      pendingSubmissions
     };
-
-    this.quests.unshift(newQuest);
-    saveStorage(STORAGE_KEYS.QUESTS, this.quests);
-    this.notify();
-    return { success: true, quest: newQuest };
-  }
-
-  verifyReferral(referralId) {
-    const ref = this.referrals.find(r => r.id === referralId);
-    if (!ref) return { success: false, message: 'Referral record not found' };
-
-    ref.status = 'verified';
-    ref.rewardClaimed = 300;
-
-    // Award referrer +300 BOOBA
-    const referrer = this.users.find(u => u.username.toLowerCase() === ref.referrerUsername.toLowerCase());
-    if (referrer) {
-      referrer.boobaPoints += 300;
-      referrer.verifiedReferralsCount = (referrer.verifiedReferralsCount || 0) + 1;
-      referrer.reputation = Math.min(100, (referrer.reputation || 80) + 2);
-    }
-
-    saveStorage(STORAGE_KEYS.REFERRALS, this.referrals);
-    saveStorage(STORAGE_KEYS.USERS, this.users);
-    this.notify();
-    return { success: true, ref };
-  }
-
-  adjustUserBooba(userId, pointsDelta, reason = '') {
-    const user = this.users.find(u => u.id === userId);
-    if (!user) return { success: false, message: 'User not found' };
-
-    user.boobaPoints = Math.max(0, user.boobaPoints + pointsDelta);
-    if (this.currentUser && this.currentUser.id === user.id) {
-      this.currentUser = { ...user };
-      saveStorage(STORAGE_KEYS.CURRENT_USER, this.currentUser);
-    }
-
-    saveStorage(STORAGE_KEYS.USERS, this.users);
-    this.notify();
-    return { success: true, user };
   }
 }
 
 export const db = new DatabaseService();
+// Auto-initialize connection
+db.init();

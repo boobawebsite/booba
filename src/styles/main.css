@@ -1,0 +1,101 @@
+/* ==========================================================================
+   BOOBA (BNB baby) — Master Unified Stylesheet (main.css)
+   Google-Standard Aesthetics • Dark Crypto Luxury • Amber Gold Accent
+   ========================================================================== */
+
+@import url('./theme.css?v=3.0');
+@import url('./components.css?v=3.0');
+
+/* Multi-Page Navigation Active Indicator */
+.nav-link.active,
+.mobile-nav-link.active {
+  color: var(--brand-yellow) !important;
+  font-weight: 700;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--brand-yellow);
+  border-radius: var(--radius-full);
+}
+
+/* Header Admin Quick Access Button */
+.header-admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(243, 186, 47, 0.15);
+  color: var(--brand-yellow);
+  border: 1px solid rgba(243, 186, 47, 0.3);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.header-admin-badge:hover {
+  background: var(--brand-yellow);
+  color: #000000;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--brand-yellow-glow);
+}
+
+/* Page Layout Shell */
+.page-wrapper {
+  min-height: calc(100vh - var(--header-height));
+  display: flex;
+  flex-direction: column;
+}
+
+.page-content {
+  flex: 1;
+  padding: 2.5rem 0 4rem 0;
+}
+
+/* Live Supabase Sync Status Toast */
+.supabase-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-emerald);
+  background: var(--accent-emerald-subtle);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+}
+
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  box-shadow: 0 0 8px var(--accent-emerald);
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* Access Gate Card for unauthorized admin visits */
+.admin-gate-card {
+  max-width: 500px;
+  margin: 4rem auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(16px);
+}

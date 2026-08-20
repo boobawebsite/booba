@@ -1,20 +1,14 @@
 /* ==========================================================================
    BOOBA (BNB baby) — Team Admin Console Logic (teamadmin.js)
+   Live Supabase Backend • Email Whitelist Security Guard • Real Data
    ========================================================================== */
 
 import { db, calculateLevel, LEVEL_TIERS } from './src/services/db.js';
+import { isUserAdmin, ADMIN_EMAILS } from './src/services/supabaseClient.js';
 
 class TeamAdminApp {
   constructor() {
     this.activeTab = 'overview';
-    this.distributionLogs = JSON.parse(localStorage.getItem('booba_admin_airdrop_logs') || '[]');
-    
-    // Ensure admin user is active
-    const state = db.getState();
-    if (!state.currentUser || state.currentUser.role !== 'admin') {
-      db.switchDemoUser('admin');
-    }
-
     this.init();
   }
 
@@ -22,7 +16,7 @@ class TeamAdminApp {
     this.setupEventListeners();
     this.render();
 
-    // Subscribe to DB state updates
+    // Subscribe to DB updates
     db.subscribe(() => {
       this.render();
     });
@@ -61,12 +55,10 @@ class TeamAdminApp {
       openSidebar();
     });
 
-    // Close button inside sidebar
     document.getElementById('mobileSidebarCloseBtn')?.addEventListener('click', () => {
       closeSidebar();
     });
 
-    // Close on backdrop click
     backdrop?.addEventListener('click', () => {
       closeSidebar();
     });
@@ -87,786 +79,619 @@ class TeamAdminApp {
     sidebar?.classList.remove('open');
     backdrop?.classList.remove('active');
     document.body.style.overflow = '';
-    
+
     this.render();
   }
 
   showToast(message, type = 'success') {
-    const container = document.getElementById('adminToastContainer');
-    if (!container) return;
-
-    const toast = document.createElement('div');
-    toast.className = `admin-toast toast-${type}`;
-
-    toast.innerHTML = `
-      <div style="flex: 1; font-size: 0.9rem; font-weight: 600;">${message}</div>
-    `;
-
-    container.appendChild(toast);
-
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateX(100%)';
-      setTimeout(() => toast.remove(), 300);
-    }, 3500);
+    alert((type === 'success' ? '✅ ' : '❌ ') + message);
   }
 
-  render() {
-    const state = db.getState();
-    const contentBody = document.getElementById('adminContentBody');
-    if (!contentBody) return;
+  // --------------------------------------------------------------------------
+  // MAIN RENDER
+  // --------------------------------------------------------------------------
 
-    // Update pending submissions badge
-    const pendingCount = state.submissions.filter(s => s.status === 'pending').length;
-    const subBadge = document.getElementById('pendingSubmissionsBadge');
-    if (subBadge) {
-      subBadge.textContent = pendingCount;
-      subBadge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
+  render() {
+    const mainWorkspace = document.getElementById('adminWorkspace') || document.getElementById('adminContentBody');
+    if (!mainWorkspace) return;
+
+    const user = db.currentUser;
+    const isAuthorized = user && isUserAdmin(user);
+
+    // If not authenticated or not an admin, render the access restriction gate
+    if (!isAuthorized) {
+      this.renderAccessGate(mainWorkspace);
+      return;
+    }
+
+    // Update pending submissions badge in sidebar
+    const pendingCount = db.submissions.filter(s => s.status === 'pending').length;
+    const badge = document.getElementById('pendingSubmissionsBadge');
+    if (badge) {
+      badge.textContent = pendingCount;
+      badge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
     }
 
     switch (this.activeTab) {
-      case 'overview':
-        contentBody.innerHTML = this.getOverviewHTML(state);
-        this.attachOverviewListeners();
-        break;
       case 'quests':
-        contentBody.innerHTML = this.getQuestsHTML(state);
-        this.attachQuestsListeners();
+        this.renderQuestsTab(mainWorkspace);
         break;
       case 'airdrop':
-        contentBody.innerHTML = this.getAirdropHTML(state);
-        this.attachAirdropListeners();
+        this.renderAirdropTab(mainWorkspace);
         break;
       case 'submissions':
-        contentBody.innerHTML = this.getSubmissionsHTML(state);
-        this.attachSubmissionsListeners();
+        this.renderSubmissionsTab(mainWorkspace);
         break;
       case 'users':
-        contentBody.innerHTML = this.getUsersHTML(state);
-        this.attachUsersListeners();
+        this.renderUsersTab(mainWorkspace);
         break;
+      case 'overview':
       default:
-        contentBody.innerHTML = this.getOverviewHTML(state);
-        this.attachOverviewListeners();
+        this.renderOverviewTab(mainWorkspace);
+        break;
     }
   }
 
-  /* --------------------------------------------------------------------------
-     1. OVERVIEW TAB
-     -------------------------------------------------------------------------- */
-  getOverviewHTML(state) {
-    const totalUsers = state.users.length;
-    const totalQuests = state.quests.length;
-    const totalTokensDistributed = state.users.reduce((acc, u) => acc + (u.boobaPoints || 0), 0);
-    const pendingSubmissions = state.submissions.filter(s => s.status === 'pending').length;
+  // --------------------------------------------------------------------------
+  // ADMIN ACCESS RESTRICTION GATE
+  // --------------------------------------------------------------------------
 
-    const topHolders = [...state.users].sort((a, b) => b.boobaPoints - a.boobaPoints).slice(0, 5);
+  renderAccessGate(container) {
+    container.innerHTML = `
+      <div class="admin-gate-card">
+        <img src="assets/mascot.jpg" style="width: 72px; height: 72px; border-radius: 50%; border: 2.5px solid var(--brand-yellow); margin-bottom: 1.25rem;">
+        <h2 style="font-size: 1.4rem; color: #FFFFFF; margin-bottom: 0.5rem;">Core Team Admin Authorization</h2>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.75rem;">
+          This console is restricted to authorized team email addresses registered in the admin whitelist.
+        </p>
 
-    return `
-      <div class="admin-stats-grid">
-        <div class="stat-widget">
-          <div class="stat-icon-wrapper" style="background: var(--brand-yellow-subtle); color: var(--brand-yellow);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><line x1="12" y1="6" x2="12" y2="8"></line><line x1="12" y1="16" x2="12" y2="18"></line></svg>
+        <form id="adminLoginForm" onsubmit="window.adminApp.handleAdminLogin(event)" style="text-align: left;">
+          <div style="margin-bottom: 1rem;">
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">
+              Authorized Admin Email
+            </label>
+            <input type="email" id="adminEmailInput" placeholder="admin@gmail.com" class="form-input" style="width: 100%;" required>
           </div>
-          <div>
-            <div class="stat-val">${totalTokensDistributed.toLocaleString()}</div>
-            <div class="stat-lbl">BOOBA Distributed</div>
-          </div>
-        </div>
-
-        <div class="stat-widget">
-          <div class="stat-icon-wrapper" style="background: var(--accent-blue-subtle); color: var(--accent-blue);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          </div>
-          <div>
-            <div class="stat-val">${totalUsers}</div>
-            <div class="stat-lbl">Registered Passports</div>
-          </div>
-        </div>
-
-        <div class="stat-widget">
-          <div class="stat-icon-wrapper" style="background: var(--accent-emerald-subtle); color: var(--accent-emerald);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-          </div>
-          <div>
-            <div class="stat-val">${totalQuests}</div>
-            <div class="stat-lbl">Active Quests & Bounties</div>
-          </div>
-        </div>
-
-        <div class="stat-widget">
-          <div class="stat-icon-wrapper" style="background: var(--accent-ruby-subtle); color: var(--accent-ruby);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          </div>
-          <div>
-            <div class="stat-val">${pendingSubmissions}</div>
-            <div class="stat-lbl">Pending Submissions</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Actions Grid -->
-      <div class="admin-card">
-        <div class="admin-card-header">
-          <h3 class="admin-card-title">Quick Management Actions</h3>
-        </div>
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-          <button class="btn-admin btn-admin-primary" id="quickNewQuestBtn">
-            Upload New Quest
+          
+          <button type="submit" class="btn btn-primary btn-block" style="margin-top: 0.5rem;">
+            Authenticate Admin Access ↗
           </button>
-          <button class="btn-admin btn-admin-secondary" id="quickAirdropBtn">
-            Launch Token Airdrop
-          </button>
-          <button class="btn-admin btn-admin-secondary" id="quickReviewSubmissionsBtn">
-            Review Proof Submissions (${pendingSubmissions})
-          </button>
-          <a href="index.html#home" class="btn-admin btn-admin-secondary" target="_blank">
-            Visit Public Website ↗
-          </a>
-        </div>
-      </div>
-
-      <!-- Top Leaderboard Snapshot -->
-      <div class="admin-card">
-        <div class="admin-card-header">
-          <h3 class="admin-card-title">Top User Rankings</h3>
-          <button class="btn-admin btn-admin-secondary btn-sm" id="viewAllUsersBtn">View All Users →</button>
-        </div>
-        <div class="table-responsive">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>User / Passport</th>
-                <th>BSC Wallet</th>
-                <th>Level Tier</th>
-                <th>BOOBA Balance</th>
-                <th>Reputation</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${topHolders.map((u, i) => {
-                const lvl = calculateLevel(u.boobaPoints);
-                return `
-                  <tr>
-                    <td><span class="admin-badge ${i === 0 ? 'badge-gold' : 'badge-blue'}">#${i + 1}</span></td>
-                    <td>
-                      <div style="font-weight: 700; color: var(--text-primary);">@${u.username}</div>
-                      <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">${u.passportId}</div>
-                    </td>
-                    <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary);">${u.walletAddress || 'Not Connected'}</td>
-                    <td><span class="admin-badge badge-purple">${lvl.title} (Lvl ${lvl.level})</span></td>
-                    <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">${u.boobaPoints.toLocaleString()} BOOBA</td>
-                    <td><span class="admin-badge badge-green">Rep: ${u.reputation || 90}/100</span></td>
-                    <td>
-                      <button class="btn-admin btn-admin-primary btn-sm direct-credit-btn" data-userid="${u.id}" data-username="${u.username}">
-                        Credit Tokens
-                      </button>
-                    </td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  }
-
-  attachOverviewListeners() {
-    document.getElementById('quickNewQuestBtn')?.addEventListener('click', () => this.switchTab('quests'));
-    document.getElementById('quickAirdropBtn')?.addEventListener('click', () => this.switchTab('airdrop'));
-    document.getElementById('quickReviewSubmissionsBtn')?.addEventListener('click', () => this.switchTab('submissions'));
-    document.getElementById('viewAllUsersBtn')?.addEventListener('click', () => this.switchTab('users'));
-
-    document.querySelectorAll('.direct-credit-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const userId = btn.getAttribute('data-userid');
-        this.switchTab('airdrop');
-        setTimeout(() => {
-          const userSelect = document.getElementById('airdropUserSelect');
-          if (userSelect) userSelect.value = userId;
-        }, 100);
-      });
-    });
-  }
-
-  /* --------------------------------------------------------------------------
-     2. QUESTS CREATOR & UPLOAD TAB
-     -------------------------------------------------------------------------- */
-  getQuestsHTML(state) {
-    return `
-      <!-- Quest Upload Form Card -->
-      <div class="admin-card">
-        <div class="admin-card-header">
-          <h3 class="admin-card-title">Create & Publish New Quest</h3>
-          <span class="admin-badge badge-gold">Live Website Upload</span>
-        </div>
-
-        <form id="createQuestForm">
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label">Quest Title *</label>
-              <input type="text" id="questTitleInput" class="form-control" placeholder="e.g. Retweet & Tag 3 Friends on X" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Category *</label>
-              <select id="questCategoryInput" class="form-control">
-                <option value="social">Social (Twitter / X, Discord, TG)</option>
-                <option value="community">Community (Ambassador, Onboarding)</option>
-                <option value="creative">Creative (Memes, Threads, TikTok/Reels)</option>
-                <option value="special">Special Launch Campaign</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Reward Amount (BOOBA Points) *</label>
-              <input type="number" id="questRewardInput" class="form-control" placeholder="500" min="10" step="10" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Verification Type *</label>
-              <select id="questTypeInput" class="form-control">
-                <option value="proof">Manual Proof Submission (Links, Screenshots)</option>
-                <option value="social">Instant Link / Social Follow</option>
-                <option value="special">Milestone / Special Criteria</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Target Link / URL (Optional)</label>
-              <input type="url" id="questUrlInput" class="form-control" placeholder="https://x.com/BoobaBabyBNB/status/...">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Deadline / Schedule *</label>
-              <input type="text" id="questDeadlineInput" class="form-control" placeholder="e.g. Active Bounty, Ends in 3 Days" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Button Action Text *</label>
-              <input type="text" id="questActionTextInput" class="form-control" placeholder="e.g. Submit Meme Link, Follow on X" required>
-            </div>
-
-            <div class="form-group" style="display: flex; align-items: center; justify-content: center;">
-              <label style="display: flex; align-items: center; gap: 0.6rem; font-weight: 600; cursor: pointer;">
-                <input type="checkbox" id="questRepeatableInput" style="width: 18px; height: 18px; accent-color: var(--brand-yellow);">
-                <span>Allow Repeatable Submissions</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="form-group" style="margin-top: 1rem;">
-            <label class="form-label">Quest Description *</label>
-            <textarea id="questDescInput" class="form-control" placeholder="Explain what the participant must do to earn the bounty..." required></textarea>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Detailed Requirements & Instructions</label>
-            <input type="text" id="questRequirementsInput" class="form-control" placeholder="e.g. Must include #BOOBA #BNBbaby in your post. Minimum 20 followers.">
-          </div>
-
-          <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem;">
-            <button type="reset" class="btn-admin btn-admin-secondary">Clear Form</button>
-            <button type="submit" class="btn-admin btn-admin-primary">Publish Quest to Live Site</button>
-          </div>
         </form>
-      </div>
 
-      <!-- Published Quests Table -->
-      <div class="admin-card">
-        <div class="admin-card-header">
-          <h3 class="admin-card-title">Published Quests & Bounties (${state.quests.length})</h3>
+        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle); font-size: 0.75rem; color: var(--text-muted);">
+          Whitelisted Emails: <span class="text-mono" style="color: var(--brand-yellow);">${ADMIN_EMAILS.join(', ')}</span>
         </div>
 
-        <div class="table-responsive">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Title & Category</th>
-                <th>Reward</th>
-                <th>Type</th>
-                <th>Deadline</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${state.quests.map(q => `
-                <tr>
-                  <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">${q.id}</td>
-                  <td>
-                    <div style="font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">${q.title}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.2rem;">
-                      <span class="admin-badge badge-${q.category === 'creative' ? 'purple' : q.category === 'social' ? 'blue' : 'gold'}">${q.category}</span>
-                      <span style="color: var(--text-muted); margin-left: 0.5rem;">${q.actionText}</span>
+        <div style="margin-top: 1rem;">
+          <a href="index.html" class="nav-link" style="font-size: 0.85rem; color: var(--text-secondary);">← Back to Main Website</a>
+        </div>
+      </div>
+    `;
+  }
+
+  async handleAdminLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('adminEmailInput')?.value.trim().toLowerCase();
+    if (!email) return;
+
+    if (!isUserAdmin(email)) {
+      alert(`❌ Access Denied: "${email}" is not listed in the ADMIN_EMAILS whitelist in code.`);
+      return;
+    }
+
+    // Attempt to log in or create the admin session
+    let res = await db.login({ emailOrUsername: email });
+    if (!res.success) {
+      // Auto-register admin account if first time
+      res = await db.signup({
+        username: 'BoobaBoss',
+        email: email,
+        referralCode: 'ADMIN'
+      });
+    }
+
+    if (res.success) {
+      alert(`🎉 Welcome to the Admin Studio, ${res.user.username}!`);
+      this.render();
+    } else {
+      alert(res.message || 'Login failed');
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // 1. OVERVIEW TAB
+  // --------------------------------------------------------------------------
+
+  renderOverviewTab(container) {
+    const stats = db.getStats();
+    const recentSubmissions = db.submissions.slice(0, 5);
+    const recentUsers = db.users.slice(0, 5);
+
+    container.innerHTML = `
+      <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; color: #FFFFFF;">Admin Dashboard Overview</h1>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Live metrics and recent activity from Supabase database.</p>
+          </div>
+          <div class="supabase-live-pill">
+            <span class="pulse-dot"></span>
+            <span>Live Supabase Connected</span>
+          </div>
+        </div>
+
+        <!-- Metrics Cards Grid -->
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem;">
+          <div class="card">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total Real Passports</div>
+            <div style="font-size: 2rem; font-weight: 800; color: #FFFFFF; margin: 0.35rem 0;">${Number(stats.totalUsers).toLocaleString()}</div>
+            <div style="font-size: 0.75rem; color: var(--accent-emerald);">Registered Accounts</div>
+          </div>
+
+          <div class="card">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Active Live Quests</div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--brand-yellow); margin: 0.35rem 0;">${Number(stats.activeQuestsCount).toLocaleString()}</div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary);"><a href="#" onclick="window.adminApp.switchTab('quests')" style="color: var(--brand-yellow);">Manage Quests →</a></div>
+          </div>
+
+          <div class="card">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Pending Submissions</div>
+            <div style="font-size: 2rem; font-weight: 800; color: ${stats.pendingSubmissions > 0 ? 'var(--accent-orange)' : 'var(--text-primary)'}; margin: 0.35rem 0;">
+              ${Number(stats.pendingSubmissions).toLocaleString()}
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary);"><a href="#" onclick="window.adminApp.switchTab('submissions')" style="color: var(--brand-yellow);">Review Submissions →</a></div>
+          </div>
+
+          <div class="card">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total Points Circulating</div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--accent-gold); margin: 0.35rem 0;">${Number(stats.totalPointsDistributed).toLocaleString()}</div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary);">$BOOBA Points</div>
+          </div>
+        </div>
+
+        <!-- Recent Activity Sections -->
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
+          <!-- Recent Submissions -->
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="font-size: 1.1rem; color: #FFFFFF;">Recent Proof Submissions</h3>
+              <a href="#" onclick="window.adminApp.switchTab('submissions')" style="font-size: 0.8rem; color: var(--brand-yellow);">View All</a>
+            </div>
+
+            ${recentSubmissions.length === 0 ? `
+              <p style="color: var(--text-secondary); font-size: 0.85rem;">No user submissions yet.</p>
+            ` : `
+              <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+                ${recentSubmissions.map(s => `
+                  <div style="padding: 0.65rem; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <strong style="color: #FFFFFF; font-size: 0.85rem;">${s.username}</strong>
+                      <div style="font-size: 0.75rem; color: var(--text-muted);">${s.questTitle}</div>
                     </div>
-                  </td>
-                  <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">
-                    +${q.rewardBooba.toLocaleString()} BOOBA
-                  </td>
-                  <td><span class="admin-badge badge-blue">${q.type}</span></td>
-                  <td style="font-size: 0.825rem; color: var(--text-secondary);">${q.deadline}</td>
-                  <td>
-                    <button class="btn-admin btn-admin-danger btn-sm delete-quest-btn" data-questid="${q.id}" title="Delete Quest">
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  }
-
-  attachQuestsListeners() {
-    document.getElementById('createQuestForm')?.addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      const title = document.getElementById('questTitleInput')?.value;
-      const category = document.getElementById('questCategoryInput')?.value;
-      const rewardBooba = parseInt(document.getElementById('questRewardInput')?.value, 10);
-      const type = document.getElementById('questTypeInput')?.value;
-      const targetUrl = document.getElementById('questUrlInput')?.value;
-      const deadline = document.getElementById('questDeadlineInput')?.value;
-      const actionText = document.getElementById('questActionTextInput')?.value;
-      const repeatable = document.getElementById('questRepeatableInput')?.checked;
-      const description = document.getElementById('questDescInput')?.value;
-      const requirements = document.getElementById('questRequirementsInput')?.value;
-
-      if (!title || !rewardBooba || !description) {
-        this.showToast('Please fill all required fields.', 'error');
-        return;
-      }
-
-      const res = db.createQuest({
-        title,
-        category,
-        rewardBooba,
-        type,
-        targetUrl,
-        deadline,
-        actionText,
-        repeatable,
-        description,
-        requirements
-      });
-
-      if (res.success) {
-        this.showToast(`Quest "${title}" successfully published to the live website!`);
-        document.getElementById('createQuestForm')?.reset();
-        this.render();
-      }
-    });
-
-    document.querySelectorAll('.delete-quest-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const questId = btn.getAttribute('data-questid');
-        if (confirm('Are you sure you want to remove this quest from the live website?')) {
-          const state = db.getState();
-          state.quests = state.quests.filter(q => q.id !== questId);
-          localStorage.setItem('booba_quests_data', JSON.stringify(state.quests));
-          db.notify();
-          this.showToast('Quest deleted from live site.');
-        }
-      });
-    });
-  }
-
-  /* --------------------------------------------------------------------------
-     3. TOKEN & AIRDROP DISTRIBUTION ENGINE
-     -------------------------------------------------------------------------- */
-  getAirdropHTML(state) {
-    return `
-      <div class="airdrop-hub-grid">
-        
-        <!-- Single User Token Grant -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <h3 class="admin-card-title">Individual User Token Distribution</h3>
-            <span class="admin-badge badge-gold">Direct Credit</span>
-          </div>
-
-          <form id="singleDistributeForm">
-            <div class="form-group">
-              <label class="form-label">Select Recipient User *</label>
-              <select id="airdropUserSelect" class="form-control" required>
-                <option value="">-- Choose User / Passport --</option>
-                ${state.users.map(u => `
-                  <option value="${u.id}">@${u.username} (${u.passportId}) — Balance: ${u.boobaPoints.toLocaleString()} BOOBA</option>
+                    <span class="badge-tag" style="font-size: 0.7rem; text-transform: uppercase;">${s.status}</span>
+                  </div>
                 `).join('')}
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Token Amount to Credit (BOOBA) *</label>
-              <input type="number" id="singleAmountInput" class="form-control" placeholder="1000" min="1" step="10" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Distribution Reason / Note *</label>
-              <input type="text" id="singleReasonInput" class="form-control" placeholder="e.g. Bug Bounty Reward, AMA Stage Speaker Reward" required>
-            </div>
-
-            <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; margin-top: 1rem;">
-              Credit Tokens to User Passport
-            </button>
-          </form>
-        </div>
-
-        <!-- Mass / Batch Airdrop Engine -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <h3 class="admin-card-title">Mass Community Airdrop</h3>
-            <span class="admin-badge badge-purple">Batch Engine</span>
+              </div>
+            `}
           </div>
 
-          <form id="massAirdropForm">
-            <div class="form-group">
-              <label class="form-label">Target Audience Criteria *</label>
-              <select id="massTargetCriteria" class="form-control">
-                <option value="all">All Registered Passport Holders (${state.users.length} Users)</option>
-                <option value="lvl5">Level 5+ Grinders & Warriors Only</option>
-                <option value="lvl7">Level 7+ Booba Elites & Legends Only</option>
-                <option value="referrers">Top Referrers (1+ Verified Referrals)</option>
-              </select>
+          <!-- Recent Users -->
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="font-size: 1.1rem; color: #FFFFFF;">Recent Real Passports</h3>
+              <a href="#" onclick="window.adminApp.switchTab('users')" style="font-size: 0.8rem; color: var(--brand-yellow);">View All</a>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">BOOBA Amount Per User *</label>
-              <input type="number" id="massAmountInput" class="form-control" placeholder="500" min="10" step="10" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Airdrop Campaign Name *</label>
-              <input type="text" id="massCampaignInput" class="form-control" placeholder="e.g. Genesis Community Season 1 Airdrop" required>
-            </div>
-
-            <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; margin-top: 1rem; background: linear-gradient(135deg, #F3BA2F 0%, #E0A800 100%);">
-              Execute Mass Airdrop Payout
-            </button>
-          </form>
-        </div>
-
-      </div>
-
-      <!-- Airdrop Transaction & Audit Log -->
-      <div class="admin-card" style="margin-top: 1.5rem;">
-        <div class="admin-card-header">
-          <h3 class="admin-card-title">Token Distribution Ledger (${this.distributionLogs.length} Records)</h3>
-          <button class="btn-admin btn-admin-secondary btn-sm" id="clearAirdropLogsBtn">Clear Log History</button>
-        </div>
-
-        <div class="table-responsive">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Type</th>
-                <th>Recipient(s)</th>
-                <th>Amount</th>
-                <th>Reason / Campaign</th>
-                <th>Admin Signature</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${this.distributionLogs.length === 0 ? `
-                <tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No distribution transactions recorded yet.</td></tr>
-              ` : this.distributionLogs.map(log => `
-                <tr>
-                  <td style="font-size: 0.8rem; color: var(--text-secondary); font-family: var(--font-mono);">${log.timestamp}</td>
-                  <td><span class="admin-badge ${log.type === 'Mass Airdrop' ? 'badge-purple' : 'badge-gold'}">${log.type}</span></td>
-                  <td style="font-weight: 700; color: var(--text-primary);">${log.recipient}</td>
-                  <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">+${log.amount.toLocaleString()} BOOBA</td>
-                  <td style="font-size: 0.85rem; color: var(--text-secondary);">${log.reason}</td>
-                  <td style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-emerald);">${log.admin}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  }
-
-  attachAirdropListeners() {
-    // Single Transfer
-    document.getElementById('singleDistributeForm')?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const userId = document.getElementById('airdropUserSelect')?.value;
-      const amount = parseInt(document.getElementById('singleAmountInput')?.value, 10);
-      const reason = document.getElementById('singleReasonInput')?.value;
-
-      if (!userId || !amount) {
-        this.showToast('Please select user and amount.', 'error');
-        return;
-      }
-
-      const res = db.adjustUserBooba(userId, amount, reason);
-      if (res.success) {
-        // Record log
-        this.distributionLogs.unshift({
-          timestamp: new Date().toLocaleString(),
-          type: 'Single Grant',
-          recipient: `@${res.user.username} (${res.user.passportId})`,
-          amount,
-          reason,
-          admin: db.currentUser?.username || 'BoobaBoss'
-        });
-        localStorage.setItem('booba_admin_airdrop_logs', JSON.stringify(this.distributionLogs));
-
-        this.showToast(`Successfully credited ${amount.toLocaleString()} BOOBA to @${res.user.username}!`);
-        document.getElementById('singleDistributeForm')?.reset();
-        this.render();
-      }
-    });
-
-    // Mass Airdrop
-    document.getElementById('massAirdropForm')?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const criteria = document.getElementById('massTargetCriteria')?.value;
-      const amount = parseInt(document.getElementById('massAmountInput')?.value, 10);
-      const campaign = document.getElementById('massCampaignInput')?.value;
-
-      if (!amount || !campaign) {
-        this.showToast('Please specify amount and campaign name.', 'error');
-        return;
-      }
-
-      const state = db.getState();
-      let targetUsers = [];
-
-      if (criteria === 'all') {
-        targetUsers = state.users;
-      } else if (criteria === 'lvl5') {
-        targetUsers = state.users.filter(u => calculateLevel(u.boobaPoints).level >= 5);
-      } else if (criteria === 'lvl7') {
-        targetUsers = state.users.filter(u => calculateLevel(u.boobaPoints).level >= 7);
-      } else if (criteria === 'referrers') {
-        targetUsers = state.users.filter(u => (u.verifiedReferralsCount || 0) > 0);
-      }
-
-      if (targetUsers.length === 0) {
-        this.showToast('No users match the selected criteria.', 'error');
-        return;
-      }
-
-      const totalTokens = targetUsers.length * amount;
-      if (!confirm(`Execute Airdrop to ${targetUsers.length} users (${totalTokens.toLocaleString()} total BOOBA)?`)) {
-        return;
-      }
-
-      targetUsers.forEach(u => {
-        u.boobaPoints += amount;
-      });
-
-      localStorage.setItem('booba_users_data', JSON.stringify(state.users));
-      db.notify();
-
-      this.distributionLogs.unshift({
-        timestamp: new Date().toLocaleString(),
-        type: 'Mass Airdrop',
-        recipient: `${targetUsers.length} Users (${criteria})`,
-        amount: totalTokens,
-        reason: campaign,
-        admin: db.currentUser?.username || 'BoobaBoss'
-      });
-      localStorage.setItem('booba_admin_airdrop_logs', JSON.stringify(this.distributionLogs));
-
-      this.showToast(`Mass Airdrop Completed: ${totalTokens.toLocaleString()} BOOBA sent to ${targetUsers.length} users!`);
-      document.getElementById('massAirdropForm')?.reset();
-      this.render();
-    });
-
-    document.getElementById('clearAirdropLogsBtn')?.addEventListener('click', () => {
-      this.distributionLogs = [];
-      localStorage.removeItem('booba_admin_airdrop_logs');
-      this.render();
-      this.showToast('Airdrop ledger cleared.');
-    });
-  }
-
-  /* --------------------------------------------------------------------------
-     4. SUBMISSIONS MODERATION QUEUE TAB
-     -------------------------------------------------------------------------- */
-  getSubmissionsHTML(state) {
-    const submissions = state.submissions;
-
-    return `
-      <div class="admin-card">
-        <div class="admin-card-header">
-          <h3 class="admin-card-title">Community Proof Submissions Queue (${submissions.length})</h3>
-        </div>
-
-        <div class="table-responsive">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>User / Passport</th>
-                <th>Quest Bounty</th>
-                <th>Reward</th>
-                <th>Proof Submission Link</th>
-                <th>Submitted</th>
-                <th>Status</th>
-                <th>Review Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${submissions.length === 0 ? `
-                <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No submissions in queue.</td></tr>
-              ` : submissions.map(sub => `
-                <tr>
-                  <td>
-                    <div style="font-weight: 700; color: var(--text-primary);">@${sub.username}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">${sub.passportId}</div>
-                  </td>
-                  <td style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">${sub.questTitle}</td>
-                  <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">+${sub.rewardBooba} BOOBA</td>
-                  <td>
-                    <a href="${sub.proofUrl}" target="_blank" class="btn-admin btn-admin-secondary btn-sm" style="color: var(--accent-blue);">
-                      View Proof ↗
-                    </a>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; max-width: 260px;">${sub.proofDescription || ''}</div>
-                  </td>
-                  <td style="font-size: 0.75rem; color: var(--text-secondary);">${sub.submittedAt}</td>
-                  <td>
-                    <span class="admin-badge ${sub.status === 'approved' ? 'badge-green' : sub.status === 'rejected' ? 'badge-red' : 'badge-gold'}">
-                      ${sub.status.toUpperCase()}
-                    </span>
-                  </td>
-                  <td>
-                    ${sub.status === 'pending' ? `
-                      <div style="display: flex; gap: 0.5rem;">
-                        <button class="btn-admin btn-admin-success btn-sm approve-sub-btn" data-subid="${sub.id}">
-                          Approve (+${sub.rewardBooba})
-                        </button>
-                        <button class="btn-admin btn-admin-danger btn-sm reject-sub-btn" data-subid="${sub.id}">
-                          Reject
-                        </button>
+            ${recentUsers.length === 0 ? `
+              <p style="color: var(--text-secondary); font-size: 0.85rem;">No registered passports yet.</p>
+            ` : `
+              <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+                ${recentUsers.map(u => `
+                  <div style="padding: 0.65rem; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 24px; height: 24px; border-radius: 50%;">
+                      <div>
+                        <strong style="color: #FFFFFF; font-size: 0.85rem;">${u.username}</strong>
+                        <div style="font-size: 0.72rem; color: var(--text-muted);">${u.passportId}</div>
                       </div>
-                    ` : `
-                      <span style="font-size: 0.75rem; color: var(--text-muted);">Reviewed by ${sub.reviewedBy || 'Admin'}</span>
-                    `}
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
+                    </div>
+                    <div style="font-weight: 700; color: var(--brand-yellow); font-size: 0.85rem;">${Number(u.boobaPoints).toLocaleString()} BOOBA</div>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
         </div>
       </div>
     `;
   }
 
-  attachSubmissionsListeners() {
-    document.querySelectorAll('.approve-sub-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const subId = btn.getAttribute('data-subid');
-        const res = db.reviewSubmission(subId, 'approved', 'Verified by Team Admin');
-        if (res.success) {
-          this.showToast(`Submission approved! Tokens credited to user's passport.`);
-        }
-      });
-    });
+  // --------------------------------------------------------------------------
+  // 2. QUESTS TAB (CREATE & MANAGE)
+  // --------------------------------------------------------------------------
 
-    document.querySelectorAll('.reject-sub-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const subId = btn.getAttribute('data-subid');
-        const note = prompt('Reason for rejection (optional):', 'Proof invalid or link broken');
-        const res = db.reviewSubmission(subId, 'rejected', note || '');
-        if (res.success) {
-          this.showToast(`Submission rejected.`, 'info');
-        }
-      });
-    });
-  }
+  renderQuestsTab(container) {
+    const quests = db.quests;
 
-  /* --------------------------------------------------------------------------
-     5. USER DIRECTORY TAB
-     -------------------------------------------------------------------------- */
-  getUsersHTML(state) {
-    return `
-      <div class="admin-card">
-        <div class="admin-card-header">
-          <h3 class="admin-card-title">All Registered Passports (${state.users.length})</h3>
-          <div style="display: flex; gap: 0.75rem;">
-            <input type="text" id="userSearchInput" class="form-control" placeholder="Search by username, ID, or wallet..." style="width: 260px; padding: 0.4rem 0.8rem; font-size: 0.85rem;">
-          </div>
+    container.innerHTML = `
+      <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="margin-bottom: 2rem;">
+          <h1 style="font-size: 1.6rem; font-weight: 800; color: #FFFFFF;">Upload & Manage Live Quests</h1>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">Quests created here are saved directly to Supabase and appear immediately on the main website.</p>
         </div>
 
-        <div class="table-responsive">
-          <table class="admin-table" id="usersTable">
-            <thead>
-              <tr>
-                <th>Passport ID</th>
-                <th>Username</th>
-                <th>Role</th>
-                <th>BSC Wallet</th>
-                <th>Level</th>
-                <th>BOOBA Balance</th>
-                <th>Quests</th>
-                <th>Referrals</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${state.users.map(u => {
-                const lvl = calculateLevel(u.boobaPoints);
-                return `
-                  <tr class="user-row" data-search="${u.username.toLowerCase()} ${u.passportId.toLowerCase()} ${(u.walletAddress || '').toLowerCase()}">
-                    <td style="font-family: var(--font-mono); font-weight: 700; color: var(--brand-yellow);">${u.passportId}</td>
-                    <td>
-                      <div style="font-weight: 700; color: var(--text-primary);">@${u.username}</div>
-                      <div style="font-size: 0.75rem; color: var(--text-muted);">${u.email}</div>
-                    </td>
-                    <td><span class="admin-badge ${u.role === 'admin' ? 'badge-gold' : 'badge-blue'}">${u.role.toUpperCase()}</span></td>
-                    <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary);">${u.walletAddress || 'Not Connected'}</td>
-                    <td><span class="admin-badge badge-purple">${lvl.title} (Lvl ${lvl.level})</span></td>
-                    <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">${u.boobaPoints.toLocaleString()} BOOBA</td>
-                    <td>${u.completedQuestsCount || 0}</td>
-                    <td>${u.verifiedReferralsCount || 0}</td>
-                    <td>
-                      <button class="btn-admin btn-admin-primary btn-sm user-grant-btn" data-userid="${u.id}">
-                        Grant Tokens
-                      </button>
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+          <!-- Quest Creator Form -->
+          <div class="card">
+            <h3 style="font-size: 1.15rem; color: #FFFFFF; margin-bottom: 1.25rem;">Create New Quest</h3>
+            
+            <form onsubmit="window.adminApp.handleCreateQuest(event)">
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <label class="form-label">Quest Title</label>
+                <input type="text" id="newQuestTitle" placeholder="e.g. Subscribe to Booba YouTube" class="form-input" required>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <label class="form-label">Description</label>
+                <textarea id="newQuestDesc" rows="2" placeholder="Explain what the user needs to do..." class="form-input" required></textarea>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                  <label class="form-label">Category</label>
+                  <select id="newQuestCategory" class="form-input">
+                    <option value="social">Social</option>
+                    <option value="creative">Creative / Memes</option>
+                    <option value="community">Community</option>
+                    <option value="daily">Daily Check-in</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Reward (BOOBA)</label>
+                  <input type="number" id="newQuestReward" value="150" class="form-input" required>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                  <label class="form-label">Quest Type</label>
+                  <select id="newQuestType" class="form-input">
+                    <option value="proof">Proof Submission</option>
+                    <option value="social">Social Link Action</option>
+                    <option value="instant">Instant Claim</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Target URL (Optional)</label>
+                  <input type="url" id="newQuestUrl" placeholder="https://..." class="form-input">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label">Requirements Summary</label>
+                <input type="text" id="newQuestReqs" placeholder="e.g. Submit post link with #BOOBA tags" class="form-input">
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                Publish Quest to Main Website ↗
+              </button>
+            </form>
+          </div>
+
+          <!-- Existing Quests List -->
+          <div>
+            <h3 style="font-size: 1.15rem; color: #FFFFFF; margin-bottom: 1.25rem;">Live Quests in Database (${quests.length})</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              ${quests.map(q => `
+                <div class="card" style="padding: 1.25rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <div>
+                      <span class="badge-tag" style="text-transform: uppercase; font-size: 0.7rem;">${q.category}</span>
+                      <strong style="font-size: 1rem; color: #FFFFFF; display: block; margin-top: 0.35rem;">${q.title}</strong>
+                    </div>
+                    <div style="font-weight: 800; color: var(--brand-yellow);">+${q.rewardBooba} BOOBA</div>
+                  </div>
+                  <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">${q.description}</p>
+                  
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Type: ${q.type}</span>
+                    <button class="btn btn-ghost btn-sm" onclick="window.adminApp.handleDeleteQuest('${q.id}')" style="color: var(--accent-ruby); font-size: 0.75rem;">
+                      Delete Quest
+                    </button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async handleCreateQuest(e) {
+    e.preventDefault();
+    const title = document.getElementById('newQuestTitle')?.value.trim();
+    const description = document.getElementById('newQuestDesc')?.value.trim();
+    const category = document.getElementById('newQuestCategory')?.value;
+    const rewardBooba = document.getElementById('newQuestReward')?.value;
+    const type = document.getElementById('newQuestType')?.value;
+    const targetUrl = document.getElementById('newQuestUrl')?.value.trim();
+    const requirements = document.getElementById('newQuestReqs')?.value.trim();
+
+    if (!title || !description) return;
+
+    const res = await db.createQuest({
+      title,
+      description,
+      category,
+      rewardBooba,
+      type,
+      targetUrl,
+      requirements
+    });
+
+    if (res.success) {
+      alert('🎉 Quest published live! Users can now view and complete it.');
+      this.render();
+    } else {
+      alert(res.message || 'Failed to create quest');
+    }
+  }
+
+  async handleDeleteQuest(questId) {
+    if (!confirm('Are you sure you want to delete this quest?')) return;
+    const res = await db.deleteQuest(questId);
+    if (res.success) {
+      alert('Quest deleted.');
+      this.render();
+    } else {
+      alert(res.message || 'Failed to delete quest');
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // 3. PROOF SUBMISSIONS TAB (REVIEW & APPROVE)
+  // --------------------------------------------------------------------------
+
+  renderSubmissionsTab(container) {
+    const submissions = db.submissions;
+
+    container.innerHTML = `
+      <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="margin-bottom: 2rem;">
+          <h1 style="font-size: 1.6rem; font-weight: 800; color: #FFFFFF;">User Proof Submissions</h1>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">Review creative content, verify task completion, and release $BOOBA tokens.</p>
+        </div>
+
+        ${submissions.length === 0 ? `
+          <div class="card text-center" style="padding: 3rem;">
+            <p style="color: var(--text-secondary);">No user submissions recorded in database yet.</p>
+          </div>
+        ` : `
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            ${submissions.map(s => `
+              <div class="card" style="padding: 1.5rem; border-left: 4px solid ${s.status === 'approved' ? 'var(--accent-emerald)' : s.status === 'rejected' ? 'var(--accent-ruby)' : 'var(--brand-yellow)'};">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <strong style="font-size: 1.1rem; color: #FFFFFF;">${s.username}</strong>
+                      <span class="text-mono" style="font-size: 0.8rem; color: var(--text-muted);">(${s.passportId})</span>
+                      <span class="badge-tag" style="text-transform: uppercase; font-size: 0.7rem;">${s.status}</span>
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--brand-yellow); font-weight: 700; margin-top: 0.25rem;">
+                      Quest: ${s.questTitle} • Reward: +${s.rewardBooba} BOOBA
+                    </div>
+                  </div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">
+                    Submitted: ${s.submittedAt}
+                  </div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.25); padding: 1rem; border-radius: 8px; margin-bottom: 1.25rem;">
+                  ${s.proofUrl ? `
+                    <div style="margin-bottom: 0.5rem;">
+                      <strong>Proof Link:</strong> <a href="${s.proofUrl}" target="_blank" style="color: var(--brand-yellow); text-decoration: underline;">${s.proofUrl} ↗</a>
+                    </div>
+                  ` : ''}
+                  ${s.proofDescription ? `
+                    <div><strong>Description / Notes:</strong> ${s.proofDescription}</div>
+                  ` : ''}
+                </div>
+
+                ${s.status === 'pending' ? `
+                  <div class="flex items-center gap-3">
+                    <button class="btn btn-primary btn-sm" onclick="window.adminApp.handleReview('${s.id}', 'approved')">
+                      ✓ Approve (+${s.rewardBooba} BOOBA)
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="window.adminApp.handleReview('${s.id}', 'rejected')" style="color: var(--accent-ruby);">
+                      ✕ Reject
+                    </button>
+                  </div>
+                ` : `
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">
+                    Reviewed by <strong>${s.reviewedBy || 'Admin'}</strong> on ${s.reviewedAt || 'N/A'}
+                  </div>
+                `}
+              </div>
+            `).join('')}
+          </div>
+        `}
+      </div>
+    `;
+  }
+
+  async handleReview(submissionId, action) {
+    const res = await db.reviewSubmission(submissionId, action);
+    if (res.success) {
+      alert(`Submission marked as ${action}! User passport updated.`);
+      this.render();
+    } else {
+      alert(res.message || 'Review failed');
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // 4. TOKEN & AIRDROP TAB
+  // --------------------------------------------------------------------------
+
+  renderAirdropTab(container) {
+    const logs = db.airdropLogs;
+    const usersCount = db.users.length;
+
+    container.innerHTML = `
+      <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="margin-bottom: 2rem;">
+          <h1 style="font-size: 1.6rem; font-weight: 800; color: #FFFFFF;">Token & Airdrop Hub</h1>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">Distribute bulk $BOOBA points to real registered passports in Supabase.</p>
+        </div>
+
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+          <!-- Airdrop Form -->
+          <div class="card">
+            <h3 style="font-size: 1.15rem; color: #FFFFFF; margin-bottom: 1.25rem;">Execute Live Airdrop</h3>
+            
+            <form onsubmit="window.adminApp.handleAirdrop(event)">
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <label class="form-label">Target Recipient Group</label>
+                <select id="airdropTarget" class="form-input">
+                  <option value="all">All Registered Passports (${usersCount} users)</option>
+                  <option value="top10">Top 10 Leaderboard Holders</option>
+                  <option value="active">Active Questers (Completed > 0)</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <label class="form-label">Amount Per User (BOOBA)</label>
+                <input type="number" id="airdropAmount" value="500" class="form-input" required>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label">Reason / Campaign Name</label>
+                <input type="text" id="airdropReason" placeholder="e.g. Community Milestone Bonus" class="form-input" required>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                🚀 Distribute Airdrop to Supabase
+              </button>
+            </form>
+          </div>
+
+          <!-- Airdrop History -->
+          <div>
+            <h3 style="font-size: 1.15rem; color: #FFFFFF; margin-bottom: 1.25rem;">Airdrop Distribution History (${logs.length})</h3>
+            
+            ${logs.length === 0 ? `
+              <div class="card text-center" style="padding: 2rem;">
+                <p style="color: var(--text-secondary);">No airdrops recorded yet.</p>
+              </div>
+            ` : `
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                ${logs.map(l => `
+                  <div class="card" style="padding: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                      <strong style="color: #FFFFFF; font-size: 0.9rem;">${l.reason}</strong>
+                      <span style="font-weight: 800; color: var(--brand-yellow);">+${Number(l.totalDistributed).toLocaleString()} BOOBA</span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">
+                      ${l.recipientCount} Recipients (+${l.amountPerUser} each) • Executed by ${l.adminUsername} on ${l.date}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async handleAirdrop(e) {
+    e.preventDefault();
+    const targetGroup = document.getElementById('airdropTarget')?.value;
+    const amountPerUser = document.getElementById('airdropAmount')?.value;
+    const reason = document.getElementById('airdropReason')?.value.trim();
+
+    if (!amountPerUser || Number(amountPerUser) <= 0) return;
+
+    if (!confirm(`Are you sure you want to airdrop ${amountPerUser} BOOBA points to ${targetGroup} users?`)) return;
+
+    const res = await db.distributeAirdrop({ targetGroup, amountPerUser, reason });
+    if (res.success) {
+      alert(`🎉 Airdrop successful! Distributed ${res.totalDistributed.toLocaleString()} BOOBA to ${res.recipientCount} accounts.`);
+      this.render();
+    } else {
+      alert(res.message || 'Airdrop failed');
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // 5. PASSPORTS & USERS TAB
+  // --------------------------------------------------------------------------
+
+  renderUsersTab(container) {
+    const users = db.users;
+
+    container.innerHTML = `
+      <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="margin-bottom: 2rem;">
+          <h1 style="font-size: 1.6rem; font-weight: 800; color: #FFFFFF;">Registered Passports & Users</h1>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">All genuine community accounts registered in the live Supabase database.</p>
+        </div>
+
+        <div class="card" style="padding: 0; overflow: hidden; border-radius: 16px;">
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+              <thead>
+                <tr style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-subtle); font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);">
+                  <th style="padding: 1rem 1.25rem;">User / Mascot</th>
+                  <th style="padding: 1rem 1.25rem;">Email</th>
+                  <th style="padding: 1rem 1.25rem;">Passport ID</th>
+                  <th style="padding: 1rem 1.25rem;">Role</th>
+                  <th style="padding: 1rem 1.25rem;">Quests</th>
+                  <th style="padding: 1rem 1.25rem; text-align: right;">BOOBA Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${users.length === 0 ? `
+                  <tr>
+                    <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                      No users registered in database yet.
                     </td>
                   </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
+                ` : users.map(u => `
+                  <tr style="border-bottom: 1px solid var(--border-subtle);">
+                    <td style="padding: 1rem 1.25rem;">
+                      <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 28px; height: 28px; border-radius: 50%;">
+                        <strong style="color: #FFFFFF;">${u.username}</strong>
+                      </div>
+                    </td>
+                    <td style="padding: 1rem 1.25rem; color: var(--text-secondary);">
+                      ${u.email}
+                    </td>
+                    <td style="padding: 1rem 1.25rem; font-family: var(--font-mono); color: var(--brand-yellow);">
+                      ${u.passportId}
+                    </td>
+                    <td style="padding: 1rem 1.25rem;">
+                      <span class="badge-tag" style="font-size: 0.7rem; text-transform: uppercase;">${u.role}</span>
+                    </td>
+                    <td style="padding: 1rem 1.25rem; color: var(--text-secondary);">
+                      ${u.completedQuestsCount || 0}
+                    </td>
+                    <td style="padding: 1rem 1.25rem; text-align: right; font-weight: 800; color: var(--brand-yellow); font-size: 1rem;">
+                      ${Number(u.boobaPoints).toLocaleString()}
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     `;
-  }
-
-  attachUsersListeners() {
-    const searchInput = document.getElementById('userSearchInput');
-    searchInput?.addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase();
-      document.querySelectorAll('.user-row').forEach(row => {
-        const text = row.getAttribute('data-search') || '';
-        row.style.display = text.includes(q) ? '' : 'none';
-      });
-    });
-
-    document.querySelectorAll('.user-grant-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const userId = btn.getAttribute('data-userid');
-        this.switchTab('airdrop');
-        setTimeout(() => {
-          const select = document.getElementById('airdropUserSelect');
-          if (select) select.value = userId;
-        }, 100);
-      });
-    });
   }
 }
 
-// Instantiate Team Admin App
-document.addEventListener('DOMContentLoaded', () => {
-  window.teamAdmin = new TeamAdminApp();
-});
+// Attach globally
+window.adminApp = new TeamAdminApp();

@@ -3,23 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BOOBA (BNB baby) — Gamified Community & Rewards Platform</title>
-  <meta name="description" content="Welcome to the Booba Universe on BNB Smart Chain. Complete live quests, mint your digital Booba Passport, and earn $BOOBA tokens.">
+  <title>Community Quests & Bounties — BOOBA (BNB baby)</title>
   <link rel="icon" type="image/jpeg" href="assets/mascot.jpg">
-
-  <!-- Consolidated Master Stylesheet -->
   <link rel="stylesheet" href="src/styles/main.css?v=3.0">
 </head>
 <body>
-
-  <!-- Ambient Glow Effects -->
   <div class="ambient-glow"></div>
 
-  <!-- SITE HEADER -->
   <header class="site-header">
     <div class="container nav-container">
-      
-      <!-- Brand Logo -->
       <a href="index.html" class="logo-brand">
         <img src="assets/mascot.jpg" alt="Booba BNB Baby Mascot" class="logo-avatar">
         <div class="flex items-center gap-2">
@@ -28,22 +20,18 @@
         </div>
       </a>
 
-      <!-- Center Navigation Links -->
       <ul class="nav-links">
         <li><a href="index.html" class="nav-link">Home</a></li>
         <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
         <li><a href="passport.html" class="nav-link">My Passport</a></li>
-        <li><a href="quests.html" class="nav-link">Quests</a></li>
+        <li><a href="quests.html" class="nav-link active">Quests</a></li>
         <li><a href="leaderboard.html" class="nav-link">Leaderboard</a></li>
         <li><a href="rewards.html" class="nav-link">Rewards</a></li>
         <li><a href="referrals.html" class="nav-link">Referrals</a></li>
       </ul>
 
-      <!-- Right Header Actions (Auth / Admin Badge) -->
       <div class="flex items-center gap-2">
         <div id="headerNavActions" class="nav-actions"></div>
-
-        <!-- Mobile Hamburger Toggle -->
         <button id="mobileNavToggleBtn" class="mobile-nav-toggle-btn" aria-label="Open Navigation Menu">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -52,13 +40,11 @@
           </svg>
         </button>
       </div>
-
     </div>
   </header>
 
-  <!-- MOBILE NAVIGATION DRAWER -->
   <div id="mobileNavBackdrop" class="mobile-nav-backdrop"></div>
-  <aside id="mobileNavDrawer" class="mobile-nav-drawer" aria-label="Mobile Navigation">
+  <aside id="mobileNavDrawer" class="mobile-nav-drawer">
     <div class="mobile-nav-header">
       <a href="index.html" class="logo-brand mobile-drawer-logo">
         <img src="assets/mascot.jpg" alt="Booba" class="logo-avatar">
@@ -67,64 +53,27 @@
           <span class="badge-tag">BNB baby</span>
         </div>
       </a>
-      <button id="mobileNavCloseBtn" class="btn btn-ghost btn-sm btn-icon-action" aria-label="Close menu" style="width: 34px; height: 34px; border-radius: 50%;">✕</button>
+      <button id="mobileNavCloseBtn" class="btn btn-ghost btn-sm btn-icon-action" style="width: 34px; height: 34px; border-radius: 50%;">✕</button>
     </div>
-
     <div class="mobile-nav-body">
       <ul class="mobile-nav-list">
         <li><a href="index.html" class="mobile-nav-link">Home</a></li>
         <li><a href="dashboard.html" class="mobile-nav-link">Dashboard Overview</a></li>
         <li><a href="passport.html" class="mobile-nav-link">My Booba Passport</a></li>
-        <li><a href="quests.html" class="mobile-nav-link">Quests & Bounties</a></li>
+        <li><a href="quests.html" class="mobile-nav-link active">Quests & Bounties</a></li>
         <li><a href="leaderboard.html" class="mobile-nav-link">Leaderboard</a></li>
         <li><a href="rewards.html" class="mobile-nav-link">BOOBA Vault</a></li>
         <li><a href="referrals.html" class="mobile-nav-link">Referrals</a></li>
       </ul>
     </div>
-
     <div id="mobileNavFooter" class="mobile-nav-footer"></div>
   </aside>
 
-  <!-- MAIN APP CONTAINER -->
   <main id="app" class="page-wrapper"></main>
 
-  <!-- FOOTER -->
   <footer id="siteFooter" style="border-top: 1px solid var(--border-subtle); padding: 3.5rem 0 2rem 0; background: rgba(7, 9, 14, 0.95);">
     <div class="container">
-      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2.5rem; margin-bottom: 3rem;">
-        
-        <div>
-          <div class="flex items-center gap-2" style="margin-bottom: 1rem;">
-            <img src="assets/mascot.jpg" style="width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--brand-yellow);">
-            <strong style="font-size: 1.2rem; color: var(--text-primary);">BOOBA (BNB baby)</strong>
-          </div>
-          <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
-            The interactive community reputation and rewards platform powering the BNB Baby movement.
-          </p>
-        </div>
-
-        <div>
-          <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--brand-yellow); margin-bottom: 1rem;">Ecosystem</h4>
-          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem;">
-            <li><a href="passport.html" class="nav-link">Booba Passport</a></li>
-            <li><a href="quests.html" class="nav-link">Community Quests</a></li>
-            <li><a href="leaderboard.html" class="nav-link">Leaderboard</a></li>
-            <li><a href="teamadmin.html" class="nav-link" style="color: var(--brand-yellow);">⚡ Core Team Admin</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--brand-yellow); margin-bottom: 1rem;">Official Channels</h4>
-          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem;">
-            <li><a href="https://twitter.com/boobababybnb" target="_blank" class="nav-link">X (Twitter)</a></li>
-            <li><a href="https://t.me/boobababybnb" target="_blank" class="nav-link">Telegram Lounge</a></li>
-            <li><a href="https://discord.gg/booba" target="_blank" class="nav-link">Discord Community</a></li>
-          </ul>
-        </div>
-
-      </div>
-
-      <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted); padding-top: 2rem; border-top: 1px solid var(--border-subtle);">
+      <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted);">
         © 2026 BOOBA (BNB baby). All rights reserved. Powered by BNB Smart Chain & Supabase.
       </div>
     </div>
@@ -139,12 +88,10 @@
         <h3 id="authModalTitle">Mint Your Booba Passport</h3>
         <p id="authModalSubtitle">Join the BNB Baby revolution and claim +100 BOOBA welcome tokens!</p>
       </div>
-
       <div class="auth-tabs">
         <button id="tabAuthSignup" class="auth-tab-btn active">Mint Passport (Sign Up)</button>
         <button id="tabAuthSignin" class="auth-tab-btn">Sign In (Login)</button>
       </div>
-
       <form id="authForm">
         <div class="form-group signup-only-field">
           <label class="form-label">Choose Username</label>
@@ -202,7 +149,6 @@
     </div>
   </div>
 
-  <!-- Application Controller -->
   <script type="module" src="src/app.js"></script>
 </body>
 </html>

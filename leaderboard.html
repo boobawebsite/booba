@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Leaderboard — BOOBA (BNB baby)</title>
+  <link rel="icon" type="image/jpeg" href="assets/mascot.jpg">
+  <link rel="stylesheet" href="src/styles/main.css?v=3.0">
+</head>
+<body>
+  <div class="ambient-glow"></div>
+
+  <header class="site-header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo-brand">
+        <img src="assets/mascot.jpg" alt="Booba BNB Baby Mascot" class="logo-avatar">
+        <div class="flex items-center gap-2">
+          <span>BOOBA</span>
+          <span class="badge-tag">BNB baby</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="passport.html" class="nav-link">My Passport</a></li>
+        <li><a href="quests.html" class="nav-link">Quests</a></li>
+        <li><a href="leaderboard.html" class="nav-link active">Leaderboard</a></li>
+        <li><a href="rewards.html" class="nav-link">Rewards</a></li>
+        <li><a href="referrals.html" class="nav-link">Referrals</a></li>
+      </ul>
+
+      <div class="flex items-center gap-2">
+        <div id="headerNavActions" class="nav-actions"></div>
+        <button id="mobileNavToggleBtn" class="mobile-nav-toggle-btn" aria-label="Open Navigation Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="mobileNavBackdrop" class="mobile-nav-backdrop"></div>
+  <aside id="mobileNavDrawer" class="mobile-nav-drawer">
+    <div class="mobile-nav-header">
+      <a href="index.html" class="logo-brand mobile-drawer-logo">
+        <img src="assets/mascot.jpg" alt="Booba" class="logo-avatar">
+        <div class="flex items-center gap-2">
+          <span>BOOBA</span>
+          <span class="badge-tag">BNB baby</span>
+        </div>
+      </a>
+      <button id="mobileNavCloseBtn" class="btn btn-ghost btn-sm btn-icon-action" style="width: 34px; height: 34px; border-radius: 50%;">✕</button>
+    </div>
+    <div class="mobile-nav-body">
+      <ul class="mobile-nav-list">
+        <li><a href="index.html" class="mobile-nav-link">Home</a></li>
+        <li><a href="dashboard.html" class="mobile-nav-link">Dashboard Overview</a></li>
+        <li><a href="passport.html" class="mobile-nav-link">My Booba Passport</a></li>
+        <li><a href="quests.html" class="mobile-nav-link">Quests & Bounties</a></li>
+        <li><a href="leaderboard.html" class="mobile-nav-link active">Leaderboard</a></li>
+        <li><a href="rewards.html" class="mobile-nav-link">BOOBA Vault</a></li>
+        <li><a href="referrals.html" class="mobile-nav-link">Referrals</a></li>
+      </ul>
+    </div>
+    <div id="mobileNavFooter" class="mobile-nav-footer"></div>
+  </aside>
+
+  <main id="app" class="page-wrapper"></main>
+
+  <footer id="siteFooter" style="border-top: 1px solid var(--border-subtle); padding: 3.5rem 0 2rem 0; background: rgba(7, 9, 14, 0.95);">
+    <div class="container">
+      <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted);">
+        © 2026 BOOBA (BNB baby). All rights reserved. Powered by BNB Smart Chain & Supabase.
+      </div>
+    </div>
+  </footer>
+
+  <!-- AUTH MODAL -->
+  <div class="modal-backdrop" id="authModal">
+    <div class="auth-card">
+      <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.closeModal()" style="position: absolute; top: 1rem; right: 1rem;">✕</button>
+      <div class="auth-header">
+        <img src="assets/mascot.jpg" class="auth-mascot-preview" alt="Booba Mascot">
+        <h3 id="authModalTitle">Mint Your Booba Passport</h3>
+        <p id="authModalSubtitle">Join the BNB Baby revolution and claim +100 BOOBA welcome tokens!</p>
+      </div>
+      <div class="auth-tabs">
+        <button id="tabAuthSignup" class="auth-tab-btn active">Mint Passport (Sign Up)</button>
+        <button id="tabAuthSignin" class="auth-tab-btn">Sign In (Login)</button>
+      </div>
+      <form id="authForm">
+        <div class="form-group signup-only-field">
+          <label class="form-label">Choose Username</label>
+          <input type="text" id="authUsernameInput" placeholder="e.g. CryptoKing" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email or Username</label>
+          <input type="text" id="authEmailInput" placeholder="user@example.com" class="form-input" required>
+        </div>
+        <div class="form-group signup-only-field">
+          <label class="form-label">Referral Code (Optional)</label>
+          <input type="text" id="authReferralInput" placeholder="e.g. BOOBABOSS" class="form-input text-mono" style="text-transform: uppercase;">
+        </div>
+        <button type="submit" id="authSubmitBtn" class="btn btn-primary btn-block btn-lg" style="margin-top: 0.5rem;">
+          Mint Passport & Join (+100 BOOBA)
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

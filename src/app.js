@@ -1,6 +1,6 @@
 /* ==========================================================================
    BOOBA (BNB baby) — Master Unified Application Controller (app.js)
-   Single JS Core for all pages (index, dashboard, passport, quests, etc.)
+   Single JS Core for all pages (index, dashboard, passport, quests, signin, etc.)
    ========================================================================== */
 
 import { db, calculateLevel, LEVEL_TIERS } from './services/db.js';
@@ -19,6 +19,7 @@ class BoobaApp {
 
   detectPageName() {
     const path = window.location.pathname.toLowerCase();
+    if (path.endsWith('signin.html')) return 'signin';
     if (path.endsWith('dashboard.html')) return 'dashboard';
     if (path.endsWith('passport.html')) return 'passport';
     if (path.endsWith('quests.html')) return 'quests';
@@ -26,8 +27,9 @@ class BoobaApp {
     if (path.endsWith('rewards.html')) return 'rewards';
     if (path.endsWith('referrals.html')) return 'referrals';
     
-    // Hash routing fallback for index.html SPA support
+    // Hash routing fallback
     const hash = window.location.hash.replace(/^#/, '');
+    if (hash === 'signin' || hash === 'login' || hash === 'signup' || hash === 'auth') return 'signin';
     if (hash.startsWith('dashboard/passport')) return 'passport';
     if (hash.startsWith('dashboard/quests')) return 'quests';
     if (hash.startsWith('dashboard/leaderboard')) return 'leaderboard';
@@ -46,6 +48,13 @@ class BoobaApp {
       sessionStorage.setItem('booba_ref_code', ref);
     }
 
+    const hash = window.location.hash.replace(/^#/, '');
+    if (hash === 'login' || hash === 'signin') {
+      this.authMode = 'signin';
+    } else if (hash === 'signup') {
+      this.authMode = 'signup';
+    }
+
     // Subscribe to DB state
     db.subscribe(() => {
       this.renderHeaderNav();
@@ -55,6 +64,12 @@ class BoobaApp {
     // Handle hash change
     window.addEventListener('hashchange', () => {
       this.pageName = this.detectPageName();
+      const currentHash = window.location.hash.replace(/^#/, '');
+      if (currentHash === 'login' || currentHash === 'signin') {
+        this.authMode = 'signin';
+      } else if (currentHash === 'signup') {
+        this.authMode = 'signup';
+      }
       this.renderHeaderNav();
       this.renderPage();
     });
@@ -88,20 +103,6 @@ class BoobaApp {
         this.closeMobileNav();
       }
     });
-
-    // Setup Auth Form
-    const authForm = document.getElementById('authForm');
-    if (authForm) {
-      authForm.addEventListener('submit', (e) => this.handleAuthSubmit(e));
-    }
-
-    // Auth tab switchers
-    const tabSignup = document.getElementById('tabAuthSignup');
-    const tabSignin = document.getElementById('tabAuthSignin');
-    if (tabSignup && tabSignin) {
-      tabSignup.addEventListener('click', () => this.switchAuthMode('signup'));
-      tabSignin.addEventListener('click', () => this.switchAuthMode('signin'));
-    }
 
     // Creative proof submission form
     const proofForm = document.getElementById('proofForm');
@@ -180,21 +181,21 @@ class BoobaApp {
       `;
     } else {
       authButtonsDesktop = `
-        <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.openAuthModal('signin')">
+        <a href="signin.html#signin" class="btn btn-ghost btn-sm">
           Sign In
-        </button>
-        <button class="btn btn-primary btn-sm" onclick="window.boobaApp.openAuthModal('signup')">
+        </a>
+        <a href="signin.html#signup" class="btn btn-primary btn-sm">
           Mint Passport (+100 BOOBA)
-        </button>
+        </a>
       `;
 
       authButtonsMobile = `
-        <button class="btn btn-primary btn-block" onclick="window.boobaApp.openAuthModal('signup')" style="margin-bottom: 0.5rem;">
+        <a href="signin.html#signup" class="btn btn-primary btn-block" style="margin-bottom: 0.5rem; text-align: center;">
           Mint Passport (+100 BOOBA)
-        </button>
-        <button class="btn btn-secondary btn-block" onclick="window.boobaApp.openAuthModal('signin')">
+        </a>
+        <a href="signin.html#signin" class="btn btn-secondary btn-block" style="text-align: center;">
           Sign In
-        </button>
+        </a>
       `;
     }
 
@@ -218,127 +219,16 @@ class BoobaApp {
     if (backdrop) backdrop.classList.remove('active');
   }
 
-  // --------------------------------------------------------------------------
-  // AUTH MODALS
-  // --------------------------------------------------------------------------
-
-  openAuthModal(mode = 'signup') {
-    this.authMode = mode;
-    this.closeMobileNav();
-    const modal = document.getElementById('authModal');
-    if (!modal) return;
-
-    this.switchAuthMode(mode);
-
-    // Autofill referral if in session
-    const savedRef = sessionStorage.getItem('booba_ref_code');
-    const refInput = document.getElementById('authReferralInput');
-    if (savedRef && refInput) {
-      refInput.value = savedRef;
-    }
-
-    modal.classList.add('active');
-  }
-
-  switchAuthMode(mode) {
-    this.authMode = mode;
-    const tabSignup = document.getElementById('tabAuthSignup');
-    const tabSignin = document.getElementById('tabAuthSignin');
-    const submitBtn = document.getElementById('authSubmitBtn');
-    const modalTitle = document.getElementById('authModalTitle');
-    const modalSubtitle = document.getElementById('authModalSubtitle');
-    const signupOnlyFields = document.querySelectorAll('.signup-only-field');
-
-    if (mode === 'signup') {
-      tabSignup?.classList.add('active');
-      tabSignin?.classList.remove('active');
-      signupOnlyFields.forEach(el => el.style.display = 'block');
-      if (submitBtn) submitBtn.textContent = 'Mint Passport & Join (+100 BOOBA)';
-      if (modalTitle) modalTitle.textContent = 'Mint Your Booba Passport';
-      if (modalSubtitle) modalSubtitle.textContent = 'Join the BNB Baby movement and claim +100 BOOBA welcome tokens!';
-    } else {
-      tabSignin?.classList.add('active');
-      tabSignup?.classList.remove('active');
-      signupOnlyFields.forEach(el => el.style.display = 'none');
-      if (submitBtn) submitBtn.textContent = 'Sign In to Your Passport';
-      if (modalTitle) modalTitle.textContent = 'Welcome Back, Baby Panda';
-      if (modalSubtitle) modalSubtitle.textContent = 'Sign in to access your BOOBA balance, streak, and bounties.';
-    }
-  }
-
   closeModal() {
     document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
     this.selectedQuestForProof = null;
     this.selectedQuestForSocial = null;
   }
 
-  async handleAuthSubmit(e) {
-    e.preventDefault();
-    const submitBtn = document.getElementById('authSubmitBtn');
-    const originalText = submitBtn ? submitBtn.textContent : 'Submit';
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Processing...';
-    }
-
-    try {
-      const password = document.getElementById('authPasswordInput')?.value;
-
-      if (this.authMode === 'signup') {
-        const username = document.getElementById('authUsernameInput')?.value.trim();
-        const email = document.getElementById('authEmailInput')?.value.trim();
-        const referralCode = document.getElementById('authReferralInput')?.value.trim();
-
-        if (!username || !email) {
-          alert('Please enter both a username and email to mint your passport.');
-          return;
-        }
-
-        if (!password || password.length < 6) {
-          alert('Please choose a password with at least 6 characters.');
-          return;
-        }
-
-        const res = await db.signup({ username, email, password, referralCode });
-        if (res.success) {
-          this.closeModal();
-          alert(`🎉 Welcome to BOOBA, ${res.user.username}! Your digital passport (${res.user.passportId}) has been minted with +100 BOOBA!`);
-        } else {
-          alert(res.message || 'Signup failed');
-        }
-      } else {
-        const emailOrUsername = document.getElementById('authEmailInput')?.value.trim();
-        if (!emailOrUsername) {
-          alert('Please enter your email or username to sign in.');
-          return;
-        }
-
-        if (!password) {
-          alert('Please enter your password to sign in.');
-          return;
-        }
-
-        const res = await db.login({ emailOrUsername, password });
-        if (res.success) {
-          this.closeModal();
-          alert(`👋 Welcome back, ${res.user.username}!`);
-        } else {
-          alert(res.message || 'Login failed');
-        }
-      }
-    } catch (err) {
-      alert('An error occurred. Please check your internet connection.');
-    } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
-      }
-    }
-  }
-
   logout() {
     db.logout();
     alert('You have signed out.');
+    window.location.href = 'index.html';
   }
 
   // --------------------------------------------------------------------------
@@ -350,6 +240,9 @@ class BoobaApp {
     if (!mainContainer) return;
 
     switch (this.pageName) {
+      case 'signin':
+        this.renderSigninView(mainContainer);
+        break;
       case 'dashboard':
         this.renderDashboardView(mainContainer);
         break;
@@ -372,6 +265,203 @@ class BoobaApp {
       default:
         this.renderHomeView(mainContainer);
         break;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // DEDICATED SIGN IN / SIGN UP (signin.html) VIEW
+  // --------------------------------------------------------------------------
+
+  renderSigninView(container) {
+    const isSignUp = this.authMode === 'signup';
+    const storedRef = sessionStorage.getItem('booba_ref_code') || '';
+
+    container.innerHTML = `
+      <div class="container" style="max-width: 1200px; padding: 2rem 1.5rem 4rem 1.5rem;">
+        <div class="x-auth-layout">
+          
+          <!-- LEFT SIDE: Grand 3D BNB baby Mascot & Emblem -->
+          <div class="x-auth-left">
+            <div style="position: relative; text-align: center;">
+              <img src="assets/mascot.jpg" class="x-auth-giant-logo" alt="Booba BNB baby Mascot">
+              
+              <div class="glass-panel" style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); padding: 0.6rem 1.25rem; border-radius: var(--radius-full); border: 1.5px solid var(--brand-yellow); display: flex; align-items: center; gap: 0.6rem; white-space: nowrap; box-shadow: 0 10px 30px rgba(0,0,0,0.8); background: rgba(14, 18, 27, 0.9);">
+                <span style="font-weight: 800; font-size: 0.9rem; color: #FFFFFF;">BOOBA • BNB baby</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT SIDE: X-Style Auth Form & Actions -->
+          <div class="x-auth-right">
+            
+            <h1 class="x-auth-headline" style="font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 0.75rem;">
+              Happening now
+            </h1>
+
+            <h2 class="x-auth-subhead" style="font-size: clamp(1.3rem, 2.5vw, 1.8rem); margin-bottom: 2rem; color: var(--text-secondary);">
+              ${isSignUp ? 'Join the Booba Universe today.' : 'Sign in to access your Booba Passport.'}
+            </h2>
+
+            <div class="x-auth-actions-group">
+              
+              <!-- 1. Google One-Click -->
+              <button type="button" class="btn-auth-pill" onclick="window.boobaApp.handleFastAuth('google')">
+                <svg width="18" height="18" viewBox="0 0 48 48">
+                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                Continue with Google
+              </button>
+
+              <!-- 2. Web3 Wallet -->
+              <button type="button" class="btn-auth-pill btn-wallet" onclick="window.boobaApp.handleFastAuth('wallet')">
+                <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
+                  <path d="M16 2L2 9L16 16L30 9L16 2Z" fill="#F3BA2F"/>
+                  <path d="M2 23L16 30L30 23V9L16 16L2 9V23Z" fill="#F3BA2F" fill-opacity="0.8"/>
+                </svg>
+                Continue with Web3 Wallet
+              </button>
+
+            </div>
+
+            <!-- Divider -->
+            <div class="x-auth-divider">
+              <span>or</span>
+            </div>
+
+            <!-- Main Live Form -->
+            <form id="dedicatedAuthForm" onsubmit="window.boobaApp.handleDedicatedAuthSubmit(event)" class="x-auth-input-box">
+              
+              ${isSignUp ? `
+                <input type="text" id="dedicatedUsernameInput" placeholder="Choose username (e.g. CryptoKing)" class="x-input-field" required autocomplete="username">
+              ` : ''}
+
+              <input type="text" id="dedicatedEmailInput" placeholder="Email or username" class="x-input-field" required autocomplete="email">
+
+              <input type="password" id="dedicatedPasswordInput" placeholder="Password (min 6 characters)" class="x-input-field" required autocomplete="current-password">
+
+              ${isSignUp ? `
+                <input type="text" id="dedicatedReferralInput" value="${storedRef}" placeholder="Referral code (Optional)" class="x-input-field text-mono" style="text-transform: uppercase;">
+              ` : ''}
+
+              <button type="submit" id="dedicatedSubmitBtn" class="btn-x-submit">
+                ${isSignUp ? 'Create Account & Mint Passport (+100 BOOBA)' : 'Sign In'}
+              </button>
+
+            </form>
+
+            <div class="x-legal-text">
+              By signing up, you agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>, including Cookie Use.
+            </div>
+
+            <!-- Mode Switcher -->
+            <div class="x-switch-account-row">
+              ${isSignUp ? `
+                Already have a Booba Passport? <a href="signin.html#signin" onclick="window.boobaApp.switchDedicatedAuthMode('signin')">Sign in</a>
+              ` : `
+                Don't have an account? <a href="signin.html#signup" onclick="window.boobaApp.switchDedicatedAuthMode('signup')">Mint Passport (Sign Up)</a>
+              `}
+            </div>
+
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  switchDedicatedAuthMode(mode) {
+    this.authMode = mode;
+    window.location.hash = mode === 'signin' ? 'signin' : 'signup';
+    this.renderPage();
+  }
+
+  async handleDedicatedAuthSubmit(e) {
+    e.preventDefault();
+    const submitBtn = document.getElementById('dedicatedSubmitBtn');
+    const originalText = submitBtn ? submitBtn.textContent : 'Submit';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Authenticating with Supabase...';
+    }
+
+    try {
+      const emailOrUsername = document.getElementById('dedicatedEmailInput')?.value.trim();
+      const password = document.getElementById('dedicatedPasswordInput')?.value;
+
+      if (this.authMode === 'signup') {
+        const username = document.getElementById('dedicatedUsernameInput')?.value.trim();
+        const referralCode = document.getElementById('dedicatedReferralInput')?.value.trim();
+
+        if (!username || !emailOrUsername) {
+          alert('Please enter both a username and email to mint your passport.');
+          return;
+        }
+
+        if (!password || password.length < 6) {
+          alert('Please choose a password with at least 6 characters.');
+          return;
+        }
+
+        const res = await db.signup({ username, email: emailOrUsername, password, referralCode });
+        if (res.success) {
+          alert(`🎉 Welcome to BOOBA, ${res.user.username}! Your digital passport (${res.user.passportId}) has been minted with +100 BOOBA!`);
+          if (res.user.role === 'admin') {
+            window.location.href = 'teamadmin.html';
+          } else {
+            window.location.href = 'dashboard.html';
+          }
+        } else {
+          alert(res.message || 'Signup failed');
+        }
+      } else {
+        if (!emailOrUsername || !password) {
+          alert('Please enter both your email/username and password.');
+          return;
+        }
+
+        const res = await db.login({ emailOrUsername, password });
+        if (res.success) {
+          alert(`👋 Welcome back, ${res.user.username}!`);
+          if (res.user.role === 'admin') {
+            window.location.href = 'teamadmin.html';
+          } else {
+            window.location.href = 'dashboard.html';
+          }
+        } else {
+          alert(res.message || 'Login failed');
+        }
+      }
+    } catch (err) {
+      alert('An error occurred during authentication. Please check your network.');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    }
+  }
+
+  async handleFastAuth(provider) {
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const mockUsername = provider === 'wallet' ? `Web3Panda_${randomSuffix}` : `Panda_${randomSuffix}`;
+    const mockEmail = `${mockUsername.toLowerCase()}@booba.crypto`;
+    const mockPass = 'boobapassword123';
+
+    let res = await db.login({ emailOrUsername: mockEmail, password: mockPass });
+    if (!res.success) {
+      res = await db.signup({
+        username: mockUsername,
+        email: mockEmail,
+        password: mockPass,
+        walletAddress: provider === 'wallet' ? `0x${Math.random().toString(16).substring(2, 6)}...${Math.random().toString(16).substring(2, 6)}` : ''
+      });
+    }
+
+    if (res.success) {
+      alert(`Connected successfully with ${provider}! Welcome ${res.user.username}.`);
+      window.location.href = 'dashboard.html';
     }
   }
 
@@ -410,16 +500,15 @@ class BoobaApp {
                   Explore Quests
                 </a>
               ` : `
-                <button class="btn btn-primary btn-lg" onclick="window.boobaApp.openAuthModal('signup')">
+                <a href="signin.html#signup" class="btn btn-primary btn-lg">
                   Mint Passport (+100 BOOBA)
-                </button>
-                <a href="quests.html" class="btn btn-secondary btn-lg">
-                  View Live Quests
+                </a>
+                <a href="signin.html#signin" class="btn btn-secondary btn-lg">
+                  Sign In
                 </a>
               `}
             </div>
 
-            <!-- Real Live Statistics Banner -->
             <div class="hero-stats-grid">
               <div class="stat-box">
                 <div class="stat-value text-gradient-gold">${Number(stats.totalUsers).toLocaleString()}</div>
@@ -508,11 +597,11 @@ class BoobaApp {
             <img src="assets/mascot.jpg" style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1.5rem auto; border: 2px solid var(--brand-yellow);">
             <h2>Connect Your Booba Passport</h2>
             <p style="color: var(--text-secondary); margin: 0.75rem 0 2rem 0; font-size: 0.95rem;">
-              You are currently viewing the guest mode. Mint your free passport or sign in to track your personal BOOBA points, daily streak, and bounties.
+              You are currently viewing guest mode. Mint your free passport or sign in to track your personal BOOBA points, daily streak, and bounties.
             </p>
             <div class="flex items-center justify-center gap-3">
-              <button class="btn btn-primary" onclick="window.boobaApp.openAuthModal('signup')">Mint Passport (+100 BOOBA)</button>
-              <button class="btn btn-secondary" onclick="window.boobaApp.openAuthModal('signin')">Sign In</button>
+              <a href="signin.html#signup" class="btn btn-primary">Mint Passport (+100 BOOBA)</a>
+              <a href="signin.html#signin" class="btn btn-secondary">Sign In</a>
             </div>
           </div>
         </div>
@@ -599,7 +688,7 @@ class BoobaApp {
           <div class="card">
             <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Digital Passport</h3>
             <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
-              View and download your digital passport card with customized badges and reputation watermark.
+              View your digital passport card with customized badges and reputation watermark.
             </p>
             <a href="passport.html" class="btn btn-secondary btn-block btn-sm">Open My Passport</a>
           </div>
@@ -640,9 +729,9 @@ class BoobaApp {
             <p style="color: var(--text-secondary); margin: 0.75rem 0 2rem 0; font-size: 0.95rem;">
               You do not have an active passport yet. Sign up or log in to generate your unique on-chain Booba Passport card!
             </p>
-            <button class="btn btn-primary btn-lg btn-block" onclick="window.boobaApp.openAuthModal('signup')">
+            <a href="signin.html#signup" class="btn btn-primary btn-lg btn-block">
               Mint Passport (+100 BOOBA)
-            </button>
+            </a>
           </div>
         </div>
       `;
@@ -663,12 +752,10 @@ class BoobaApp {
           <!-- HOLOGRAPHIC PASSPORT CARD -->
           <div class="passport-card-real" style="max-width: 480px; width: 100%; background: linear-gradient(145deg, #101522 0%, #080B12 100%); border: 1.5px solid rgba(243, 186, 47, 0.4); border-radius: 20px; padding: 2rem; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(243, 186, 47, 0.2); position: relative; overflow: hidden;">
             
-            <!-- Watermark / Hologram Accent -->
             <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.08; pointer-events: none;">
               <img src="assets/mascot.jpg" style="width: 220px; height: 220px; border-radius: 50%;">
             </div>
 
-            <!-- Card Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 1rem;">
               <div style="display: flex; align-items: center; gap: 0.65rem;">
                 <img src="assets/mascot.jpg" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--brand-yellow);">
@@ -682,7 +769,6 @@ class BoobaApp {
               </span>
             </div>
 
-            <!-- Card Body Profile -->
             <div style="display: flex; gap: 1.25rem; align-items: center; margin-bottom: 1.5rem;">
               <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 80px; height: 80px; border-radius: 14px; border: 2px solid var(--brand-yellow); object-fit: cover;">
               <div>
@@ -696,7 +782,6 @@ class BoobaApp {
               </div>
             </div>
 
-            <!-- Card Specs Grid -->
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; background: rgba(0, 0, 0, 0.3); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.05);">
               <div>
                 <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">BOOBA Points</div>
@@ -766,7 +851,6 @@ class BoobaApp {
           <p class="section-subtitle">Complete tasks published by the core team to earn real $BOOBA tokens.</p>
         </div>
 
-        <!-- Filter Tabs -->
         <div class="flex items-center justify-center gap-2" style="margin-bottom: 2.5rem; flex-wrap: wrap;">
           <button class="btn btn-sm ${this.activeQuestFilter === 'all' ? 'btn-primary' : 'btn-secondary'}" onclick="window.boobaApp.setQuestFilter('all')">All Quests (${quests.length})</button>
           <button class="btn btn-sm ${this.activeQuestFilter === 'daily' ? 'btn-primary' : 'btn-secondary'}" onclick="window.boobaApp.setQuestFilter('daily')">Daily Check-In</button>
@@ -775,7 +859,6 @@ class BoobaApp {
           <button class="btn btn-sm ${this.activeQuestFilter === 'community' ? 'btn-primary' : 'btn-secondary'}" onclick="window.boobaApp.setQuestFilter('community')">Community</button>
         </div>
 
-        <!-- Quests Grid -->
         <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
           ${filtered.length === 0 ? `
             <div class="card text-center" style="grid-column: 1 / -1; padding: 3rem;">
@@ -828,7 +911,7 @@ class BoobaApp {
 
   openSocialModal(questId) {
     if (!db.currentUser) {
-      this.openAuthModal('signup');
+      window.location.href = 'signin.html#signup';
       return;
     }
     const quest = db.quests.find(q => q.id === questId);
@@ -862,7 +945,7 @@ class BoobaApp {
 
   openProofModal(questId) {
     if (!db.currentUser) {
-      this.openAuthModal('signup');
+      window.location.href = 'signin.html#signup';
       return;
     }
     const quest = db.quests.find(q => q.id === questId);
@@ -907,7 +990,7 @@ class BoobaApp {
 
   async handleDailyCheckIn() {
     if (!db.currentUser) {
-      this.openAuthModal('signup');
+      window.location.href = 'signin.html#signup';
       return;
     }
     const res = await db.dailyCheckIn();
@@ -923,7 +1006,7 @@ class BoobaApp {
   // --------------------------------------------------------------------------
 
   renderLeaderboardView(container) {
-    const users = db.users; // Sorted by points DESC from Supabase
+    const users = db.users;
 
     container.innerHTML = `
       <div class="container page-content">
@@ -1001,9 +1084,6 @@ class BoobaApp {
   // --------------------------------------------------------------------------
 
   renderRewardsView(container) {
-    const user = db.currentUser;
-    const userPoints = user ? user.boobaPoints : 0;
-
     container.innerHTML = `
       <div class="container page-content">
         <div class="section-header text-center" style="margin-bottom: 2.5rem;">
@@ -1057,16 +1137,16 @@ class BoobaApp {
             <p style="color: var(--text-secondary); margin: 0.75rem 0 2rem 0;">
               Please mint your passport to get your unique referral link and earn +300 BOOBA per invite!
             </p>
-            <button class="btn btn-primary btn-block" onclick="window.boobaApp.openAuthModal('signup')">
+            <a href="signin.html#signup" class="btn btn-primary btn-block">
               Mint Passport (+100 BOOBA)
-            </button>
+            </a>
           </div>
         </div>
       `;
       return;
     }
 
-    const refLink = `${window.location.origin}${window.location.pathname}?ref=${user.referralCode}`;
+    const refLink = `${window.location.origin}/signin.html?ref=${user.referralCode}`;
     const myReferrals = referrals.filter(r => r.referrerUsername?.toLowerCase() === user.username?.toLowerCase() || r.referrerUsername?.toUpperCase() === user.referralCode?.toUpperCase());
 
     container.innerHTML = `

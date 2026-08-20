@@ -340,9 +340,29 @@ class BoobaApp {
 
               <input type="text" id="dedicatedEmailInput" placeholder="Email or username" class="x-input-field" required autocomplete="email">
 
-              <input type="password" id="dedicatedPasswordInput" placeholder="Password (min 6 characters)" class="x-input-field" required autocomplete="current-password">
+              <!-- Password Input with SVG Eye Toggle -->
+              <div class="password-field-wrapper">
+                <input type="password" id="dedicatedPasswordInput" placeholder="${isSignUp ? 'Create password (min 6 chars)' : 'Enter password'}" class="x-input-field" required autocomplete="current-password">
+                <button type="button" id="togglePassBtn1" class="password-toggle-btn" onclick="window.boobaApp.togglePasswordVisibility('dedicatedPasswordInput', 'togglePassBtn1')" title="Show password" aria-label="Toggle password visibility">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
 
+              <!-- Confirm Password (Only on Sign Up) -->
               ${isSignUp ? `
+                <div class="password-field-wrapper">
+                  <input type="password" id="dedicatedConfirmPasswordInput" placeholder="Confirm password" class="x-input-field" required autocomplete="new-password">
+                  <button type="button" id="togglePassBtn2" class="password-toggle-btn" onclick="window.boobaApp.togglePasswordVisibility('dedicatedConfirmPasswordInput', 'togglePassBtn2')" title="Show password" aria-label="Toggle confirm password visibility">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
+
                 <input type="text" id="dedicatedReferralInput" value="${storedRef}" placeholder="Referral code (Optional)" class="x-input-field text-mono" style="text-transform: uppercase;">
               ` : ''}
 
@@ -371,6 +391,35 @@ class BoobaApp {
     `;
   }
 
+  togglePasswordVisibility(inputId, btnId) {
+    const input = document.getElementById(inputId);
+    const btn = document.getElementById(btnId);
+    if (!input || !btn) return;
+
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+
+    if (isPassword) {
+      // Eye Off SVG (Hide password)
+      btn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+          <line x1="1" y1="1" x2="23" y2="23"></line>
+        </svg>
+      `;
+      btn.setAttribute('title', 'Hide password');
+    } else {
+      // Eye Open SVG (Show password)
+      btn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+      `;
+      btn.setAttribute('title', 'Show password');
+    }
+  }
+
   switchDedicatedAuthMode(mode) {
     this.authMode = mode;
     window.location.hash = mode === 'signin' ? 'signin' : 'signup';
@@ -392,6 +441,7 @@ class BoobaApp {
 
       if (this.authMode === 'signup') {
         const username = document.getElementById('dedicatedUsernameInput')?.value.trim();
+        const confirmPassword = document.getElementById('dedicatedConfirmPasswordInput')?.value;
         const referralCode = document.getElementById('dedicatedReferralInput')?.value.trim();
 
         if (!username || !emailOrUsername) {
@@ -401,6 +451,11 @@ class BoobaApp {
 
         if (!password || password.length < 6) {
           alert('Please choose a password with at least 6 characters.');
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          alert('Passwords do not match. Please ensure both password fields are identical.');
           return;
         }
 
@@ -1146,7 +1201,8 @@ class BoobaApp {
       return;
     }
 
-    const refLink = `${window.location.origin}/signin.html?ref=${user.referralCode}`;
+    const basePath = window.location.pathname.replace(/\/[^/]*$/, '');
+    const refLink = `${window.location.origin}${basePath}/signin.html?ref=${user.referralCode}#signup`;
     const myReferrals = referrals.filter(r => r.referrerUsername?.toLowerCase() === user.username?.toLowerCase() || r.referrerUsername?.toUpperCase() === user.referralCode?.toUpperCase());
 
     container.innerHTML = `

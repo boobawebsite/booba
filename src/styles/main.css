@@ -99,3 +99,38 @@
   box-shadow: var(--shadow-lg);
   backdrop-filter: blur(16px);
 }
+
+/* Password Input Field with Show/Hide Eye SVG */
+.password-field-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+}
+
+.password-field-wrapper .x-input-field,
+.password-field-wrapper .form-input {
+  padding-right: 2.85rem !important;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  border-radius: 4px;
+  transition: color var(--transition-fast);
+  z-index: 5;
+}
+
+.password-toggle-btn:hover {
+  color: var(--brand-yellow);
+}
+

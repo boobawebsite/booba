@@ -3975,6 +3975,85 @@
     padding: 0.5rem 0.4rem !important;
     font-size: 0.75rem !important;
   }
+
+  /* 12. Dashboard Passport Hero Card & Claim Button Fix */
+  .dashboard-hero-card {
+    padding: 1.15rem 1rem !important;
+    border-radius: 18px !important;
+    margin-bottom: 1.15rem !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboard-hero-content {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.85rem !important;
+    width: 100% !important;
+  }
+
+  .dashboard-user-info {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+  }
+
+  .dashboard-user-avatar {
+    width: 54px !important;
+    height: 54px !important;
+    border-radius: 14px !important;
+  }
+
+  .dashboard-user-meta {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .dashboard-user-subdetails {
+    font-size: 0.72rem !important;
+    gap: 0.35rem !important;
+    margin-top: 0.25rem !important;
+  }
+
+  .dashboard-action-wrapper {
+    width: 100% !important;
+    display: flex !important;
+  }
+
+  .dashboard-claim-btn,
+  .dashboard-action-wrapper .btn,
+  .btn-lg {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0.65rem 0.75rem !important;
+    font-size: 0.82rem !important;
+    border-radius: 10px !important;
+    justify-content: center !important;
+    white-space: normal !important;
+    text-align: center !important;
+    height: auto !important;
+    min-height: 40px !important;
+  }
+
+  .dashboard-claim-btn svg {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .dashboard-claim-btn span {
+    font-size: 0.82rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .dashboard-progress-wrap {
+    margin-top: 1rem !important;
+    padding-top: 0.75rem !important;
+  }
 }
 
 

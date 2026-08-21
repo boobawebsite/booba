@@ -1929,15 +1929,15 @@ HOW TO RECOVER YOUR ACCOUNT:
             <img src="assets/mascot.jpg" style="width: 260px; height: 260px; border-radius: 50%;">
           </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; position: relative; z-index: 1;">
-            <div style="display: flex; align-items: center; gap: 1.5rem;">
-              <div style="position: relative;">
-                <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 84px; height: 84px; border-radius: 20px; border: 2.5px solid var(--brand-yellow); object-fit: cover; box-shadow: 0 0 25px var(--brand-yellow-glow);">
+          <div class="dashboard-hero-content" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; position: relative; z-index: 1;">
+            <div class="dashboard-user-info" style="display: flex; align-items: center; gap: 1.5rem;">
+              <div style="position: relative; flex-shrink: 0;">
+                <img src="${user.avatar || 'assets/mascot.jpg'}" class="dashboard-user-avatar" style="width: 84px; height: 84px; border-radius: 20px; border: 2.5px solid var(--brand-yellow); object-fit: cover; box-shadow: 0 0 25px var(--brand-yellow-glow);">
                 <div style="position: absolute; bottom: -4px; right: -4px; background: var(--brand-yellow); color: #000; font-size: 0.72rem; font-weight: 800; padding: 0.15rem 0.45rem; border-radius: 999px; border: 2px solid #000;">
                   Lv.${levelInfo.level}
                 </div>
               </div>
-              <div>
+              <div class="dashboard-user-meta">
                 <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                   <span class="badge-tag" style="background: var(--brand-yellow); color: #000; font-weight: 800; font-size: 0.78rem;">
                     Lv.${levelInfo.level} ${levelInfo.title}
@@ -1945,7 +1945,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                   ${user.role === 'admin' ? '<a href="teamadmin.html" class="badge-tag" style="background: rgba(243, 186, 47, 0.2); color: var(--brand-yellow); border-color: var(--brand-yellow); font-weight: 800; display: inline-flex; align-items: center; gap: 0.35rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Admin Access</a>' : ''}
                 </div>
 
-                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.4rem; display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+                <div class="dashboard-user-subdetails" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.4rem; display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
                   <span>Passport: <strong class="text-mono" style="color: var(--brand-yellow);">${user.passportId}</strong></span>
                   <span>•</span>
                   <span>Ref: <strong class="text-mono" style="color: var(--text-primary);">${user.referralCode}</strong></span>
@@ -1958,8 +1958,8 @@ HOW TO RECOVER YOUR ACCOUNT:
             </div>
 
             <!-- Quick Action Button -->
-            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-              <button class="btn btn-primary btn-lg" onclick="window.boobaApp.handleDailyCheckIn()" style="display: flex; align-items: center; gap: 0.5rem;">
+            <div class="dashboard-action-wrapper" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button class="btn btn-primary btn-lg dashboard-claim-btn" onclick="window.boobaApp.handleDailyCheckIn()" style="display: flex; align-items: center; gap: 0.5rem;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"></path></svg>
                 <span>Claim Daily Streak (+50 BOOBA)</span>
               </button>
@@ -1968,7 +1968,7 @@ HOW TO RECOVER YOUR ACCOUNT:
           </div>
 
           <!-- Level Progression Bar -->
-          <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+          <div class="dashboard-progress-wrap" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
             <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.6rem; color: var(--text-secondary);">
               <span>Next Milestone: <strong style="color: #FFFFFF;">${levelInfo.nextTier ? levelInfo.nextTier.title : 'MAX LEVEL'}</strong></span>
               <span><strong style="color: var(--brand-yellow);">${Number(user.boobaPoints).toLocaleString()}</strong> / ${levelInfo.nextTier ? levelInfo.nextTier.min.toLocaleString() : 'MAX'} $BOOBA (${levelInfo.progressPercent}%)</span>

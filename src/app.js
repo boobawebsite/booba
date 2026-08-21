@@ -283,6 +283,53 @@ class BoobaApp {
 
     if (headerActions) headerActions.innerHTML = authButtonsDesktop;
     if (mobileFooter) mobileFooter.innerHTML = authButtonsMobile;
+
+    this.renderMobileBottomDock();
+  }
+
+  renderMobileBottomDock() {
+    let dock = document.getElementById('mobileBottomDock');
+    if (!dock) {
+      dock = document.createElement('nav');
+      dock.id = 'mobileBottomDock';
+      dock.className = 'mobile-bottom-dock';
+      dock.setAttribute('aria-label', 'Mobile App Navigation');
+      document.body.appendChild(dock);
+    }
+
+    const p = this.pageName;
+    dock.innerHTML = `
+      <a href="index.html" class="mobile-dock-item ${p === 'home' ? 'active' : ''}">
+        <div class="dock-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        </div>
+        <span>Home</span>
+      </a>
+      <a href="quests.html" class="mobile-dock-item ${p === 'quests' ? 'active' : ''}">
+        <div class="dock-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+        <span>Quests</span>
+      </a>
+      <a href="dashboard.html" class="mobile-dock-item mobile-dock-center ${p === 'dashboard' || p === 'passport' ? 'active' : ''}">
+        <div class="dock-icon-wrap center-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
+        </div>
+        <span>Passport</span>
+      </a>
+      <a href="leaderboard.html" class="mobile-dock-item ${p === 'leaderboard' ? 'active' : ''}">
+        <div class="dock-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        </div>
+        <span>Ranks</span>
+      </a>
+      <a href="rewards.html" class="mobile-dock-item ${p === 'rewards' ? 'active' : ''}">
+        <div class="dock-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line></svg>
+        </div>
+        <span>Vault</span>
+      </a>
+    `;
   }
 
   toggleMobileNav() {

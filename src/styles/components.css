@@ -3465,29 +3465,336 @@
 
 .subday-item.active-today {
   background: linear-gradient(180deg, rgba(243, 186, 47, 0.25) 0%, rgba(14, 18, 27, 0.9) 100%);
-  border: 1px solid var(--brand-yellow);
-  box-shadow: 0 0 12px rgba(243, 186, 47, 0.5);
-}
-
-.subday-item.day-100-nft {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.25) 0%, rgba(147, 51, 234, 0.25) 100%);
-  border: 1px solid #FFD700;
-}
-
-.subday-item.claimed {
-  background: rgba(16, 185, 129, 0.08);
-  border-color: rgba(16, 185, 129, 0.4);
-}
-
-.subday-item.active-today {
-  background: linear-gradient(180deg, rgba(243, 186, 47, 0.2) 0%, rgba(14, 18, 27, 0.9) 100%);
   border: 1.5px solid var(--brand-yellow);
-  box-shadow: 0 0 15px rgba(243, 186, 47, 0.4);
+  box-shadow: 0 0 15px rgba(243, 186, 47, 0.45);
 }
 
 .subday-item.day-100-nft {
   background: linear-gradient(135deg, rgba(255, 215, 0, 0.25) 0%, rgba(147, 51, 234, 0.25) 100%);
   border: 1.5px solid #FFD700;
+}
+
+/* ==========================================================================
+   ULTRA-POLISHED MOBILE WEB3 EXPERIENCE & INTERACTIVE APP ARCHITECTURE
+   (Specifically scoped to <= 768px and <= 480px — Desktop remains 100% untouched)
+   ========================================================================== */
+
+/* 1. Mobile Floating Bottom Navigation Dock */
+.mobile-bottom-dock {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-dock {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    position: fixed;
+    bottom: 0.85rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 1.5rem);
+    max-width: 440px;
+    height: 62px;
+    background: rgba(14, 18, 27, 0.92);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1.5px solid rgba(243, 186, 47, 0.35);
+    border-radius: 999px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.85), 0 0 25px rgba(243, 186, 47, 0.15);
+    z-index: 999;
+    padding: 0 0.5rem;
+    touch-action: manipulation;
+  }
+
+  body {
+    padding-bottom: 5.5rem !important;
+  }
+
+  .mobile-dock-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 0.65rem;
+    font-weight: 700;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 0.3rem 0.5rem;
+    border-radius: 16px;
+    flex: 1;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-dock-item .dock-icon-wrap {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  .mobile-dock-item:active {
+    transform: scale(0.9);
+  }
+
+  .mobile-dock-item.active {
+    color: var(--brand-yellow);
+  }
+
+  .mobile-dock-item.active .dock-icon-wrap {
+    color: var(--brand-yellow);
+    transform: translateY(-2px);
+    filter: drop-shadow(0 0 8px rgba(243, 186, 47, 0.6));
+  }
+
+  .mobile-dock-center .dock-icon-wrap.center-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand-yellow) 0%, #FF9900 100%);
+    color: #000000;
+    margin-top: -14px;
+    box-shadow: 0 6px 18px rgba(243, 186, 47, 0.6);
+    border: 2px solid #0E121B;
+  }
+
+  .mobile-dock-center.active .dock-icon-wrap.center-icon {
+    transform: translateY(-4px) scale(1.08);
+    box-shadow: 0 8px 22px rgba(243, 186, 47, 0.85), 0 0 15px rgba(255, 215, 0, 0.5);
+  }
+
+  /* 2. Tactile Touch Feedback Across Mobile Cards and Buttons */
+  .btn, .bento-card, .card, .stat-box, .pipeline-card, .daily-epoch-card-face, .quest-item-card {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn:active {
+    transform: scale(0.96) !important;
+    transition: transform 0.1s cubic-bezier(0.1, 1, 0.1, 1) !important;
+  }
+
+  .bento-card:active, .card:active, .quest-item-card:active {
+    transform: scale(0.985);
+    border-color: rgba(243, 186, 47, 0.45) !important;
+  }
+
+  /* 3. Mobile Hero Mascot Stage */
+  .hero-section {
+    padding-top: 5rem !important;
+    padding-bottom: 2rem !important;
+    min-height: auto !important;
+  }
+
+  .hero-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.75rem !important;
+    text-align: center !important;
+  }
+
+  .hero-media {
+    order: -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .mascot-hologram-wrapper {
+    max-width: 220px !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 28px !important;
+    padding: 8px !important;
+    animation: mascotMobileFloat 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes mascotMobileFloat {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-8px); }
+  }
+
+  .hero-mascot-img {
+    border-radius: 22px !important;
+  }
+
+  .mascot-floating-pill {
+    padding: 0.4rem 1rem !important;
+    font-size: 0.76rem !important;
+    bottom: -10px !important;
+  }
+
+  .hero-title {
+    font-size: clamp(1.85rem, 7.5vw, 2.5rem) !important;
+    line-height: 1.18 !important;
+    letter-spacing: -0.025em !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .hero-subtitle {
+    font-size: 0.92rem !important;
+    line-height: 1.55 !important;
+    color: var(--text-secondary) !important;
+    margin: 0 auto 1.25rem auto !important;
+    max-width: 90% !important;
+  }
+
+  .hero-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+    margin-bottom: 1.75rem !important;
+  }
+
+  .hero-actions .btn {
+    width: 100% !important;
+    padding: 0.85rem 1.25rem !important;
+    font-size: 0.92rem !important;
+    border-radius: 16px !important;
+    justify-content: center !important;
+  }
+
+  .hero-stats-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.4rem !important;
+    padding: 0.85rem 0.5rem !important;
+    border-radius: 18px !important;
+    margin: 0 auto !important;
+  }
+
+  .stat-box {
+    padding: 0.2rem !important;
+    text-align: center !important;
+  }
+
+  .stat-value {
+    font-size: 1.15rem !important;
+  }
+
+  .stat-label {
+    font-size: 0.65rem !important;
+  }
+
+  /* 4. Mobile Bento Grid Web3 Pods */
+  .bento-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.15rem !important;
+  }
+
+  .bento-card {
+    border-radius: 22px !important;
+    padding: 1.4rem 1.15rem !important;
+    background: rgba(14, 18, 27, 0.85) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .bento-icon-badge {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 14px !important;
+  }
+
+  .bento-title {
+    font-size: 1.2rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .bento-desc {
+    font-size: 0.85rem !important;
+    line-height: 1.5 !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* 5. Mobile Quests & Missions */
+  .quests-grid, .achievements-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  .quest-item-card {
+    padding: 1.15rem 1rem !important;
+    border-radius: 20px !important;
+  }
+
+  .quest-actions-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    margin-top: 1rem !important;
+  }
+
+  .quest-actions-row .btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* 6. Mobile 100-Day GameFi Carousel */
+  .daily-carousel-track {
+    gap: 0.85rem !important;
+    padding: 0.75rem 0.5rem 1.5rem 0.5rem !important;
+  }
+
+  .daily-carousel-slide {
+    flex: 0 0 min(295px, 85vw) !important;
+  }
+
+  .daily-epoch-card-face {
+    padding: 1.25rem 1rem !important;
+    border-radius: 22px !important;
+  }
+
+  .epoch-subdays-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 0.3rem !important;
+  }
+
+  .subday-item {
+    padding: 0.35rem 0.15rem !important;
+    border-radius: 8px !important;
+  }
+
+  /* 7. Mobile Modals Bottom Sheet Transition */
+  .modal-backdrop {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .auth-card, .wallet-modal-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 28px 28px 0 0 !important;
+    padding: 1.75rem 1.25rem !important;
+    max-height: 88vh !important;
+    overflow-y: auto !important;
+    border-bottom: none !important;
+    animation: mobileSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  @keyframes mobileSlideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  /* 8. Mobile Leaderboard Top 3 Podium */
+  .top-podium-container {
+    flex-direction: column !important;
+    gap: 0.85rem !important;
+    align-items: center !important;
+  }
+
+  .podium-card {
+    width: 100% !important;
+    max-width: 320px !important;
+    padding: 1.25rem !important;
+    border-radius: 20px !important;
+  }
 }
 
 

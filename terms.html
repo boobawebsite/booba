@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service — BOOBA (BNB baby)</title>
+  <meta name="description" content="Official Terms of Service for the BOOBA (BNB baby) ecosystem, digital passport minting, community bounties, and BEP-20 rewards.">
+  <link rel="icon" type="image/jpeg" href="assets/mascot.jpg">
+
+  <!-- Consolidated Master Stylesheet -->
+  <link rel="stylesheet" href="src/styles/main.css?v=3.0">
+</head>
+<body>
+
+  <!-- Ambient Glow -->
+  <div class="ambient-glow"></div>
+
+  <!-- SITE HEADER -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo-brand">
+        <img src="assets/mascot.jpg" alt="Booba BNB Baby Mascot" class="logo-avatar">
+        <div class="flex items-center gap-2">
+          <span>BOOBA</span>
+          <span class="badge-tag">BNB baby</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="leaderboard.html" class="nav-link">Leaderboard</a></li>
+      </ul>
+
+      <div class="flex items-center gap-2">
+        <div id="headerNavActions" class="nav-actions"></div>
+        <button id="mobileNavToggleBtn" class="mobile-nav-toggle-btn" aria-label="Open Navigation Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MOBILE NAVIGATION DRAWER -->
+  <div id="mobileNavBackdrop" class="mobile-nav-backdrop"></div>
+  <aside id="mobileNavDrawer" class="mobile-nav-drawer">
+    <div class="mobile-nav-header">
+      <a href="index.html" class="logo-brand mobile-drawer-logo">
+        <img src="assets/mascot.jpg" alt="Booba" class="logo-avatar">
+        <div class="flex items-center gap-2">
+          <span>BOOBA</span>
+          <span class="badge-tag">BNB baby</span>
+        </div>
+      </a>
+      <button id="mobileNavCloseBtn" class="btn btn-ghost btn-sm btn-icon-action" style="width: 34px; height: 34px; border-radius: 50%;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+    </div>
+    <div class="mobile-nav-body">
+      <ul class="mobile-nav-list">
+        <li><a href="index.html" class="mobile-nav-link">Home</a></li>
+        <li><a href="dashboard.html" class="mobile-nav-link">Dashboard Overview</a></li>
+        <li><a href="leaderboard.html" class="mobile-nav-link">Leaderboard</a></li>
+      </ul>
+    </div>
+    <div id="mobileNavFooter" class="mobile-nav-footer"></div>
+  </aside>
+
+  <!-- MAIN TERMS CONTENT -->
+  <main class="page-wrapper">
+    <div class="container" style="max-width: 900px; padding: 3rem 1.5rem 5rem 1.5rem;">
+      
+      <!-- Header Banner -->
+      <div style="text-align: center; margin-bottom: 3rem;">
+        <div class="badge-tag" style="margin-bottom: 0.75rem;">Legal & Protocol Guidelines</div>
+        <h1 style="font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">
+          Terms of Service
+        </h1>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">
+          Last Updated: August 2026 • Governed by Decentralized Community Standards on BNB Smart Chain
+        </p>
+      </div>
+
+      <!-- Content Card -->
+      <div class="card" style="padding: 2.5rem 2rem; display: flex; flex-direction: column; gap: 2rem; line-height: 1.7; color: var(--text-secondary);">
+
+        <!-- Section 1 -->
+        <div>
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: var(--brand-yellow);">1.</span> Acceptance of Terms & Protocol Overview
+          </h2>
+          <p>
+            Welcome to <strong>BOOBA (BNB baby)</strong> ("we," "our," or "the Protocol"). By accessing our website, minting a digital <strong>Booba Passport</strong>, participating in community bounties, connecting your Web3 crypto wallet, or earning <strong>$BOOBA</strong> ecosystem points, you agree to be bound by these Terms of Service and all applicable regulations governing the <strong>BNB Smart Chain (BEP-20)</strong> ecosystem.
+          </p>
+          <p style="margin-top: 0.75rem;">
+            If you do not agree with any part of these Terms, you must immediately cease interaction with the platform and refrain from minting or claiming community assets.
+          </p>
+        </div>
+
+        <!-- Section 2 -->
+        <div>
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: var(--brand-yellow);">2.</span> Non-Custodial Architecture & 12-Word Recovery Seed Phrase
+          </h2>
+          <p>
+            BOOBA operates under strict cryptographic and non-custodial principles:
+          </p>
+          <ul style="padding-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <li><strong>Master Recovery Phrase:</strong> When minting your Booba Passport, you are issued a unique 12-word cryptographic seed phrase (BIP-39 standard). This recovery phrase is your master key to restore access if you forget your credentials.</li>
+            <li><strong>User Sole Responsibility:</strong> You are solely responsible for saving, backing up, and safeguarding your 12-word recovery phrase. <strong>The BOOBA team does not store, possess, or have the technical ability to recover lost seed phrases.</strong></li>
+            <li><strong>Zero-Knowledge Security:</strong> Passwords and seed phrases are hashed cryptographically using SHA-256 before verification. The team will never ask for your 12-word recovery phrase or private keys.</li>
+          </ul>
+        </div>
+
+        <!-- Section 3 -->
+        <div>
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: var(--brand-yellow);">3.</span> Digital Booba Passport & Token Rewards ($BOOBA)
+          </h2>
+          <p>
+            The digital Booba Passport serves as your community identity across the BNB Baby movement. Points, badges, and levels awarded on the platform:
+          </p>
+          <ul style="padding-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <li>Represent gamified community reputation, engagement standing, and eligibility for potential ecosystem airdrop snapshots.</li>
+            <li>Do not represent debt, shares, securities, or fractional ownership in any legal corporate entity.</li>
+            <li>Level Progression (from <em>Lv.1 Booba Baby</em> to <em>Lv.10 Booba Master</em>) unlocks digital badges, multiplier perks, alpha lounges, and community advisory governance.</li>
+          </ul>
+        </div>
+
+        <!-- Section 4 -->
+        <div>
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: var(--brand-yellow);">4.</span> Community Quests, Bounties & Anti-Sybil Fair Play
+          </h2>
+          <p>
+            To protect genuine holders and maintain a fair community leaderboard, the following rules apply to all quest submissions:
+          </p>
+          <ul style="padding-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <li><strong>Authentic Proofs:</strong> Creative submissions, meme contests, and social tasks must be original and accurately verifiable via live URL or image proof.</li>
+            <li><strong>Anti-Sybil Protection:</strong> Creating automated bot farms, submitting falsified proofs, or using multi-account exploits is strictly prohibited. The core team reserves the right to reject fraudulent submissions and adjust reputation scores in the Admin Console.</li>
+            <li><strong>Referral Program:</strong> Verified referrals earn +300 BOOBA upon genuine passport activation. Exploitation via automated burner accounts will disqualify the referring passport from reward vault distributions.</li>
+          </ul>
+        </div>
+
+        <!-- Section 5 -->
+        <div>
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: var(--brand-yellow);">5.</span> Web3 Wallet Integration & BNB Chain Transactions
+          </h2>
+          <p>
+            When connecting an injected Web3 wallet (such as MetaMask, Trust Wallet, Binance Web3 Wallet, OKX, or Coinbase Wallet):
+          </p>
+          <ul style="padding-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <li>Transactions performed on the <strong>BNB Smart Chain (Chain ID: 56)</strong> are broadcast directly to the decentralized network and are irreversible.</li>
+            <li>Users are responsible for any applicable network gas fees (BNB) associated with blockchain executions.</li>
+            <li>We do not control the underlying blockchain protocol or third-party wallet software.</li>
+          </ul>
+        </div>
+
+        <!-- Section 6 -->
+        <div>
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: var(--brand-yellow);">6.</span> Disclaimers & No Financial Advice
+          </h2>
+          <p>
+            All content, gamified rewards, and community initiatives provided on the BOOBA platform are for entertainment, utility, and community-building purposes only. Nothing on this website constitutes financial, investment, legal, or tax advice. Cryptocurrency assets and BEP-20 tokens involve inherent market volatility; participate responsibly and conduct your own research (DYOR).
+          </p>
+        </div>
+
+        <!-- Section 7 -->
+        <div>
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: var(--brand-yellow);">7.</span> Contact & Community Governance
+          </h2>
+          <p>
+            For inquiries regarding protocol terms or community proposals, connect with our team and community moderators via our official channels:
+          </p>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+            <a href="https://twitter.com/boobababybnb" target="_blank" class="btn btn-secondary btn-sm">X (Twitter)</a>
+            <a href="https://t.me/boobababybnb" target="_blank" class="btn btn-secondary btn-sm">Telegram Lounge</a>
+            <a href="https://discord.gg/booba" target="_blank" class="btn btn-secondary btn-sm">Discord Community</a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Navigation Back to App -->
+      <div style="text-align: center; margin-top: 2.5rem; display: flex; justify-content: center; gap: 1rem;">
+        <a href="privacy.html" class="btn btn-secondary">Read Privacy Policy →</a>
+        <a href="signin.html#signup" class="btn btn-primary">Mint Booba Passport (+100 BOOBA)</a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer id="siteFooter" style="border-top: 1px solid var(--border-subtle); padding: 3rem 0 2rem 0; background: rgba(7, 9, 14, 0.95);">
+    <div class="container" style="text-align: center; font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.75rem;">
+      <div style="display: flex; justify-content: center; gap: 1.5rem; font-weight: 600;">
+        <a href="terms.html" style="color: var(--brand-yellow);">Terms of Service</a>
+        <a href="privacy.html" style="color: var(--text-secondary);">Privacy Policy</a>
+        <a href="index.html" style="color: var(--text-secondary);">Home</a>
+        <a href="passport.html" style="color: var(--text-secondary);">Passport</a>
+      </div>
+      <div>© 2026 BOOBA (BNB baby). All rights reserved. Powered by BNB Smart Chain & Supabase.</div>
+    </div>
+  </footer>
+
+  <!-- Motion & Physics Frameworks -->
+  <script src="https://unpkg.com/lenis@1.1.9/dist/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

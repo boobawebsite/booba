@@ -29,11 +29,7 @@
       <ul class="nav-links">
         <li><a href="index.html" class="nav-link">Home</a></li>
         <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
-        <li><a href="passport.html" class="nav-link">My Passport</a></li>
-        <li><a href="quests.html" class="nav-link">Quests</a></li>
         <li><a href="leaderboard.html" class="nav-link">Leaderboard</a></li>
-        <li><a href="rewards.html" class="nav-link">Rewards</a></li>
-        <li><a href="referrals.html" class="nav-link">Referrals</a></li>
       </ul>
 
       <div class="flex items-center gap-2">
@@ -60,17 +56,13 @@
           <span class="badge-tag">BNB baby</span>
         </div>
       </a>
-      <button id="mobileNavCloseBtn" class="btn btn-ghost btn-sm btn-icon-action" style="width: 34px; height: 34px; border-radius: 50%;">✕</button>
+      <button id="mobileNavCloseBtn" class="btn btn-ghost btn-sm btn-icon-action" style="width: 34px; height: 34px; border-radius: 50%;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
     <div class="mobile-nav-body">
       <ul class="mobile-nav-list">
         <li><a href="index.html" class="mobile-nav-link">Home</a></li>
         <li><a href="dashboard.html" class="mobile-nav-link">Dashboard Overview</a></li>
-        <li><a href="passport.html" class="mobile-nav-link">My Booba Passport</a></li>
-        <li><a href="quests.html" class="mobile-nav-link">Quests & Bounties</a></li>
         <li><a href="leaderboard.html" class="mobile-nav-link">Leaderboard</a></li>
-        <li><a href="rewards.html" class="mobile-nav-link">BOOBA Vault</a></li>
-        <li><a href="referrals.html" class="mobile-nav-link">Referrals</a></li>
       </ul>
     </div>
     <div id="mobileNavFooter" class="mobile-nav-footer"></div>
@@ -80,10 +72,19 @@
   <main id="app" class="page-wrapper"></main>
 
   <footer id="siteFooter" style="border-top: 1px solid var(--border-subtle); padding: 2rem 0; background: rgba(7, 9, 14, 0.95);">
-    <div class="container" style="text-align: center; font-size: 0.75rem; color: var(--text-muted);">
-      © 2026 BOOBA (BNB baby). All rights reserved. Powered by BNB Smart Chain & Supabase.
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 0.75rem; color: var(--text-muted);">
+      <div>© 2026 BOOBA (BNB baby). All rights reserved. Powered by BNB Smart Chain & Supabase.</div>
+      <div style="display: flex; gap: 1.5rem;">
+        <a href="terms.html" style="color: var(--text-secondary); text-decoration: none;">Terms of Service</a>
+        <a href="privacy.html" style="color: var(--text-secondary); text-decoration: none;">Privacy Policy</a>
+      </div>
     </div>
   </footer>
+
+  <!-- Motion & Physics Frameworks -->
+  <script src="https://unpkg.com/lenis@1.1.9/dist/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
   <script type="module" src="src/app.js"></script>
 </body>

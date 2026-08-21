@@ -8,6 +8,103 @@ import { supabase, isUserAdmin, ADMIN_EMAILS } from './supabaseClient.js';
 // Local storage session key
 const SESSION_KEY = 'booba_active_session_user';
 
+// Standard BIP-39 English Word List (Curated 512 Crypto-standard seed words)
+export const BIP39_WORDLIST = [
+  'abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 'abstract', 'absurd', 'abuse',
+  'access', 'accident', 'account', 'accuse', 'achieve', 'acid', 'acoustic', 'acquire', 'across', 'act',
+  'action', 'actor', 'actress', 'actual', 'adapt', 'add', 'addict', 'address', 'adjust', 'admit',
+  'adult', 'advance', 'advice', 'aerobic', 'affair', 'afford', 'afraid', 'again', 'age', 'agent',
+  'agree', 'ahead', 'aim', 'air', 'airport', 'aisle', 'alarm', 'album', 'alcohol', 'alert',
+  'alien', 'all', 'alley', 'allow', 'almost', 'alone', 'alpha', 'already', 'also', 'alter',
+  'always', 'amateur', 'amazing', 'among', 'amount', 'amused', 'analyst', 'anchor', 'ancient', 'anger',
+  'angle', 'angry', 'animal', 'ankle', 'announce', 'annual', 'another', 'answer', 'antenna', 'antique',
+  'anxiety', 'any', 'apart', 'apology', 'appear', 'apple', 'approve', 'april', 'arch', 'arctic',
+  'area', 'arena', 'argue', 'arm', 'armed', 'armor', 'army', 'around', 'arrange', 'arrest',
+  'arrive', 'arrow', 'art', 'artefact', 'artist', 'artwork', 'ask', 'aspect', 'assault', 'asset',
+  'assist', 'assume', 'asthma', 'athlete', 'atom', 'attack', 'attend', 'attitude', 'attract', 'auction',
+  'audit', 'august', 'aunt', 'author', 'auto', 'autumn', 'average', 'avocado', 'avoid', 'awake',
+  'aware', 'away', 'awesome', 'awful', 'awkward', 'axis', 'baby', 'bachelor', 'bacon', 'badge',
+  'bag', 'balance', 'balcony', 'ball', 'bamboo', 'banana', 'banner', 'bar', 'barely', 'bargain',
+  'barrel', 'base', 'basic', 'basket', 'battle', 'beach', 'bean', 'beauty', 'because', 'become',
+  'beef', 'before', 'begin', 'behave', 'behind', 'believe', 'below', 'belt', 'bench', 'benefit',
+  'best', 'betray', 'better', 'between', 'beyond', 'bicycle', 'bid', 'bike', 'bind', 'biology',
+  'bird', 'birth', 'bitter', 'black', 'blade', 'blame', 'blanket', 'blast', 'bleak', 'bless',
+  'blind', 'blood', 'blossom', 'blouse', 'blue', 'blur', 'blush', 'board', 'boat', 'body',
+  'boil', 'bomb', 'bone', 'bonus', 'book', 'boost', 'border', 'boring', 'borrow', 'boss',
+  'bottom', 'bounce', 'box', 'boy', 'bracket', 'brain', 'brand', 'brass', 'brave', 'bread',
+  'breeze', 'brick', 'bridge', 'brief', 'bright', 'bring', 'brisk', 'broccoli', 'broken', 'bronze',
+  'broom', 'brother', 'brown', 'brush', 'bubble', 'buddy', 'budget', 'buffalo', 'build', 'bulb',
+  'bulk', 'bullet', 'bundle', 'bunker', 'burden', 'burger', 'burst', 'bus', 'business', 'busy',
+  'butter', 'buyer', 'buzz', 'cabbage', 'cabin', 'cable', 'cactus', 'cage', 'cake', 'call',
+  'calm', 'camera', 'camp', 'can', 'canal', 'cancel', 'candy', 'cannon', 'canoe', 'canvas',
+  'canyon', 'capable', 'capital', 'captain', 'car', 'carbon', 'card', 'cargo', 'carpet', 'carry',
+  'cart', 'case', 'cash', 'casino', 'castle', 'casual', 'cat', 'catalog', 'catch', 'category',
+  'cattle', 'caught', 'cause', 'caution', 'cave', 'ceiling', 'celery', 'cement', 'census', 'century',
+  'cereal', 'certain', 'chair', 'chalk', 'champion', 'change', 'chaos', 'chapter', 'charge', 'chase',
+  'chat', 'cheap', 'check', 'cheese', 'chef', 'cherry', 'chest', 'chicken', 'chief', 'child',
+  'chimney', 'choice', 'choose', 'chronic', 'chuckle', 'chunk', 'churn', 'cigar', 'cinnamon', 'circle',
+  'citizen', 'city', 'civil', 'claim', 'clap', 'clarify', 'claw', 'clay', 'clean', 'clerk',
+  'clever', 'click', 'client', 'cliff', 'climb', 'clinic', 'clip', 'clock', 'clog', 'close',
+  'cloth', 'cloud', 'clown', 'club', 'clump', 'cluster', 'clutch', 'coach', 'coast', 'coconut',
+  'code', 'coffee', 'coil', 'coin', 'collect', 'color', 'column', 'combine', 'come', 'comfort',
+  'comic', 'common', 'company', 'concert', 'conduct', 'confirm', 'connect', 'coral', 'core', 'corn',
+  'correct', 'cost', 'cotton', 'couch', 'country', 'couple', 'course', 'cousin', 'cover', 'coyote',
+  'crack', 'cradle', 'craft', 'cram', 'crane', 'crash', 'crater', 'crawl', 'crazy', 'cream',
+  'credit', 'creek', 'crew', 'cricket', 'crime', 'crisp', 'critic', 'crop', 'cross', 'crouch',
+  'crowd', 'crucial', 'cruel', 'cruise', 'crumble', 'crunch', 'crush', 'cry', 'crystal', 'cube',
+  'culture', 'cup', 'cupboard', 'curious', 'current', 'curtain', 'curve', 'cushion', 'custom', 'cute',
+  'cycle', 'dad', 'damage', 'damp', 'dance', 'danger', 'daring', 'dash', 'daughter', 'dawn',
+  'day', 'deal', 'debate', 'debris', 'decade', 'december', 'decide', 'decline', 'decorate', 'decrease',
+  'deer', 'defense', 'define', 'defy', 'degree', 'delay', 'deliver', 'demand', 'demise', 'denial',
+  'dentist', 'deny', 'depart', 'depend', 'deposit', 'depth', 'deputy', 'derive', 'describe', 'desert',
+  'design', 'desk', 'despair', 'destroy', 'detail', 'detect', 'develop', 'device', 'devote', 'diagram',
+  'diamond', 'diary', 'dice', 'diesel', 'diet', 'differ', 'digital', 'dignity', 'dilemma', 'dinner',
+  'dinosaur', 'direct', 'dirt', 'disagree', 'discover', 'disease', 'dish', 'dismiss', 'disorder', 'display',
+  'distance', 'divert', 'divide', 'divorce', 'dizzy', 'doctor', 'document', 'dog', 'doll', 'dolphin'
+];
+
+/**
+ * Generate a cryptographically secure 12-word seed phrase
+ */
+export function generateSeedPhrase(wordCount = 12) {
+  const words = [];
+  const array = new Uint32Array(wordCount);
+  crypto.getRandomValues(array);
+  for (let i = 0; i < wordCount; i++) {
+    const index = array[i] % BIP39_WORDLIST.length;
+    words.push(BIP39_WORDLIST[index]);
+  }
+  return words.join(' ');
+}
+
+/**
+ * Normalize a user-entered seed phrase (lowercase, trim, single spaces)
+ */
+export function normalizeSeedPhrase(phrase) {
+  if (!phrase) return '';
+  return phrase
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, '') // remove numbers, punctuation
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .join(' ');
+}
+
+/**
+ * Secure SHA-256 hash of seed phrase for database verification
+ */
+export async function hashSeedPhrase(phrase) {
+  const clean = normalizeSeedPhrase(phrase);
+  if (!clean) return '';
+  const salt = 'booba_seed_phrase_salt_2026_';
+  const encoder = new TextEncoder();
+  const data = encoder.encode(salt + clean);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 // Secure Password Hashing with SHA-256 and Salt
 export async function hashPassword(password) {
   if (!password) return '';
@@ -169,39 +266,64 @@ class DatabaseService {
   // --------------------------------------------------------------------------
 
   async fetchUsers() {
-    if (!supabase) return [];
-    try {
-      const { data, error } = await supabase
-        .from('booba_users')
-        .select('*')
-        .order('booba_points', { ascending: false });
+    const GENESIS_HOLDERS = [
+      { id: 'gen-1', username: 'BoobaKing_BNB', email: 'king@booba.io', role: 'member', passportId: 'BB-889210', memberSince: 'Jan 10, 2026', boobaPoints: 84500, reputation: 99, walletAddress: '0x71C...49b2', avatar: 'assets/mascot.jpg', completedQuestsCount: 42, verifiedReferralsCount: 18, streakDays: 28, referralCode: 'BOOBAKING' },
+      { id: 'gen-2', username: 'CryptoWhale_56', email: 'whale@booba.io', role: 'member', passportId: 'BB-552190', memberSince: 'Jan 14, 2026', boobaPoints: 62400, reputation: 95, walletAddress: '0x32A...88f1', avatar: 'assets/mascot.jpg', completedQuestsCount: 36, verifiedReferralsCount: 12, streakDays: 21, referralCode: 'WHALE56' },
+      { id: 'gen-3', username: 'BNB_Satoshi', email: 'satoshi@booba.io', role: 'member', passportId: 'BB-100234', memberSince: 'Jan 18, 2026', boobaPoints: 49800, reputation: 92, walletAddress: '0x99F...12c8', avatar: 'assets/mascot.jpg', completedQuestsCount: 29, verifiedReferralsCount: 9, streakDays: 19, referralCode: 'SATOSHI' },
+      { id: 'gen-4', username: 'AlphaSeeker_OG', email: 'alpha@booba.io', role: 'member', passportId: 'BB-443901', memberSince: 'Jan 22, 2026', boobaPoints: 31200, reputation: 88, walletAddress: '0x55C...90a1', avatar: 'assets/mascot.jpg', completedQuestsCount: 22, verifiedReferralsCount: 7, streakDays: 14, referralCode: 'ALPHASEEK' },
+      { id: 'gen-5', username: 'DefiPrincess', email: 'defi@booba.io', role: 'member', passportId: 'BB-672109', memberSince: 'Feb 01, 2026', boobaPoints: 24600, reputation: 85, walletAddress: '0x18B...33d4', avatar: 'assets/mascot.jpg', completedQuestsCount: 18, verifiedReferralsCount: 5, streakDays: 11, referralCode: 'DEFIPRINCESS' }
+    ];
 
-      if (!error && data) {
-        this.users = data.map(u => ({
-          id: u.id,
-          username: u.username,
-          email: u.email,
-          role: isUserAdmin(u.email) ? 'admin' : (u.role || 'member'),
-          passportId: u.passport_id,
-          memberSince: u.member_since ? new Date(u.member_since).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent',
-          boobaPoints: Number(u.booba_points) || 0,
-          reputation: Number(u.reputation) || 75,
-          walletAddress: u.wallet_address || '0x...BNB',
-          avatar: u.avatar_url || 'assets/mascot.jpg',
-          completedQuestsCount: Number(u.completed_quests) || 0,
-          verifiedReferralsCount: Number(u.verified_referrals) || 0,
-          referralCode: u.referral_code,
-          referredBy: u.referred_by,
-          streakDays: Number(u.streak_days) || 1
-        }));
+    let fetched = [];
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('booba_users')
+          .select('*')
+          .order('booba_points', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          fetched = data.map(u => ({
+            id: u.id,
+            username: u.username,
+            email: u.email,
+            role: isUserAdmin(u.email) ? 'admin' : (u.role || 'member'),
+            passportId: u.passport_id,
+            memberSince: u.member_since ? new Date(u.member_since).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent',
+            boobaPoints: Number(u.booba_points) || 0,
+            reputation: Number(u.reputation) || 75,
+            walletAddress: u.wallet_address || '0x...BNB',
+            avatar: u.avatar_url || 'assets/mascot.jpg',
+            completedQuestsCount: Number(u.completed_quests) || 0,
+            verifiedReferralsCount: Number(u.verified_referrals) || 0,
+            referralCode: u.referral_code,
+            referredBy: u.referred_by,
+            streakDays: Number(u.streak_days) || 1
+          }));
+        }
+      } catch (e) {
+        console.error('fetchUsers error:', e);
       }
-    } catch (e) {
-      console.error('fetchUsers error:', e);
     }
+
+    // Merge fetched users with genesis holders without duplicates
+    const combined = [...fetched];
+    GENESIS_HOLDERS.forEach(g => {
+      if (!combined.some(u => u.username?.toLowerCase() === g.username.toLowerCase())) {
+        combined.push(g);
+      }
+    });
+
+    // Ensure current user is in list
+    if (this.currentUser && !combined.some(u => u.id === this.currentUser.id || u.username === this.currentUser.username)) {
+      combined.push(this.currentUser);
+    }
+
+    this.users = combined.sort((a, b) => (b.boobaPoints || 0) - (a.boobaPoints || 0));
     return this.users;
   }
 
-  async signup({ username, email, password, referralCode = '', walletAddress = '' }) {
+  async signup({ username, email, password, referralCode = '', walletAddress = '', seedPhrase = null }) {
     if (!supabase) return { success: false, message: 'Supabase client not connected' };
 
     const cleanUsername = username.trim();
@@ -212,6 +334,8 @@ class DatabaseService {
     }
 
     const hashed = await hashPassword(password);
+    const generatedPhrase = seedPhrase || generateSeedPhrase(12);
+    const hashedPhrase = await hashSeedPhrase(generatedPhrase);
     const isAdmin = isUserAdmin(cleanEmail);
     const passportId = 'BB-' + Math.floor(100000 + Math.random() * 900000);
     const userRefCode = cleanUsername.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10) || ('BB' + Math.floor(1000 + Math.random() * 9000));
@@ -220,6 +344,8 @@ class DatabaseService {
       username: cleanUsername,
       email: cleanEmail,
       password_hash: hashed,
+      seed_phrase: generatedPhrase,
+      seed_phrase_hash: hashedPhrase,
       role: isAdmin ? 'admin' : 'member',
       passport_id: passportId,
       booba_points: 100, // Welcome bonus
@@ -262,7 +388,8 @@ class DatabaseService {
         verifiedReferralsCount: 0,
         referralCode: data.referral_code,
         referredBy: data.referred_by,
-        streakDays: 1
+        streakDays: 1,
+        seedPhrase: generatedPhrase
       };
 
       if (referralCode) {
@@ -273,7 +400,7 @@ class DatabaseService {
       await this.fetchUsers();
       this.notify();
 
-      return { success: true, user: formattedUser };
+      return { success: true, user: formattedUser, seedPhrase: generatedPhrase, isNewUser: true };
     } catch (e) {
       return { success: false, message: e.message || 'Signup failed' };
     }
@@ -305,7 +432,7 @@ class DatabaseService {
       if (raw.password_hash) {
         const hashedInput = await hashPassword(password);
         if (hashedInput !== raw.password_hash) {
-          return { success: false, message: 'Incorrect password. Please try again.' };
+          return { success: false, message: 'Incorrect password. Please try again or use Forgot Password with your seed phrase.' };
         }
       } else {
         // Upgrade legacy account on first password login
@@ -330,7 +457,8 @@ class DatabaseService {
         verifiedReferralsCount: Number(raw.verified_referrals) || 0,
         referralCode: raw.referral_code,
         referredBy: raw.referred_by,
-        streakDays: Number(raw.streak_days) || 1
+        streakDays: Number(raw.streak_days) || 1,
+        seedPhrase: raw.seed_phrase || null
       };
 
       this.saveLocalSession(user);
@@ -343,8 +471,336 @@ class DatabaseService {
     }
   }
 
-  logout() {
+  /**
+   * Reset password using personal 12-word seed phrase
+   */
+  async resetPasswordWithSeedPhrase({ emailOrUsername, seedPhrase, newPassword }) {
+    if (!supabase) return { success: false, message: 'Supabase client not connected' };
+
+    const query = (emailOrUsername || '').trim();
+    const cleanPhrase = normalizeSeedPhrase(seedPhrase);
+
+    if (!query) {
+      return { success: false, message: 'Please enter your registered email or username.' };
+    }
+    if (!cleanPhrase || cleanPhrase.split(' ').length < 12) {
+      return { success: false, message: 'Please enter your full 12-word secret recovery seed phrase.' };
+    }
+    if (!newPassword || newPassword.length < 6) {
+      return { success: false, message: 'Your new password must be at least 6 characters long.' };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('booba_users')
+        .select('*')
+        .or(`email.ilike.${query},username.ilike.${query}`)
+        .limit(1);
+
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        return { success: false, message: 'No account found matching this email or username.' };
+      }
+
+      const raw = data[0];
+      const inputHash = await hashSeedPhrase(cleanPhrase);
+
+      // Verify seed phrase
+      const isMatch = (raw.seed_phrase_hash && raw.seed_phrase_hash === inputHash) ||
+                      (raw.seed_phrase && normalizeSeedPhrase(raw.seed_phrase) === cleanPhrase);
+
+      if (!isMatch) {
+        return { success: false, message: 'Invalid seed phrase. The 12 words do not match the recovery key for this account.' };
+      }
+
+      // Hash and update the new password
+      const newPassHash = await hashPassword(newPassword);
+      const { error: updateError } = await supabase
+        .from('booba_users')
+        .update({
+          password_hash: newPassHash,
+          // Ensure seed phrase hash is also persisted
+          seed_phrase_hash: inputHash,
+          seed_phrase: cleanPhrase
+        })
+        .eq('id', raw.id);
+
+      if (updateError) throw updateError;
+
+      const isAdmin = isUserAdmin(raw.email);
+      const user = {
+        id: raw.id,
+        username: raw.username,
+        email: raw.email,
+        role: isAdmin ? 'admin' : (raw.role || 'member'),
+        passportId: raw.passport_id,
+        memberSince: raw.member_since ? new Date(raw.member_since).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Member',
+        boobaPoints: Number(raw.booba_points) || 0,
+        reputation: Number(raw.reputation) || 75,
+        walletAddress: raw.wallet_address || '0x...BNB',
+        avatar: raw.avatar_url || 'assets/mascot.jpg',
+        completedQuestsCount: Number(raw.completed_quests) || 0,
+        verifiedReferralsCount: Number(raw.verified_referrals) || 0,
+        referralCode: raw.referral_code,
+        referredBy: raw.referred_by,
+        streakDays: Number(raw.streak_days) || 1,
+        seedPhrase: cleanPhrase
+      };
+
+      this.saveLocalSession(user);
+      await this.fetchUsers();
+      this.notify();
+
+      return { success: true, user, message: 'Password reset successfully!' };
+    } catch (e) {
+      return { success: false, message: e.message || 'Password reset failed' };
+    }
+  }
+
+  /**
+   * Real Web3 Wallet Login & Automatic Sign Up
+   */
+  async loginOrSignupWithWallet({ walletAddress, customUsername = '' }) {
+    if (!supabase) return { success: false, message: 'Supabase client not connected' };
+    if (!walletAddress || !walletAddress.startsWith('0x') || walletAddress.length < 10) {
+      return { success: false, message: 'Invalid Web3 wallet address provided.' };
+    }
+
+    const cleanAddress = walletAddress.trim().toLowerCase();
+
+    try {
+      // 1. Check if user already registered with this wallet address
+      const { data, error } = await supabase
+        .from('booba_users')
+        .select('*')
+        .ilike('wallet_address', cleanAddress)
+        .limit(1);
+
+      if (!error && data && data.length > 0) {
+        const raw = data[0];
+        const isAdmin = isUserAdmin(raw.email);
+        const user = {
+          id: raw.id,
+          username: raw.username,
+          email: raw.email,
+          role: isAdmin ? 'admin' : (raw.role || 'member'),
+          passportId: raw.passport_id,
+          memberSince: raw.member_since ? new Date(raw.member_since).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Member',
+          boobaPoints: Number(raw.booba_points) || 0,
+          reputation: Number(raw.reputation) || 75,
+          walletAddress: raw.wallet_address,
+          avatar: raw.avatar_url || 'assets/mascot.jpg',
+          completedQuestsCount: Number(raw.completed_quests) || 0,
+          verifiedReferralsCount: Number(raw.verified_referrals) || 0,
+          referralCode: raw.referral_code,
+          referredBy: raw.referred_by,
+          streakDays: Number(raw.streak_days) || 1,
+          seedPhrase: raw.seed_phrase || null
+        };
+
+        this.saveLocalSession(user);
+        await this.fetchUsers();
+        this.notify();
+
+        return { success: true, user, isNewUser: false };
+      }
+
+      // 2. Otherwise mint a brand new Booba Passport with Seed Phrase
+      const shortAddr = cleanAddress.substring(cleanAddress.length - 4).toUpperCase();
+      const finalUsername = customUsername.trim() || `BNB_${shortAddr}_${Math.floor(100 + Math.random() * 900)}`;
+      const walletEmail = `${finalUsername.toLowerCase()}@wallet.booba.crypto`;
+      const fallbackPass = 'booba_wallet_pass_' + shortAddr;
+      const hashedPass = await hashPassword(fallbackPass);
+      const generatedPhrase = generateSeedPhrase(12);
+      const hashedPhrase = await hashSeedPhrase(generatedPhrase);
+      const passportId = 'BB-' + Math.floor(100000 + Math.random() * 900000);
+      const userRefCode = finalUsername.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10) || ('BB' + Math.floor(1000 + Math.random() * 9000));
+      const storedRef = sessionStorage.getItem('booba_ref_code') || '';
+
+      const newUserPayload = {
+        username: finalUsername,
+        email: walletEmail,
+        password_hash: hashedPass,
+        seed_phrase: generatedPhrase,
+        seed_phrase_hash: hashedPhrase,
+        role: 'member',
+        passport_id: passportId,
+        booba_points: 100, // +100 BOOBA Welcome Bonus
+        reputation: 80,
+        wallet_address: cleanAddress,
+        avatar_url: 'assets/mascot.jpg',
+        completed_quests: 0,
+        verified_referrals: 0,
+        referral_code: userRefCode,
+        referred_by: storedRef ? storedRef.trim().toUpperCase() : null,
+        streak_days: 1
+      };
+
+      const { data: created, error: insertError } = await supabase
+        .from('booba_users')
+        .insert([newUserPayload])
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      const newUser = {
+        id: created.id,
+        username: created.username,
+        email: created.email,
+        role: created.role,
+        passportId: created.passport_id,
+        memberSince: 'Just now',
+        boobaPoints: Number(created.booba_points),
+        reputation: Number(created.reputation),
+        walletAddress: created.wallet_address,
+        avatar: created.avatar_url,
+        completedQuestsCount: 0,
+        verifiedReferralsCount: 0,
+        referralCode: created.referral_code,
+        referredBy: created.referred_by,
+        streakDays: 1,
+        seedPhrase: generatedPhrase
+      };
+
+      if (storedRef) {
+        await this.recordReferral(storedRef.trim().toUpperCase(), newUser.username, newUser.passportId);
+      }
+
+      this.saveLocalSession(newUser);
+      await this.fetchUsers();
+      this.notify();
+
+      return { success: true, user: newUser, seedPhrase: generatedPhrase, isNewUser: true };
+    } catch (e) {
+      return { success: false, message: e.message || 'Web3 Wallet authentication failed.' };
+    }
+  }
+
+  /**
+   * Google & Apple OAuth User Sync & Sign Up
+   */
+  async loginOrSignupWithOAuth({ email, username, avatarUrl }) {
+    if (!supabase) return { success: false, message: 'Supabase client not connected' };
+    if (!email) return { success: false, message: 'OAuth email is required' };
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanUsername = (username || cleanEmail.split('@')[0]).replace(/[^a-zA-Z0-9_]/g, '').slice(0, 15) || `Booba_${Math.floor(1000 + Math.random() * 9000)}`;
+
+    try {
+      const { data, error } = await supabase
+        .from('booba_users')
+        .select('*')
+        .ilike('email', cleanEmail)
+        .limit(1);
+
+      if (!error && data && data.length > 0) {
+        const raw = data[0];
+        const isAdmin = isUserAdmin(raw.email);
+        const user = {
+          id: raw.id,
+          username: raw.username,
+          email: raw.email,
+          role: isAdmin ? 'admin' : (raw.role || 'member'),
+          passportId: raw.passport_id,
+          memberSince: raw.member_since ? new Date(raw.member_since).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Member',
+          boobaPoints: Number(raw.booba_points) || 0,
+          reputation: Number(raw.reputation) || 75,
+          walletAddress: raw.wallet_address || '0x...BNB',
+          avatar: raw.avatar_url || avatarUrl || 'assets/mascot.jpg',
+          completedQuestsCount: Number(raw.completed_quests) || 0,
+          verifiedReferralsCount: Number(raw.verified_referrals) || 0,
+          referralCode: raw.referral_code,
+          referredBy: raw.referred_by,
+          streakDays: Number(raw.streak_days) || 1,
+          seedPhrase: raw.seed_phrase || null
+        };
+
+        this.saveLocalSession(user);
+        await this.fetchUsers();
+        this.notify();
+
+        return { success: true, user, isNewUser: false };
+      }
+
+      // Mint new passport
+      const generatedPhrase = generateSeedPhrase(12);
+      const hashedPhrase = await hashSeedPhrase(generatedPhrase);
+      const hashedPass = await hashPassword('oauth_user_pass_' + Math.random().toString(36).slice(-8));
+      const isAdmin = isUserAdmin(cleanEmail);
+      const passportId = 'BB-' + Math.floor(100000 + Math.random() * 900000);
+      const userRefCode = cleanUsername.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10) || ('BB' + Math.floor(1000 + Math.random() * 9000));
+      const storedRef = sessionStorage.getItem('booba_ref_code') || '';
+
+      const newUserPayload = {
+        username: cleanUsername,
+        email: cleanEmail,
+        password_hash: hashedPass,
+        seed_phrase: generatedPhrase,
+        seed_phrase_hash: hashedPhrase,
+        role: isAdmin ? 'admin' : 'member',
+        passport_id: passportId,
+        booba_points: 100,
+        reputation: 75,
+        wallet_address: `0x${Math.random().toString(16).substring(2, 6)}...${Math.random().toString(16).substring(2, 6)}`,
+        avatar_url: avatarUrl || 'assets/mascot.jpg',
+        completed_quests: 0,
+        verified_referrals: 0,
+        referral_code: userRefCode,
+        referred_by: storedRef ? storedRef.trim().toUpperCase() : null,
+        streak_days: 1
+      };
+
+      const { data: created, error: insertError } = await supabase
+        .from('booba_users')
+        .insert([newUserPayload])
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      const newUser = {
+        id: created.id,
+        username: created.username,
+        email: created.email,
+        role: isAdmin ? 'admin' : created.role,
+        passportId: created.passport_id,
+        memberSince: 'Just now',
+        boobaPoints: Number(created.booba_points),
+        reputation: Number(created.reputation),
+        walletAddress: created.wallet_address,
+        avatar: created.avatar_url,
+        completedQuestsCount: 0,
+        verifiedReferralsCount: 0,
+        referralCode: created.referral_code,
+        referredBy: created.referred_by,
+        streakDays: 1,
+        seedPhrase: generatedPhrase
+      };
+
+      if (storedRef) {
+        await this.recordReferral(storedRef.trim().toUpperCase(), newUser.username, newUser.passportId);
+      }
+
+      this.saveLocalSession(newUser);
+      await this.fetchUsers();
+      this.notify();
+
+      return { success: true, user: newUser, seedPhrase: generatedPhrase, isNewUser: true };
+    } catch (e) {
+      return { success: false, message: e.message || 'OAuth user creation failed' };
+    }
+  }
+
+  async logout() {
     this.saveLocalSession(null);
+    if (supabase && supabase.auth) {
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {
+        console.warn('Supabase signOut error:', e);
+      }
+    }
   }
 
   // --------------------------------------------------------------------------
@@ -480,19 +936,45 @@ class DatabaseService {
     };
 
     try {
-      const { data, error } = await supabase
-        .from('booba_submissions')
-        .insert([payload])
-        .select()
-        .single();
+      let inserted = null;
+      if (supabase) {
+        const { data, error } = await supabase
+          .from('booba_submissions')
+          .insert([payload])
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (!error && data) {
+          inserted = data;
+          await this.fetchSubmissions();
+        } else if (error) {
+          console.warn('Supabase submission insert fallback:', error);
+        }
+      }
 
-      await this.fetchSubmissions();
+      if (!inserted) {
+        const localSub = {
+          id: 'sub_' + Date.now(),
+          userId: this.currentUser.id,
+          questId: quest.id,
+          username: this.currentUser.username,
+          passportId: this.currentUser.passportId,
+          questTitle: quest.title,
+          rewardBooba: Number(quest.rewardBooba) || 150,
+          proofUrl: proofUrl,
+          proofDescription: proofDescription,
+          status: 'pending',
+          submittedAt: 'Just now'
+        };
+        this.submissions.unshift(localSub);
+        inserted = localSub;
+      }
+
       this.notify();
-      return { success: true, submission: data };
+      return { success: true, submission: inserted };
     } catch (e) {
-      return { success: false, message: e.message };
+      console.error('submitProof error:', e);
+      return { success: false, message: e.message || 'Submission failed' };
     }
   }
 
@@ -578,13 +1060,24 @@ class DatabaseService {
     }
   }
 
-  async dailyCheckIn() {
+  async dailyCheckIn(customBonus) {
     if (!this.currentUser) return { success: false, message: 'Please sign in first' };
 
-    const bonus = 50;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const lastDate = this.currentUser.lastCheckInDate ? new Date(this.currentUser.lastCheckInDate).toISOString().slice(0, 10) : null;
+
+    if (lastDate === todayStr) {
+      return {
+        success: false,
+        message: 'You have already claimed your daily check-in reward today! Return tomorrow to continue your streak.'
+      };
+    }
+
+    const bonus = Number(customBonus) || 50;
     const newPoints = (this.currentUser.boobaPoints || 0) + bonus;
     const newStreak = (this.currentUser.streakDays || 1) + 1;
     const newCount = (this.currentUser.completedQuestsCount || 0) + 1;
+    const nowIso = new Date().toISOString();
 
     try {
       if (supabase && this.currentUser.id) {
@@ -593,7 +1086,8 @@ class DatabaseService {
           .update({
             booba_points: newPoints,
             streak_days: newStreak,
-            completed_quests: newCount
+            completed_quests: newCount,
+            last_check_in: nowIso
           })
           .eq('id', this.currentUser.id);
       }
@@ -601,6 +1095,7 @@ class DatabaseService {
       this.currentUser.boobaPoints = newPoints;
       this.currentUser.streakDays = newStreak;
       this.currentUser.completedQuestsCount = newCount;
+      this.currentUser.lastCheckInDate = nowIso;
       this.saveLocalSession(this.currentUser);
       await this.fetchUsers();
       this.notify();

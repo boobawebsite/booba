@@ -23,11 +23,7 @@
       <ul class="nav-links">
         <li><a href="index.html" class="nav-link">Home</a></li>
         <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
-        <li><a href="passport.html" class="nav-link">My Passport</a></li>
-        <li><a href="quests.html" class="nav-link active">Quests</a></li>
         <li><a href="leaderboard.html" class="nav-link">Leaderboard</a></li>
-        <li><a href="rewards.html" class="nav-link">Rewards</a></li>
-        <li><a href="referrals.html" class="nav-link">Referrals</a></li>
       </ul>
 
       <div class="flex items-center gap-2">
@@ -53,17 +49,13 @@
           <span class="badge-tag">BNB baby</span>
         </div>
       </a>
-      <button id="mobileNavCloseBtn" class="btn btn-ghost btn-sm btn-icon-action" style="width: 34px; height: 34px; border-radius: 50%;">✕</button>
+      <button id="mobileNavCloseBtn" class="btn btn-ghost btn-sm btn-icon-action" style="width: 34px; height: 34px; border-radius: 50%;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
     <div class="mobile-nav-body">
       <ul class="mobile-nav-list">
         <li><a href="index.html" class="mobile-nav-link">Home</a></li>
         <li><a href="dashboard.html" class="mobile-nav-link">Dashboard Overview</a></li>
-        <li><a href="passport.html" class="mobile-nav-link">My Booba Passport</a></li>
-        <li><a href="quests.html" class="mobile-nav-link active">Quests & Bounties</a></li>
         <li><a href="leaderboard.html" class="mobile-nav-link">Leaderboard</a></li>
-        <li><a href="rewards.html" class="mobile-nav-link">BOOBA Vault</a></li>
-        <li><a href="referrals.html" class="mobile-nav-link">Referrals</a></li>
       </ul>
     </div>
     <div id="mobileNavFooter" class="mobile-nav-footer"></div>
@@ -73,8 +65,12 @@
 
   <footer id="siteFooter" style="border-top: 1px solid var(--border-subtle); padding: 3.5rem 0 2rem 0; background: rgba(7, 9, 14, 0.95);">
     <div class="container">
-      <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted);">
-        © 2026 BOOBA (BNB baby). All rights reserved. Powered by BNB Smart Chain & Supabase.
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 0.75rem; color: var(--text-muted);">
+        <div>© 2026 BOOBA (BNB baby). All rights reserved. Powered by BNB Smart Chain & Supabase.</div>
+        <div style="display: flex; gap: 1.5rem;">
+          <a href="terms.html" style="color: var(--text-secondary); text-decoration: none;">Terms of Service</a>
+          <a href="privacy.html" style="color: var(--text-secondary); text-decoration: none;">Privacy Policy</a>
+        </div>
       </div>
     </div>
   </footer>
@@ -82,7 +78,7 @@
   <!-- AUTH MODAL -->
   <div class="modal-backdrop" id="authModal">
     <div class="auth-card">
-      <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.closeModal()" style="position: absolute; top: 1rem; right: 1rem;">✕</button>
+      <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.closeModal()" style="position: absolute; top: 1rem; right: 1rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       <div class="auth-header">
         <img src="assets/mascot.jpg" class="auth-mascot-preview" alt="Booba Mascot">
         <h3 id="authModalTitle">Mint Your Booba Passport</h3>
@@ -116,42 +112,72 @@
     </div>
   </div>
 
-  <!-- SOCIAL MODAL -->
+  <!-- SOCIAL VERIFICATION MODAL -->
   <div class="modal-backdrop" id="socialVerifyModal">
-    <div class="auth-card" style="max-width: 440px; text-align: center;">
-      <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.closeModal()" style="position: absolute; top: 1rem; right: 1rem;">✕</button>
-      <h3 id="socialModalTitle">Social Task Verification</h3>
-      <div class="quest-reward-pill" id="socialModalReward" style="margin: 0.75rem auto 1.25rem auto;">+100 BOOBA</div>
-      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
-        Click below after completing the action to claim your instant BOOBA tokens into your passport balance.
-      </p>
+    <div class="auth-card" style="max-width: 480px; text-align: center; border-radius: 28px; border: 1.5px solid rgba(243, 186, 47, 0.4); background: linear-gradient(135deg, rgba(14, 18, 27, 0.98) 0%, rgba(10, 12, 18, 0.99) 100%);">
+      <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.closeModal()" style="position: absolute; top: 1.25rem; right: 1.25rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      
+      <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(243, 186, 47, 0.15); border: 1px solid var(--brand-yellow); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; color: var(--brand-yellow);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+      </div>
+
+      <h3 id="socialModalTitle" style="font-size: 1.4rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.35rem;">Social Mission Verification</h3>
+      <div class="quest-reward-pill" id="socialModalReward" style="margin: 0.5rem auto 1.25rem auto; font-size: 0.95rem; font-weight: 900;">+100 BOOBA</div>
+      
+      <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.15rem; margin-bottom: 1.5rem; text-align: left;">
+        <div style="font-size: 0.78rem; font-weight: 800; color: var(--brand-yellow); text-transform: uppercase; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>Step 1: Complete Action on External Link</span>
+        </div>
+        <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 0.75rem;">
+          The mission link has been opened in a new tab. If it did not open automatically, click the button below:
+        </p>
+        <button type="button" id="reopenTargetUrlBtn" class="btn btn-outline btn-sm btn-block" style="font-size: 0.78rem; font-weight: 700;">
+          Launch Mission Link ↗
+        </button>
+      </div>
+
       <div class="flex items-center gap-3">
-        <button type="button" onclick="window.boobaApp.closeModal()" class="btn btn-secondary btn-block">Cancel</button>
-        <button type="button" id="confirmSocialVerifyBtn" class="btn btn-primary btn-block">Verify & Claim</button>
+        <button type="button" onclick="window.boobaApp.closeModal()" class="btn btn-secondary btn-block">Dismiss</button>
+        <button type="button" id="confirmSocialVerifyBtn" class="btn btn-primary btn-block" style="font-weight: 800;">Verify & Claim Points</button>
       </div>
     </div>
   </div>
 
   <!-- PROOF MODAL -->
   <div class="modal-backdrop" id="proofModal">
-    <div class="auth-card" style="max-width: 500px;">
-      <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.closeModal()" style="position: absolute; top: 1rem; right: 1rem;">✕</button>
-      <h3 id="proofQuestTitle">Submit Quest Proof</h3>
-      <p id="proofRewardText" style="font-size: 0.85rem; color: var(--brand-yellow); margin-bottom: 1.25rem; font-weight: 700;"></p>
+    <div class="auth-card" style="max-width: 520px; border-radius: 28px; border: 1.5px solid rgba(243, 186, 47, 0.4); background: linear-gradient(135deg, rgba(14, 18, 27, 0.98) 0%, rgba(10, 12, 18, 0.99) 100%);">
+      <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.closeModal()" style="position: absolute; top: 1.25rem; right: 1.25rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       
-      <form id="proofForm">
-        <div class="form-group">
-          <label class="form-label">Proof URL (e.g. Tweet link, Screenshot URL)</label>
-          <input type="url" id="proofUrlInput" placeholder="https://x.com/..." class="form-input">
+      <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(243, 186, 47, 0.15); border: 1px solid var(--brand-yellow); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; color: var(--brand-yellow);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+      </div>
+
+      <h3 id="proofQuestTitle" style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; text-align: center; margin-bottom: 0.35rem;">Submit Content Proof Link</h3>
+      <p id="proofRewardText" style="font-size: 0.88rem; color: var(--brand-yellow); margin-bottom: 1.25rem; font-weight: 800; text-align: center; font-family: var(--font-mono);"></p>
+      
+      <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5;">
+        Drop the direct public URL where the core team can view and verify your published content (e.g. YouTube video, TikTok, X post, Medium article). <strong>Link access only — no file uploads needed.</strong>
+      </div>
+
+      <form id="proofForm" onsubmit="window.boobaApp.handleProofSubmit(event)">
+        <div class="form-group" style="margin-bottom: 1.15rem;">
+          <label class="form-label" style="font-weight: 700; font-size: 0.82rem;">Direct Content URL (Compulsory) *</label>
+          <input type="url" id="proofUrlInput" placeholder="https://x.com/... or https://youtube.com/watch?v=... or https://tiktok.com/@..." class="form-input" style="border-radius: 12px;" required>
         </div>
-        <div class="form-group">
-          <label class="form-label">Description / Notes</label>
-          <textarea id="proofDescriptionInput" rows="3" placeholder="Explain your submission..." class="form-input"></textarea>
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label" style="font-weight: 700; font-size: 0.82rem;">Creator Notes / Handle (Optional)</label>
+          <textarea id="proofDescriptionInput" rows="2" placeholder="e.g. Published video with #BOOBA tags, creator handle @myhandle..." class="form-input" style="border-radius: 12px;"></textarea>
         </div>
-        <button type="submit" class="btn btn-primary btn-block btn-lg">Submit for Team Review</button>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="font-weight: 800; border-radius: 12px;">Submit Link for Admin Verification ↗</button>
       </form>
     </div>
   </div>
+
+  <!-- Motion & Physics Frameworks -->
+  <script src="https://unpkg.com/lenis@1.1.9/dist/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
   <script type="module" src="src/app.js"></script>
 </body>

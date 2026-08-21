@@ -252,3 +252,115 @@ a {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+/* ==========================================================================
+   LIVING MOTION & WEBGL ENGINE STYLES (Apple Vision Pro & Wayfinder)
+   ========================================================================== */
+
+/* WebGL / Canvas Constellation Background */
+.bg-constellation-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.85;
+}
+
+/* Fluid Cursor Spotlight Glow */
+.cursor-spotlight {
+  position: fixed;
+  top: -250px;
+  left: -250px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(243, 186, 47, 0.07) 0%, rgba(255, 184, 0, 0.02) 45%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 50%;
+  filter: blur(20px);
+  will-change: transform;
+  mix-blend-mode: screen;
+}
+
+@media (max-width: 768px) {
+  .cursor-spotlight {
+    display: none !important;
+  }
+}
+
+/* 3D Magnetic Tilt Specular Reflection */
+.card, .passport-card, .x-auth-layout, .quest-item-card, .stat-badge, .feature-card, .hero-mascot-card {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+}
+
+.card-specular-glare {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+/* Floating 3D Coin Dust Layers (Firewatch Parallax) */
+.floating-coins-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.floating-coin {
+  position: absolute;
+  background-image: url('../../assets/coin.jpg');
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+  box-shadow: 0 0 25px rgba(243, 186, 47, 0.3);
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.7));
+  opacity: 0.22;
+  will-change: transform;
+}
+
+.coin-1 {
+  width: 48px;
+  height: 48px;
+  top: 18%;
+  left: 8%;
+}
+
+.coin-2 {
+  width: 64px;
+  height: 64px;
+  top: 65%;
+  right: 7%;
+}
+
+.coin-3 {
+  width: 36px;
+  height: 36px;
+  top: 42%;
+  left: 85%;
+}
+
+/* Shimmer Edge Gradient Animation */
+@keyframes border-shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+

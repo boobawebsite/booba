@@ -13,8 +13,7 @@ export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // ==========================================================================
 export const ADMIN_EMAILS = [
   'admin@gmail.com',
-  'boobaboss@gmail.com',
-  'boobaadmin@gmail.com'
+  'boobawebsite@gmail.com'
 ];
 
 /**

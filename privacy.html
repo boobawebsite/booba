@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — BOOBA (BNB baby)</title>
+  <meta name="description" content="Official Privacy Policy for BOOBA (BNB baby) platform, non-custodial cryptography, and decentralized user data protection.">
+  <link rel="icon" type="image/jpeg" href="assets/mascot.jpg">
+
+  <!-- Consolidated Master Stylesheet -->
+  <link rel="stylesheet" href="src/styles/main.css?v=3.0">
+</head>
+<body>
+
+  <!-- Ambient Glow -->
+  <div class="ambient-glow"></div>
+
+  <!-- SITE HEADER -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo-brand">
+        <img src="assets/mascot.jpg" alt="Booba BNB Baby Mascot" class="logo-avatar">
+        <div class="flex items-center gap-2">
+          <span>BOOBA</span>
+          <span class="badge-tag">BNB baby</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="leaderboard.html" class="nav-link">Leaderboard</a></li>
+      </ul>
+
+      <div class="flex items-center gap-2">
+        <div id="headerNavActions" class="nav-actions"></div>
+        <button id="mobileNavToggleBtn" class="mobile-nav-toggle-btn" aria-label="Open Navigation Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MOBILE NAVIGATION DRAWER -->
+  <div id="mobileNavBackdrop" class="mobile-nav-backdrop"></div>
+  <aside id="mobileNavDrawer" class="mobile-nav-drawer">
+    <div class="mobile-nav-header">
+      <a href="index.html" class="logo-brand mobile-drawer-logo">
+        <img src="assets/mascot.jpg" alt="Booba" class="logo-avatar">
+        <div class="flex items-center gap-2">
+          <span>BOOBA</span>
+          <span class="badge-tag">BNB baby</span>
+        </div>
+      </a>
+      <button id="mobileNavCloseBtn" class="btn btn-ghost btn-sm btn-icon-action" style="width: 34px; height: 34px; border-radius: 50%;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+    </div>
+    <div class="mobile-nav-body">
+      <ul class="mobile-nav-list">
+        <li><a href="index.html" class="mobile-nav-link">Home</a></li>
+        <li><a href="dashboard.html" class="mobile-nav-link">Dashboard Overview</a></li>
+        <li><a href="leaderboard.html" class="mobile-nav-link">Leaderboard</a></li>
+      </ul>
+    </div>
+    <div id="mobileNavFooter" class="mobile-nav-footer"></div>
+  </aside>
+
+  <!-- MAIN PRIVACY CONTENT -->
+  <main class="page-wrapper">
+    <div class="container" style="max-width: 900px; padding: 3rem 1.5rem 5rem 1.5rem;">
+      
+      <!-- Header Banner -->
+      <div style="text-align: center; margin-bottom: 3rem;">
+        <div class="badge-tag" style="margin-bottom: 0.75rem;">Privacy & Cryptographic Security</div>
+        <h1 style="font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">
+          Privacy Policy
+        </h1>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">
+          Last Updated: August 2026 • Dedicated to Data Minimization & Non-Custodial User Privacy
+        </p>
+      </div>
+
+      <!-- Content Card -->
+      <div class="card" style="padding: 2.5rem 2rem; display: flex; flex-direction: column; gap: 2rem; line-height: 1.7; color: var(--text-secondary);">
+
+        <!-- Section 1 -->
+        <div>
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: var(--brand-yellow);">1.</span> Our Core Privacy Philosophy
+          </h2>
+          <p>
+            At <strong>BOOBA (BNB baby)</strong>, we believe in radical transparency, cryptographic pseudonymity, and zero-knowledge data minimization. We do not sell, monetize, rent, or trade your personal data to third-party data brokers or advertising networks.
+          </p>
+          <p style="margin-top: 0.75rem;">
+            This Privacy Policy explains how information is collected, cryptographically handled, and protected across the BOOBA digital passport platform and BNB Smart Chain integrations.
+          </p>
+        </div>
+
+        <!-- Section 2 -->
+        <div>
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: var(--brand-yellow);">2.</span> Information We Collect & Store
+          </h2>
+          <p>
+            We strictly limit data collection to what is necessary for minting your digital passport and tracking community rewards:
+          </p>
+          <ul style="padding-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <li><strong>Public Wallet Addresses:</strong> When connecting with MetaMask, Trust Wallet, or Binance Web3, your public BNB Smart Chain address (e.g., <code>0x...</code>) is stored to identify your passport, leaderboard rank, and token points.</li>
+            <li><strong>Pseudonymous Profiles:</strong> Your chosen community username, referral code, avatar, and assigned Passport ID (e.g., <code>BB-123456</code>).</li>
+            <li><strong>OAuth Credentials:</strong> When using Google Sign-In, we receive only your verified email and display name to create your account session.</li>
+            <li><strong>Quest Proof Submissions:</strong> URLs or image proof links submitted voluntarily for bounty reviews and community contest entries.</li>
+          </ul>
+        </div>
+
+        <!-- Section 3 -->
+        <div>
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: var(--brand-yellow);">3.</span> Cryptographic Zero-Knowledge Security
+          </h2>
+          <p>
+            Security is engineered directly into the code architecture:
+          </p>
+          <ul style="padding-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <li><strong>12-Word Seed Phrases:</strong> Generated on-demand via the BIP-39 standard and hashed client-side with SHA-256 before validation. Raw unencrypted recovery phrases are never transmitted across plaintext channels.</li>
+            <li><strong>Password Protection:</strong> Passwords are never stored in plaintext and are hashed before persistence in Supabase database tables.</li>
+            <li><strong>Non-Custodial Keys:</strong> We never have access to your Web3 private keys or wallet funds.</li>
+          </ul>
+        </div>
+
+        <!-- Section 4 -->
+        <div>
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: var(--brand-yellow);">4.</span> Third-Party Services & Infrastructure
+          </h2>
+          <p>
+            The BOOBA platform interacts with trusted decentralized and cloud service providers:
+          </p>
+          <ul style="padding-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <li><strong>BNB Smart Chain RPC Nodes:</strong> For querying on-chain BEP-20 balances, wallet accounts, and network states.</li>
+            <li><strong>Supabase Database & Authentication:</strong> Secure database backend hosting community quest tables, user points, and real-time subscription channels.</li>
+            <li><strong>Google OAuth:</strong> Official single-sign-on identity provider with account picker authorization.</li>
+          </ul>
+        </div>
+
+        <!-- Section 5 -->
+        <div>
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: var(--brand-yellow);">5.</span> Browser Cookies & Local Storage
+          </h2>
+          <p>
+            We use browser <code>localStorage</code> and <code>sessionStorage</code> solely for essential platform functionality:
+          </p>
+          <ul style="padding-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <li>Maintaining your active passport login session across pages.</li>
+            <li>Preserving referral codes during the sign-up flow.</li>
+            <li>Caching your quest filter preferences and UI themes.</li>
+          </ul>
+        </div>
+
+        <!-- Section 6 -->
+        <div>
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: var(--brand-yellow);">6.</span> Data Rights & Deletion
+          </h2>
+          <p>
+            You retain the right to disconnect your wallet at any time and request removal of off-chain database records by contacting our core team. Public blockchain transactions permanently recorded on the BNB Smart Chain ledger cannot be modified or deleted due to the immutable nature of decentralized networks.
+          </p>
+        </div>
+
+        <!-- Section 7 -->
+        <div>
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: var(--brand-yellow);">7.</span> Policy Updates & Inquiries
+          </h2>
+          <p>
+            We may update this Privacy Policy as new protocol features, governance votes, and smart contracts are deployed. Reach out to our team in the official channels for any privacy inquiries:
+          </p>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+            <a href="https://twitter.com/boobababybnb" target="_blank" class="btn btn-secondary btn-sm">X (Twitter)</a>
+            <a href="https://t.me/boobababybnb" target="_blank" class="btn btn-secondary btn-sm">Telegram Lounge</a>
+            <a href="https://discord.gg/booba" target="_blank" class="btn btn-secondary btn-sm">Discord Community</a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Navigation Back to App -->
+      <div style="text-align: center; margin-top: 2.5rem; display: flex; justify-content: center; gap: 1rem;">
+        <a href="terms.html" class="btn btn-secondary">Read Terms of Service →</a>
+        <a href="signin.html#signup" class="btn btn-primary">Mint Booba Passport (+100 BOOBA)</a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer id="siteFooter" style="border-top: 1px solid var(--border-subtle); padding: 3rem 0 2rem 0; background: rgba(7, 9, 14, 0.95);">
+    <div class="container" style="text-align: center; font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.75rem;">
+      <div style="display: flex; justify-content: center; gap: 1.5rem; font-weight: 600;">
+        <a href="terms.html" style="color: var(--text-secondary);">Terms of Service</a>
+        <a href="privacy.html" style="color: var(--brand-yellow);">Privacy Policy</a>
+        <a href="index.html" style="color: var(--text-secondary);">Home</a>
+        <a href="passport.html" style="color: var(--text-secondary);">Passport</a>
+      </div>
+      <div>© 2026 BOOBA (BNB baby). All rights reserved. Powered by BNB Smart Chain & Supabase.</div>
+    </div>
+  </footer>
+
+  <!-- Motion & Physics Frameworks -->
+  <script src="https://unpkg.com/lenis@1.1.9/dist/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

@@ -1287,9 +1287,26 @@ HOW TO RECOVER YOUR ACCOUNT:
 
   async handleGoogleAuth() {
     try {
-      const returnUrl = encodeURIComponent(window.location.origin + window.location.pathname);
-      const googleAuthUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=google&prompt=select_account&redirect_to=${returnUrl}`;
-      window.location.href = googleAuthUrl;
+      const returnUrl = window.location.origin + '/dashboard.html';
+      if (supabase && supabase.auth) {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: returnUrl,
+            queryParams: {
+              prompt: 'select_account'
+            }
+          }
+        });
+        if (error) throw error;
+        if (data?.url) {
+          window.location.href = data.url;
+        }
+      } else {
+        const encodedUrl = encodeURIComponent(returnUrl);
+        const googleAuthUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=google&prompt=select_account&redirect_to=${encodedUrl}`;
+        window.location.href = googleAuthUrl;
+      }
     } catch (err) {
       console.warn('Google OAuth:', err);
       this.openGoogleAccountChooserModal();

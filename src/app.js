@@ -36,24 +36,48 @@ class BoobaApp {
   }
 
   detectPageName() {
-    const path = window.location.pathname.toLowerCase();
-    if (path.endsWith('signin.html')) return 'signin';
-    if (path.endsWith('dashboard.html')) return 'dashboard';
-    if (path.endsWith('passport.html')) return 'passport';
-    if (path.endsWith('quests.html')) return 'quests';
-    if (path.endsWith('leaderboard.html')) return 'leaderboard';
-    if (path.endsWith('rewards.html')) return 'rewards';
-    if (path.endsWith('referrals.html')) return 'referrals';
+    // 1. Check data-page attribute on body tag first (highest fidelity across all static/Vercel hosts)
+    if (typeof document !== 'undefined' && document.body) {
+      const bodyPage = document.body.getAttribute('data-page');
+      if (bodyPage && bodyPage !== 'home') return bodyPage;
+    }
+
+    const rawPath = (window.location.pathname || '').toLowerCase().replace(/\/+$/, '');
+    const segments = rawPath.split('/').filter(Boolean);
+    const last = segments[segments.length - 1] || '';
+
+    // 2. Direct path matching (supports .html and clean Vercel/production URLs)
+    if (last === 'signin.html' || last === 'signin' || last === 'login' || last === 'signup') return 'signin';
+    if (last === 'dashboard.html' || last === 'dashboard' || last === 'overview') return 'dashboard';
+    if (last === 'passport.html' || last === 'passport') return 'passport';
+    if (last === 'quests.html' || last === 'quests') return 'quests';
+    if (last === 'leaderboard.html' || last === 'leaderboard') return 'leaderboard';
+    if (last === 'rewards.html' || last === 'rewards') return 'rewards';
+    if (last === 'referrals.html' || last === 'referrals') return 'referrals';
     
-    // Hash routing fallback
-    const hash = window.location.hash.replace(/^#/, '');
+    // 3. Sub-path matching (e.g. /dashboard/leaderboard or /dashboard/quests)
+    if (rawPath.includes('/signin')) return 'signin';
+    if (rawPath.includes('/passport')) return 'passport';
+    if (rawPath.includes('/quests')) return 'quests';
+    if (rawPath.includes('/leaderboard')) return 'leaderboard';
+    if (rawPath.includes('/rewards')) return 'rewards';
+    if (rawPath.includes('/referrals')) return 'referrals';
+    if (rawPath.includes('/dashboard')) return 'dashboard';
+
+    // 4. Hash routing fallback
+    const hash = (window.location.hash || '').replace(/^#/, '').toLowerCase();
     if (hash === 'signin' || hash === 'login' || hash === 'signup' || hash === 'auth') return 'signin';
-    if (hash.startsWith('dashboard/passport')) return 'passport';
-    if (hash.startsWith('dashboard/quests')) return 'quests';
-    if (hash.startsWith('dashboard/leaderboard')) return 'leaderboard';
-    if (hash.startsWith('dashboard/rewards')) return 'rewards';
-    if (hash.startsWith('dashboard/referrals')) return 'referrals';
-    if (hash.startsWith('dashboard/overview') || hash === 'dashboard') return 'dashboard';
+    if (hash.startsWith('dashboard/passport') || hash === 'passport') return 'passport';
+    if (hash.startsWith('dashboard/quests') || hash === 'quests') return 'quests';
+    if (hash.startsWith('dashboard/leaderboard') || hash === 'leaderboard') return 'leaderboard';
+    if (hash.startsWith('dashboard/rewards') || hash === 'rewards') return 'rewards';
+    if (hash.startsWith('dashboard/referrals') || hash === 'referrals') return 'referrals';
+    if (hash.startsWith('dashboard/overview') || hash.startsWith('dashboard') || hash === 'overview') return 'dashboard';
+
+    if (typeof document !== 'undefined' && document.body) {
+      const bodyPage = document.body.getAttribute('data-page');
+      if (bodyPage) return bodyPage;
+    }
 
     return 'home';
   }
@@ -192,8 +216,13 @@ class BoobaApp {
 
     // Highlight active nav links
     document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
-      const href = link.getAttribute('href') || '';
-      if (href.includes(this.pageName + '.html') || (this.pageName === 'home' && (href === 'index.html' || href === '#home'))) {
+      const href = (link.getAttribute('href') || '').toLowerCase();
+      if (
+        href.includes(this.pageName + '.html') ||
+        href.endsWith('/' + this.pageName) ||
+        href === this.pageName ||
+        (this.pageName === 'home' && (href === 'index.html' || href === '/' || href === '' || href === '#home'))
+      ) {
         link.classList.add('active');
       } else {
         link.classList.remove('active');

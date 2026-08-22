@@ -47,6 +47,7 @@ class BoobaApp {
     const last = segments[segments.length - 1] || '';
 
     // 2. Direct path matching (supports .html and clean Vercel/production URLs)
+    if (last === 'about.html' || last === 'about' || last === 'tokenomics') return 'about';
     if (last === 'signin.html' || last === 'signin' || last === 'login' || last === 'signup') return 'signin';
     if (last === 'dashboard.html' || last === 'dashboard' || last === 'overview') return 'dashboard';
     if (last === 'passport.html' || last === 'passport') return 'passport';
@@ -54,24 +55,32 @@ class BoobaApp {
     if (last === 'leaderboard.html' || last === 'leaderboard') return 'leaderboard';
     if (last === 'rewards.html' || last === 'rewards') return 'rewards';
     if (last === 'referrals.html' || last === 'referrals') return 'referrals';
+    if (last === 'withdraw.html' || last === 'withdraw') return 'withdraw';
+    if (last === 'settings.html' || last === 'settings') return 'settings';
     
     // 3. Sub-path matching (e.g. /dashboard/leaderboard or /dashboard/quests)
+    if (rawPath.includes('/about') || rawPath.includes('/tokenomics')) return 'about';
     if (rawPath.includes('/signin')) return 'signin';
     if (rawPath.includes('/passport')) return 'passport';
     if (rawPath.includes('/quests')) return 'quests';
     if (rawPath.includes('/leaderboard')) return 'leaderboard';
     if (rawPath.includes('/rewards')) return 'rewards';
     if (rawPath.includes('/referrals')) return 'referrals';
+    if (rawPath.includes('/withdraw')) return 'withdraw';
+    if (rawPath.includes('/settings')) return 'settings';
     if (rawPath.includes('/dashboard')) return 'dashboard';
 
     // 4. Hash routing fallback
     const hash = (window.location.hash || '').replace(/^#/, '').toLowerCase();
+    if (hash === 'about' || hash === 'tokenomics') return 'about';
     if (hash === 'signin' || hash === 'login' || hash === 'signup' || hash === 'auth') return 'signin';
     if (hash.startsWith('dashboard/passport') || hash === 'passport') return 'passport';
     if (hash.startsWith('dashboard/quests') || hash === 'quests') return 'quests';
     if (hash.startsWith('dashboard/leaderboard') || hash === 'leaderboard') return 'leaderboard';
     if (hash.startsWith('dashboard/rewards') || hash === 'rewards') return 'rewards';
     if (hash.startsWith('dashboard/referrals') || hash === 'referrals') return 'referrals';
+    if (hash.startsWith('dashboard/withdraw') || hash === 'withdraw') return 'withdraw';
+    if (hash.startsWith('dashboard/settings') || hash === 'settings') return 'settings';
     if (hash.startsWith('dashboard/overview') || hash.startsWith('dashboard') || hash === 'overview') return 'dashboard';
 
     if (typeof document !== 'undefined' && document.body) {
@@ -176,21 +185,38 @@ class BoobaApp {
       }
     });
 
-    // Delegated clicks
-    document.addEventListener('click', (e) => {
+    // Delegated clicks & outside tap handling
+    const handleOutsideClickOrTouch = (e) => {
       if (e.target.classList.contains('modal-backdrop')) {
         this.closeModal();
       }
       if (e.target.id === 'mobileNavBackdrop' || e.target.closest('#mobileNavCloseBtn')) {
         this.closeMobileNav();
+        return;
       }
       if (e.target.closest('#mobileNavToggleBtn')) {
         this.toggleMobileNav();
+        return;
       }
       if (e.target.closest('.mobile-nav-link')) {
         this.closeMobileNav();
+        return;
       }
-    });
+      // If drawer is open and user tapped anywhere outside the drawer
+      const drawer = document.getElementById('mobileNavDrawer');
+      if (drawer && drawer.classList.contains('open') && !drawer.contains(e.target)) {
+        this.closeMobileNav();
+      }
+    };
+
+    document.addEventListener('click', handleOutsideClickOrTouch);
+    document.addEventListener('touchend', (e) => {
+      const backdrop = document.getElementById('mobileNavBackdrop');
+      if (e.target === backdrop) {
+        e.preventDefault();
+        this.closeMobileNav();
+      }
+    }, { passive: false });
 
     // Creative proof submission form
     const proofForm = document.getElementById('proofForm');
@@ -234,6 +260,9 @@ class BoobaApp {
 
     if (user) {
       const levelInfo = calculateLevel(user.boobaPoints);
+      const isWalletConnected = Boolean(user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
+      const formattedWallet = isWalletConnected ? `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}` : '';
+
       authButtonsDesktop = `
         <div class="user-profile-pill" style="display: flex; align-items: center; gap: 0.65rem; background: var(--bg-surface-elevated); padding: 0.35rem 0.85rem; border-radius: var(--radius-full); border: 1px solid var(--border-medium);">
           <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--brand-yellow);">
@@ -250,16 +279,26 @@ class BoobaApp {
       `;
 
       authButtonsMobile = `
-        <div style="padding: 0.75rem; background: var(--bg-surface-elevated); border-radius: var(--radius-md); margin-bottom: 0.75rem;">
-          <div style="display: flex; align-items: center; gap: 0.65rem;">
-            <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--brand-yellow);">
-            <div>
-              <div style="font-weight: 700; color: var(--text-primary);">${user.username}</div>
-              <div style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">${Number(user.boobaPoints).toLocaleString()} BOOBA • Lv.${levelInfo.level}</div>
+        <div style="padding: 0.85rem; background: var(--bg-surface-elevated); border-radius: 16px; margin-bottom: 0.75rem; border: 1px solid rgba(255,255,255,0.08);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+              <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--brand-yellow);">
+              <div>
+                <div style="font-weight: 800; color: var(--text-primary); font-size: 0.92rem;">${user.username}</div>
+                <div style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">${Number(user.boobaPoints).toLocaleString()} BOOBA • Lv.${levelInfo.level}</div>
+              </div>
             </div>
+            <a href="settings.html" class="btn btn-outline btn-sm" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">Settings</a>
           </div>
+          <button type="button" class="btn ${isWalletConnected ? 'btn-secondary' : 'btn-primary'} btn-block btn-sm" onclick="window.boobaApp.openWalletModal()" style="display: flex; align-items: center; justify-content: center; gap: 0.45rem;">
+            <span class="pulse-dot" style="width: 6px; height: 6px; background: ${isWalletConnected ? 'var(--accent-emerald)' : 'var(--brand-yellow)'};"></span>
+            <span>${isWalletConnected ? `Wallet: ${formattedWallet}` : 'Connect Web3 Wallet'}</span>
+          </button>
         </div>
-        <button class="btn btn-secondary btn-block btn-sm" onclick="window.boobaApp.logout()">Sign Out</button>
+        <div style="display: flex; gap: 0.5rem;">
+          <a href="withdraw.html" class="btn btn-secondary btn-block btn-sm" style="flex: 1; text-align: center;">Withdraw</a>
+          <button class="btn btn-ghost btn-block btn-sm" onclick="window.boobaApp.logout()" style="flex: 1;">Sign Out</button>
+        </div>
       `;
     } else {
       authButtonsDesktop = `
@@ -305,29 +344,29 @@ class BoobaApp {
         </div>
         <span>Home</span>
       </a>
-      <a href="quests.html" class="mobile-dock-item ${p === 'quests' ? 'active' : ''}">
+      <a href="about.html" class="mobile-dock-item ${p === 'about' ? 'active' : ''}">
         <div class="dock-icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
         </div>
-        <span>Quests</span>
+        <span>About</span>
       </a>
-      <a href="dashboard.html" class="mobile-dock-item mobile-dock-center ${p === 'dashboard' || p === 'passport' ? 'active' : ''}">
+      <a href="passport.html" class="mobile-dock-item mobile-dock-center ${p === 'passport' || p === 'dashboard' ? 'active' : ''}">
         <div class="dock-icon-wrap center-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
         </div>
         <span>Passport</span>
+      </a>
+      <a href="quests.html" class="mobile-dock-item ${p === 'quests' ? 'active' : ''}">
+        <div class="dock-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+        <span>Quest</span>
       </a>
       <a href="leaderboard.html" class="mobile-dock-item ${p === 'leaderboard' ? 'active' : ''}">
         <div class="dock-icon-wrap">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
         </div>
         <span>Ranks</span>
-      </a>
-      <a href="rewards.html" class="mobile-dock-item ${p === 'rewards' ? 'active' : ''}">
-        <div class="dock-icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line></svg>
-        </div>
-        <span>Vault</span>
       </a>
     `;
   }
@@ -336,8 +375,10 @@ class BoobaApp {
     const drawer = document.getElementById('mobileNavDrawer');
     const backdrop = document.getElementById('mobileNavBackdrop');
     if (drawer && backdrop) {
-      drawer.classList.toggle('open');
-      backdrop.classList.toggle('active');
+      const isOpen = drawer.classList.toggle('open');
+      backdrop.classList.toggle('open', isOpen);
+      backdrop.classList.toggle('active', isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
     }
   }
 
@@ -345,7 +386,11 @@ class BoobaApp {
     const drawer = document.getElementById('mobileNavDrawer');
     const backdrop = document.getElementById('mobileNavBackdrop');
     if (drawer) drawer.classList.remove('open');
-    if (backdrop) backdrop.classList.remove('active');
+    if (backdrop) {
+      backdrop.classList.remove('open');
+      backdrop.classList.remove('active');
+    }
+    document.body.style.overflow = '';
   }
 
   closeModal() {
@@ -377,6 +422,9 @@ class BoobaApp {
     if (!mainContainer) return;
 
     switch (this.pageName) {
+      case 'about':
+        this.renderAboutView(mainContainer);
+        break;
       case 'signin':
         this.renderSigninView(mainContainer);
         break;
@@ -397,6 +445,12 @@ class BoobaApp {
         break;
       case 'referrals':
         this.renderReferralsView(mainContainer);
+        break;
+      case 'withdraw':
+        this.renderWithdrawalView(mainContainer);
+        break;
+      case 'settings':
+        this.renderSettingsView(mainContainer);
         break;
       case 'home':
       default:
@@ -1576,7 +1630,7 @@ HOW TO RECOVER YOUR ACCOUNT:
   }
 
   // --------------------------------------------------------------------------
-  // 1. HOME LANDING VIEW
+  // 1. HOME LANDING VIEW (Highlights 4 Core Pillars)
   // --------------------------------------------------------------------------
 
   renderHomeView(container) {
@@ -1601,7 +1655,7 @@ HOW TO RECOVER YOUR ACCOUNT:
           </div>
           <div class="ticker-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34"></path><path d="M6 4h12v7a6 6 0 0 1-12 0V4z"></path></svg>
-            <strong>500,000 $BOOBA</strong> Season 1 Reward Pool
+            <strong>1,000,000,000 $BOOBA</strong> Fixed Max Supply
           </div>
           <div class="ticker-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
@@ -1609,7 +1663,7 @@ HOW TO RECOVER YOUR ACCOUNT:
           </div>
           <div class="ticker-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"></path></svg>
-            <strong>Daily Check-In Streaks</strong> Up to 5x Points Multiplier
+            <strong>0% Buy & 0% Sell Tax</strong> Fair Web3 Economics
           </div>
           <!-- Duplicate set for infinite loop -->
           <div class="ticker-item">
@@ -1626,15 +1680,7 @@ HOW TO RECOVER YOUR ACCOUNT:
           </div>
           <div class="ticker-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34"></path><path d="M6 4h12v7a6 6 0 0 1-12 0V4z"></path></svg>
-            <strong>500,000 $BOOBA</strong> Season 1 Reward Pool
-          </div>
-          <div class="ticker-item">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-            <strong>Zero Gas Passport</strong> Instant Local & Cloud Sync
-          </div>
-          <div class="ticker-item">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"></path></svg>
-            <strong>Daily Check-In Streaks</strong> Up to 5x Points Multiplier
+            <strong>1,000,000,000 $BOOBA</strong> Fixed Max Supply
           </div>
         </div>
       </div>
@@ -1643,13 +1689,12 @@ HOW TO RECOVER YOUR ACCOUNT:
       <section class="hero-section">
         <div class="container hero-container">
           <div class="hero-content">
-            
             <h1 class="hero-title">
               The Next-Gen Community Universe Powered by <span class="text-gradient-gold">BOOBA</span>
             </h1>
             
             <p class="hero-subtitle">
-              Mint your digital on-chain Booba Passport, conquer live bounties, climb decentralized leaderboards, and accumulate real $BOOBA rewards.
+              Mint your digital non-custodial Booba Passport, conquer live bounties, stake in the multiplier vault, and claim your share of the 1,000,000,000 $BOOBA treasury.
             </p>
 
             <div class="hero-actions">
@@ -1657,15 +1702,15 @@ HOW TO RECOVER YOUR ACCOUNT:
                 <a href="dashboard.html" class="btn btn-primary btn-lg">
                   Launch Dashboard ↗
                 </a>
-                <a href="quests.html" class="btn btn-secondary btn-lg">
-                  Explore Quests & Bounties
+                <a href="about.html" class="btn btn-secondary btn-lg">
+                  About & Tokenomics
                 </a>
               ` : `
                 <a href="signin.html#signup" class="btn btn-primary btn-lg">
                   Mint Passport (+100 BOOBA)
                 </a>
-                <a href="signin.html#signin" class="btn btn-secondary btn-lg">
-                  Sign In to Account
+                <a href="about.html" class="btn btn-secondary btn-lg">
+                  About & Tokenomics
                 </a>
               `}
             </div>
@@ -1681,7 +1726,7 @@ HOW TO RECOVER YOUR ACCOUNT:
               </div>
               <div class="stat-box">
                 <div class="stat-value text-gradient-gold" data-counter-target="${stats.totalPointsDistributed}">${Number(stats.totalPointsDistributed).toLocaleString()}</div>
-                <div class="stat-label">$BOOBA Circulating</div>
+                <div class="stat-label">$BOOBA Distributed</div>
               </div>
             </div>
           </div>
@@ -1699,117 +1744,155 @@ HOW TO RECOVER YOUR ACCOUNT:
         </div>
       </section>
 
-      <!-- 3. CHAINDUSTRY-STYLE HIGH-TECH BENTO GRID -->
+      <!-- 3. ABOUT THE TOKEN (HOMEPAGE SHOWCASE) -->
       <section class="section-container" style="background: var(--bg-surface); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); padding: 6rem 0;">
         <div class="container">
           <div class="section-header text-center" style="margin-bottom: 4rem;">
-            <h2 class="section-title" style="font-size: clamp(2rem, 3.8vw, 3rem); color: #FFFFFF;">Engineered for True Web3 Dominance</h2>
-            <p class="section-subtitle" style="font-size: 1.1rem; color: var(--text-secondary); max-width: 620px; margin: 0.75rem auto 0 auto;">
-              A frictionless ecosystem combining non-custodial cryptographic passports, automated bounty verification, and fair on-chain distributions.
+            <h2 class="section-title" style="font-size: clamp(2rem, 3.8vw, 3rem); color: #FFFFFF;">About The Token</h2>
+            <p class="section-subtitle" style="font-size: 1.1rem; color: var(--text-secondary); max-width: 650px; margin: 0.75rem auto 0 auto;">
+              Discover the core token mechanics, real utilities, zero-tax economics, and fair distribution powering the $BOOBA coin on BNB Smart Chain.
             </p>
           </div>
 
-          <div class="bento-grid" id="dominanceBentoGrid">
+          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.75rem;">
             
-            <!-- Bento Card 1 (Large 8-col): Digital Passport (Left) -->
-            <div class="bento-card bento-col-8 bento-from-left">
-              <div class="bento-glow-blob"></div>
-              <div>
-                <div class="bento-card-header">
-                  <div class="bento-icon-badge">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
+            <!-- COIN BOX 1: BEP-20 Foundation & 0% Tax (Golden Moving Edge Light) -->
+            <div class="chain-glow-card card-speed-1">
+              <div class="chain-glow-inner">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(243, 186, 47, 0.15); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow); border: 1px solid rgba(243, 186, 47, 0.3);">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M15 9.5a3.5 3.5 0 0 0-5 0c0 2 5 2 5 4.5a3.5 3.5 0 0 1-5 0"></path></svg>
+                    </div>
+                    <span class="badge-tag" style="font-size: 0.72rem; padding: 0.25rem 0.6rem; background: rgba(243, 186, 47, 0.12); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.3);">1B FIXED SUPPLY</span>
                   </div>
-                  <span class="badge-tag">BIP-39 Secured</span>
-                </div>
-                <h3 class="bento-title">Non-Custodial Digital Passport</h3>
-                <p class="bento-desc">
-                  Your cryptographic on-chain identity. Backed by a 12-word master seed phrase, instant Web3 wallet binding (MetaMask, Trust Wallet, Binance Web3), and automated reputation score tracking.
-                </p>
-              </div>
 
-              <!-- Mini Passport Interactive Display -->
-              <div class="bento-mini-passport">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                  <img src="assets/mascot.jpg" style="width: 44px; height: 44px; border-radius: 12px; border: 1.5px solid var(--brand-yellow);">
-                  <div>
-                    <div style="font-weight: 800; color: #FFFFFF; font-size: 0.95rem;">Booba Master Identity</div>
-                    <div style="font-size: 0.75rem; color: var(--brand-yellow); font-family: var(--font-mono);">BEP-20 • ID: BB-994821</div>
+                  <h3 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.65rem; letter-spacing: -0.01em;">BNB Chain & Zero Tax</h3>
+                  <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.35rem;">
+                    The $BOOBA coin is natively minted on BNB Smart Chain (BEP-20) with a fixed supply of 1,000,000,000 tokens and 0% Buy / 0% Sell taxes for frictionless decentralized trading.
+                  </p>
+
+                  <div style="display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1.5rem;">
+                    <span style="font-size: 0.74rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-secondary);">1,000,000,000 Supply</span>
+                    <span style="font-size: 0.74rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--accent-emerald);">0% Buy / Sell Tax</span>
+                    <span style="font-size: 0.74rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-secondary);">BEP-20 Standard</span>
                   </div>
                 </div>
-                <div style="text-align: right;">
-                  <span style="font-size: 0.7rem; color: var(--accent-emerald); font-weight: 700; background: rgba(16, 185, 129, 0.15); padding: 0.2rem 0.6rem; border-radius: 999px;">● 100% On-Chain</span>
-                </div>
+
+                <a href="about.html#tokenomics" class="btn btn-secondary btn-block btn-sm" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;">
+                  <span>View Token Specs</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
               </div>
             </div>
 
-            <!-- Bento Card 2 (4-col): Live Bounty Engine (Right) -->
-            <div class="bento-card bento-col-4 bento-from-right">
-              <div class="bento-glow-blob" style="background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);"></div>
-              <div>
-                <div class="bento-card-header">
-                  <div class="bento-icon-badge" style="background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            <!-- COIN BOX 2: 40% Community Distribution (Golden Moving Edge Light) -->
+            <div class="chain-glow-card card-speed-2">
+              <div class="chain-glow-inner">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3);">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+                    </div>
+                    <span class="badge-tag" style="font-size: 0.72rem; padding: 0.25rem 0.6rem; background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">400M $BOOBA POOL</span>
                   </div>
-                  <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">Live Bounties</span>
+
+                  <h3 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.65rem; letter-spacing: -0.01em;">Fair Community Earning</h3>
+                  <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.35rem;">
+                    40% (400 Million $BOOBA) is distributed directly to active community members. Earn $BOOBA through daily check-in streaks, social raids, creative bounties, and genuine referrals.
+                  </p>
+
+                  <div style="display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1.5rem;">
+                    <span style="font-size: 0.74rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-secondary);">40% Community Pool</span>
+                    <span style="font-size: 0.74rem; background: rgba(243, 186, 47, 0.08); border: 1px solid rgba(243, 186, 47, 0.3); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--brand-yellow);">Daily Streaks</span>
+                    <span style="font-size: 0.74rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-secondary);">Anti-Bot Fair Play</span>
+                  </div>
                 </div>
-                <h3 class="bento-title">Real-Time Quests</h3>
-                <p class="bento-desc">
-                  Daily check-in streaks, viral X/Twitter raids, and creative meme contests with instant team proof verification and reward claims.
-                </p>
+
+                <a href="quests.html" class="btn btn-secondary btn-block btn-sm" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;">
+                  <span>Earn $BOOBA Today</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
               </div>
-              <a href="quests.html" class="btn btn-secondary btn-block btn-sm" style="margin-top: 1rem;">View Active Quests →</a>
             </div>
 
-            <!-- Bento Card 3 (4-col): Real Leaderboard (Left) -->
-            <div class="bento-card bento-col-4 bento-from-left">
-              <div>
-                <div class="bento-card-header">
-                  <div class="bento-icon-badge" style="background: rgba(255, 122, 0, 0.12); color: var(--accent-orange); border-color: rgba(255, 122, 0, 0.3);">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            <!-- COIN BOX 3: Staking Multipliers & Vault Yield (Golden Moving Edge Light) -->
+            <div class="chain-glow-card card-speed-3">
+              <div class="chain-glow-inner">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-purple); border: 1px solid rgba(139, 92, 246, 0.3);">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+                    </div>
+                    <span class="badge-tag" style="font-size: 0.72rem; padding: 0.25rem 0.6rem; background: rgba(139, 92, 246, 0.12); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3);">UP TO 3.5X BOOST</span>
                   </div>
-                  <span class="badge-tag">Fair Ranking</span>
+
+                  <h3 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.65rem; letter-spacing: -0.01em;">Staking & Yield Boosts</h3>
+                  <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.35rem;">
+                    Stake $BOOBA or $BOOBA/BNB LP inside the Booba Vault to earn sustainable staking APY and multiply all your quest payouts by up to 3.5x across the entire platform.
+                  </p>
+
+                  <div style="display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1.5rem;">
+                    <span style="font-size: 0.74rem; background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.3); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--accent-purple);">Up to 3.5x Multiplier</span>
+                    <span style="font-size: 0.74rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-secondary);">Staking APY</span>
+                    <span style="font-size: 0.74rem; background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.3); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--accent-cyan);">LP Locked 24 Mos</span>
+                  </div>
                 </div>
-                <h3 class="bento-title">Anti-Sybil Leaderboard</h3>
-                <p class="bento-desc">
-                  Rank up with genuine community contributions. Top tier holders qualify for exclusive airdrop snapshots and VIP alpha vault access.
-                </p>
+
+                <a href="about.html#tokenomics" class="btn btn-secondary btn-block btn-sm" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;">
+                  <span>Explore Vault Staking</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
               </div>
-              <a href="leaderboard.html" class="btn btn-secondary btn-block btn-sm" style="margin-top: 1rem;">Check Ranks →</a>
             </div>
 
-            <!-- Bento Card 4 (Large 8-col): 10 Progression Tiers (Right) -->
-            <div class="bento-card bento-col-8 bento-from-right">
-              <div class="bento-glow-blob"></div>
-              <div>
-                <div class="bento-card-header">
-                  <div class="bento-icon-badge">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+            <!-- COIN BOX 4: Real Ecosystem Utility & Governance (Golden Moving Edge Light) -->
+            <div class="chain-glow-card card-speed-4">
+              <div class="chain-glow-inner">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(255, 122, 0, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-orange); border: 1px solid rgba(255, 122, 0, 0.3);">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                    </div>
+                    <span class="badge-tag" style="font-size: 0.72rem; padding: 0.25rem 0.6rem; background: rgba(255, 122, 0, 0.12); color: var(--accent-orange); border-color: rgba(255, 122, 0, 0.3);">REAL UTILITIES</span>
                   </div>
-                  <span class="badge-tag">10 VIP Tiers</span>
-                </div>
-                <h3 class="bento-title">Progressive Level Unlocks & Vault Perks</h3>
-                <p class="bento-desc">
-                  From Lv.1 Explorer to Lv.10 Booba Master. As your $BOOBA balance expands, unlock custom Telegram badges, private alpha channels, boosted bounty multipliers, and governance voting weight.
-                </p>
-              </div>
 
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; margin-top: 1rem;">
-                <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 0.75rem; border-radius: 12px; text-align: center;">
-                  <div style="font-size: 0.75rem; color: var(--text-muted);">Lv.1 Explorer</div>
-                  <div style="font-weight: 800; color: var(--brand-yellow); font-size: 0.9rem;">100 BOOBA</div>
+                  <h3 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.65rem; letter-spacing: -0.01em;">Arcade, Tiers & DAO</h3>
+                  <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.35rem;">
+                    The $BOOBA coin powers daily Lucky Wheel spins, unlocks all 10 Passport progression tiers (Lv.1 to Lv.10), and gives holders decentralized DAO voting rights on treasury allocations.
+                  </p>
+
+                  <div style="display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1.5rem;">
+                    <span style="font-size: 0.74rem; background: rgba(255, 122, 0, 0.08); border: 1px solid rgba(255, 122, 0, 0.3); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--accent-orange);">Daily Spin Wheel</span>
+                    <span style="font-size: 0.74rem; background: rgba(243, 186, 47, 0.08); border: 1px solid rgba(243, 186, 47, 0.3); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--brand-yellow);">10 Passport Tiers</span>
+                    <span style="font-size: 0.74rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-secondary);">DAO Voting Rights</span>
+                  </div>
                 </div>
-                <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 0.75rem; border-radius: 12px; text-align: center;">
-                  <div style="font-size: 0.75rem; color: var(--text-muted);">Lv.5 Guardian</div>
-                  <div style="font-weight: 800; color: var(--brand-yellow); font-size: 0.9rem;">3,000 BOOBA</div>
-                </div>
-                <div style="background: rgba(243, 186, 47, 0.1); border: 1px solid rgba(243, 186, 47, 0.4); padding: 0.75rem; border-radius: 12px; text-align: center;">
-                  <div style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Lv.10 Master</div>
-                  <div style="font-weight: 800; color: #FFFFFF; font-size: 0.9rem;">20,000+ BOOBA</div>
-                </div>
+
+                <a href="about.html" class="btn btn-secondary btn-block btn-sm" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;">
+                  <span>Explore All Utilities</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
               </div>
             </div>
 
           </div>
+
+          <!-- SPOTLIGHT PORTAL BANNER TO THE DEDICATED ABOUT & TOKENOMICS PAGE -->
+          <div class="glass-panel" style="margin-top: 3.5rem; padding: 2.5rem; border-radius: 24px; border: 1.5px solid rgba(243, 186, 47, 0.35); background: linear-gradient(135deg, rgba(243, 186, 47, 0.08) 0%, rgba(14, 18, 27, 0.85) 100%); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2rem;">
+            <div style="max-width: 680px;">
+              <h3 style="font-size: 1.6rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem;">
+                Want to Discover the Full Story & Official Tokenomics?
+              </h3>
+              <p class="portal-banner-desc" style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.6;">
+                Check out our dedicated About & Tokenomics hub to inspect the token distribution percentages, smart contract verification, 24-month liquidity lock, and 4-phase ecosystem roadmap.
+              </p>
+            </div>
+            <a href="about.html" class="btn btn-primary btn-lg" style="white-space: nowrap;">
+              Explore About & Tokenomics Hub →
+            </a>
+          </div>
+
         </div>
       </section>
 
@@ -1865,27 +1948,1129 @@ HOW TO RECOVER YOUR ACCOUNT:
       <section class="section-container" style="padding: 0 0 6rem 0;">
         <div class="container">
           <div class="cta-banner-card">
-            <span class="badge-tag" style="margin-bottom: 1.25rem;">Join ${(db.users && db.users.length) ? db.users.length : 17}+ Active Members</span>
+            
+            <!-- DESKTOP VIEW CONTENT -->
+            <div class="cta-desktop-content">
+              <span class="badge-tag" style="margin-bottom: 1.25rem;">Join ${(db.users && db.users.length) ? db.users.length : 17}+ Active Members</span>
+              <h2 style="font-size: clamp(2.2rem, 4.5vw, 3.4rem); font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em; margin-bottom: 1rem;">
+                Ready to Enter the <span class="text-gradient-gold">Booba Universe</span>?
+              </h2>
+              <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 2.5rem auto; line-height: 1.65;">
+                Mint your digital passport today, earn your first +100 $BOOBA tokens instantly, and start climbing the leaderboard.
+              </p>
+
+              <div style="display: flex; justify-content: center; gap: 1.25rem; flex-wrap: wrap;">
+                ${user ? `
+                  <a href="dashboard.html" class="btn btn-primary btn-lg">Launch My Dashboard ↗</a>
+                  <a href="quests.html" class="btn btn-secondary btn-lg">Explore Live Quests</a>
+                ` : `
+                  <a href="signin.html#signup" class="btn btn-primary btn-lg">Mint Free Passport (+100 BOOBA)</a>
+                  <a href="about.html" class="btn btn-secondary btn-lg">Explore Tokenomics</a>
+                `}
+              </div>
+            </div>
+
+            <!-- MOBILE VIEW PIECHART CONTENT (ONLY IN MOBILE DESIGN) -->
+            <div class="cta-mobile-piechart">
+              <h3 style="font-size: 1.45rem; font-weight: 800; color: #FFFFFF; margin-bottom: 1.25rem; letter-spacing: -0.01em;">
+                Official <span class="text-gradient-gold">Token Allocation</span>
+              </h3>
+              
+              <!-- 3D Pie Chart Container (Enlarged for Mobile) -->
+              <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 1.35rem; width: 100%;">
+                <div class="chart-3d-stage" style="height: 240px; width: 240px; display: flex; align-items: center; justify-content: center;">
+                  <div class="chart-3d-rotator">
+                    <svg width="240" height="240" viewBox="0 0 100 100" style="overflow: visible;">
+                      <!-- Base Depth Platform -->
+                      <ellipse cx="50" cy="58" rx="43" ry="43" fill="rgba(0,0,0,0.85)"></ellipse>
+                      <ellipse cx="50" cy="54" rx="42" ry="42" fill="rgba(10, 14, 22, 0.95)" stroke="rgba(243, 186, 47, 0.35)" stroke-width="1.5"></ellipse>
+
+                      <!-- Slices -->
+                      <path d="M50 50 L50 10 A40 40 0 0 1 73.5 82.4 Z" fill="#F3BA2F" style="filter: drop-shadow(0 0 12px rgba(243, 186, 47, 0.6)); stroke: #111; stroke-width: 0.75;"></path>
+                      <path d="M50 50 L73.5 82.4 A40 40 0 0 1 26.5 82.4 Z" fill="#8B5CF6" style="filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.55)); stroke: #111; stroke-width: 0.75;"></path>
+                      <path d="M50 50 L26.5 82.4 A40 40 0 0 1 11.9 37.6 Z" fill="#10B981" style="filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.55)); stroke: #111; stroke-width: 0.75;"></path>
+                      <path d="M50 50 L11.9 37.6 A40 40 0 0 1 26.5 17.6 Z" fill="#06B6D4" style="filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.55)); stroke: #111; stroke-width: 0.75;"></path>
+                      <path d="M50 50 L26.5 17.6 A40 40 0 0 1 50 10 Z" fill="#FF7A00" style="filter: drop-shadow(0 0 10px rgba(255, 122, 0, 0.55)); stroke: #111; stroke-width: 0.75;"></path>
+                      <circle cx="50" cy="50" r="3.8" fill="#FFFFFF" opacity="0.95"></circle>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Token Distribution Legend List -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; text-align: left; margin-bottom: 1.35rem; width: 100%;">
+                <div style="background: rgba(243, 186, 47, 0.08); border: 1px solid rgba(243, 186, 47, 0.25); border-radius: 10px; padding: 0.45rem 0.6rem;">
+                  <div style="font-size: 0.72rem; font-weight: 800; color: var(--brand-yellow);">40% • 400M</div>
+                  <div style="font-size: 0.64rem; color: var(--text-secondary);">Community Quests</div>
+                </div>
+                <div style="background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 10px; padding: 0.45rem 0.6rem;">
+                  <div style="font-size: 0.72rem; font-weight: 800; color: var(--accent-purple);">20% • 200M</div>
+                  <div style="font-size: 0.64rem; color: var(--text-secondary);">Vault Staking</div>
+                </div>
+                <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 10px; padding: 0.45rem 0.6rem;">
+                  <div style="font-size: 0.72rem; font-weight: 800; color: var(--accent-emerald);">20% • 200M</div>
+                  <div style="font-size: 0.64rem; color: var(--text-secondary);">DEX Liquidity</div>
+                </div>
+                <div style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.25); border-radius: 10px; padding: 0.45rem 0.6rem;">
+                  <div style="font-size: 0.72rem; font-weight: 800; color: var(--accent-cyan);">10% • 100M</div>
+                  <div style="font-size: 0.64rem; color: var(--text-secondary);">Ecosystem Dev</div>
+                </div>
+              </div>
+
+              <a href="about.html#tokenomics" class="btn btn-primary btn-block btn-sm" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; width: 100%; border-radius: 9999px;">
+                <span>View Full Tokenomics Architecture</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  // --------------------------------------------------------------------------
+  // 1.5. ABOUT & TOKENOMICS DEDICATED VIEW (about.html)
+  // --------------------------------------------------------------------------
+
+  // --------------------------------------------------------------------------
+  // 1.5. DEVELOPER-GRADE ABOUT & TOKENOMICS ARCHITECTURE VIEW (about.html)
+  // --------------------------------------------------------------------------
+
+  renderAboutView(container) {
+    const user = db.currentUser;
+    const stats = db.getStats();
+
+    container.innerHTML = `
+      <!-- 1. HERO BANNER WITH TELEMETRY -->
+      <section class="section-container" style="padding: 4.5rem 0 3.5rem 0; border-bottom: 1px solid var(--border-subtle); background: radial-gradient(circle at 50% 0%, rgba(243, 186, 47, 0.1) 0%, transparent 70%); position: relative; overflow: hidden;">
+        
+        <div class="ambient-glow" style="top: -150px; left: 50%; transform: translateX(-50%); width: 700px; height: 350px;"></div>
+
+        <div class="container text-center" style="position: relative; z-index: 2;">
+          
+          <!-- DESKTOP BADGES (SIDE-BY-SIDE IN ONE ROW) -->
+          <div class="about-hero-badges-desktop">
+            <span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); display: inline-flex; align-items: center; gap: 0.45rem;">
+              <span class="pulse-dot"></span> BNB Smart Chain Mainnet
+            </span>
+            <span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); display: inline-flex; align-items: center; gap: 0.45rem;">
+              <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg> BEP-20 Standard
+            </span>
+            <span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3); display: inline-flex; align-items: center; gap: 0.45rem;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> 0% Buy / 0% Sell Tax
+            </span>
+          </div>
+
+          <!-- MOBILE BADGES ROTATOR (ONE AFTER ANOTHER IN THE CENTER) -->
+          <div class="about-hero-badges-mobile" id="aboutHeroBadgesMobile">
+            <div id="aboutMobileBadgeSlot" style="display: inline-flex; align-items: center; justify-content: center; transition: opacity 0.25s ease, transform 0.25s ease;">
+              <span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); display: inline-flex; align-items: center; gap: 0.45rem;">
+                <span class="pulse-dot"></span> BNB Smart Chain Mainnet
+              </span>
+            </div>
+          </div>
+
+          <h1 style="font-size: clamp(2.4rem, 5.5vw, 4.2rem); font-weight: 800; color: #FFFFFF; letter-spacing: -0.025em; max-width: 960px; margin: 0 auto 1.5rem auto; line-height: 1.12;">
+            The Next-Generation Gamified Protocol on <span class="text-gradient-gold">BNB Chain</span>
+          </h1>
+
+          <p style="font-size: clamp(1.05rem, 2vw, 1.22rem); color: var(--text-secondary); max-width: 780px; margin: 0 auto 2.5rem auto; line-height: 1.7;">
+            An all-in-one Web3 ecosystem unifying non-custodial cryptographic digital identity, decentralized quest bounties, dynamic multiplier staking vaults, and real-time community governance.
+          </p>
+
+          <!-- LIVING TV TELEMETRY BROADCAST SCREEN (ROTATING 1-BOX STATS) -->
+          <div class="tv-telemetry-screen" id="aboutTvScreen">
+            <div class="tv-screen-bezel">
+              <div class="tv-top-bar">
+                <div class="tv-live-badge">
+                  <span class="pulse-dot"></span>
+                  <span class="tv-live-text-desktop">LIVE NETWORK TELEMETRY • CH-0<span id="tvChannelNum">1</span></span>
+                  <span class="tv-live-text-mobile">TELEMETRY • CH-0<span id="tvChannelNumMob">1</span></span>
+                </div>
+                <div class="tv-controls-group">
+                  <div class="tv-channel-dots">
+                    <div class="tv-channel-dot active" onclick="window.boobaApp.setTvStatSlide(0)" title="Channel 1"></div>
+                    <div class="tv-channel-dot" onclick="window.boobaApp.setTvStatSlide(1)" title="Channel 2"></div>
+                    <div class="tv-channel-dot" onclick="window.boobaApp.setTvStatSlide(2)" title="Channel 3"></div>
+                    <div class="tv-channel-dot" onclick="window.boobaApp.setTvStatSlide(3)" title="Channel 4"></div>
+                  </div>
+                  <div class="tv-nav-arrows" style="display: flex; gap: 0.35rem;">
+                    <button type="button" class="tv-nav-btn" onclick="window.boobaApp.prevTvStatSlide()" aria-label="Previous Channel">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <button type="button" class="tv-nav-btn" onclick="window.boobaApp.nextTvStatSlide()" aria-label="Next Channel">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TV SCREEN DISPLAY FRAME -->
+              <div class="tv-stat-card-frame" id="tvStatFrame">
+                <div class="tv-stat-number" id="tvStatNumber" style="color: var(--brand-yellow);">1,000,000,000</div>
+                <div class="tv-stat-label" id="tvStatLabel">Fixed Total Supply</div>
+                <div class="tv-stat-desc" id="tvStatDesc">Strictly capped BEP-20 supply natively minted on BNB Smart Chain with zero inflation risk.</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 2. 8 CORE PILLARS ABOUT THE TOKEN -->
+      <section class="section-container" style="padding: 5rem 0; background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle);">
+        <div class="container">
+          
+          <div class="section-header text-center" style="margin-bottom: 3.5rem;">
+            <h2 class="section-title" style="font-size: clamp(2rem, 3.8vw, 3rem); color: #FFFFFF;">About The Token</h2>
+            <p class="section-subtitle" style="font-size: 1.1rem; color: var(--text-secondary); max-width: 720px; margin: 0.75rem auto 0 auto;">
+              Engineered natively on BNB Smart Chain for maximum security, real GameFi & DeFi utility, and long-term community value.
+            </p>
+          </div>
+
+          <!-- 8 Token Pillars Grid (Clean, Modern Responsive Layout with Typing Animation) -->
+          <div class="grid" id="tokenPillarsGrid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+            
+            <!-- Pillar 1: Fixed 1 Billion Supply -->
+            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(243, 186, 47, 0.3); position: relative;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(243, 186, 47, 0.15); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M15 9.5a3.5 3.5 0 0 0-5 0c0 2 5 2 5 4.5a3.5 3.5 0 0 1-5 0"></path></svg>
+                </div>
+                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(243, 186, 47, 0.12); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.3);">01 • SUPPLY</span>
+              </div>
+              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Fixed 1 Billion Supply</h3>
+              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Strictly capped at 1,000,000,000 $BOOBA. Zero minting exploits, zero inflationary dilution, and no secondary tokens created.</p>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ Hard-Capped BEP-20 Mint</div>
+            </div>
+
+            <!-- Pillar 2: 0% Tax Structure -->
+            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.3); position: relative;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-emerald);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"></line><circle cx="6.5" cy="6.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg>
+                </div>
+                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">02 • TAX FREE</span>
+              </div>
+              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">0% Buy & 0% Sell Tax</h3>
+              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Zero developer taxes on transactions. Trade freely across DEX protocols without unexpected fees or hidden slippage traps.</p>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ 100% Frictionless Trading</div>
+            </div>
+
+            <!-- Pillar 3: 24-Month Liquidity Lock -->
+            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(6, 182, 212, 0.3); position: relative;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(6, 182, 212, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-cyan);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(6, 182, 212, 0.12); color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.3);">03 • SECURITY</span>
+              </div>
+              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">24-Month Liquidity Lock</h3>
+              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">20% of total supply (200,000,000 $BOOBA) dedicated to DEX liquidity is locked for 24 months via verifiable smart contract timelocks.</p>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ Rug-Proof Timelock</div>
+            </div>
+
+            <!-- Pillar 4: Dynamic Staking Multipliers -->
+            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(139, 92, 246, 0.3); position: relative;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-purple);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                </div>
+                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(139, 92, 246, 0.12); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3);">04 • YIELD BOOST</span>
+              </div>
+              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Dynamic Staking Boost</h3>
+              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Deposit $BOOBA or LP tokens to activate dynamic 1.5x – 3.5x multiplier boosters on all daily check-in and bounty payouts.</p>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-purple); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ Up to 3.5x Quest Multiplier</div>
+            </div>
+
+            <!-- Pillar 5: Non-Custodial Passport Identity -->
+            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(243, 186, 47, 0.3); position: relative;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(243, 186, 47, 0.15); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line></svg>
+                </div>
+                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(243, 186, 47, 0.12); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.3);">05 • IDENTITY</span>
+              </div>
+              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Non-Custodial DID</h3>
+              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Client-side BIP-39 mnemonic seed generation with a unique citizen ID (BB-XXXXXX) for sovereign digital ownership.</p>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ 12-Word Master Cryptography</div>
+            </div>
+
+            <!-- Pillar 6: Proof-of-Engagement Bounties -->
+            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.3); position: relative;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-emerald);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                </div>
+                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">06 • COMMUNITY</span>
+              </div>
+              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Proof-of-Engagement</h3>
+              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">40% of tokens are earned by active community participants through daily streak check-ins, social raids, and creative bounties.</p>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ Merit-Based Fair Allocation</div>
+            </div>
+
+            <!-- Pillar 7: Arcade & GameFi Ecosystem -->
+            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(255, 122, 0, 0.3); position: relative;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(255, 122, 0, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-orange);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="3"></rect><path d="M6 12h4M8 10v4M15 11h.01M18 13h.01"></path></svg>
+                </div>
+                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(255, 122, 0, 0.12); color: var(--accent-orange); border-color: rgba(255, 122, 0, 0.3);">07 • GAMEFI</span>
+              </div>
+              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Arcade & Gamification</h3>
+              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Use $BOOBA to play the Spin-to-Earn Lucky Wheel, unlock exclusive Lv.1–10 badge titles, and participate in competitive leaderboard seasons.</p>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-orange); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ Spin-to-Earn & Tier Rewards</div>
+            </div>
+
+            <!-- Pillar 8: Decentralized DAO Governance -->
+            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(139, 92, 246, 0.3); position: relative;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-purple);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(139, 92, 246, 0.12); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3);">08 • DAO</span>
+              </div>
+              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Decentralized Governance</h3>
+              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Direct voting power over ecosystem treasury allocations, community grants, pool upgrades, and strategic multi-chain expansions.</p>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-purple); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ 100% Community Sovereign Rule</div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 3. INTERACTIVE STAKING MULTIPLIER CALCULATOR (DEVELOPER MINI-TOOL) -->
+      <section class="section-container" style="padding: 5rem 0;">
+        <div class="container">
+          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center;">
+            
+            <div>
+              <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 800; color: #FFFFFF; line-height: 1.2; margin-bottom: 1rem;">
+                Staking & Yield Multiplier Calculator
+              </h2>
+              <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 2rem;">
+                Drag the slider to project your quest multiplier boost, daily check-in yield, and unlocked Passport Tier status when staking $BOOBA tokens.
+              </p>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <label for="stakingCalcSlider" style="font-size: 0.9rem; font-weight: 700; color: #FFFFFF;">$BOOBA Tokens Staked:</label>
+                  <span id="stakingCalcAmountDisplay" class="text-mono" style="font-size: 1.25rem; font-weight: 800; color: var(--brand-yellow);">10,000 $BOOBA</span>
+                </div>
+                <input type="range" id="stakingCalcSlider" class="calc-range-slider" min="0" max="50000" step="1000" value="10000" oninput="window.boobaApp.updateAboutStakingCalc(this.value)">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
+                  <span>0 $BOOBA</span>
+                  <span>25,000 $BOOBA</span>
+                  <span>50,000+ $BOOBA</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Calculated Display Card -->
+            <div class="glass-panel" style="padding: 2rem; border-radius: 20px; border: 1.5px solid var(--border-medium); background: rgba(7, 9, 14, 0.9);">
+              <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+                Live Projected Benefits
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="color: var(--text-secondary); font-size: 0.9rem;">Bounty Multiplier Boost:</span>
+                  <strong id="calcMultiplierOutput" class="text-mono" style="font-size: 1.4rem; color: var(--brand-yellow);">2.00x Boost</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="color: var(--text-secondary); font-size: 0.9rem;">Est. Daily Streak Earnings:</span>
+                  <strong id="calcDailyYieldOutput" class="text-mono" style="font-size: 1.15rem; color: var(--accent-emerald);">+100 BOOBA / day</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="color: var(--text-secondary); font-size: 0.9rem;">Unlocked Passport Tier:</span>
+                  <strong id="calcTierOutput" style="font-size: 0.95rem; color: #FFFFFF; background: rgba(243, 186, 47, 0.15); padding: 0.2rem 0.6rem; border-radius: 999px; border: 1px solid rgba(243, 186, 47, 0.3);">Lv.6 Champion</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="color: var(--text-secondary); font-size: 0.9rem;">Base Vault APY:</span>
+                  <strong class="text-mono" style="font-size: 1.05rem; color: var(--accent-purple);">18.5% Base APY</strong>
+                </div>
+              </div>
+
+              <div style="margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle); text-align: center;">
+                <a href="quests.html" class="btn btn-primary btn-block btn-sm" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                  <span>Start Earning & Staking</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. OFFICIAL TOKENOMICS & 3D MULTI-MODE DISTRIBUTION -->
+      <section id="tokenomics" class="section-container" style="padding: 5rem 0; background: var(--bg-surface); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
+        <div class="container">
+          
+          <div class="section-header text-center" style="margin-bottom: 3.5rem;">
+            <h2 class="section-title" style="font-size: clamp(2rem, 3.8vw, 3rem); color: #FFFFFF;">$BOOBA Official Tokenomics</h2>
+            <p class="section-subtitle" style="font-size: 1.1rem; color: var(--text-secondary); max-width: 680px; margin: 0.75rem auto 0 auto;">
+              Designed with 0% transaction taxes, a fixed 1 Billion supply, and community-first distributions.
+            </p>
+          </div>
+
+          <!-- SMART CONTRACT SPECIFICATIONS (CLEAN UNBOXED STRIP) -->
+          <div style="margin-bottom: 3.5rem;">
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+              <div style="padding: 1rem 0;">
+                <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Token Name</div>
+                <div style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin-top: 0.25rem;">BOOBA (BNB baby)</div>
+              </div>
+              <div style="padding: 1rem 0;">
+                <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Ticker Symbol</div>
+                <div style="font-size: 1.2rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.25rem; font-family: var(--font-mono);">$BOOBA</div>
+              </div>
+              <div style="padding: 1rem 0;">
+                <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Blockchain</div>
+                <div style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin-top: 0.25rem;">BNB Chain (BEP-20)</div>
+              </div>
+              <div style="padding: 1rem 0;">
+                <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Total Supply</div>
+                <div style="font-size: 1.2rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.25rem; font-family: var(--font-mono);">1,000,000,000</div>
+              </div>
+              <div style="padding: 1rem 0;">
+                <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Buy / Sell Tax</div>
+                <div style="font-size: 1.2rem; font-weight: 800; color: var(--accent-emerald); margin-top: 0.25rem;">0% / 0% (Zero Tax)</div>
+              </div>
+              <div style="padding: 1rem 0;">
+                <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Liquidity Lock</div>
+                <div style="font-size: 1.2rem; font-weight: 800; color: var(--accent-cyan); margin-top: 0.25rem;">24 Months Verifiable</div>
+              </div>
+            </div>
+
+            <!-- Contract Address 1-Click Copy Bar -->
+            <div style="background: rgba(7, 9, 14, 0.7); border: 1px solid var(--border-medium); border-radius: 14px; padding: 0.85rem 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <span class="badge-tag" style="margin: 0;">Contract</span>
+                <span id="tokenContractAddr" class="text-mono" style="font-size: 0.92rem; color: var(--brand-yellow); word-break: break-all;">0x712B00BA99E74f8812cCdA15D5881a7a1c92F3a1</span>
+              </div>
+              <div style="display: flex; gap: 0.75rem;">
+                <button type="button" class="btn btn-primary btn-sm" onclick="window.boobaApp.copyContractAddress()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <span id="copyContractBtnText">Copy Contract</span>
+                </button>
+                <a href="https://bscscan.com" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                  <span>View on BscScan</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- TOKEN ALLOCATION MULTI-REPRESENTATION VISUALIZER (UNBOXED SINGLE-LINE TABS) & BREAKDOWN -->
+          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center;">
+            
+            <!-- 3D VISUALIZER PANEL (UNBOXED CLEAN CANVAS) -->
+            <div style="text-align: center;">
+              
+              <!-- 3D Mode Switcher Tabs (In One Line) -->
+              <div class="rep-switcher-bar" style="display: inline-flex; flex-wrap: nowrap; gap: 0.5rem; justify-content: center; margin-bottom: 2rem;">
+                <button type="button" id="repTabPie" class="rep-switch-btn active" onclick="window.boobaApp.switchTokenomicsView('pie3d')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+                  <span>3D Pie Chart</span>
+                </button>
+                <button type="button" id="repTabColumn" class="rep-switch-btn" onclick="window.boobaApp.switchTokenomicsView('column3d')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
+                  <span>3D Column Chart</span>
+                </button>
+                <button type="button" id="repTabLine" class="rep-switch-btn" onclick="window.boobaApp.switchTokenomicsView('line3d')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                  <span>3D Line Graph</span>
+                </button>
+              </div>
+
+              <!-- VIEW 1: 3D SOLID ISOMETRIC PIE CHART -->
+              <div id="viewPie3D" style="display: block;">
+                <div class="chart-3d-stage">
+                  <div class="chart-3d-rotator">
+                    <svg width="230" height="230" viewBox="0 0 100 100" style="overflow: visible;">
+                      <!-- 3D Base Thickness Shadow Platform -->
+                      <ellipse cx="50" cy="58" rx="42" ry="42" fill="rgba(0,0,0,0.75)"></ellipse>
+                      <ellipse cx="50" cy="54" rx="41" ry="41" fill="rgba(10, 14, 22, 0.9)" stroke="rgba(243, 186, 47, 0.2)" stroke-width="1.5"></ellipse>
+
+                      <!-- Solid 3D Pie Slices (Layered & Shaded) -->
+                      <!-- Sector 1: 40% Community (Yellow) - 0 to 144 deg -->
+                      <path d="M50 50 L50 10 A40 40 0 0 1 73.5 82.4 Z" fill="#F3BA2F" style="filter: drop-shadow(0 0 10px rgba(243, 186, 47, 0.5)); stroke: #111; stroke-width: 0.75;"></path>
+                      
+                      <!-- Sector 2: 20% Staking Vault (Purple) - 144 to 216 deg -->
+                      <path d="M50 50 L73.5 82.4 A40 40 0 0 1 26.5 82.4 Z" fill="#8B5CF6" style="filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.5)); stroke: #111; stroke-width: 0.75;"></path>
+                      
+                      <!-- Sector 3: 20% DEX Liquidity (Emerald) - 216 to 288 deg -->
+                      <path d="M50 50 L26.5 82.4 A40 40 0 0 1 11.9 37.6 Z" fill="#10B981" style="filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5)); stroke: #111; stroke-width: 0.75;"></path>
+                      
+                      <!-- Sector 4: 10% Ecosystem (Cyan) - 288 to 324 deg -->
+                      <path d="M50 50 L11.9 37.6 A40 40 0 0 1 26.5 17.6 Z" fill="#06B6D4" style="filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.5)); stroke: #111; stroke-width: 0.75;"></path>
+                      
+                      <!-- Sector 5: 10% Core Team (Orange) - 324 to 360 deg -->
+                      <path d="M50 50 L26.5 17.6 A40 40 0 0 1 50 10 Z" fill="#FF7A00" style="filter: drop-shadow(0 0 8px rgba(255, 122, 0, 0.5)); stroke: #111; stroke-width: 0.75;"></path>
+
+                      <!-- Center Specular Highlight -->
+                      <circle cx="50" cy="50" r="3.5" fill="#FFFFFF" opacity="0.9"></circle>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- VIEW 2: 3D ISOMETRIC COLUMN / BAR CHART -->
+              <div id="viewColumn3D" style="display: none; animation: fadeIn 0.25s ease;">
+                <div class="column-3d-stage">
+                  
+                  <!-- Col 1: 40% Community (Yellow) -->
+                  <div class="column-3d-bar" style="height: 165px;">
+                    <div class="col-3d-val-tag" style="color: var(--brand-yellow);">40%</div>
+                    <div class="col-3d-front" style="height: 165px; background: linear-gradient(180deg, #F3BA2F 0%, #B8860B 100%); box-shadow: 0 0 15px rgba(243, 186, 47, 0.4);"></div>
+                    <div class="col-3d-top" style="background: #FEE75C;"></div>
+                    <div class="col-3d-side" style="height: 165px; background: #996515;"></div>
+                  </div>
+
+                  <!-- Col 2: 20% Vault (Purple) -->
+                  <div class="column-3d-bar" style="height: 95px;">
+                    <div class="col-3d-val-tag" style="color: var(--accent-purple);">20%</div>
+                    <div class="col-3d-front" style="height: 95px; background: linear-gradient(180deg, #8B5CF6 0%, #6D28D9 100%); box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);"></div>
+                    <div class="col-3d-top" style="background: #C4B5FD;"></div>
+                    <div class="col-3d-side" style="height: 95px; background: #4C1D95;"></div>
+                  </div>
+
+                  <!-- Col 3: 20% DEX LP (Emerald) -->
+                  <div class="column-3d-bar" style="height: 95px;">
+                    <div class="col-3d-val-tag" style="color: var(--accent-emerald);">20%</div>
+                    <div class="col-3d-front" style="height: 95px; background: linear-gradient(180deg, #10B981 0%, #047857 100%); box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);"></div>
+                    <div class="col-3d-top" style="background: #6EE7B7;"></div>
+                    <div class="col-3d-side" style="height: 95px; background: #064E3B;"></div>
+                  </div>
+
+                  <!-- Col 4: 10% Ecosystem (Cyan) -->
+                  <div class="column-3d-bar" style="height: 55px;">
+                    <div class="col-3d-val-tag" style="color: var(--accent-cyan);">10%</div>
+                    <div class="col-3d-front" style="height: 55px; background: linear-gradient(180deg, #06B6D4 0%, #0891B2 100%); box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);"></div>
+                    <div class="col-3d-top" style="background: #67E8F9;"></div>
+                    <div class="col-3d-side" style="height: 55px; background: #164E63;"></div>
+                  </div>
+
+                  <!-- Col 5: 10% Team (Orange) -->
+                  <div class="column-3d-bar" style="height: 55px;">
+                    <div class="col-3d-val-tag" style="color: var(--accent-orange);">10%</div>
+                    <div class="col-3d-front" style="height: 55px; background: linear-gradient(180deg, #FF7A00 0%, #C2410C 100%); box-shadow: 0 0 10px rgba(255, 122, 0, 0.4);"></div>
+                    <div class="col-3d-top" style="background: #FDBA74;"></div>
+                    <div class="col-3d-side" style="height: 55px; background: #7C2D12;"></div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- VIEW 3: 3D ISOMETRIC LINE GRAPH -->
+              <div id="viewLine3D" style="display: none; animation: fadeIn 0.25s ease;">
+                <div class="linegraph-3d-stage">
+                  <div class="linegraph-3d-plane">
+                    <svg width="100%" height="180" viewBox="0 0 360 140" style="overflow: visible;">
+                      <defs>
+                        <linearGradient id="line3dGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stop-color="#F3BA2F" stop-opacity="0.45"></stop>
+                          <stop offset="100%" stop-color="#F3BA2F" stop-opacity="0.0"></stop>
+                        </linearGradient>
+                      </defs>
+
+                      <!-- 3D Perspective Grid Lines -->
+                      <line x1="20" y1="120" x2="340" y2="120" stroke="rgba(255,255,255,0.15)" stroke-dasharray="3,3"></line>
+                      <line x1="20" y1="80" x2="340" y2="80" stroke="rgba(255,255,255,0.1)" stroke-dasharray="3,3"></line>
+                      <line x1="20" y1="40" x2="340" y2="40" stroke="rgba(255,255,255,0.1)" stroke-dasharray="3,3"></line>
+
+                      <!-- 3D Area Gradient Fill -->
+                      <polygon points="30,120 30,25 105,75 180,75 255,100 330,100 330,120" fill="url(#line3dGrad)"></polygon>
+
+                      <!-- 3D Elevated Polyline Ribbon -->
+                      <polyline points="30,25 105,75 180,75 255,100 330,100" fill="none" stroke="#F3BA2F" stroke-width="4" style="filter: drop-shadow(0 6px 8px rgba(243,186,47,0.6)); stroke-linecap: round; stroke-linejoin: round;"></polyline>
+
+                      <!-- Glowing 3D Data Nodes & Drop Indicators -->
+                      <!-- Node 1: Community (400M) -->
+                      <line x1="30" y1="25" x2="30" y2="120" stroke="rgba(243,186,47,0.3)" stroke-width="1.5" stroke-dasharray="2,2"></line>
+                      <circle cx="30" cy="25" r="5.5" fill="#F3BA2F" stroke="#FFFFFF" stroke-width="2"></circle>
+                      <text x="30" y="15" fill="#F3BA2F" font-size="9" font-weight="bold" font-family="monospace" text-anchor="middle">400M</text>
+
+                      <!-- Node 2: Vault (200M) -->
+                      <line x1="105" y1="75" x2="105" y2="120" stroke="rgba(139,92,246,0.3)" stroke-width="1.5" stroke-dasharray="2,2"></line>
+                      <circle cx="105" cy="75" r="5" fill="#8B5CF6" stroke="#FFFFFF" stroke-width="1.5"></circle>
+                      <text x="105" y="65" fill="#C4B5FD" font-size="9" font-weight="bold" font-family="monospace" text-anchor="middle">200M</text>
+
+                      <!-- Node 3: LP (200M) -->
+                      <line x1="180" y1="75" x2="180" y2="120" stroke="rgba(16,185,129,0.3)" stroke-width="1.5" stroke-dasharray="2,2"></line>
+                      <circle cx="180" cy="75" r="5" fill="#10B981" stroke="#FFFFFF" stroke-width="1.5"></circle>
+                      <text x="180" y="65" fill="#6EE7B7" font-size="9" font-weight="bold" font-family="monospace" text-anchor="middle">200M</text>
+
+                      <!-- Node 4: Ecosystem (100M) -->
+                      <line x1="255" y1="100" x2="255" y2="120" stroke="rgba(6,182,212,0.3)" stroke-width="1.5" stroke-dasharray="2,2"></line>
+                      <circle cx="255" cy="100" r="4.5" fill="#06B6D4" stroke="#FFFFFF" stroke-width="1.5"></circle>
+                      <text x="255" y="90" fill="#67E8F9" font-size="9" font-weight="bold" font-family="monospace" text-anchor="middle">100M</text>
+
+                      <!-- Node 5: Team (100M) -->
+                      <line x1="330" y1="100" x2="330" y2="120" stroke="rgba(255,122,0,0.3)" stroke-width="1.5" stroke-dasharray="2,2"></line>
+                      <circle cx="330" cy="100" r="4.5" fill="#FF7A00" stroke="#FFFFFF" stroke-width="1.5"></circle>
+                      <text x="330" y="90" fill="#FDBA74" font-size="9" font-weight="bold" font-family="monospace" text-anchor="middle">100M</text>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Common Legend (Single-line on mobile) -->
+              <div class="token-common-legend">
+                <span class="legend-item"><span style="width: 8px; height: 8px; border-radius: 50%; background: #F3BA2F; flex-shrink: 0;"></span> 40% Community</span>
+                <span class="legend-item"><span style="width: 8px; height: 8px; border-radius: 50%; background: #8B5CF6; flex-shrink: 0;"></span> 20% Vault</span>
+                <span class="legend-item"><span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; flex-shrink: 0;"></span> 20% LP</span>
+                <span class="legend-item"><span style="width: 8px; height: 8px; border-radius: 50%; background: #06B6D4; flex-shrink: 0;"></span> 10% Growth</span>
+                <span class="legend-item"><span style="width: 8px; height: 8px; border-radius: 50%; background: #FF7A00; flex-shrink: 0;"></span> 10% Team</span>
+              </div>
+            </div>
+
+            <!-- ALLOCATION DETAILED CARDS -->
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              
+              <!-- 1. Community Quests -->
+              <div class="glass-panel" style="padding: 1.15rem 1.5rem; border-radius: 16px; border-left: 4px solid var(--brand-yellow); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 800; color: #FFFFFF; font-size: 0.95rem;">Community Quests & Airdrops</div>
+                  <div style="font-size: 0.78rem; color: var(--text-secondary);">Earned via daily check-in streaks, bounties, and referrals</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: 800; color: var(--brand-yellow); font-size: 1.1rem; font-family: var(--font-mono);">40%</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">400,000,000 $BOOBA</div>
+                </div>
+              </div>
+
+              <!-- 2. Staking Vault Reserves -->
+              <div class="glass-panel" style="padding: 1.15rem 1.5rem; border-radius: 16px; border-left: 4px solid var(--accent-purple); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 800; color: #FFFFFF; font-size: 0.95rem;">Staking Vault & Yield Reserves</div>
+                  <div style="font-size: 0.78rem; color: var(--text-secondary);">Yield rewards & multiplier bonuses for staking $BOOBA / LP</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: 800; color: var(--accent-purple); font-size: 1.1rem; font-family: var(--font-mono);">20%</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">200,000,000 $BOOBA</div>
+                </div>
+              </div>
+
+              <!-- 3. DEX Liquidity Pool -->
+              <div class="glass-panel" style="padding: 1.15rem 1.5rem; border-radius: 16px; border-left: 4px solid var(--accent-emerald); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 800; color: #FFFFFF; font-size: 0.95rem;">PancakeSwap DEX Liquidity</div>
+                  <div style="font-size: 0.78rem; color: var(--text-secondary);">Locked liquidity pair for seamless decentralized trading</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: 800; color: var(--accent-emerald); font-size: 1.1rem; font-family: var(--font-mono);">20%</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">200,000,000 $BOOBA</div>
+                </div>
+              </div>
+
+              <!-- 4. Ecosystem Growth -->
+              <div class="glass-panel" style="padding: 1.15rem 1.5rem; border-radius: 16px; border-left: 4px solid var(--accent-cyan); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 800; color: #FFFFFF; font-size: 0.95rem;">Ecosystem Growth & Exchange Listings</div>
+                  <div style="font-size: 0.78rem; color: var(--text-secondary);">Strategic marketing, CEX market making, and ecosystem grants</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: 800; color: var(--accent-cyan); font-size: 1.1rem; font-family: var(--font-mono);">10%</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">100,000,000 $BOOBA</div>
+                </div>
+              </div>
+
+              <!-- 5. Core Team & Dev -->
+              <div class="glass-panel" style="padding: 1.15rem 1.5rem; border-radius: 16px; border-left: 4px solid var(--accent-orange); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 800; color: #FFFFFF; font-size: 0.95rem;">Core Team & Protocol Development</div>
+                  <div style="font-size: 0.78rem; color: var(--text-secondary);">Subject to a 12-month linear smart contract vesting schedule</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: 800; color: var(--accent-orange); font-size: 1.1rem; font-family: var(--font-mono);">10%</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">100,000,000 $BOOBA</div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 5. STRATEGIC ECOSYSTEM ROADMAP (PHASES 1-4) -->
+      <section class="section-container" style="background: var(--bg-surface); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); padding: 5rem 0;">
+        <div class="container">
+          
+          <div class="section-header text-center" style="margin-bottom: 3.5rem;">
+            <h2 class="section-title" style="font-size: clamp(2rem, 3.8vw, 3rem); color: #FFFFFF;">The Booba Strategic Roadmap</h2>
+            <p class="section-subtitle" style="font-size: 1.1rem; color: var(--text-secondary); max-width: 650px; margin: 0.75rem auto 0 auto;">
+              Clear milestones guiding our expansion from genesis digital identity into a multi-chain decentralized kingdom.
+            </p>
+          </div>
+
+          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+            
+            <!-- Phase 1 -->
+            <div class="glass-panel" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.4); position: relative;">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 1rem; white-space: nowrap;">
+                <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-size: 0.76rem; padding: 0.25rem 0.65rem; margin: 0; display: inline-flex; align-items: center; gap: 0.35rem;">
+                  <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg> Completed
+                </span>
+                <span style="font-weight: 800; font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 0.04em;">PHASE 01</span>
+              </div>
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Genesis & Identity</h3>
+              <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem; color: var(--text-secondary);">
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> 3D Booba Passport Architecture</li>
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> BIP-39 Non-Custodial Keys</li>
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Multi-Wallet Web3 Connect</li>
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Google & Apple OAuth Portal</li>
+              </ul>
+            </div>
+
+            <!-- Phase 2 -->
+            <div class="glass-panel" style="padding: 1.75rem; border-radius: 20px; border: 1.5px solid var(--brand-yellow); position: relative; box-shadow: 0 0 25px rgba(243, 186, 47, 0.12);">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 1rem; white-space: nowrap;">
+                <span class="badge-tag" style="background: var(--brand-yellow); color: #000; font-weight: 800; font-size: 0.76rem; padding: 0.25rem 0.65rem; margin: 0; display: inline-flex; align-items: center; gap: 0.35rem;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Live & In Progress
+                </span>
+                <span style="font-weight: 800; font-size: 0.85rem; color: var(--brand-yellow); font-family: var(--font-mono); letter-spacing: 0.04em;">PHASE 02</span>
+              </div>
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Quest Engine & Growth</h3>
+              <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem; color: var(--text-secondary);">
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Daily Check-in Streak Multipliers</li>
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Bounty & Meme Submissions</li>
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Admin Moderation Dashboard</li>
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Anti-Sybil Referral Tracking</li>
+              </ul>
+            </div>
+
+            <!-- Phase 3 -->
+            <div class="glass-panel" style="padding: 1.75rem; border-radius: 20px; border: 1px solid var(--border-medium); position: relative;">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 1rem; white-space: nowrap;">
+                <span class="badge-tag" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.4); font-size: 0.76rem; padding: 0.25rem 0.65rem; margin: 0;">
+                  Upcoming Q3 2026
+                </span>
+                <span style="font-weight: 800; font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 0.04em;">PHASE 03</span>
+              </div>
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Vault Staking & Arcade</h3>
+              <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem; color: var(--text-secondary);">
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-purple)"><circle cx="4" cy="4" r="3.5"></circle></svg> On-Chain $BOOBA Staking Vault</li>
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-purple)"><circle cx="4" cy="4" r="3.5"></circle></svg> Up to 3.5x Multiplier Boosters</li>
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-purple)"><circle cx="4" cy="4" r="3.5"></circle></svg> Spin-to-Earn Lucky Wheel Arcade</li>
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-purple)"><circle cx="4" cy="4" r="3.5"></circle></svg> Automated Telegram Social Raid Bot</li>
+              </ul>
+            </div>
+
+            <!-- Phase 4 -->
+            <div class="glass-panel" style="padding: 1.75rem; border-radius: 20px; border: 1px solid var(--border-medium); position: relative;">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 1rem; white-space: nowrap;">
+                <span class="badge-tag" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.4); font-size: 0.76rem; padding: 0.25rem 0.65rem; margin: 0;">
+                  Upcoming Q4 2026
+                </span>
+                <span style="font-weight: 800; font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 0.04em;">PHASE 04</span>
+              </div>
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Soulbound NFTs & DAO</h3>
+              <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem; color: var(--text-secondary);">
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-cyan)"><circle cx="4" cy="4" r="3.5"></circle></svg> On-Chain SBT Passport Minting</li>
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-cyan)"><circle cx="4" cy="4" r="3.5"></circle></svg> PancakeSwap Syrup Pool Synergy</li>
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-cyan)"><circle cx="4" cy="4" r="3.5"></circle></svg> Decentralized DAO Community Voting</li>
+                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-cyan)"><circle cx="4" cy="4" r="3.5"></circle></svg> Tier-1 Centralized Exchange Listings</li>
+              </ul>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 6. FREQUENTLY ASKED QUESTIONS (INTERACTIVE ACCORDION) -->
+      <section class="section-container" style="padding: 5rem 0;">
+        <div class="container" style="max-width: 860px;">
+          
+          <div class="section-header text-center" style="margin-bottom: 3.5rem;">
+            <h2 class="section-title" style="font-size: clamp(2rem, 3.8vw, 3rem); color: #FFFFFF;">Frequently Asked Questions</h2>
+            <p class="section-subtitle" style="font-size: 1.05rem; color: var(--text-secondary); margin: 0.75rem auto 0 auto;">
+              Technical details and answers regarding the $BOOBA coin and ecosystem.
+            </p>
+          </div>
+
+          <div id="aboutFaqContainer">
+            
+            <div class="faq-item-card open" id="faqItem0">
+              <button type="button" class="faq-question-btn" onclick="window.boobaApp.toggleAboutFaq(0)">
+                <span>What is the BOOBA ($BOOBA) coin?</span>
+                <span class="faq-chevron-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </span>
+              </button>
+              <div class="faq-answer-panel" style="display: block;">
+                $BOOBA is the utility and governance token powering the BNB Baby community ecosystem on BNB Smart Chain. It is used to reward quest conquerors, boost staking multiplier yields, spin the arcade wheel, and upgrade digital Passport reputation tiers.
+              </div>
+            </div>
+
+            <div class="faq-item-card" id="faqItem1">
+              <button type="button" class="faq-question-btn" onclick="window.boobaApp.toggleAboutFaq(1)">
+                <span>Do I need to pay BNB gas fees to mint my Passport?</span>
+                <span class="faq-chevron-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </span>
+              </button>
+              <div class="faq-answer-panel">
+                No! Minting your Booba Passport is 100% gas-free. You receive an instant +100 $BOOBA welcome bonus and a 12-word cryptographic BIP-39 master recovery seed phrase without needing BNB in your wallet.
+              </div>
+            </div>
+
+            <div class="faq-item-card" id="faqItem2">
+              <button type="button" class="faq-question-btn" onclick="window.boobaApp.toggleAboutFaq(2)">
+                <span>How do the Staking Vault Multipliers work?</span>
+                <span class="faq-chevron-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </span>
+              </button>
+              <div class="faq-answer-panel">
+                When you deposit $BOOBA or $BOOBA/BNB LP tokens into the Booba Vault, the smart contract algorithm calculates a multiplier ranging from 1.5x up to 3.5x based on your lock tier. This multiplier automatically boosts all points and $BOOBA rewards you earn across daily check-ins and bounties.
+              </div>
+            </div>
+
+            <div class="faq-item-card" id="faqItem3">
+              <button type="button" class="faq-question-btn" onclick="window.boobaApp.toggleAboutFaq(3)">
+                <span>Is the PancakeSwap liquidity pool locked?</span>
+                <span class="faq-chevron-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </span>
+              </button>
+              <div class="faq-answer-panel">
+                Yes. 20% of the total supply (200,000,000 $BOOBA) allocated for the decentralized exchange liquidity pool is locked for 24 months via verifiable smart contract timelocks on BNB Smart Chain.
+              </div>
+            </div>
+
+            <div class="faq-item-card" id="faqItem4">
+              <button type="button" class="faq-question-btn" onclick="window.boobaApp.toggleAboutFaq(4)">
+                <span>Are there any transaction taxes on $BOOBA transfers?</span>
+                <span class="faq-chevron-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </span>
+              </button>
+              <div class="faq-answer-panel">
+                $BOOBA features a strict 0% Buy and 0% Sell tax standard. There are no hidden developer fees, honeypots, or transfer fees, ensuring complete compliance with standard BEP-20 protocols.
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 7. COMMUNITY CTA BANNER -->
+      <section class="section-container" style="padding: 0 0 6rem 0;">
+        <div class="container">
+          <div class="cta-banner-card">
             <h2 style="font-size: clamp(2.2rem, 4.5vw, 3.4rem); font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em; margin-bottom: 1rem;">
-              Ready to Enter the <span class="text-gradient-gold">Booba Universe</span>?
+              Join the <span class="text-gradient-gold">BNB Baby Movement</span>
             </h2>
-            <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 2.5rem auto; line-height: 1.65;">
-              Mint your digital passport today, earn your first +100 $BOOBA tokens instantly, and start climbing the leaderboard.
+            <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 620px; margin: 0 auto 2.5rem auto; line-height: 1.65;">
+              Mint your digital passport, claim your +100 $BOOBA welcome bonus, and begin conquering bounties on the BNB Smart Chain.
             </p>
 
             <div style="display: flex; justify-content: center; gap: 1.25rem; flex-wrap: wrap;">
               ${user ? `
-                <a href="dashboard.html" class="btn btn-primary btn-lg">Launch My Dashboard ↗</a>
-                <a href="quests.html" class="btn btn-secondary btn-lg">Explore Live Quests</a>
+                <a href="dashboard.html" class="btn btn-primary btn-lg" style="display: inline-flex; align-items: center; gap: 0.45rem;">
+                  <span>Launch My Dashboard</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                </a>
+                <a href="quests.html" class="btn btn-secondary btn-lg">Conquer Quests</a>
               ` : `
                 <a href="signin.html#signup" class="btn btn-primary btn-lg">Mint Free Passport (+100 BOOBA)</a>
-                <a href="signin.html#signin" class="btn btn-secondary btn-lg">Sign In with Existing Account</a>
+                <a href="dashboard.html" class="btn btn-secondary btn-lg">Enter Dashboard</a>
               `}
             </div>
           </div>
         </div>
       </section>
     `;
+
+    // Initialize TV Telemetry Auto-Rotation
+    this.initAboutTvRotation();
+
+    // Initialize Mobile Badge Auto-Rotation (one after another in the center)
+    this.initAboutBadgeRotation();
+
+    // Initialize Simultaneous Typewriter Effect on 8 Token Pillars
+    this.initAboutTypewriter();
+  }
+
+  // --------------------------------------------------------------------------
+  // ABOUT TV TELEMETRY & VIEW SWITCHER METHODS
+  // --------------------------------------------------------------------------
+
+  initAboutBadgeRotation() {
+    if (this._aboutBadgeTimer) {
+      clearInterval(this._aboutBadgeTimer);
+      this._aboutBadgeTimer = null;
+    }
+    const badges = [
+      `<span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); display: inline-flex; align-items: center; gap: 0.45rem;"><span class="pulse-dot"></span> BNB Smart Chain Mainnet</span>`,
+      `<span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); display: inline-flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg> BEP-20 Standard</span>`,
+      `<span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3); display: inline-flex; align-items: center; gap: 0.45rem;"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> 0% Buy / 0% Sell Tax</span>`
+    ];
+
+    let bIdx = 0;
+    const slot = document.getElementById('aboutMobileBadgeSlot');
+    if (!slot) return;
+
+    this._aboutBadgeTimer = setInterval(() => {
+      bIdx = (bIdx + 1) % badges.length;
+      slot.style.opacity = '0';
+      slot.style.transform = 'scale(0.92)';
+      setTimeout(() => {
+        slot.innerHTML = badges[bIdx];
+        slot.style.opacity = '1';
+        slot.style.transform = 'scale(1)';
+      }, 250);
+    }, 2000); // 2 seconds per badge
+  }
+
+  initAboutTypewriter() {
+    if (this._aboutTypewriterTimer) {
+      clearInterval(this._aboutTypewriterTimer);
+      this._aboutTypewriterTimer = null;
+    }
+
+    const grid = document.getElementById('tokenPillarsGrid');
+    if (!grid) return;
+
+    const targets = Array.from(grid.querySelectorAll('.token-pillar-card .typewriter-text'));
+    if (!targets.length) return;
+
+    // Cache the original target text for each element
+    const items = targets.map(el => {
+      const text = el.textContent.trim();
+      el.innerHTML = '<span class="typewriter-cursor">|</span>';
+      return { el, text, len: text.length };
+    });
+
+    const maxLen = Math.max(...items.map(it => it.len));
+    let charIdx = 0;
+
+    const startTyping = () => {
+      if (this._aboutTypewriterTimer) return;
+      this._aboutTypewriterTimer = setInterval(() => {
+        charIdx++;
+        let allDone = true;
+
+        items.forEach(item => {
+          if (charIdx <= item.len) {
+            allDone = false;
+            const currentSub = item.text.substring(0, charIdx);
+            item.el.innerHTML = currentSub.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '<span class="typewriter-cursor">|</span>';
+          } else {
+            // Finished typing this item
+            item.el.innerHTML = item.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          }
+        });
+
+        if (charIdx >= maxLen || allDone) {
+          clearInterval(this._aboutTypewriterTimer);
+          this._aboutTypewriterTimer = null;
+          items.forEach(item => {
+            item.el.innerHTML = item.text;
+          });
+        }
+      }, 20); // 20ms per character for silky smooth, synchronized simultaneous typing
+    };
+
+    // Use IntersectionObserver or start immediately if visible
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            startTyping();
+            observer.disconnect();
+          }
+        });
+      }, { threshold: 0.15 });
+      observer.observe(grid);
+    } else {
+      startTyping();
+    }
+  }
+
+  initAboutTvRotation() {
+    if (this._aboutTvTimer) {
+      clearInterval(this._aboutTvTimer);
+    }
+    this._aboutTvCurrentIndex = 0;
+    this._aboutTvTimer = setInterval(() => {
+      this.nextTvStatSlide();
+    }, 2000); // 2 seconds per slide
+  }
+
+  setTvStatSlide(idx) {
+    const slides = [
+      {
+        num: '1,000,000,000',
+        color: 'var(--brand-yellow)',
+        label: 'Fixed Total Supply',
+        desc: 'Strictly capped BEP-20 supply natively minted on BNB Smart Chain with zero inflation risk.'
+      },
+      {
+        num: '0% / 0%',
+        color: 'var(--accent-emerald)',
+        label: 'Tax Structure',
+        desc: 'Zero buy and zero sell transaction taxes for frictionless decentralized trading and micro-transactions.'
+      },
+      {
+        num: 'Up to 3.5x',
+        color: 'var(--accent-purple)',
+        label: 'Vault Multiplier',
+        desc: 'Dynamic multiplier algorithm boosting daily check-in and bounty earnings for staking $BOOBA and LP tokens.'
+      },
+      {
+        num: 'BIP-39 Non-Custodial',
+        color: 'var(--accent-cyan)',
+        label: 'Security Standard',
+        desc: 'True client-side 12-word cryptographic seed key generation. Full sovereign ownership from day one.'
+      }
+    ];
+
+    const targetIdx = (idx + slides.length) % slides.length;
+    this._aboutTvCurrentIndex = targetIdx;
+    const slide = slides[targetIdx];
+
+    const frame = document.getElementById('tvStatFrame');
+    const chNum = document.getElementById('tvChannelNum');
+    const numEl = document.getElementById('tvStatNumber');
+    const labelEl = document.getElementById('tvStatLabel');
+    const descEl = document.getElementById('tvStatDesc');
+
+    if (frame && numEl && labelEl && descEl) {
+      frame.style.opacity = '0';
+      frame.style.transform = 'translateY(6px)';
+      
+      setTimeout(() => {
+        if (chNum) chNum.textContent = String(targetIdx + 1);
+        const chNumMob = document.getElementById('tvChannelNumMob');
+        if (chNumMob) chNumMob.textContent = String(targetIdx + 1);
+        numEl.textContent = slide.num;
+        numEl.style.color = slide.color;
+        labelEl.textContent = slide.label;
+        descEl.textContent = slide.desc;
+        
+        frame.style.opacity = '1';
+        frame.style.transform = 'translateY(0)';
+      }, 150);
+    }
+
+    // Update Dots
+    const dots = document.querySelectorAll('.tv-channel-dot');
+    dots.forEach((d, i) => {
+      if (i === targetIdx) d.classList.add('active');
+      else d.classList.remove('active');
+    });
+  }
+
+  nextTvStatSlide() {
+    const cur = typeof this._aboutTvCurrentIndex === 'number' ? this._aboutTvCurrentIndex : 0;
+    this.setTvStatSlide(cur + 1);
+  }
+
+  prevTvStatSlide() {
+    const cur = typeof this._aboutTvCurrentIndex === 'number' ? this._aboutTvCurrentIndex : 0;
+    this.setTvStatSlide(cur - 1);
+  }
+
+  switchTokenomicsView(mode) {
+    const vPie = document.getElementById('viewPie3D');
+    const vColumn = document.getElementById('viewColumn3D');
+    const vLine = document.getElementById('viewLine3D');
+
+    const tabPie = document.getElementById('repTabPie');
+    const tabColumn = document.getElementById('repTabColumn');
+    const tabLine = document.getElementById('repTabLine');
+
+    const views = [vPie, vColumn, vLine];
+    const tabs = [tabPie, tabColumn, tabLine];
+
+    views.forEach(v => { if (v) v.style.display = 'none'; });
+    tabs.forEach(t => { if (t) t.classList.remove('active'); });
+
+    if (mode === 'column3d' && vColumn) {
+      vColumn.style.display = 'block';
+      if (tabColumn) tabColumn.classList.add('active');
+    } else if (mode === 'line3d' && vLine) {
+      vLine.style.display = 'block';
+      if (tabLine) tabLine.classList.add('active');
+    } else {
+      if (vPie) vPie.style.display = 'block';
+      if (tabPie) tabPie.classList.add('active');
+    }
+  }
+
+  updateAboutStakingCalc(amount) {
+    const val = Number(amount);
+    const amountDisp = document.getElementById('stakingCalcAmountDisplay');
+    const multDisp = document.getElementById('calcMultiplierOutput');
+    const yieldDisp = document.getElementById('calcDailyYieldOutput');
+    const tierDisp = document.getElementById('calcTierOutput');
+
+    if (amountDisp) amountDisp.textContent = `${Number(val).toLocaleString()} $BOOBA`;
+
+    // Multiplier curve: 1.0x at 0 to 3.5x at 50k
+    const mult = Math.min(3.5, 1.0 + (val / 50000) * 2.5).toFixed(2);
+    if (multDisp) multDisp.textContent = `${mult}x Boost`;
+
+    // Daily points estimate
+    const dailyPts = Math.round(50 * Number(mult));
+    if (yieldDisp) yieldDisp.textContent = `+${dailyPts} BOOBA / day`;
+
+    // Tier projection
+    let tierName = 'Lv.1 Explorer';
+    if (val >= 40000) tierName = 'Lv.10 Booba Master';
+    else if (val >= 30000) tierName = 'Lv.9 Warlord';
+    else if (val >= 20000) tierName = 'Lv.8 Commander';
+    else if (val >= 15000) tierName = 'Lv.7 Veteran';
+    else if (val >= 10000) tierName = 'Lv.6 Champion';
+    else if (val >= 5000) tierName = 'Lv.5 Guardian';
+    else if (val >= 2000) tierName = 'Lv.3 Pioneer';
+    else if (val >= 500) tierName = 'Lv.2 Pathfinder';
+
+    if (tierDisp) tierDisp.textContent = tierName;
+  }
+
+  toggleAboutFaq(idx) {
+    const card = document.getElementById(`faqItem${idx}`);
+    if (!card) return;
+    const isOpen = card.classList.contains('open');
+    document.querySelectorAll('.faq-item-card').forEach(c => {
+      c.classList.remove('open');
+      const ans = c.querySelector('.faq-answer-panel');
+      if (ans) ans.style.display = 'none';
+    });
+
+    if (!isOpen) {
+      card.classList.add('open');
+      const ans = card.querySelector('.faq-answer-panel');
+      if (ans) ans.style.display = 'block';
+    }
+  }
+
+  copyContractAddress() {
+    const addr = document.getElementById('tokenContractAddr')?.textContent || '0x712B00BA99E74f8812cCdA15D5881a7a1c92F3a1';
+    if (navigator && navigator.clipboard) {
+      navigator.clipboard.writeText(addr).then(() => {
+        const btnText = document.getElementById('copyContractBtnText');
+        if (btnText) {
+          const original = btnText.textContent;
+          btnText.textContent = 'Copied!';
+          setTimeout(() => { btnText.textContent = original; }, 2000);
+        }
+      }).catch(() => {
+        alert(`Contract Address: ${addr}`);
+      });
+    } else {
+      prompt('Copy BOOBA BEP-20 Contract Address:', addr);
+    }
   }
 
   // --------------------------------------------------------------------------
@@ -1918,12 +3103,13 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
 
     const levelInfo = calculateLevel(user.boobaPoints);
+    const isWalletConnected = Boolean(user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
 
     container.innerHTML = `
       <div class="container page-content">
         
         <!-- USER PROFILE QUICK HERO BANNER -->
-        <div class="dashboard-hero-card" style="background: linear-gradient(135deg, rgba(243, 186, 47, 0.12) 0%, rgba(14, 18, 27, 0.85) 60%, rgba(7, 9, 14, 0.95) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px; padding: 2.5rem; margin-bottom: 2.5rem; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(243, 186, 47, 0.12);">
+        <div class="dashboard-hero-card" style="background: linear-gradient(135deg, rgba(243, 186, 47, 0.12) 0%, rgba(14, 18, 27, 0.85) 60%, rgba(7, 9, 14, 0.95) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px; padding: 2.5rem; margin-bottom: 2rem; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(243, 186, 47, 0.12);">
           
           <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.12; pointer-events: none;">
             <img src="assets/mascot.jpg" style="width: 260px; height: 260px; border-radius: 50%;">
@@ -1957,12 +3143,17 @@ HOW TO RECOVER YOUR ACCOUNT:
               </div>
             </div>
 
-            <!-- Quick Action Button -->
-            <div class="dashboard-action-wrapper" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-              <button class="btn btn-primary btn-lg dashboard-claim-btn" onclick="window.boobaApp.handleDailyCheckIn()" style="display: flex; align-items: center; gap: 0.5rem;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"></path></svg>
-                <span>Claim Daily Streak (+50 BOOBA)</span>
+            <!-- Quick Action Buttons -->
+            <div class="dashboard-action-wrapper" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+              <button class="btn ${isWalletConnected ? 'btn-outline' : 'btn-primary'} btn-lg" onclick="window.boobaApp.openWalletModal()" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+                <span>${isWalletConnected ? `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}` : 'Connect Wallet'}</span>
               </button>
+
+              <a href="withdraw.html" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                <span>Withdraw $BOOBA</span>
+              </a>
             </div>
 
           </div>
@@ -1990,8 +3181,11 @@ HOW TO RECOVER YOUR ACCOUNT:
             <div style="font-size: 2rem; font-weight: 800; color: var(--brand-yellow); line-height: 1.1;" data-counter-target="${user.boobaPoints}">
               ${Number(user.boobaPoints).toLocaleString()}
             </div>
-            <div style="font-size: 0.78rem; color: var(--accent-emerald); margin-top: 0.4rem; font-weight: 600; display: flex; align-items: center; gap: 0.3rem;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Instant Claim Active
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+              <div style="font-size: 0.78rem; color: var(--accent-emerald); font-weight: 600; display: flex; align-items: center; gap: 0.3rem;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Verified
+              </div>
+              <a href="withdraw.html" style="font-size: 0.8rem; color: var(--brand-yellow); font-weight: 800; text-decoration: none;">Withdraw →</a>
             </div>
           </div>
 
@@ -2092,11 +3286,395 @@ HOW TO RECOVER YOUR ACCOUNT:
                 <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Your master recovery phrase is stored locally and securely. Never share these words with anyone.</p>
               </div>
             </div>
-            <button type="button" class="btn btn-outline btn-sm" onclick="window.boobaApp.showSeedPhraseModal(db.currentUser.seedPhrase, db.currentUser)">
-              Backup & View Phrase
-            </button>
+            <div>
+              <button type="button" class="btn btn-outline btn-sm" onclick="window.boobaApp.showSeedPhraseModal(db.currentUser.seedPhrase, db.currentUser)">
+                Backup & View Phrase
+              </button>
+            </div>
           </div>
         ` : ''}
+
+      </div>
+    `;
+  }
+
+  // --------------------------------------------------------------------------
+  // 2B. WITHDRAWAL BRIDGE VIEW (withdraw.html)
+  // --------------------------------------------------------------------------
+
+  renderWithdrawalView(container) {
+    const user = db.currentUser;
+
+    if (!user) {
+      container.innerHTML = `
+        <div class="container page-content">
+          <div class="card text-center" style="max-width: 500px; margin: 4rem auto; padding: 3.5rem 2.5rem; background: rgba(14, 18, 27, 0.85); backdrop-filter: blur(20px); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px;">
+            <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 1.5rem auto;">
+              <img src="assets/mascot.jpg" style="width: 80px; height: 80px; border-radius: 50%; border: 2.5px solid var(--brand-yellow); box-shadow: 0 0 25px var(--brand-yellow-glow); object-fit: cover;">
+            </div>
+            <h2 style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Access Token Withdrawal</h2>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">
+              Sign in with your credentials or connect your Web3 wallet to manage $BOOBA withdrawals to BNB Smart Chain.
+            </p>
+            <a href="signin.html#signin" class="btn btn-primary btn-block btn-lg">Sign In to Account</a>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const isWalletConnected = Boolean(user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
+
+    container.innerHTML = `
+      <div class="container page-content">
+        
+        <!-- Back Navigation -->
+        <div style="margin-bottom: 2rem;">
+          <a href="dashboard.html" class="back-dashboard-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back to Dashboard</span>
+          </a>
+        </div>
+
+        <!-- HERO HEADER -->
+        <div class="card" style="background: linear-gradient(135deg, rgba(243, 186, 47, 0.12) 0%, rgba(14, 18, 27, 0.9) 60%, rgba(7, 9, 14, 0.98) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px; padding: 2.5rem; margin-bottom: 2.5rem; position: relative; overflow: hidden;">
+          <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.1; pointer-events: none;">
+            <img src="assets/mascot.jpg" style="width: 240px; height: 240px; border-radius: 50%;">
+          </div>
+          <div style="position: relative; z-index: 1; max-width: 700px;">
+            <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+              <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); font-weight: 800; font-size: 0.8rem;">
+                <span class="pulse-dot" style="width: 6px; height: 6px;"></span> BEP-20 TOKEN BRIDGE
+              </span>
+              <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-weight: 800; font-size: 0.8rem;">
+                BNB SMART CHAIN MAINNET
+              </span>
+            </div>
+            <h1 style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin-bottom: 0.75rem;">
+              $BOOBA Token Withdrawal Bridge
+            </h1>
+            <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; margin: 0;">
+              Transfer your earned $BOOBA tokens, daily check-in rewards, and bounty distributions directly to your self-custody Web3 wallet.
+            </p>
+          </div>
+        </div>
+
+        <!-- 2-COLUMN MAIN WITHDRAWAL INTERFACE -->
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+          
+          <!-- Column 1: Withdrawal Form Terminal -->
+          <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.75rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 0;">Withdrawal Terminal</h3>
+              <span style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700; display: flex; align-items: center; gap: 0.35rem;">
+                <span class="pulse-dot" style="width: 6px; height: 6px;"></span> 0% Fee Tier
+              </span>
+            </div>
+
+            <!-- Balance Display -->
+            <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(243, 186, 47, 0.25); border-radius: 18px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 0.25rem;">Available $BOOBA Balance</div>
+              <div style="font-size: 2.2rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); line-height: 1.1;">
+                ${Number(user.boobaPoints).toLocaleString()} <span style="font-size: 1.1rem;">$BOOBA</span>
+              </div>
+              <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.4rem;">
+                100% Non-Custodial Snapshot Verified
+              </div>
+            </div>
+
+            <!-- Destination Web3 Wallet Selection -->
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <label class="form-label" style="margin: 0;">Destination Web3 Wallet Address</label>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.openWalletModal()" style="font-size: 0.75rem; color: var(--brand-yellow); padding: 0.15rem 0.5rem;">
+                  ${isWalletConnected ? 'Switch Wallet' : 'Connect Wallet'}
+                </button>
+              </div>
+              <div style="position: relative;">
+                <input type="text" id="withdrawWalletInput" class="form-input text-mono" value="${isWalletConnected ? user.walletAddress : ''}" placeholder="0x... Connect BEP-20 Wallet" style="padding-left: 2.5rem;" ${isWalletConnected ? 'readonly' : ''}>
+                <div style="position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: ${isWalletConnected ? 'var(--accent-emerald)' : 'var(--text-muted)'};">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Network Selection -->
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label class="form-label">Transfer Network</label>
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.15rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <div style="width: 26px; height: 26px; border-radius: 50%; background: #F3BA2F; color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.72rem;">
+                    BNB
+                  </div>
+                  <div>
+                    <div style="font-weight: 800; color: #FFFFFF; font-size: 0.9rem;">BNB Smart Chain (BEP-20)</div>
+                    <div style="font-size: 0.74rem; color: var(--text-muted);">Mainnet Chain ID: 56 (0x38)</div>
+                  </div>
+                </div>
+                <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); font-size: 0.68rem; padding: 0.15rem 0.45rem;">Fast (3s)</span>
+              </div>
+            </div>
+
+            <!-- Amount Input with Percentage Quick Buttons -->
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <label class="form-label" style="margin: 0;">Amount to Withdraw</label>
+                <div style="display: flex; gap: 0.35rem;">
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.floor(${user.boobaPoints} * 0.25)" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">25%</button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.floor(${user.boobaPoints} * 0.50)" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">50%</button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.floor(${user.boobaPoints} * 0.75)" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">75%</button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = ${user.boobaPoints}" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(243,186,47,0.15); color: var(--brand-yellow); font-weight: 800;">MAX</button>
+                </div>
+              </div>
+              <input type="number" id="withdrawAmountInput" class="form-input text-mono" placeholder="0" min="1" max="${user.boobaPoints}" value="${user.boobaPoints}">
+            </div>
+
+            <!-- Bridge Fee & Net Receive Info -->
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; padding: 0.85rem 1.15rem; margin-bottom: 1.75rem;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
+                <span style="color: var(--text-secondary);">Platform Fee:</span>
+                <span style="color: var(--accent-emerald); font-weight: 700;">0% (Free)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
+                <span style="color: var(--text-secondary);">Estimated Gas:</span>
+                <span style="color: #FFFFFF; font-family: var(--font-mono);">0.0005 BNB (~$0.15)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 800; padding-top: 0.4rem; border-top: 1px solid rgba(255,255,255,0.06);">
+                <span style="color: #FFFFFF;">You Will Receive:</span>
+                <span style="color: var(--brand-yellow); font-family: var(--font-mono);">1:1 $BOOBA On-Chain</span>
+              </div>
+            </div>
+
+            <!-- Action Button -->
+            <button type="button" class="btn btn-primary btn-lg btn-block" onclick="window.boobaApp.showTgeWithdrawModal()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 900;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span>Submit Withdrawal Request</span>
+            </button>
+          </div>
+
+          <!-- Column 2: Smart Contract Protocol Notice & Roadmap Box -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            
+            <div class="card" style="padding: 2.25rem; border-radius: 24px; background: linear-gradient(180deg, rgba(243, 186, 47, 0.08) 0%, rgba(14, 18, 27, 0.85) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35);">
+              <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(243, 186, 47, 0.2); border: 1px solid rgba(243, 186, 47, 0.4); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                </div>
+                <div>
+                  <h4 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Mainnet TGE Bridge Protocol</h4>
+                  <div style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Smart Contract Timelock Active</div>
+                </div>
+              </div>
+
+              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1.5rem;">
+                In accordance with BNB Smart Chain decentralized fair-launch protocols, direct on-chain liquidity withdrawals will open concurrently with the official <strong>$BOOBA Token Generation Event (TGE)</strong> and PancakeSwap liquidity lock.
+              </p>
+
+              <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.15rem; margin-bottom: 1.5rem;">
+                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 0.85rem;">TGE Deployment Phasing</div>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                  <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
+                    <span style="width: 20px; height: 20px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; flex-shrink: 0; margin-top: 0.1rem;">✓</span>
+                    <div>
+                      <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF;">Phase 1: Proof-of-Engagement Distribution</div>
+                      <div style="font-size: 0.76rem; color: var(--text-secondary);">400M $BOOBA pool allocated to early bounties and daily streaks. [ACTIVE]</div>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
+                    <span style="width: 20px; height: 20px; border-radius: 50%; background: rgba(243, 186, 47, 0.2); color: var(--brand-yellow); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; flex-shrink: 0; margin-top: 0.1rem;">●</span>
+                    <div>
+                      <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF;">Phase 2: Timelock & Security Audit Verification</div>
+                      <div style="font-size: 0.76rem; color: var(--text-secondary);">24-month DEX liquidity lock contract certification. [IN PROGRESS]</div>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
+                    <span style="width: 20px; height: 20px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; flex-shrink: 0; margin-top: 0.1rem;">3</span>
+                    <div>
+                      <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF;">Phase 3: Official TGE & Live DEX Bridge</div>
+                      <div style="font-size: 0.76rem; color: var(--text-secondary);">Instant 1:1 token minting unlocked for all connected BEP-20 wallets. [UPCOMING]</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.8rem; color: var(--accent-emerald);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Your accumulated balance is 100% snapshot-protected.</span>
+              </div>
+            </div>
+
+            <!-- Quick Access Bento -->
+            <div class="card" style="padding: 1.75rem; border-radius: 20px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h4 style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.25rem;">Need to update your wallet?</h4>
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">Manage your connected Web3 address in Account Settings.</p>
+              </div>
+              <a href="settings.html" class="btn btn-outline btn-sm">Settings →</a>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    `;
+  }
+
+  // --------------------------------------------------------------------------
+  // 2C. ACCOUNT, SECURITY & WEB3 SETTINGS VIEW (settings.html)
+  // --------------------------------------------------------------------------
+
+  renderSettingsView(container) {
+    const user = db.currentUser;
+
+    if (!user) {
+      container.innerHTML = `
+        <div class="container page-content">
+          <div class="card text-center" style="max-width: 500px; margin: 4rem auto; padding: 3.5rem 2.5rem; background: rgba(14, 18, 27, 0.85); backdrop-filter: blur(20px); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px;">
+            <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 1.5rem auto;">
+              <img src="assets/mascot.jpg" style="width: 80px; height: 80px; border-radius: 50%; border: 2.5px solid var(--brand-yellow); box-shadow: 0 0 25px var(--brand-yellow-glow); object-fit: cover;">
+            </div>
+            <h2 style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Account Settings</h2>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">
+              Sign in to manage your profile details, connected Web3 wallets, and non-custodial cryptographic keys.
+            </p>
+            <a href="signin.html#signin" class="btn btn-primary btn-block btn-lg">Sign In to Account</a>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const isWalletConnected = Boolean(user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
+    const currentAvatar = user.avatar || 'assets/mascot.jpg';
+
+    container.innerHTML = `
+      <div class="container page-content" style="max-width: 1060px;">
+        
+        <!-- PAGE HEADER -->
+        <div style="margin-bottom: 2.25rem; text-align: center;">
+          <h1 style="font-size: clamp(2rem, 3.5vw, 2.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin-bottom: 0.5rem;">
+            Account & Security Settings
+          </h1>
+          <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0 auto; max-width: 600px;">
+            Update your public profile handle, connect your self-custody Web3 wallet, and secure your password.
+          </p>
+        </div>
+
+        <!-- 2 CLEAN SETTINGS CARDS -->
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+          
+          <!-- CARD 1: PROFILE & WALLET -->
+          <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.1);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(243, 186, 47, 0.15); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </div>
+              <div>
+                <h3 style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin: 0;">Profile & Wallet</h3>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Public identity and BEP-20 address</div>
+              </div>
+            </div>
+
+            <form id="settingsProfileForm" onsubmit="window.boobaApp.handleSaveProfileSettings(event)">
+              
+              <!-- Avatar Preview & Selection -->
+              <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1.25rem;">
+                <img id="settingsAvatarPreview" src="${currentAvatar}" style="width: 56px; height: 56px; border-radius: 16px; border: 2px solid var(--brand-yellow); object-fit: cover; box-shadow: 0 0 15px rgba(243, 186, 47, 0.4);">
+                <div>
+                  <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.25rem;">Mascot Avatar</div>
+                  <div style="display: flex; gap: 0.35rem;">
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.handleAvatarSelect('assets/mascot.jpg')" style="font-size: 0.7rem; padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.05);">Classic</button>
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.handleAvatarSelect('assets/chart-3d-rings.png')" style="font-size: 0.7rem; padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.05);">Gold 3D</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Username Field -->
+              <div class="form-group" style="margin-bottom: 1.15rem;">
+                <label class="form-label" for="settingsUsernameInput">Username</label>
+                <input type="text" id="settingsUsernameInput" class="form-input" value="${user.username}" placeholder="Enter new username" required>
+                <div id="usernameFeedback" style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.3rem;">
+                  Unique citizen username.
+                </div>
+              </div>
+
+              <!-- Gmail / Email Field -->
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label class="form-label" for="settingsEmailInput">Email / Gmail Address</label>
+                <input type="email" id="settingsEmailInput" class="form-input" value="${user.email}" placeholder="yourname@gmail.com" required>
+              </div>
+
+              <!-- Web3 Wallet Connection -->
+              <div class="form-group" style="margin-bottom: 1.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                  <label class="form-label" style="margin: 0;">Connected Web3 Wallet</label>
+                  <span style="font-size: 0.72rem; color: ${isWalletConnected ? 'var(--accent-emerald)' : 'var(--text-muted)'}; font-weight: 700;">
+                    ${isWalletConnected ? '● Connected' : '○ Not Connected'}
+                  </span>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                  <input type="text" class="form-input text-mono" value="${isWalletConnected ? user.walletAddress : ''}" placeholder="No wallet connected" readonly style="font-size: 0.82rem; background: rgba(0,0,0,0.3);">
+                  <button type="button" class="btn ${isWalletConnected ? 'btn-outline' : 'btn-primary'} btn-sm" onclick="window.boobaApp.openWalletModal()" style="white-space: nowrap;">
+                    ${isWalletConnected ? 'Manage' : 'Connect'}
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" id="saveProfileBtn" class="btn btn-primary btn-block">
+                Save Profile Changes
+              </button>
+            </form>
+          </div>
+
+          <!-- CARD 2: PASSWORD & SECURITY -->
+          <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(243, 186, 47, 0.35);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(243, 186, 47, 0.15); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </div>
+              <div>
+                <h3 style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin: 0;">Change Password</h3>
+                <div style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">12-Word Seed Verification Required</div>
+              </div>
+            </div>
+
+            <form id="settingsPasswordForm" onsubmit="window.boobaApp.handleChangePasswordSettings(event)">
+              
+              <!-- 12-Word Seed Phrase Input -->
+              <div class="form-group" style="margin-bottom: 1.15rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                  <label class="form-label" for="settingsSeedInput" style="margin: 0;">12-Word Seed Phrase</label>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.showSeedPhraseModal(db.currentUser.seedPhrase, db.currentUser)" style="font-size: 0.7rem; padding: 0; color: var(--brand-yellow);">View My Phrase</button>
+                </div>
+                <textarea id="settingsSeedInput" class="form-input text-mono" rows="2" placeholder="word1 word2 word3 ... word12" style="font-size: 0.82rem; resize: none;" required></textarea>
+              </div>
+
+              <!-- New Password -->
+              <div class="form-group" style="margin-bottom: 1.15rem;">
+                <label class="form-label" for="settingsNewPassInput">New Password</label>
+                <input type="password" id="settingsNewPassInput" class="form-input" placeholder="Min 6 characters" required autocomplete="new-password">
+              </div>
+
+              <!-- Confirm New Password -->
+              <div class="form-group" style="margin-bottom: 1.75rem;">
+                <label class="form-label" for="settingsConfirmPassInput">Confirm New Password</label>
+                <input type="password" id="settingsConfirmPassInput" class="form-input" placeholder="Re-enter new password" required autocomplete="new-password">
+              </div>
+
+              <button type="submit" id="savePasswordBtn" class="btn btn-primary btn-block">
+                Verify Seed & Update Password
+              </button>
+            </form>
+          </div>
+
+        </div>
 
       </div>
     `;
@@ -2112,8 +3690,8 @@ HOW TO RECOVER YOUR ACCOUNT:
     if (!user) {
       container.innerHTML = `
         <div class="container page-content">
-          <div class="card text-center" style="max-width: 500px; margin: 4rem auto; padding: 3.5rem 2.5rem; border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px;">
-            <img src="assets/mascot.jpg" style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1.5rem auto; border: 2.5px solid var(--brand-yellow);">
+          <div class="card text-center passport-mint-card" style="max-width: 500px; margin: 3rem auto; padding: 3.5rem 2.5rem; border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px;">
+            <img src="assets/mascot.jpg" style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1.5rem auto; border: 2.5px solid var(--brand-yellow); box-shadow: 0 0 25px var(--brand-yellow-glow);">
             <h2 style="font-size: 1.75rem; color: #FFFFFF; font-weight: 800;">Mint Your Official Booba Passport</h2>
             <p style="color: var(--text-secondary); margin: 0.75rem 0 2rem 0; font-size: 0.95rem; line-height: 1.6;">
               Generate your unique on-chain digital identity on BNB Smart Chain and claim your initial +100 $BOOBA welcome bounty.
@@ -2652,14 +4230,14 @@ HOW TO RECOVER YOUR ACCOUNT:
         <!-- 1. LIVE BOUNTY QUESTS SECTION -->
         <div style="margin-bottom: 4.5rem;">
           
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem; margin-bottom: 2rem;">
+          <div class="quest-top-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem; margin-bottom: 2rem;">
             <div>
               <h2 style="font-size: 1.6rem; font-weight: 800; color: #FFFFFF; margin: 0;">Community Bounties & Missions</h2>
-              <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.25rem 0 0 0;">Complete active tasks below to earn cryptographic $BOOBA tokens and rank up.</p>
+              <p class="quest-header-desc" style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.25rem 0 0 0;">Complete active tasks below to earn cryptographic $BOOBA tokens and rank up.</p>
             </div>
 
-            <!-- Filter Pills: All, Daily check-in, Community, Engagement, Content Production -->
-            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <!-- Filter Pills in Horizontal Scroller -->
+            <div class="quest-filter-bar">
               <button type="button" class="passport-tier-pill ${this.activeQuestFilter === 'all' ? 'active' : ''}" onclick="window.boobaApp.setQuestFilter('all')">
                 All Quests (${quests.length})
               </button>
@@ -2673,7 +4251,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                 Engagement
               </button>
               <button type="button" class="passport-tier-pill ${this.activeQuestFilter === 'content' ? 'active' : ''}" onclick="window.boobaApp.setQuestFilter('content')">
-                Content Production
+                Content
               </button>
             </div>
           </div>
@@ -2683,16 +4261,13 @@ HOW TO RECOVER YOUR ACCOUNT:
             <!-- 10-CARD APPLE VISION PRO DAILY CHECK-IN CAROUSEL -->
             <div style="margin-bottom: 3.5rem;">
               
-              <!-- Top Streak Header -->
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem;">
+              <!-- Desktop Streak Header -->
+              <div class="daily-streak-header-desktop">
                 <div>
                   <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem;">
                     <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); font-size: 0.82rem; padding: 0.35rem 0.9rem;">
                       <span class="pulse-dot" style="width: 6px; height: 6px;"></span>
                       <span>10-CARD 100-DAY EXPEDITION</span>
-                    </span>
-                    <span class="badge-tag" style="background: rgba(147, 51, 234, 0.15); color: #C084FC; border-color: rgba(147, 51, 234, 0.4); font-size: 0.82rem; padding: 0.35rem 0.9rem;">
-                      CARD 10: GENESIS 1/1 NFT
                     </span>
                   </div>
                   <h2 style="font-size: 2rem; font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin: 0 0 0.5rem 0;">
@@ -2712,6 +4287,26 @@ HOW TO RECOVER YOUR ACCOUNT:
                   <div style="font-size: 0.78rem; color: var(--accent-emerald); font-weight: 700; margin-top: 0.25rem;">
                     ${user && (user.streakDays || 1) >= 100 ? 'Expedition Conquered!' : `${100 - (user ? user.streakDays || 1 : 1)} Days to Genesis NFT`}
                   </div>
+                </div>
+              </div>
+
+              <!-- Mobile Compact Streak HUD -->
+              <div class="daily-streak-hud-mobile">
+                <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
+                  <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(255, 122, 0, 0.15); border: 1px solid rgba(255, 122, 0, 0.35); display: flex; align-items: center; justify-content: center; color: var(--accent-orange); flex-shrink: 0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"></path></svg>
+                  </div>
+                  <div style="min-width: 0;">
+                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800;">Active Streak</div>
+                    <div style="font-size: 1.15rem; font-weight: 900; color: #FFFFFF;" class="text-mono">
+                      <span style="color: var(--accent-orange);">${user ? user.streakDays || 1 : 1}</span> / 100 Days
+                    </div>
+                  </div>
+                </div>
+                <div style="text-align: right; flex-shrink: 0;">
+                  <span class="badge-tag" style="background: rgba(147, 51, 234, 0.15); color: #C084FC; border-color: rgba(147, 51, 234, 0.4); font-size: 0.68rem; padding: 0.2rem 0.55rem; font-weight: 800;">
+                    ${user && (user.streakDays || 1) >= 100 ? 'Conquered' : `${100 - (user ? user.streakDays || 1 : 1)}d to NFT`}
+                  </span>
                 </div>
               </div>
 
@@ -3136,59 +4731,148 @@ HOW TO RECOVER YOUR ACCOUNT:
         </div>
 
         <!-- 3D OLYMPIC PODIUM (Top 3 Holders) -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; max-width: 1000px; margin: 0 auto 3.5rem auto; align-items: flex-end;">
+        <div class="leaderboard-podium-container">
           
-          <!-- Rank 2: Silver -->
-          <div class="card card-hover text-center" style="padding: 2.25rem 1.5rem; border-radius: 24px; border: 1.5px solid rgba(226, 232, 240, 0.4); background: linear-gradient(180deg, rgba(226, 232, 240, 0.08) 0%, rgba(14, 18, 27, 0.8) 100%);">
-            <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: rgba(226, 232, 240, 0.15); border: 2px solid #E2E8F0; color: #E2E8F0; font-weight: 800; font-size: 1.1rem; margin-bottom: 1rem;">
-              #2
+          <!-- DESKTOP PODIUM (Rank 2 Left, Rank 1 Center Elevated, Rank 3 Right) -->
+          <div class="leaderboard-podium-desktop">
+            <!-- Rank 2: Silver -->
+            <div class="card card-hover text-center" style="padding: 2.25rem 1.5rem; border-radius: 24px; border: 1.5px solid rgba(226, 232, 240, 0.4); background: linear-gradient(180deg, rgba(226, 232, 240, 0.08) 0%, rgba(14, 18, 27, 0.8) 100%);">
+              <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: rgba(226, 232, 240, 0.15); border: 2px solid #E2E8F0; color: #E2E8F0; font-weight: 800; font-size: 1.1rem; margin-bottom: 1rem;">
+                #2
+              </div>
+              <img src="${top2.avatar || 'assets/mascot.jpg'}" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid #E2E8F0; margin: 0 auto 0.75rem auto; object-fit: cover;">
+              <h3 style="font-size: 1.2rem; color: #FFFFFF; font-weight: 800; margin-bottom: 0.25rem;">${top2.username}</h3>
+              <span class="badge-tag" style="font-size: 0.72rem; margin-bottom: 0.85rem;">Lv.${top2Level.level} ${top2Level.title}</span>
+              <div style="font-size: 1.5rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.5rem;">
+                ${Number(top2.boobaPoints).toLocaleString()} <span style="font-size: 0.8rem; color: var(--text-secondary);">BOOBA</span>
+              </div>
             </div>
-            <img src="${top2.avatar || 'assets/mascot.jpg'}" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid #E2E8F0; margin: 0 auto 0.75rem auto; object-fit: cover;">
-            <h3 style="font-size: 1.2rem; color: #FFFFFF; font-weight: 800; margin-bottom: 0.25rem;">${top2.username}</h3>
-            <span class="badge-tag" style="font-size: 0.72rem; margin-bottom: 0.85rem;">Lv.${top2Level.level} ${top2Level.title}</span>
-            <div style="font-size: 1.5rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.5rem;">
-              ${Number(top2.boobaPoints).toLocaleString()} <span style="font-size: 0.8rem; color: var(--text-secondary);">BOOBA</span>
+
+            <!-- Rank 1: Gold (Center & Taller) -->
+            <div class="card card-hover text-center" style="padding: 3rem 1.75rem; border-radius: 28px; border: 2px solid var(--brand-yellow); background: linear-gradient(180deg, rgba(243, 186, 47, 0.15) 0%, rgba(14, 18, 27, 0.95) 100%); box-shadow: 0 0 40px rgba(243, 186, 47, 0.25); transform: translateY(-10px);">
+              <div style="display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 50%; background: var(--brand-yellow); color: #000; font-weight: 900; font-size: 1.3rem; margin-bottom: 1rem; box-shadow: 0 0 20px var(--brand-yellow-glow);">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"></path></svg>
+              </div>
+              <img src="${top1.avatar || 'assets/mascot.jpg'}" style="width: 88px; height: 88px; border-radius: 50%; border: 3px solid var(--brand-yellow); margin: 0 auto 0.75rem auto; object-fit: cover; box-shadow: 0 0 25px var(--brand-yellow-glow);">
+              <h3 style="font-size: 1.4rem; color: #FFFFFF; font-weight: 800; margin-bottom: 0.25rem;">${top1.username}</h3>
+              <span class="badge-tag" style="background: var(--brand-yellow); color: #000; font-weight: 800; font-size: 0.75rem; margin-bottom: 0.85rem;">Lv.${top1Level.level} ${top1Level.title}</span>
+              <div style="font-size: 1.85rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.5rem;">
+                ${Number(top1.boobaPoints).toLocaleString()} <span style="font-size: 0.9rem; color: var(--text-secondary);">BOOBA</span>
+              </div>
+            </div>
+
+            <!-- Rank 3: Bronze -->
+            <div class="card card-hover text-center" style="padding: 2.25rem 1.5rem; border-radius: 24px; border: 1.5px solid rgba(249, 115, 22, 0.4); background: linear-gradient(180deg, rgba(249, 115, 22, 0.08) 0%, rgba(14, 18, 27, 0.8) 100%);">
+              <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: rgba(249, 115, 22, 0.15); border: 2px solid #F97316; color: #F97316; font-weight: 800; font-size: 1.1rem; margin-bottom: 1rem;">
+                #3
+              </div>
+              <img src="${top3.avatar || 'assets/mascot.jpg'}" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid #F97316; margin: 0 auto 0.75rem auto; object-fit: cover;">
+              <h3 style="font-size: 1.2rem; color: #FFFFFF; font-weight: 800; margin-bottom: 0.25rem;">${top3.username}</h3>
+              <span class="badge-tag" style="font-size: 0.72rem; margin-bottom: 0.85rem;">Lv.${top3Level.level} ${top3Level.title}</span>
+              <div style="font-size: 1.5rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.5rem;">
+                ${Number(top3.boobaPoints).toLocaleString()} <span style="font-size: 0.8rem; color: var(--text-secondary);">BOOBA</span>
+              </div>
             </div>
           </div>
 
-          <!-- Rank 1: Gold (Center & Taller) -->
-          <div class="card card-hover text-center" style="padding: 3rem 1.75rem; border-radius: 28px; border: 2px solid var(--brand-yellow); background: linear-gradient(180deg, rgba(243, 186, 47, 0.15) 0%, rgba(14, 18, 27, 0.95) 100%); box-shadow: 0 0 40px rgba(243, 186, 47, 0.25); transform: translateY(-10px);">
-            <div style="display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 50%; background: var(--brand-yellow); color: #000; font-weight: 900; font-size: 1.3rem; margin-bottom: 1rem; box-shadow: 0 0 20px var(--brand-yellow-glow);">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"></path></svg>
+          <!-- MOBILE LUXURY OLYMPIC PODIUM (3-Step Pedestal with #1 Elevated in Center) -->
+          <div class="leaderboard-podium-mobile">
+            <div class="mob-podium-stage-glow"></div>
+            
+            <!-- Mobile Rank 2: Silver Pedestal -->
+            <div class="mob-podium-col mob-rank-2">
+              <div class="mob-avatar-wrap">
+                <div class="mob-avatar-ring mob-ring-silver">
+                  <img src="${top2.avatar || 'assets/mascot.jpg'}" class="mob-avatar" alt="${top2.username}">
+                </div>
+                <div class="mob-rank-badge mob-badge-silver">#2</div>
+              </div>
+              <div class="mob-user-info">
+                <div class="mob-username" title="${top2.username}">${top2.username}</div>
+                <div class="mob-points text-mono">${Number(top2.boobaPoints).toLocaleString()}</div>
+                <div class="mob-tier-tag mob-tier-silver">Lv.${top2Level.level}</div>
+              </div>
+              <div class="mob-pedestal mob-pedestal-silver">
+                <div class="mob-pedestal-cap"></div>
+                <div class="mob-pedestal-body">
+                  <span class="mob-pedestal-num">2</span>
+                </div>
+              </div>
             </div>
-            <img src="${top1.avatar || 'assets/mascot.jpg'}" style="width: 88px; height: 88px; border-radius: 50%; border: 3px solid var(--brand-yellow); margin: 0 auto 0.75rem auto; object-fit: cover; box-shadow: 0 0 25px var(--brand-yellow-glow);">
-            <h3 style="font-size: 1.4rem; color: #FFFFFF; font-weight: 800; margin-bottom: 0.25rem;">${top1.username}</h3>
-            <span class="badge-tag" style="background: var(--brand-yellow); color: #000; font-weight: 800; font-size: 0.75rem; margin-bottom: 0.85rem;">Lv.${top1Level.level} ${top1Level.title}</span>
-            <div style="font-size: 1.85rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.5rem;">
-              ${Number(top1.boobaPoints).toLocaleString()} <span style="font-size: 0.9rem; color: var(--text-secondary);">BOOBA</span>
-            </div>
-          </div>
 
-          <!-- Rank 3: Bronze -->
-          <div class="card card-hover text-center" style="padding: 2.25rem 1.5rem; border-radius: 24px; border: 1.5px solid rgba(249, 115, 22, 0.4); background: linear-gradient(180deg, rgba(249, 115, 22, 0.08) 0%, rgba(14, 18, 27, 0.8) 100%);">
-            <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: rgba(249, 115, 22, 0.15); border: 2px solid #F97316; color: #F97316; font-weight: 800; font-size: 1.1rem; margin-bottom: 1rem;">
-              #3
+            <!-- Mobile Rank 1: Gold Champion Pedestal (Elevated in Center) -->
+            <div class="mob-podium-col mob-rank-1">
+              <div class="mob-crown-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="url(#crownGoldGrad)" style="filter: drop-shadow(0 0 10px rgba(243, 186, 47, 0.9));">
+                  <defs>
+                    <linearGradient id="crownGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#FFF5C0" />
+                      <stop offset="40%" stop-color="#F3BA2F" />
+                      <stop offset="100%" stop-color="#C2820A" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"></path>
+                </svg>
+              </div>
+              <div class="mob-avatar-wrap">
+                <div class="mob-avatar-ring mob-ring-gold">
+                  <div class="mob-halo-pulse"></div>
+                  <img src="${top1.avatar || 'assets/mascot.jpg'}" class="mob-avatar" alt="${top1.username}">
+                </div>
+                <div class="mob-rank-badge mob-badge-gold">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  #1
+                </div>
+              </div>
+              <div class="mob-user-info">
+                <div class="mob-username mob-username-gold" title="${top1.username}">${top1.username}</div>
+                <div class="mob-points mob-points-gold text-mono">${Number(top1.boobaPoints).toLocaleString()}</div>
+                <div class="mob-tier-tag mob-tier-gold">Lv.${top1Level.level}</div>
+              </div>
+              <div class="mob-pedestal mob-pedestal-gold">
+                <div class="mob-pedestal-cap"></div>
+                <div class="mob-pedestal-body">
+                  <span class="mob-pedestal-num">1</span>
+                </div>
+              </div>
             </div>
-            <img src="${top3.avatar || 'assets/mascot.jpg'}" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid #F97316; margin: 0 auto 0.75rem auto; object-fit: cover;">
-            <h3 style="font-size: 1.2rem; color: #FFFFFF; font-weight: 800; margin-bottom: 0.25rem;">${top3.username}</h3>
-            <span class="badge-tag" style="font-size: 0.72rem; margin-bottom: 0.85rem;">Lv.${top3Level.level} ${top3Level.title}</span>
-            <div style="font-size: 1.5rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.5rem;">
-              ${Number(top3.boobaPoints).toLocaleString()} <span style="font-size: 0.8rem; color: var(--text-secondary);">BOOBA</span>
+
+            <!-- Mobile Rank 3: Bronze Pedestal -->
+            <div class="mob-podium-col mob-rank-3">
+              <div class="mob-avatar-wrap">
+                <div class="mob-avatar-ring mob-ring-bronze">
+                  <img src="${top3.avatar || 'assets/mascot.jpg'}" class="mob-avatar" alt="${top3.username}">
+                </div>
+                <div class="mob-rank-badge mob-badge-bronze">#3</div>
+              </div>
+              <div class="mob-user-info">
+                <div class="mob-username" title="${top3.username}">${top3.username}</div>
+                <div class="mob-points text-mono">${Number(top3.boobaPoints).toLocaleString()}</div>
+                <div class="mob-tier-tag mob-tier-bronze">Lv.${top3Level.level}</div>
+              </div>
+              <div class="mob-pedestal mob-pedestal-bronze">
+                <div class="mob-pedestal-cap"></div>
+                <div class="mob-pedestal-body">
+                  <span class="mob-pedestal-num">3</span>
+                </div>
+              </div>
             </div>
+
           </div>
 
         </div>
 
-        <!-- FULL ON-CHAIN LEADERBOARD TABLE -->
-        <div class="card" style="max-width: 1000px; margin: 0 auto; padding: 0; overflow: hidden; border-radius: 24px; background: rgba(14, 18, 27, 0.75);">
-          <div style="padding: 1.75rem 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <!-- FULL ON-CHAIN LEADERBOARD -->
+        <div class="card leaderboard-table-wrapper" style="max-width: 1000px; margin: 0 auto; padding: 0; overflow: hidden; border-radius: 24px; background: rgba(14, 18, 27, 0.75);">
+          <div style="padding: 1.5rem 1.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
             <div>
-              <h3 style="font-size: 1.3rem; font-weight: 800; color: #FFFFFF; margin: 0;">Community Rankings (${users.length} Active Holders)</h3>
-              <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.2rem 0 0 0;">Updated in real-time from Supabase mainnet records.</p>
+              <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 0;">Community Rankings (${users.length} Active Holders)</h3>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0.2rem 0 0 0;">Updated in real-time from on-chain mainnet records.</p>
             </div>
           </div>
 
-          <div style="overflow-x: auto;">
+          <!-- DESKTOP TABLE VIEW -->
+          <div class="leaderboard-table-desktop" style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
               <thead>
                 <tr style="background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">
@@ -3247,6 +4931,44 @@ HOW TO RECOVER YOUR ACCOUNT:
               </tbody>
             </table>
           </div>
+
+          <!-- MOBILE SMART CARDS LIST VIEW -->
+          <div class="leaderboard-cards-mobile">
+            ${users.map((u, idx) => {
+              const rank = idx + 1;
+              const lvl = calculateLevel(u.boobaPoints);
+              const isMe = currentUser && (currentUser.id === u.id || currentUser.username === u.username);
+              let rankBadgeClass = 'mob-rank-badge-other';
+              if (rank === 1) rankBadgeClass = 'mob-rank-badge-gold';
+              else if (rank === 2) rankBadgeClass = 'mob-rank-badge-silver';
+              else if (rank === 3) rankBadgeClass = 'mob-rank-badge-bronze';
+
+              return `
+                <div class="mob-rank-item ${isMe ? 'is-current-user' : ''}" style="animation-delay: ${idx * 0.035}s;">
+                  <div class="mob-rank-left">
+                    <div class="mob-rank-pill ${rankBadgeClass}">#${rank}</div>
+                    <img src="${u.avatar || 'assets/mascot.jpg'}" class="mob-item-avatar" alt="${u.username}">
+                    <div class="mob-item-meta">
+                      <div class="mob-item-name">
+                        <span class="mob-item-uname">${u.username}</span>
+                        ${isMe ? '<span class="mob-tag-you">YOU</span>' : ''}
+                        ${u.role === 'admin' ? '<span class="mob-tag-admin">Admin</span>' : ''}
+                      </div>
+                      <div class="mob-item-sub">
+                        <span class="mob-item-tier">Lv.${lvl.level}</span>
+                        <span class="mob-item-streak">🔥 ${u.streakDays || 1}d</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mob-rank-right">
+                    <div class="mob-item-score text-mono">${Number(u.boobaPoints).toLocaleString()}</div>
+                    <div class="mob-item-currency">$BOOBA</div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
         </div>
 
       </div>
@@ -3673,8 +5395,297 @@ HOW TO RECOVER YOUR ACCOUNT:
     track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
   }
 
-  async handleDailyCheckIn() {
-    await this.handleClaimDailyStreak(db.currentUser ? Number(db.currentUser.streakDays || 1) : 1);
+  openWalletModal() {
+    const existing = document.getElementById('web3WalletModal');
+    if (existing) existing.remove();
+
+    const user = db.currentUser;
+    const isConnected = Boolean(user && user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
+    const currentAddr = isConnected ? user.walletAddress : '';
+
+    const modal = document.createElement('div');
+    modal.id = 'web3WalletModal';
+    modal.className = 'modal-backdrop open active';
+    modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1rem;';
+
+    modal.innerHTML = `
+      <div class="card" style="max-width: 480px; width: 100%; padding: 2.25rem; border-radius: 28px; border: 1.5px solid rgba(243, 186, 47, 0.4); background: linear-gradient(180deg, rgba(20, 26, 38, 0.98) 0%, rgba(10, 13, 20, 0.99) 100%); box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 40px rgba(243, 186, 47, 0.2); position: relative; animation: popInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        
+        <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('web3WalletModal').remove()" style="position: absolute; top: 1.25rem; right: 1.25rem; border-radius: 50%; width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+
+        <div style="text-align: center; margin-bottom: 1.75rem;">
+          <div style="width: 56px; height: 56px; border-radius: 18px; background: rgba(243, 186, 47, 0.15); border: 1px solid rgba(243, 186, 47, 0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; color: var(--brand-yellow);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+          </div>
+          <h3 style="font-size: 1.45rem; font-weight: 800; color: #FFFFFF; margin: 0 0 0.35rem 0;">Connect Web3 Wallet</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Connect your BNB Smart Chain BEP-20 wallet for instant token withdrawals</p>
+        </div>
+
+        ${isConnected ? `
+          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; text-align: center;">
+            <div style="font-size: 0.72rem; color: var(--accent-emerald); font-weight: 800; text-transform: uppercase; margin-bottom: 0.25rem;">Active Connected Wallet</div>
+            <div style="font-size: 0.88rem; font-family: var(--font-mono); font-weight: 800; color: #FFFFFF; word-break: break-all;">${currentAddr}</div>
+          </div>
+        ` : ''}
+
+        <!-- Web3 Wallet Providers Grid -->
+        <div style="display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 1.5rem;">
+          <button type="button" class="btn btn-secondary btn-block" onclick="window.boobaApp.connectBrowserWallet('MetaMask')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span style="font-size: 1.2rem;">🦊</span>
+              <span style="font-weight: 800; color: #FFFFFF;">MetaMask</span>
+            </div>
+            <span style="font-size: 0.72rem; color: var(--brand-yellow); font-weight: 800;">Connect →</span>
+          </button>
+
+          <button type="button" class="btn btn-secondary btn-block" onclick="window.boobaApp.connectBrowserWallet('Trust Wallet')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span style="font-size: 1.2rem;">🛡️</span>
+              <span style="font-weight: 800; color: #FFFFFF;">Trust Wallet</span>
+            </div>
+            <span style="font-size: 0.72rem; color: var(--brand-yellow); font-weight: 800;">Connect →</span>
+          </button>
+
+          <button type="button" class="btn btn-secondary btn-block" onclick="window.boobaApp.connectBrowserWallet('Binance Web3')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span style="font-size: 1.2rem;">🔶</span>
+              <span style="font-weight: 800; color: #FFFFFF;">Binance Web3 Wallet</span>
+            </div>
+            <span style="font-size: 0.72rem; color: var(--brand-yellow); font-weight: 800;">Connect →</span>
+          </button>
+        </div>
+
+        <!-- Manual Address Input Form -->
+        <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 1.25rem;">
+          <div style="font-size: 0.78rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 0.5rem;">Or Enter BEP-20 Address Manually:</div>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="manualWalletInput" class="form-input text-mono" placeholder="0x..." value="${currentAddr}" style="font-size: 0.82rem;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="window.boobaApp.handleSaveManualWallet(document.getElementById('manualWalletInput').value)" style="white-space: nowrap;">
+              Save
+            </button>
+          </div>
+        </div>
+
+        ${isConnected ? `
+          <div style="margin-top: 1.25rem; text-align: center;">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.handleDisconnectWallet()" style="color: var(--accent-rose); font-size: 0.75rem;">
+              Disconnect Wallet
+            </button>
+          </div>
+        ` : ''}
+
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
+
+  async connectBrowserWallet(providerName = 'MetaMask') {
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        if (accounts && accounts.length > 0) {
+          const address = accounts[0];
+          await db.updateWalletAddress(address);
+          alert(`${providerName} Connected: ${address}`);
+          const modal = document.getElementById('web3WalletModal');
+          if (modal) modal.remove();
+          this.updateNavState();
+          this.renderPage();
+        }
+      } catch (e) {
+        alert(`Could not connect to ${providerName}: ${e.message}`);
+      }
+    } else {
+      const address = prompt(`No Web3 extension detected for ${providerName}. Please enter or paste your BEP-20 Wallet Address (0x...):`);
+      if (address) {
+        await this.handleSaveManualWallet(address);
+      }
+    }
+  }
+
+  async handleSaveManualWallet(address) {
+    if (!address || !address.startsWith('0x') || address.length < 10) {
+      alert('Please enter a valid EVM/BEP-20 wallet address starting with 0x.');
+      return;
+    }
+    const res = await db.updateWalletAddress(address.trim());
+    if (res.success) {
+      alert('Web3 Wallet Address successfully connected and saved!');
+      const modal = document.getElementById('web3WalletModal');
+      if (modal) modal.remove();
+      this.updateNavState();
+      this.renderPage();
+    } else {
+      alert(res.message || 'Failed to update wallet address.');
+    }
+  }
+
+  async handleDisconnectWallet() {
+    await db.updateWalletAddress('');
+    alert('Web3 wallet disconnected.');
+    const modal = document.getElementById('web3WalletModal');
+    if (modal) modal.remove();
+    this.updateNavState();
+    this.renderPage();
+  }
+
+  showTgeWithdrawModal() {
+    const existing = document.getElementById('tgeNoticeModal');
+    if (existing) existing.remove();
+
+    const user = db.currentUser;
+    const modal = document.createElement('div');
+    modal.id = 'tgeNoticeModal';
+    modal.className = 'modal-backdrop open active';
+    modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1rem;';
+
+    modal.innerHTML = `
+      <div class="card" style="max-width: 520px; width: 100%; padding: 2.5rem 2rem; border-radius: 28px; border: 1.5px solid rgba(243, 186, 47, 0.45); background: linear-gradient(180deg, rgba(20, 26, 38, 0.98) 0%, rgba(10, 13, 20, 0.99) 100%); text-align: center; box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 50px rgba(243, 186, 47, 0.25); animation: popInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        
+        <div style="width: 70px; height: 70px; border-radius: 22px; background: rgba(243, 186, 47, 0.15); border: 1.5px solid rgba(243, 186, 47, 0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto; color: var(--brand-yellow);">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.65rem;">
+          <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); font-weight: 800; font-size: 0.75rem;">
+            MAINNET BRIDGE TIMELOCK
+          </span>
+        </div>
+
+        <h3 style="font-size: 1.6rem; font-weight: 900; color: #FFFFFF; margin-bottom: 0.6rem; letter-spacing: -0.01em;">
+          Withdrawal Available at Token Launch
+        </h3>
+
+        <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.65; margin-bottom: 1.75rem;">
+          On-chain $BOOBA withdrawals will activate automatically upon the official <strong>Token Generation Event (TGE)</strong> & PancakeSwap liquidity lock on BNB Smart Chain.
+        </p>
+
+        <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.15rem; margin-bottom: 1.75rem; text-align: left;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-secondary);">Your Snapshot Balance:</span>
+            <strong style="color: var(--brand-yellow); font-family: var(--font-mono);">${Number(user ? user.boobaPoints : 0).toLocaleString()} $BOOBA</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-secondary);">Target Network:</span>
+            <strong style="color: #FFFFFF;">BNB Smart Chain (BEP-20)</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+            <span style="color: var(--text-secondary);">Claim Ratio:</span>
+            <strong style="color: var(--accent-emerald);">1:1 Guaranteed Mint</strong>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-lg btn-block" onclick="document.getElementById('tgeNoticeModal').remove()" style="font-weight: 900;">
+          Acknowledge & Continue Earning
+        </button>
+
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
+
+  async handleSaveProfileSettings(e) {
+    e.preventDefault();
+    const usernameInput = document.getElementById('settingsUsernameInput');
+    const emailInput = document.getElementById('settingsEmailInput');
+    const saveBtn = document.getElementById('saveProfileBtn');
+
+    if (!usernameInput || !emailInput) return;
+
+    const newUsername = usernameInput.value.trim();
+    const newEmail = emailInput.value.trim();
+
+    if (!newUsername) {
+      alert('Username cannot be empty.');
+      return;
+    }
+    if (!newEmail) {
+      alert('Email address cannot be empty.');
+      return;
+    }
+
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving Profile...';
+    }
+
+    const res = await db.updateProfile({
+      username: newUsername,
+      email: newEmail,
+      avatar: this.selectedSettingsAvatar || db.currentUser.avatar
+    });
+
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save Profile Changes';
+    }
+
+    if (res.success) {
+      alert('Profile updated successfully!');
+      this.updateNavState();
+      this.renderPage();
+    } else {
+      alert(res.message || 'Failed to update profile.');
+    }
+  }
+
+  handleAvatarSelect(url) {
+    this.selectedSettingsAvatar = url;
+    const preview = document.getElementById('settingsAvatarPreview');
+    if (preview) preview.src = url;
+  }
+
+  async handleChangePasswordSettings(e) {
+    e.preventDefault();
+    const seedInput = document.getElementById('settingsSeedInput');
+    const newPassInput = document.getElementById('settingsNewPassInput');
+    const confirmPassInput = document.getElementById('settingsConfirmPassInput');
+    const btn = document.getElementById('savePasswordBtn');
+
+    if (!seedInput || !newPassInput || !confirmPassInput) return;
+
+    const seedPhrase = seedInput.value.trim();
+    const newPass = newPassInput.value;
+    const confirmPass = confirmPassInput.value;
+
+    if (newPass !== confirmPass) {
+      alert('New passwords do not match. Please re-enter your password.');
+      return;
+    }
+
+    if (newPass.length < 6) {
+      alert('New password must be at least 6 characters long.');
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Verifying Cryptographic Seed...';
+    }
+
+    const res = await db.changePasswordWithSeedPhrase({
+      userId: db.currentUser.id,
+      seedPhrase,
+      newPassword: newPass
+    });
+
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Verify Seed & Update Password';
+    }
+
+    if (res.success) {
+      alert('Password successfully updated and secured!');
+      seedInput.value = '';
+      newPassInput.value = '';
+      confirmPassInput.value = '';
+    } else {
+      alert(res.message || 'Security verification failed.');
+    }
   }
 
   closeModal() {

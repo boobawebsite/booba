@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About & Tokenomics — BOOBA (BNB baby)</title>
+  <meta name="description" content="Discover the story, 4 core ecosystem pillars, BEP-20 tokenomics, and roadmap of BOOBA (BNB baby) on BNB Smart Chain.">
+  <link rel="icon" type="image/jpeg" href="assets/mascot.jpg">
+
+  <!-- Consolidated Master Stylesheet -->
+  <link rel="stylesheet" href="src/styles/main.css?v=3.0">
+</head>
+<body data-page="about">
+
+  <!-- Ambient Glow Effects -->
+  <div class="ambient-glow"></div>
+
+  <!-- SITE HEADER -->
+  <header class="site-header">
+    <div class="container nav-container">
+      
+      <!-- Brand Logo -->
+      <a href="index.html" class="logo-brand">
+        <img src="assets/mascot.jpg" alt="Booba BNB Baby Mascot" class="logo-avatar">
+        <div class="flex items-center gap-2">
+          <span>BOOBA</span>
+          <span class="badge-tag">BNB baby</span>
+        </div>
+      </a>
+
+      <!-- Center Navigation Links -->
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="about.html" class="nav-link active">About</a></li>
+        <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="leaderboard.html" class="nav-link">Leaderboard</a></li>
+        <li><a href="settings.html" class="nav-link">Settings</a></li>
+      </ul>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-2">
+        <div id="headerNavActions" class="nav-actions"></div>
+
+        <!-- Mobile Hamburger Toggle -->
+        <button id="mobileNavToggleBtn" class="mobile-nav-toggle-btn" aria-label="Open Navigation Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MOBILE NAVIGATION DRAWER -->
+  <div id="mobileNavBackdrop" class="mobile-nav-backdrop"></div>
+  <aside id="mobileNavDrawer" class="mobile-nav-drawer" aria-label="Mobile Navigation">
+    <div class="mobile-nav-header">
+      <a href="index.html" class="logo-brand mobile-drawer-logo">
+        <img src="assets/mascot.jpg" alt="Booba" class="logo-avatar">
+        <div class="flex items-center gap-2">
+          <span>BOOBA</span>
+          <span class="badge-tag">BNB baby</span>
+        </div>
+      </a>
+      <button id="mobileNavCloseBtn" class="mobile-nav-close-btn" aria-label="Close menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="mobile-nav-body">
+      <ul class="mobile-nav-list">
+        <li><a href="index.html" class="mobile-nav-link">Home</a></li>
+        <li><a href="about.html" class="mobile-nav-link">About & Tokenomics</a></li>
+        <li><a href="dashboard.html" class="mobile-nav-link">Dashboard Overview</a></li>
+        <li><a href="leaderboard.html" class="mobile-nav-link">Leaderboard</a></li>
+        <li><a href="settings.html" class="mobile-nav-link">Settings</a></li>
+      </ul>
+    </div>
+
+    <div id="mobileNavFooter" class="mobile-nav-footer"></div>
+  </aside>
+
+  <!-- MAIN APP CONTAINER -->
+  <main id="app" class="page-wrapper"></main>
+
+  <!-- FOOTER -->
+  <footer id="siteFooter" style="border-top: 1px solid var(--border-subtle); padding: 3.5rem 0 2rem 0; background: rgba(7, 9, 14, 0.95);">
+    <div class="container">
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2.5rem; margin-bottom: 3rem;">
+        
+        <div>
+          <div class="flex items-center gap-2" style="margin-bottom: 1rem;">
+            <img src="assets/mascot.jpg" alt="Booba" style="width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--brand-yellow);">
+            <strong style="font-size: 1.2rem; color: var(--text-primary);">BOOBA (BNB baby)</strong>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+            The interactive community reputation and rewards platform powering the BNB Baby movement.
+          </p>
+        </div>
+
+        <div>
+          <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--brand-yellow); margin-bottom: 1rem;">Ecosystem</h4>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem;">
+            <li><a href="about.html" style="color: var(--text-secondary); text-decoration: none;">About & Tokenomics</a></li>
+            <li><a href="dashboard.html" style="color: var(--text-secondary); text-decoration: none;">My Passport</a></li>
+            <li><a href="quests.html" style="color: var(--text-secondary); text-decoration: none;">Live Quests</a></li>
+            <li><a href="leaderboard.html" style="color: var(--text-secondary); text-decoration: none;">Leaderboard</a></li>
+            <li><a href="rewards.html" style="color: var(--text-secondary); text-decoration: none;">Rewards Vault</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--brand-yellow); margin-bottom: 1rem;">Community</h4>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem;">
+            <li><a href="https://x.com/Boobacoinoffial" target="_blank" rel="noopener" style="color: var(--text-secondary); text-decoration: none;">X (Twitter)</a></li>
+            <li><a href="https://t.me/Boobatokenofficial" target="_blank" rel="noopener" style="color: var(--text-secondary); text-decoration: none;">Telegram Community</a></li>
+            <li><a href="https://chat.whatsapp.com/EEn3nuJt7yPHLIBbPi4OpA?s=cl&p=a&ilr=4" target="_blank" rel="noopener" style="color: var(--text-secondary); text-decoration: none;">WhatsApp Community</a></li>
+            <li><a href="https://www.facebook.com/share/1HSYomVdjB/" target="_blank" rel="noopener" style="color: var(--text-secondary); text-decoration: none;">Facebook Page</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--brand-yellow); margin-bottom: 1rem;">Legal & Security</h4>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem;">
+            <li><a href="terms.html" style="color: var(--text-secondary); text-decoration: none;">Terms of Service</a></li>
+            <li><a href="privacy.html" style="color: var(--text-secondary); text-decoration: none;">Privacy Policy</a></li>
+            <li><span style="color: var(--text-muted);">Contract: BEP-20 (BNB Chain)</span></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div style="border-top: 1px solid var(--border-subtle); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 0.8rem; color: var(--text-muted);">
+        <div>&copy; 2026 BOOBA (BNB baby) Foundation. All rights reserved.</div>
+        <div style="display: flex; gap: 1rem;">
+          <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms</a>
+          <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Core JavaScript Module -->
+  <script type="module">
+    import './src/app.js';
+  </script>
+</body>
+</html>

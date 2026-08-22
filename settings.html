@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Referrals — BOOBA (BNB baby)</title>
+  <title>Account & Security Settings — BOOBA (BNB baby)</title>
   <link rel="icon" type="image/jpeg" href="assets/mascot.jpg">
   <link rel="stylesheet" href="src/styles/main.css?v=3.0">
 </head>
-<body data-page="referrals">
+<body data-page="settings">
   <div class="ambient-glow"></div>
 
+  <!-- SITE HEADER -->
   <header class="site-header">
     <div class="container nav-container">
       <a href="index.html" class="logo-brand">
@@ -25,7 +26,7 @@
         <li><a href="about.html" class="nav-link">About</a></li>
         <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
         <li><a href="leaderboard.html" class="nav-link">Leaderboard</a></li>
-        <li><a href="settings.html" class="nav-link">Settings</a></li>
+        <li><a href="settings.html" class="nav-link active">Settings</a></li>
       </ul>
 
       <div class="flex items-center gap-2">
@@ -41,6 +42,7 @@
     </div>
   </header>
 
+  <!-- MOBILE NAVIGATION DRAWER -->
   <div id="mobileNavBackdrop" class="mobile-nav-backdrop"></div>
   <aside id="mobileNavDrawer" class="mobile-nav-drawer">
     <div class="mobile-nav-header">
@@ -70,8 +72,10 @@
     <div id="mobileNavFooter" class="mobile-nav-footer"></div>
   </aside>
 
+  <!-- MAIN VIEW -->
   <main id="app" class="page-wrapper"></main>
 
+  <!-- FOOTER -->
   <footer id="siteFooter" style="border-top: 1px solid var(--border-subtle); padding: 3.5rem 0 2rem 0; background: rgba(7, 9, 14, 0.95);">
     <div class="container">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 0.75rem; color: var(--text-muted);">
@@ -83,43 +87,6 @@
       </div>
     </div>
   </footer>
-
-  <!-- AUTH MODAL -->
-  <div class="modal-backdrop" id="authModal">
-    <div class="auth-card">
-      <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.closeModal()" style="position: absolute; top: 1rem; right: 1rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-      <div class="auth-header">
-        <img src="assets/mascot.jpg" class="auth-mascot-preview" alt="Booba Mascot">
-        <h3 id="authModalTitle">Mint Your Booba Passport</h3>
-        <p id="authModalSubtitle">Join the BNB Baby revolution and claim +100 BOOBA welcome tokens!</p>
-      </div>
-      <div class="auth-tabs">
-        <button id="tabAuthSignup" class="auth-tab-btn active">Mint Passport (Sign Up)</button>
-        <button id="tabAuthSignin" class="auth-tab-btn">Sign In (Login)</button>
-      </div>
-      <form id="authForm">
-        <div class="form-group signup-only-field">
-          <label class="form-label">Choose Username</label>
-          <input type="text" id="authUsernameInput" placeholder="e.g. CryptoKing" class="form-input">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email or Username</label>
-          <input type="text" id="authEmailInput" placeholder="user@example.com" class="form-input" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" id="authPasswordInput" placeholder="••••••••" class="form-input" autocomplete="current-password" required>
-        </div>
-        <div class="form-group signup-only-field">
-          <label class="form-label">Referral Code (Optional)</label>
-          <input type="text" id="authReferralInput" placeholder="e.g. BOOBABOSS" class="form-input text-mono" style="text-transform: uppercase;">
-        </div>
-        <button type="submit" id="authSubmitBtn" class="btn btn-primary btn-block btn-lg" style="margin-top: 0.5rem;">
-          Mint Passport & Join (+100 BOOBA)
-        </button>
-      </form>
-    </div>
-  </div>
 
   <!-- Motion & Physics Frameworks -->
   <script src="https://unpkg.com/lenis@1.1.9/dist/lenis.min.js"></script>

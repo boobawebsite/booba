@@ -799,6 +799,27 @@ textarea.form-control {
     min-width: unset;
     width: 100%;
   }
+
+  /* Smart Table Container for Clean Kinetic Mobile Swipe */
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.75rem;
+  }
+
+  .admin-table th, .admin-table td {
+    padding: 0.65rem 0.55rem;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  /* Interactive Touch Feedback for Admin Buttons */
+  .btn-admin:active, .stat-widget:active, .admin-card:active {
+    transform: scale(0.985);
+    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }
 
 /* Extra Small Screens (<= 380px) */
@@ -815,3 +836,4 @@ textarea.form-control {
     padding: 0.9rem 0.75rem;
   }
 }
+

@@ -171,8 +171,13 @@ class DatabaseService {
       const saved = localStorage.getItem(SESSION_KEY);
       if (saved) {
         this.currentUser = JSON.parse(saved);
-        if (this.currentUser && isUserAdmin(this.currentUser.email)) {
-          this.currentUser.role = 'admin';
+        if (this.currentUser) {
+          if (isUserAdmin(this.currentUser.email)) {
+            this.currentUser.role = 'admin';
+          }
+          if (this.currentUser.walletAddress && (this.currentUser.walletAddress.includes('...') || this.currentUser.walletAddress.length < 35)) {
+            this.currentUser.walletAddress = '';
+          }
         }
       }
     } catch (e) {
@@ -181,6 +186,9 @@ class DatabaseService {
   }
 
   saveLocalSession(user) {
+    if (user && user.walletAddress && (user.walletAddress.includes('...') || user.walletAddress.length < 35)) {
+      user.walletAddress = '';
+    }
     this.currentUser = user;
     if (user) {
       localStorage.setItem(SESSION_KEY, JSON.stringify(user));
@@ -239,6 +247,9 @@ class DatabaseService {
       const fresh = this.users.find(u => u.id === this.currentUser.id || u.email === this.currentUser.email);
       if (fresh) {
         if (isUserAdmin(fresh.email)) fresh.role = 'admin';
+        if (fresh.walletAddress && (fresh.walletAddress.includes('...') || fresh.walletAddress.length < 35)) {
+          fresh.walletAddress = '';
+        }
         this.saveLocalSession(fresh);
       }
     }
@@ -292,7 +303,7 @@ class DatabaseService {
             memberSince: u.member_since ? new Date(u.member_since).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent',
             boobaPoints: Number(u.booba_points) || 0,
             reputation: Number(u.reputation) || 75,
-            walletAddress: u.wallet_address || '0x...BNB',
+            walletAddress: (u.wallet_address && !u.wallet_address.includes('...') && u.wallet_address.length >= 35) ? u.wallet_address : '',
             avatar: u.avatar_url || 'assets/mascot.jpg',
             completedQuestsCount: Number(u.completed_quests) || 0,
             verifiedReferralsCount: Number(u.verified_referrals) || 0,
@@ -339,6 +350,7 @@ class DatabaseService {
     const isAdmin = isUserAdmin(cleanEmail);
     const passportId = 'BB-' + Math.floor(100000 + Math.random() * 900000);
     const userRefCode = cleanUsername.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10) || ('BB' + Math.floor(1000 + Math.random() * 9000));
+    const validWallet = walletAddress && walletAddress.startsWith('0x') && walletAddress.length >= 35 && !walletAddress.includes('...') ? walletAddress.trim() : null;
 
     const newUserPayload = {
       username: cleanUsername,
@@ -350,7 +362,7 @@ class DatabaseService {
       passport_id: passportId,
       booba_points: 100, // Welcome bonus
       reputation: 75,
-      wallet_address: walletAddress || `0x${Math.random().toString(16).substring(2, 6)}...${Math.random().toString(16).substring(2, 6)}`,
+      wallet_address: validWallet,
       avatar_url: 'assets/mascot.jpg',
       completed_quests: 0,
       verified_referrals: 0,
@@ -742,7 +754,7 @@ class DatabaseService {
         passport_id: passportId,
         booba_points: 100,
         reputation: 75,
-        wallet_address: `0x${Math.random().toString(16).substring(2, 6)}...${Math.random().toString(16).substring(2, 6)}`,
+        wallet_address: null,
         avatar_url: avatarUrl || 'assets/mascot.jpg',
         completed_quests: 0,
         verified_referrals: 0,
@@ -790,6 +802,234 @@ class DatabaseService {
     } catch (e) {
       return { success: false, message: e.message || 'OAuth user creation failed' };
     }
+  }
+
+  /**
+   * Check if a username is already taken by another user
+   */
+  async checkUsernameAvailability(username, excludeUserId = null) {
+    if (!username) return false;
+    const clean = username.trim().toLowerCase();
+
+    // Check local loaded users list first
+    const takenInList = this.users.some(u => 
+      u.username && 
+      u.username.toLowerCase() === clean && 
+      u.id !== excludeUserId
+    );
+    if (takenInList) return false;
+
+    if (!supabase) return true;
+
+    try {
+      let query = supabase
+        .from('booba_users')
+        .select('id')
+        .ilike('username', clean);
+
+      if (excludeUserId) {
+        query = query.neq('id', excludeUserId);
+      }
+
+      const { data, error } = await query.limit(1);
+      if (error) return true;
+      return !data || data.length === 0;
+    } catch (e) {
+      return true;
+    }
+  }
+
+  /**
+   * Update Profile Details (Username, Email, Wallet, Avatar)
+   */
+  async updateProfile({ username, email, walletAddress, avatar }) {
+    if (!this.currentUser) {
+      return { success: false, message: 'Please sign in to update your profile.' };
+    }
+
+    const cleanUsername = username ? username.trim() : this.currentUser.username;
+    const cleanEmail = email ? email.trim().toLowerCase() : this.currentUser.email;
+    const cleanWallet = walletAddress ? walletAddress.trim() : (this.currentUser.walletAddress || '');
+    const cleanAvatar = avatar || this.currentUser.avatar || 'assets/mascot.jpg';
+
+    // 1. If username changed, check uniqueness
+    if (cleanUsername.toLowerCase() !== this.currentUser.username.toLowerCase()) {
+      const isAvailable = await this.checkUsernameAvailability(cleanUsername, this.currentUser.id);
+      if (!isAvailable) {
+        return { success: false, message: `The username "@${cleanUsername}" is already taken by another community member. Please choose a unique username.` };
+      }
+    }
+
+    // 2. If email changed, check uniqueness
+    if (cleanEmail.toLowerCase() !== this.currentUser.email.toLowerCase()) {
+      if (supabase) {
+        const { data: existingEmail } = await supabase
+          .from('booba_users')
+          .select('id')
+          .ilike('email', cleanEmail)
+          .neq('id', this.currentUser.id)
+          .limit(1);
+
+        if (existingEmail && existingEmail.length > 0) {
+          return { success: false, message: `The email "${cleanEmail}" is already registered to another account.` };
+        }
+      }
+    }
+
+    const updates = {
+      username: cleanUsername,
+      email: cleanEmail,
+      wallet_address: cleanWallet,
+      avatar_url: cleanAvatar
+    };
+
+    if (supabase) {
+      try {
+        const { error } = await supabase
+          .from('booba_users')
+          .update(updates)
+          .eq('id', this.currentUser.id);
+
+        if (error) {
+          if (error.code === '23505') {
+            return { success: false, message: 'Username or email is already taken.' };
+          }
+          throw error;
+        }
+      } catch (e) {
+        return { success: false, message: e.message || 'Failed to update profile.' };
+      }
+    }
+
+    // Update in-memory and local session
+    this.currentUser = {
+      ...this.currentUser,
+      username: cleanUsername,
+      email: cleanEmail,
+      walletAddress: cleanWallet,
+      avatar: cleanAvatar
+    };
+
+    this.saveLocalSession(this.currentUser);
+    await this.fetchUsers();
+    this.notify();
+
+    return { success: true, user: this.currentUser, message: 'Profile updated successfully!' };
+  }
+
+  /**
+   * Change Password (Requires Valid 12-Word Non-Custodial Seed Phrase)
+   */
+  async changePasswordWithSeedPhrase({ userId, seedPhrase, newPassword }) {
+    const userToUpdate = this.currentUser || this.users.find(u => u.id === userId);
+    if (!userToUpdate) {
+      return { success: false, message: 'User session not found. Please log in.' };
+    }
+
+    const cleanPhrase = normalizeSeedPhrase(seedPhrase);
+    if (!cleanPhrase || cleanPhrase.split(' ').length < 12) {
+      return { success: false, message: 'Please enter your complete 12-word cryptographic seed phrase to verify authorization.' };
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+      return { success: false, message: 'New password must be at least 6 characters long.' };
+    }
+
+    // Verify seed phrase against user record
+    const inputHash = await hashSeedPhrase(cleanPhrase);
+    let isMatch = false;
+
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('booba_users')
+          .select('seed_phrase, seed_phrase_hash, password_hash')
+          .eq('id', userToUpdate.id)
+          .single();
+
+        if (error || !data) {
+          return { success: false, message: 'Could not fetch security records for this account.' };
+        }
+
+        isMatch = (data.seed_phrase_hash && data.seed_phrase_hash === inputHash) ||
+                  (data.seed_phrase && normalizeSeedPhrase(data.seed_phrase) === cleanPhrase);
+
+        // Fallback: If user was signed up locally or before hash
+        if (!isMatch && userToUpdate.seedPhrase) {
+          isMatch = normalizeSeedPhrase(userToUpdate.seedPhrase) === cleanPhrase;
+        }
+
+        if (!isMatch) {
+          return { success: false, message: 'Security Verification Failed: The 12-word seed phrase does not match this account.' };
+        }
+
+        const newHash = await hashPassword(newPassword);
+        const { error: updateError } = await supabase
+          .from('booba_users')
+          .update({
+            password_hash: newHash,
+            seed_phrase: cleanPhrase,
+            seed_phrase_hash: inputHash
+          })
+          .eq('id', userToUpdate.id);
+
+        if (updateError) throw updateError;
+      } catch (e) {
+        return { success: false, message: e.message || 'Password update failed.' };
+      }
+    } else {
+      if (userToUpdate.seedPhrase && normalizeSeedPhrase(userToUpdate.seedPhrase) !== cleanPhrase) {
+        return { success: false, message: 'Security Verification Failed: The 12-word seed phrase does not match this account.' };
+      }
+    }
+
+    this.currentUser = {
+      ...this.currentUser,
+      seedPhrase: cleanPhrase
+    };
+    this.saveLocalSession(this.currentUser);
+    this.notify();
+
+    return { success: true, message: 'Password successfully changed and secured!' };
+  }
+
+  /**
+   * Update or Connect Web3 Wallet Address
+   */
+  async updateWalletAddress(walletAddress) {
+    if (!this.currentUser) {
+      return { success: false, message: 'Please sign in to connect your wallet.' };
+    }
+
+    const clean = (walletAddress || '').trim();
+
+    if (clean && (!clean.startsWith('0x') || clean.length < 10)) {
+      return { success: false, message: 'Invalid Web3 EVM wallet address. Must begin with 0x.' };
+    }
+
+    if (supabase) {
+      try {
+        const { error } = await supabase
+          .from('booba_users')
+          .update({ wallet_address: clean })
+          .eq('id', this.currentUser.id);
+
+        if (error) throw error;
+      } catch (e) {
+        return { success: false, message: e.message || 'Failed to update wallet address.' };
+      }
+    }
+
+    this.currentUser = {
+      ...this.currentUser,
+      walletAddress: clean
+    };
+
+    this.saveLocalSession(this.currentUser);
+    await this.fetchUsers();
+    this.notify();
+
+    return { success: true, user: this.currentUser, walletAddress: clean, message: clean ? 'Wallet connected successfully!' : 'Wallet disconnected.' };
   }
 
   async logout() {

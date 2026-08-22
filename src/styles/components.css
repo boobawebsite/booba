@@ -898,6 +898,91 @@
   }
   .runner-up-item {
     padding: 0.75rem 0.85rem;
+  }
+}
+
+/* Mobile Slide-Over Navigation Drawer */
+.mobile-nav-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.mobile-nav-backdrop.open,
+.mobile-nav-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.mobile-nav-drawer {
+  position: fixed;
+  top: 0;
+  right: -320px;
+  bottom: 0;
+  width: 290px;
+  max-width: 85vw;
+  background: rgba(14, 18, 27, 0.98);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-left: 1px solid var(--border-medium);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem 1.25rem;
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.8);
+  transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.mobile-nav-drawer.open {
+  right: 0;
+}
+
+/* Professional Mobile Close Button */
+.mobile-nav-close-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+  outline: none;
+}
+
+.mobile-nav-close-btn:hover,
+.mobile-nav-close-btn:active {
+  background: rgba(243, 186, 47, 0.15);
+  border-color: rgba(243, 186, 47, 0.45);
+  color: var(--brand-yellow);
+  transform: scale(1.06);
+  box-shadow: 0 0 15px rgba(243, 186, 47, 0.3);
+}
+
+.mobile-nav-close-btn svg {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-nav-close-btn:hover svg,
+.mobile-nav-close-btn:active svg {
+  transform: rotate(90deg);
 }
 
 .mobile-nav-header {
@@ -4275,98 +4360,6 @@
   position: relative;
   overflow-x: auto;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
-}
-
-/* Mobile Slide-Over Navigation Drawer */
-.mobile-nav-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.78);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  cursor: pointer;
-}
-
-.mobile-nav-backdrop.open,
-.mobile-nav-backdrop.active {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-.mobile-nav-drawer {
-  position: fixed;
-  top: 0;
-  right: -320px;
-  bottom: 0;
-  width: 290px;
-  max-width: 85vw;
-  background: rgba(14, 18, 27, 0.98);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border-left: 1px solid var(--border-medium);
-  z-index: 1001;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 1.5rem 1.25rem;
-  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.8);
-  transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  box-sizing: border-box;
-}
-
-.mobile-nav-drawer.open {
-  right: 0;
-}
-
-.mobile-nav-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-/* Professional Mobile Close Button */
-.mobile-nav-close-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 0;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  position: relative;
-  outline: none;
-}
-
-.mobile-nav-close-btn:hover,
-.mobile-nav-close-btn:active {
-  background: rgba(243, 186, 47, 0.15);
-  border-color: rgba(243, 186, 47, 0.45);
-  color: var(--brand-yellow);
-  transform: scale(1.06);
-  box-shadow: 0 0 15px rgba(243, 186, 47, 0.3);
-}
-
-.mobile-nav-close-btn svg {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.mobile-nav-close-btn:hover svg,
-.mobile-nav-close-btn:active svg {
-  transform: rotate(90deg);
 }
 
 .terminal-header-bar {

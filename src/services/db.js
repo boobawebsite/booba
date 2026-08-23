@@ -309,7 +309,8 @@ class DatabaseService {
             verifiedReferralsCount: Number(u.verified_referrals) || 0,
             referralCode: u.referral_code,
             referredBy: u.referred_by,
-            streakDays: Number(u.streak_days) || 1
+            streakDays: Number(u.streak_days) || 1,
+            authProvider: (u.email && u.email.includes('@wallet.')) ? 'wallet' : ((u.email && u.email.includes('@gmail.')) ? 'google' : 'email')
           }));
         }
       } catch (e) {
@@ -401,7 +402,8 @@ class DatabaseService {
         referralCode: data.referral_code,
         referredBy: data.referred_by,
         streakDays: 1,
-        seedPhrase: generatedPhrase
+        seedPhrase: generatedPhrase,
+        authProvider: 'email'
       };
 
       if (referralCode) {
@@ -470,7 +472,8 @@ class DatabaseService {
         referralCode: raw.referral_code,
         referredBy: raw.referred_by,
         streakDays: Number(raw.streak_days) || 1,
-        seedPhrase: raw.seed_phrase || null
+        seedPhrase: raw.seed_phrase || null,
+        authProvider: (raw.email && raw.email.includes('@wallet.')) ? 'wallet' : ((raw.email && raw.email.includes('@gmail.')) ? 'google' : 'email')
       };
 
       this.saveLocalSession(user);
@@ -607,7 +610,8 @@ class DatabaseService {
           referralCode: raw.referral_code,
           referredBy: raw.referred_by,
           streakDays: Number(raw.streak_days) || 1,
-          seedPhrase: raw.seed_phrase || null
+          seedPhrase: raw.seed_phrase || null,
+          authProvider: 'wallet'
         };
 
         this.saveLocalSession(user);
@@ -672,7 +676,8 @@ class DatabaseService {
         referralCode: created.referral_code,
         referredBy: created.referred_by,
         streakDays: 1,
-        seedPhrase: generatedPhrase
+        seedPhrase: generatedPhrase,
+        authProvider: 'wallet'
       };
 
       if (storedRef) {
@@ -725,7 +730,8 @@ class DatabaseService {
           referralCode: raw.referral_code,
           referredBy: raw.referred_by,
           streakDays: Number(raw.streak_days) || 1,
-          seedPhrase: raw.seed_phrase || null
+          seedPhrase: raw.seed_phrase || null,
+          authProvider: 'google'
         };
 
         this.saveLocalSession(user);
@@ -787,7 +793,8 @@ class DatabaseService {
         referralCode: created.referral_code,
         referredBy: created.referred_by,
         streakDays: 1,
-        seedPhrase: generatedPhrase
+        seedPhrase: generatedPhrase,
+        authProvider: 'google'
       };
 
       if (storedRef) {
@@ -915,6 +922,23 @@ class DatabaseService {
     this.notify();
 
     return { success: true, user: this.currentUser, message: 'Profile updated successfully!' };
+  }
+
+  /**
+   * Quick Update Citizen Username (for Web3 Wallet Users & Settings)
+   */
+  async updateUsername(newUsername) {
+    if (!this.currentUser) {
+      return { success: false, message: 'Please sign in to update your username.' };
+    }
+    const clean = (newUsername || '').trim().replace(/[^a-zA-Z0-9_]/g, '');
+    if (!clean || clean.length < 3) {
+      return { success: false, message: 'Username must be at least 3 characters long and contain only letters, numbers, or underscores.' };
+    }
+    if (clean.length > 20) {
+      return { success: false, message: 'Username cannot exceed 20 characters.' };
+    }
+    return await this.updateProfile({ username: clean });
   }
 
   /**
@@ -1111,12 +1135,37 @@ class DatabaseService {
 
   async deleteQuest(questId) {
     if (!supabase) return { success: false, message: 'Supabase client not connected' };
+    const quest = this.quests.find(q => q.id === questId);
+    const questTitle = quest ? quest.title : 'Unknown Quest';
+    const adminUsername = this.currentUser?.username || 'Booba Admin';
+    const adminEmail = this.currentUser?.email || 'admin@booba.app';
+
     try {
+      // 1. Delete associated submissions first to ensure clean cascade across any environment
+      await supabase.from('booba_submissions').delete().eq('quest_id', questId);
+
+      // 2. Delete the quest from database
       const { error } = await supabase.from('booba_quests').delete().eq('id', questId);
       if (error) throw error;
-      await this.fetchQuests();
+
+      // 3. Log the deletion event in booba_admin_logs
+      try {
+        await supabase.from('booba_admin_logs').insert([{
+          admin_id: this.currentUser?.id || null,
+          admin_username: adminUsername,
+          admin_email: adminEmail,
+          action_type: 'delete_quest',
+          target_id: String(questId),
+          target_title: questTitle,
+          details: { deletedAt: new Date().toISOString(), questData: quest }
+        }]);
+      } catch (logErr) {
+        console.warn('Admin log insert skipped:', logErr);
+      }
+
+      await Promise.all([this.fetchQuests(), this.fetchSubmissions()]);
       this.notify();
-      return { success: true };
+      return { success: true, deletedBy: adminUsername, adminEmail, questTitle };
     } catch (e) {
       return { success: false, message: e.message };
     }
@@ -1421,16 +1470,24 @@ class DatabaseService {
     return this.airdropLogs;
   }
 
-  async distributeAirdrop({ targetGroup, amountPerUser, reason }) {
-    if (!supabase) return { success: false, message: 'Supabase client not connected' };
+  async distributeAirdrop({ targetGroup = 'all', topCount = 15, recipientUserIds = null, amountPerUser, reason = '', targetDescription = '' }) {
     const amount = Number(amountPerUser) || 0;
-    if (amount <= 0) return { success: false, message: 'Invalid airdrop amount' };
+    if (amount <= 0) return { success: false, message: 'Invalid airdrop amount. Must be greater than 0.' };
 
-    let recipients = [...this.users];
-    if (targetGroup === 'top10') {
-      recipients = recipients.slice(0, 10);
+    let recipients = [];
+
+    if (Array.isArray(recipientUserIds) && recipientUserIds.length > 0) {
+      const idSet = new Set(recipientUserIds.map(String));
+      recipients = this.users.filter(u => idSet.has(String(u.id)));
+    } else if (targetGroup === 'top_n' || targetGroup === 'top10') {
+      const count = Math.max(1, Number(topCount) || (targetGroup === 'top10' ? 10 : 15));
+      // Sort users by boobaPoints descending
+      const sorted = [...this.users].sort((a, b) => (Number(b.boobaPoints) || 0) - (Number(a.boobaPoints) || 0));
+      recipients = sorted.slice(0, count);
     } else if (targetGroup === 'active') {
-      recipients = recipients.filter(u => u.completedQuestsCount > 0);
+      recipients = this.users.filter(u => (Number(u.completedQuestsCount) || 0) > 0);
+    } else {
+      recipients = [...this.users];
     }
 
     if (recipients.length === 0) {
@@ -1438,34 +1495,56 @@ class DatabaseService {
     }
 
     try {
-      for (const u of recipients) {
-        await supabase
-          .from('booba_users')
-          .update({ booba_points: (u.boobaPoints || 0) + amount })
-          .eq('id', u.id);
+      if (supabase) {
+        // Chunk batch updates in slices of 40 for optimal Supabase throughput
+        const chunkSize = 40;
+        for (let i = 0; i < recipients.length; i += chunkSize) {
+          const chunk = recipients.slice(i, i + chunkSize);
+          await Promise.all(chunk.map(u =>
+            supabase
+              .from('booba_users')
+              .update({ booba_points: (Number(u.boobaPoints) || 0) + amount })
+              .eq('id', u.id)
+          ));
+        }
+
+        const totalDist = amount * recipients.length;
+        let logTargetGroup = targetDescription || targetGroup;
+        if (!targetDescription) {
+          if (targetGroup === 'top_n' || targetGroup === 'top10') logTargetGroup = `Top ${recipients.length} Highest Holders`;
+          else if (targetGroup === 'specific') logTargetGroup = `Selected ${recipients.length} Target Users`;
+          else if (targetGroup === 'active') logTargetGroup = `Active Questers (${recipients.length})`;
+          else logTargetGroup = `All Registered Passports (${recipients.length})`;
+        }
+
+        await supabase.from('booba_airdrop_logs').insert([{
+          admin_username: this.currentUser?.username || 'Booba Admin',
+          amount_per_user: amount,
+          target_group: logTargetGroup,
+          recipient_count: recipients.length,
+          total_distributed: totalDist,
+          reason: reason || 'Treasury Grant'
+        }]);
+
+        await Promise.all([this.fetchUsers(), this.fetchAirdropLogs()]);
+      } else {
+        // Local in-memory fallback
+        for (const u of recipients) {
+          u.boobaPoints = (Number(u.boobaPoints) || 0) + amount;
+        }
+        this.saveLocalSession(this.currentUser);
       }
 
-      const totalDist = amount * recipients.length;
-
-      await supabase.from('booba_airdrop_logs').insert([{
-        admin_username: this.currentUser?.username || 'Booba Admin',
-        amount_per_user: amount,
-        target_group: targetGroup,
-        recipient_count: recipients.length,
-        total_distributed: totalDist,
-        reason: reason || 'Community Airdrop'
-      }]);
-
-      await Promise.all([this.fetchUsers(), this.fetchAirdropLogs()]);
       this.notify();
 
       return {
         success: true,
         recipientCount: recipients.length,
-        totalDistributed: totalDist
+        totalDistributed: amount * recipients.length
       };
     } catch (e) {
-      return { success: false, message: e.message };
+      console.error('distributeAirdrop error:', e);
+      return { success: false, message: e.message || 'Airdrop distribution failed.' };
     }
   }
 

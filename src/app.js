@@ -511,28 +511,16 @@ class BoobaApp {
                 </svg>
                 Continue with Google
               </button>
-
+              
               <!-- 2. Web3 Multi-Wallet (MetaMask, Trust Wallet, Binance, etc.) -->
-              <button type="button" class="btn-auth-pill btn-wallet" onclick="window.boobaApp.openWalletModal()">
+              <button type="button" class="btn-auth-pill btn-wallet" onclick="window.boobaApp.openWeb3AuthModal()">
                 <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
                   <path d="M16 2L2 9L16 16L30 9L16 2Z" fill="#000000"/>
                   <path d="M2 23L16 30L30 23V9L16 16L2 9V23Z" fill="#000000" fill-opacity="0.8"/>
                 </svg>
-                Connect Web3 Wallet
+                ${isSignUp ? 'Sign Up with Web3 Wallet' : 'Sign In with Web3 Wallet'}
               </button>
 
-            </div>
-
-            <!-- Professional Browser vs dApp Notice -->
-            <div style="background: rgba(243, 186, 47, 0.08); border: 1.5px solid rgba(243, 186, 47, 0.25); border-radius: 14px; padding: 0.9rem 1.15rem; margin: 1.25rem 0; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.55; text-align: left;">
-              <div style="display: flex; align-items: center; gap: 0.45rem; font-weight: 800; color: var(--brand-yellow); margin-bottom: 0.3rem;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                Web3 & Browser Sign-Up Notice
-              </div>
-              <div>Direct 1-click Web3 wallet connection works natively inside your wallet's built-in <strong>dApp browser</strong> (Trust Wallet, MetaMask, OKX, Binance Web3) or desktop browser extensions.</div>
-              <div style="margin-top: 0.45rem; color: #FFFFFF; font-weight: 600;">
-                📱 <strong>On Mobile Chrome or Safari?</strong> We recommend creating your account with <span style="color: var(--brand-yellow);">Continue with Google</span> or <span style="color: var(--brand-yellow);">Email</span>, then easily copy & paste your BEP-20 wallet address into your Passport dashboard!
-              </div>
             </div>
 
             <!-- Divider -->
@@ -1065,9 +1053,11 @@ HOW TO RECOVER YOUR ACCOUNT:
   // --------------------------------------------------------------------------
   // WEB3 MULTI-WALLET CONNECT MODAL (MetaMask, Trust Wallet, Binance, EIP-6963)
   // --------------------------------------------------------------------------
+  // WEB3 AUTH MODAL ("Continue with Web3 Wallet" - Sign In / Sign Up)
+  // --------------------------------------------------------------------------
 
-  openWalletModal() {
-    const existing = document.getElementById('walletConnectDynamicModal') || document.getElementById('web3WalletModal');
+  openWeb3AuthModal() {
+    const existing = document.getElementById('web3AuthDynamicModal') || document.getElementById('walletConnectDynamicModal') || document.getElementById('addWalletDynamicModal');
     if (existing) existing.remove();
 
     // Trigger fresh EIP-6963 discovery
@@ -1075,12 +1065,8 @@ HOW TO RECOVER YOUR ACCOUNT:
       window.dispatchEvent(new CustomEvent('eip6963:requestProvider'));
     }
 
-    const user = db.currentUser;
-    const isConnected = Boolean(user && user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
-    const currentAddr = isConnected ? user.walletAddress : '';
-
     const modal = document.createElement('div');
-    modal.id = 'walletConnectDynamicModal';
+    modal.id = 'web3AuthDynamicModal';
     modal.className = 'modal-backdrop open active';
     modal.innerHTML = `
       <div class="wallet-modal-card" style="position: relative; z-index: 1010; max-width: 480px; width: 100%; border-radius: 24px; border: 1.5px solid rgba(243, 186, 47, 0.4); background: linear-gradient(180deg, rgba(20, 26, 38, 0.98) 0%, rgba(10, 13, 20, 0.99) 100%); box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 40px rgba(243, 186, 47, 0.2);">
@@ -1090,17 +1076,73 @@ HOW TO RECOVER YOUR ACCOUNT:
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
             </div>
             <div>
-              <h2 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.2;">Connect Web3 Wallet</h2>
+              <h2 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.2;">Continue with Web3 Wallet</h2>
               <span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">BNB Smart Chain (BEP-20)</span>
             </div>
           </div>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('walletConnectDynamicModal').remove()" style="border-radius: 50%; width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center;" aria-label="Close modal">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('web3AuthDynamicModal').remove()" style="border-radius: 50%; width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center;" aria-label="Close modal">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
 
-        <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
-          ${user ? `Connect your BEP-20 wallet to Passport <strong>${user.passportId || 'BB'}</strong> for token withdrawals & rewards.` : 'Connect your verified Web3 wallet to instantly sign in or mint your Booba Passport (+100 BOOBA bonus).'}
+        <!-- Recommendation Notice Popup -->
+        <div style="background: rgba(243, 186, 47, 0.1); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 16px; padding: 0.95rem 1.15rem; margin-bottom: 1.25rem; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.55;">
+          <div style="display: flex; align-items: center; gap: 0.45rem; font-weight: 800; color: var(--brand-yellow); margin-bottom: 0.3rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            Recommendation Notice
+          </div>
+          <div>We recommend <strong>Sign in with Google</strong> on standard mobile and desktop browsers.</div>
+          <div style="margin-top: 0.45rem; color: #FFFFFF; font-weight: 600;">
+            Sign up or Sign in with Web3 wallet natively inside your <strong>dApp browser</strong> (Trust Wallet, MetaMask, OKX, Binance Web3) or desktop browser extensions.
+          </div>
+        </div>
+
+        <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 1.1rem;">
+          Select your Web3 wallet provider below to authenticate and mint your Booba Passport (+100 BOOBA bonus):
+        </p>
+
+        <div id="walletOptionsContainer" class="wallet-options-list"></div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    this.renderWalletOptionsList();
+  }
+
+  // --------------------------------------------------------------------------
+  // ADD WALLET MODAL (For logged-in users, e.g. Gmail signups - Manual Input)
+  // --------------------------------------------------------------------------
+
+  openAddWalletModal() {
+    const existing = document.getElementById('addWalletDynamicModal') || document.getElementById('web3AuthDynamicModal') || document.getElementById('walletConnectDynamicModal');
+    if (existing) existing.remove();
+
+    const user = db.currentUser;
+    const isConnected = Boolean(user && user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
+    const currentAddr = isConnected ? user.walletAddress : '';
+
+    const modal = document.createElement('div');
+    modal.id = 'addWalletDynamicModal';
+    modal.className = 'modal-backdrop open active';
+    modal.innerHTML = `
+      <div class="wallet-modal-card" style="position: relative; z-index: 1010; max-width: 480px; width: 100%; border-radius: 24px; border: 1.5px solid rgba(243, 186, 47, 0.4); background: linear-gradient(180deg, rgba(20, 26, 38, 0.98) 0%, rgba(10, 13, 20, 0.99) 100%); box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 40px rgba(243, 186, 47, 0.2);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(243, 186, 47, 0.15); border: 1px solid rgba(243, 186, 47, 0.35); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+            </div>
+            <div>
+              <h2 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.2;">Add BEP-20 Wallet</h2>
+              <span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">BNB Smart Chain (BEP-20)</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('addWalletDynamicModal').remove()" style="border-radius: 50%; width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center;" aria-label="Close modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.5;">
+          ${user ? `Link your BEP-20 wallet address to Passport <strong>${user.passportId || 'BB'}</strong> for token rewards and instant $BOOBA withdrawals.` : 'Input your BEP-20 wallet address below to link your account.'}
         </p>
 
         ${isConnected ? `
@@ -1120,37 +1162,97 @@ HOW TO RECOVER YOUR ACCOUNT:
           </div>
         ` : ''}
 
-        <!-- Direct Instant BEP-20 Wallet Address Connect / Paste Bar -->
-        <div style="background: rgba(243, 186, 47, 0.08); border: 1.5px solid rgba(243, 186, 47, 0.3); border-radius: 18px; padding: 1.1rem; margin-bottom: 1.25rem;">
-          <div style="font-size: 0.8rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.4rem; display: flex; align-items: center; justify-content: space-between;">
-            <span>⚡ Instant Connect / Paste BEP-20 Address</span>
-            <span style="font-size: 0.72rem; color: var(--brand-yellow);">No App Switching</span>
-          </div>
-          <div style="display: flex; gap: 0.5rem; margin-top: 0.6rem;">
-            <input type="text" id="manualWalletInputAddress" class="form-input text-mono" placeholder="0x... Paste your Trust/MetaMask BEP-20 address" style="flex: 1; font-size: 0.82rem; padding: 0.6rem 0.8rem; border-radius: 10px; background: rgba(0,0,0,0.5);" value="${currentAddr || ''}">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="window.boobaApp.pasteWalletAddressFromClipboard()" style="padding: 0 0.75rem; font-size: 0.75rem; white-space: nowrap;">
+        <!-- Direct Manual BEP-20 Input Box -->
+        <div style="background: rgba(243, 186, 47, 0.08); border: 1.5px solid rgba(243, 186, 47, 0.3); border-radius: 18px; padding: 1.25rem; margin-bottom: 1rem;">
+          <label style="font-size: 0.82rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.4rem; display: block;">
+            BEP-20 Wallet Address (0x...)
+          </label>
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+            <input type="text" id="manualAddWalletInputAddress" class="form-input text-mono" placeholder="0x... Paste your Trust/MetaMask/Binance address" style="flex: 1; font-size: 0.82rem; padding: 0.65rem 0.85rem; border-radius: 10px; background: rgba(0,0,0,0.5);" value="${currentAddr || ''}">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.boobaApp.pasteWalletAddressFromClipboard('manualAddWalletInputAddress')" style="padding: 0 0.85rem; font-size: 0.78rem; white-space: nowrap;">
               Paste
             </button>
           </div>
-          <button type="button" class="btn btn-primary btn-block btn-sm" onclick="window.boobaApp.handleManualWalletConnect()" style="margin-top: 0.75rem; font-weight: 800; font-size: 0.85rem; padding: 0.65rem;">
+          <button type="button" id="saveManualAddWalletBtn" class="btn btn-primary btn-block btn-sm" onclick="window.boobaApp.handleSaveManualWallet()" style="margin-top: 0.85rem; font-weight: 800; font-size: 0.88rem; padding: 0.7rem;">
             ⚡ Link Wallet to My Account
           </button>
         </div>
 
-        <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.75rem; text-align: center;">
-          — Or Auto-Connect with Wallet App —
-        </div>
-
-        <div id="walletOptionsContainer" class="wallet-options-list"></div>
-
-        <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.75rem; color: var(--text-muted); text-align: center; line-height: 1.4;">
-          💡 <strong>Tip:</strong> You can copy your BEP-20 address from Trust Wallet or MetaMask and paste it above to connect your Chrome account in 1 second!
+        <div style="padding-top: 0.75rem; font-size: 0.76rem; color: var(--text-muted); text-align: center; line-height: 1.45;">
+          💡 <strong>Tip:</strong> Open Trust Wallet, MetaMask, or Binance, copy your <strong>BNB Smart Chain (BEP-20)</strong> deposit address, and paste it above.
         </div>
       </div>
     `;
 
     document.body.appendChild(modal);
-    this.renderWalletOptionsList();
+  }
+
+  // --------------------------------------------------------------------------
+  // ADD USERNAME MODAL (For users who registered with wallet in dApp)
+  // --------------------------------------------------------------------------
+
+  openAddUsernameModal() {
+    const existing = document.getElementById('addUsernameDynamicModal');
+    if (existing) existing.remove();
+
+    const user = db.currentUser;
+    if (!user) {
+      alert('Please sign in or connect your wallet first.');
+      return;
+    }
+
+    const isDefaultWalletName = (user.username || '').startsWith('BNB_');
+
+    const modal = document.createElement('div');
+    modal.id = 'addUsernameDynamicModal';
+    modal.className = 'modal-backdrop open active';
+    modal.innerHTML = `
+      <div class="wallet-modal-card" style="position: relative; z-index: 1010; max-width: 460px; width: 100%; border-radius: 24px; border: 1.5px solid rgba(243, 186, 47, 0.4); background: linear-gradient(180deg, rgba(20, 26, 38, 0.98) 0%, rgba(10, 13, 20, 0.99) 100%); box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 40px rgba(243, 186, 47, 0.2);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(243, 186, 47, 0.15); border: 1px solid rgba(243, 186, 47, 0.35); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <div>
+              <h2 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.2;">${isDefaultWalletName ? 'Add Citizen Username' : 'Edit Username'}</h2>
+              <span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Booba Passport Identity</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('addUsernameDynamicModal').remove()" style="border-radius: 50%; width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center;" aria-label="Close modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.5;">
+          Choose your unique citizen username. This name will appear on the global leaderboard, your digital passport, and community quests.
+        </p>
+
+        <form id="addUsernameForm" onsubmit="window.boobaApp.handleSaveUsername(event)" style="display: flex; flex-direction: column; gap: 0.85rem;">
+          <div>
+            <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.35rem; display: block;">Username</label>
+            <input type="text" id="manualAddUsernameInput" class="x-input-field" placeholder="e.g. CryptoKing" value="${isDefaultWalletName ? '' : user.username}" required maxlength="20" autocomplete="username">
+            <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.35rem;">
+              3-20 characters: letters, numbers, and underscores only.
+            </div>
+          </div>
+
+          <button type="submit" id="saveUsernameBtn" class="btn-x-submit" style="margin-top: 0.5rem;">
+            Save Username
+          </button>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
+
+  // Universal Dispatcher
+  openWalletModal(options = {}) {
+    if (options?.mode === 'auth' || !db.currentUser) {
+      this.openWeb3AuthModal();
+    } else {
+      this.openAddWalletModal();
+    }
   }
 
   renderWalletOptionsList() {
@@ -1347,11 +1449,11 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
   }
 
-  async pasteWalletAddressFromClipboard() {
+  async pasteWalletAddressFromClipboard(targetId = 'manualAddWalletInputAddress') {
     try {
       if (navigator.clipboard && navigator.clipboard.readText) {
         const text = await navigator.clipboard.readText();
-        const input = document.getElementById('manualWalletInputAddress');
+        const input = document.getElementById(targetId) || document.getElementById('manualAddWalletInputAddress') || document.getElementById('manualWalletInputAddress');
         if (input && text) {
           input.value = text.trim();
         }
@@ -1363,8 +1465,8 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
   }
 
-  async handleManualWalletConnect() {
-    const input = document.getElementById('manualWalletInputAddress');
+  async handleSaveManualWallet() {
+    const input = document.getElementById('manualAddWalletInputAddress') || document.getElementById('manualWalletInputAddress');
     const addr = (input?.value || '').trim();
 
     if (!addr || !addr.startsWith('0x') || addr.length < 20) {
@@ -1372,35 +1474,90 @@ HOW TO RECOVER YOUR ACCOUNT:
       return;
     }
 
-    const modal = document.getElementById('walletConnectDynamicModal');
-    if (modal) modal.remove();
+    const btn = document.getElementById('saveManualAddWalletBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Linking Wallet...';
+    }
 
-    if (db.currentUser) {
-      const res = await db.updateWalletAddress(addr);
+    try {
+      if (db.currentUser) {
+        const res = await db.updateWalletAddress(addr);
+        if (res.success) {
+          alert(`🎉 BEP-20 Wallet Linked Successfully!\nAddress: ${addr.slice(0, 6)}...${addr.slice(-4)}`);
+          const modal = document.getElementById('addWalletDynamicModal') || document.getElementById('walletConnectDynamicModal');
+          if (modal) modal.remove();
+          this.renderHeaderNav();
+          this.renderPage();
+        } else {
+          alert(res.message || 'Failed to link wallet address.');
+        }
+      } else {
+        const res = await db.loginOrSignupWithWallet({ walletAddress: addr });
+        if (res.success) {
+          const modal = document.getElementById('addWalletDynamicModal') || document.getElementById('walletConnectDynamicModal');
+          if (modal) modal.remove();
+          if (res.isNewUser && res.seedPhrase) {
+            this.promptWeb3EmailInputModal(res.user, () => {
+              this.showSeedPhraseModal(res.seedPhrase, res.user, () => {
+                window.location.href = 'dashboard.html';
+              });
+            });
+          } else {
+            this.renderHeaderNav();
+            this.renderPage();
+          }
+        } else {
+          alert(res.message || 'Failed to authenticate wallet.');
+        }
+      }
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '⚡ Link Wallet to My Account';
+      }
+    }
+  }
+
+  async handleSaveUsername(e) {
+    if (e) e.preventDefault();
+    const input = document.getElementById('manualAddUsernameInput');
+    const username = (input?.value || '').trim();
+
+    if (!username || username.length < 3) {
+      alert('Please enter a username with at least 3 characters.');
+      return;
+    }
+
+    const btn = document.getElementById('saveUsernameBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Saving Username...';
+    }
+
+    try {
+      const res = await db.updateUsername(username);
       if (res.success) {
-        alert(`🎉 Web3 Wallet Connected Successfully!\nAddress: ${addr.slice(0, 6)}...${addr.slice(-4)}`);
+        alert(`🎉 Username updated to "@${res.user.username}"!`);
+        const modal = document.getElementById('addUsernameDynamicModal');
+        if (modal) modal.remove();
         this.renderHeaderNav();
         this.renderPage();
       } else {
-        alert(res.message || 'Failed to link wallet address.');
+        alert(res.message || 'Failed to update username.');
       }
-    } else {
-      const res = await db.loginOrSignupWithWallet({ walletAddress: addr });
-      if (res.success) {
-        if (res.isNewUser && res.seedPhrase) {
-          this.promptWeb3EmailInputModal(res.user, () => {
-            this.showSeedPhraseModal(res.seedPhrase, res.user, () => {
-              window.location.href = 'dashboard.html';
-            });
-          });
-        } else {
-          this.renderHeaderNav();
-          this.renderPage();
-        }
-      } else {
-        alert(res.message || 'Failed to authenticate wallet.');
+    } catch (err) {
+      alert('An unexpected error occurred updating your username.');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Save Username';
       }
     }
+  }
+
+  async handleManualWalletConnect() {
+    return this.handleSaveManualWallet();
   }
 
   async initWalletConnectProvider() {
@@ -3315,7 +3472,10 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
 
     const levelInfo = calculateLevel(user.boobaPoints);
+    const isWalletUser = user.authProvider === 'wallet' || (user.email && user.email.includes('@wallet.booba.crypto')) || (user.username && user.username.startsWith('BNB_'));
     const isWalletConnected = Boolean(user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
+    const formattedWallet = isWalletConnected ? `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}` : '';
+    const isDefaultWalletName = isWalletUser && (user.username || '').startsWith('BNB_');
 
     container.innerHTML = `
       <div class="container page-content">
@@ -3336,7 +3496,14 @@ HOW TO RECOVER YOUR ACCOUNT:
                 </div>
               </div>
               <div class="dashboard-user-meta">
-                <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                  <h2 style="font-size: 1.4rem; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.2;">${user.username}</h2>
+                  ${isWalletUser ? `
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.openAddUsernameModal()" style="font-size: 0.74rem; padding: 0.2rem 0.55rem; color: var(--brand-yellow); border: 1px solid rgba(243, 186, 47, 0.35); border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                      ${isDefaultWalletName ? 'Add Username' : 'Edit Username'}
+                    </button>
+                  ` : ''}
                   <span class="badge-tag" style="background: var(--brand-yellow); color: #000; font-weight: 800; font-size: 0.78rem;">
                     Lv.${levelInfo.level} ${levelInfo.title}
                   </span>
@@ -3357,10 +3524,23 @@ HOW TO RECOVER YOUR ACCOUNT:
 
             <!-- Quick Action Buttons -->
             <div class="dashboard-action-wrapper" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
-              <button class="btn ${isWalletConnected ? 'btn-outline' : 'btn-primary'} btn-lg" onclick="window.boobaApp.openWalletModal()" style="display: inline-flex; align-items: center; gap: 0.5rem;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
-                <span>${isWalletConnected ? `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}` : 'Connect Wallet'}</span>
-              </button>
+              ${isWalletUser ? `
+                <!-- dApp Wallet Registered User: Prominent Add Username Button -->
+                <button class="btn btn-primary btn-lg" onclick="window.boobaApp.openAddUsernameModal()" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                  <span>${isDefaultWalletName ? '+ Add Username' : 'Edit Username'}</span>
+                </button>
+                <button class="btn btn-outline btn-lg" onclick="window.boobaApp.openAddWalletModal()" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                  <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--accent-emerald);"></span>
+                  <span>${formattedWallet || 'Wallet'}</span>
+                </button>
+              ` : `
+                <!-- Gmail / Email Registered User: Prominent Add Wallet Button -->
+                <button class="btn ${isWalletConnected ? 'btn-outline' : 'btn-primary'} btn-lg" onclick="window.boobaApp.openAddWalletModal()" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+                  <span>${isWalletConnected ? `Wallet: ${formattedWallet}` : '+ Add Wallet'}</span>
+                </button>
+              `}
 
               <a href="withdraw.html" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
@@ -3381,6 +3561,39 @@ HOW TO RECOVER YOUR ACCOUNT:
             </div>
           </div>
         </div>
+
+        <!-- NOTIFICATION / PROMPT BANNER FOR MISSING WALLET OR MISSING USERNAME -->
+        ${!isWalletConnected ? `
+          <div style="background: rgba(243, 186, 47, 0.08); border: 1.5px solid rgba(243, 186, 47, 0.3); border-radius: 20px; padding: 1.15rem 1.6rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(243, 186, 47, 0.15); border: 1px solid rgba(243, 186, 47, 0.35); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow); flex-shrink: 0;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+              </div>
+              <div>
+                <div style="font-weight: 800; color: #FFFFFF; font-size: 0.95rem;">Link your BEP-20 Wallet Address</div>
+                <div style="font-size: 0.82rem; color: var(--text-secondary);">Input your BNB Smart Chain address to enable token airdrops, quest rewards & instant withdrawals.</div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="window.boobaApp.openAddWalletModal()" style="white-space: nowrap; padding: 0.55rem 1.35rem; font-weight: 800; border-radius: 10px;">
+              + Add Wallet
+            </button>
+          </div>
+        ` : (isDefaultWalletName ? `
+          <div style="background: rgba(243, 186, 47, 0.08); border: 1.5px solid rgba(243, 186, 47, 0.3); border-radius: 20px; padding: 1.15rem 1.6rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(243, 186, 47, 0.15); border: 1px solid rgba(243, 186, 47, 0.35); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow); flex-shrink: 0;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </div>
+              <div>
+                <div style="font-weight: 800; color: #FFFFFF; font-size: 0.95rem;">Claim Your Unique Citizen Username</div>
+                <div style="font-size: 0.82rem; color: var(--text-secondary);">You're registered via Web3 dApp wallet. Choose your custom @username for your Booba Passport!</div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="window.boobaApp.openAddUsernameModal()" style="white-space: nowrap; padding: 0.55rem 1.35rem; font-weight: 800; border-radius: 10px;">
+              + Add Username
+            </button>
+          </div>
+        ` : '')}
 
         <!-- 4 BENTO STATS METRICS -->
         <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">

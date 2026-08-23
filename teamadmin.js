@@ -10,6 +10,20 @@ class TeamAdminApp {
   constructor() {
     this.activeTab = 'overview';
     this.userSearchQuery = '';
+    this.submissionFilter = 'all'; // 'all' | 'pending' | 'approved' | 'rejected'
+    
+    // Token & Airdrop Hub state
+    this.airdropTargetMode = 'top_n'; // 'top_n' | 'search_select' | 'all' | 'active'
+    this.airdropTopCount = 15; // default 15, customizable e.g. 15, 30, 100, 2000
+    this.airdropSearchQuery = '';
+    this.airdropSelectedUserIds = new Set();
+    this.airdropAmount = 500;
+    this.airdropReason = '';
+    const hashTab = (window.location.hash || '').replace('#', '');
+    if (['overview', 'quests', 'airdrop', 'submissions', 'users'].includes(hashTab)) {
+      this.activeTab = hashTab;
+    }
+    
     this.init();
   }
 
@@ -20,6 +34,13 @@ class TeamAdminApp {
     // Subscribe to DB updates
     db.subscribe(() => {
       this.render();
+    });
+
+    window.addEventListener('hashchange', () => {
+      const hashTab = (window.location.hash || '').replace('#', '');
+      if (['overview', 'quests', 'airdrop', 'submissions', 'users'].includes(hashTab) && this.activeTab !== hashTab) {
+        this.switchTab(hashTab);
+      }
     });
   }
 
@@ -67,6 +88,7 @@ class TeamAdminApp {
 
   switchTab(tabName) {
     this.activeTab = tabName;
+    window.location.hash = tabName;
     document.querySelectorAll('.admin-nav-item').forEach(item => {
       if (item.getAttribute('data-tab') === tabName) {
         item.classList.add('active');
@@ -105,6 +127,15 @@ class TeamAdminApp {
       return;
     }
 
+    // Update active tab styling in sidebar
+    document.querySelectorAll('.admin-nav-item').forEach(item => {
+      if (item.getAttribute('data-tab') === this.activeTab) {
+        item.classList.add('active');
+      } else {
+        item.classList.remove('active');
+      }
+    });
+
     // Update pending submissions badge in sidebar
     const pendingCount = db.submissions.filter(s => s.status === 'pending').length;
     const badge = document.getElementById('pendingSubmissionsBadge');
@@ -139,45 +170,41 @@ class TeamAdminApp {
 
   renderAccessGate(container) {
     container.innerHTML = `
-      <div style="max-width: 480px; margin: 4rem auto; padding: 2.5rem; border-radius: 28px; background: linear-gradient(135deg, rgba(20, 26, 38, 0.98) 0%, rgba(10, 13, 20, 0.99) 100%); border: 1.5px solid rgba(243, 186, 47, 0.4); text-align: center; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);">
+      <div style="max-width: 420px; margin: 5rem auto; padding: 2rem; border-radius: var(--radius-md); background: var(--admin-surface); border: 1px solid var(--admin-border); text-align: center;">
         
-        <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(243, 186, 47, 0.15); border: 2px solid var(--brand-yellow); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto; color: var(--brand-yellow);">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--brand-yellow-subtle); border: 1px solid rgba(243, 186, 47, 0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto; color: var(--brand-yellow);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         </div>
 
-        <h2 style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; letter-spacing: -0.01em;">
-          Core Team Admin Authorization
+        <h2 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.35rem; letter-spacing: -0.01em;">
+          Core Admin Authentication
         </h2>
-        <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.75rem;">
-          Restricted to authorized core team emails registered in the administrator whitelist.
+        <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.5rem;">
+          Restricted to authorized core team emails registered in the whitelist.
         </p>
 
         <form id="adminLoginForm" onsubmit="window.adminApp.handleAdminLogin(event)" style="text-align: left;">
-          <div style="margin-bottom: 1.25rem;">
-            <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">
-              Authorized Admin Email
-            </label>
-            <input type="email" id="adminEmailInput" placeholder="admin@gmail.com" class="form-input" style="width: 100%; border-radius: 12px;" required>
+          <div class="form-field">
+            <label class="form-field-label">Admin Email</label>
+            <input type="email" id="adminEmailInput" placeholder="admin@gmail.com" class="admin-input" required>
           </div>
 
-          <div style="margin-bottom: 1.5rem;">
-            <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">
-              Account Password
-            </label>
-            <input type="password" id="adminPasswordInput" placeholder="••••••••" class="form-input" style="width: 100%; border-radius: 12px;" required>
+          <div class="form-field" style="margin-bottom: 1.5rem;">
+            <label class="form-field-label">Password</label>
+            <input type="password" id="adminPasswordInput" placeholder="••••••••" class="admin-input" required>
           </div>
           
-          <button type="submit" class="btn btn-primary btn-block" style="font-weight: 800; border-radius: 12px; padding: 0.85rem;">
-            Authenticate Admin Access ↗
+          <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.75rem; font-size: 0.9rem;">
+            Sign In to Console ↗
           </button>
         </form>
 
-        <div style="margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.78rem; color: var(--text-muted);">
-          Whitelisted Emails: <span class="text-mono" style="color: var(--brand-yellow);">${ADMIN_EMAILS.join(', ')}</span>
+        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--admin-border); font-size: 0.75rem; color: var(--text-muted);">
+          Whitelisted: <span class="text-mono" style="color: var(--brand-yellow);">${ADMIN_EMAILS.join(', ')}</span>
         </div>
 
-        <div style="margin-top: 1.25rem;">
-          <a href="index.html" class="nav-link" style="font-size: 0.85rem; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 0.35rem;">
+        <div style="margin-top: 1rem;">
+          <a href="index.html" style="font-size: 0.8rem; color: var(--text-secondary); text-decoration: none;">
             ← Back to Main Website
           </a>
         </div>
@@ -198,7 +225,7 @@ class TeamAdminApp {
 
     const res = await db.login({ emailOrUsername: email, password });
     if (res.success) {
-      alert(`Welcome to the Admin Studio, ${res.user.username}!`);
+      alert(`Welcome to Admin Console, ${res.user.username}!`);
       this.render();
     } else {
       alert(res.message || 'Authentication failed. Please check your credentials.');
@@ -211,164 +238,145 @@ class TeamAdminApp {
 
   renderOverviewTab(container) {
     const stats = db.getStats();
-    const recentSubmissions = db.submissions.slice(0, 5);
-    const recentUsers = db.users.slice(0, 5);
+    const pendingSubmissions = db.submissions.filter(s => s.status === 'pending');
+    const recentSubmissions = db.submissions.slice(0, 6);
+    const recentUsers = db.users.slice(0, 6);
 
     container.innerHTML = `
-      <div style="max-width: 1200px; margin: 0 auto;">
+      <div>
         
         <!-- Header -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1.25rem;">
+        <div class="page-header">
           <div>
-            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
-              <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); font-size: 0.75rem;">
-                CORE STUDIO CONSOLE
-              </span>
-              <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-size: 0.75rem;">
-                <span class="pulse-dot" style="width: 5px; height: 5px;"></span>
-                <span>BNB SMART CHAIN</span>
-              </span>
-            </div>
-            <h1 style="font-size: 1.8rem; font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin: 0;">
-              Admin Dashboard Overview
-            </h1>
-            <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0.25rem 0 0 0;">
-              Live telemetry, proof review queue, and treasury distribution metrics.
-            </p>
+            <h1 class="page-title">Admin Dashboard</h1>
+            <p class="page-desc">Telemetry overview, pending creator proofs, and passport statistics.</p>
           </div>
 
-          <div style="display: flex; gap: 0.75rem;">
-            <button type="button" class="btn btn-outline btn-sm" onclick="window.adminApp.switchTab('quests')">
-              + Publish Quest
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button type="button" class="btn-admin btn-admin-secondary" onclick="window.adminApp.switchTab('quests')">
+              + Deploy Quest
             </button>
-            <button type="button" class="btn btn-primary btn-sm" onclick="window.adminApp.switchTab('submissions')">
-              Review Proofs (${stats.pendingSubmissions})
+            <button type="button" class="btn-admin btn-admin-primary" onclick="window.adminApp.switchTab('submissions')">
+              Review Queue (${pendingSubmissions.length})
             </button>
           </div>
         </div>
 
-        <!-- Metrics Cards Grid -->
-        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem;">
+        <!-- 4 Minimalist Metric Tiles -->
+        <div class="metrics-row">
           
-          <div class="card" style="padding: 1.5rem; border-radius: 20px; background: rgba(14, 18, 27, 0.85); border: 1px solid rgba(255, 255, 255, 0.08);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.04em;">
-                Total Passports
-              </span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--brand-yellow)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            </div>
-            <div style="font-size: 2.2rem; font-weight: 900; color: #FFFFFF; margin-bottom: 0.25rem;" class="text-mono">
-              ${Number(stats.totalUsers).toLocaleString()}
-            </div>
-            <div style="font-size: 0.78rem; color: var(--accent-emerald); font-weight: 700;">
-              Registered Community Holders
+          <div class="metric-tile">
+            <span class="metric-tile-label">Registered Citizens</span>
+            <div class="metric-tile-value">${Number(stats.totalUsers).toLocaleString()}</div>
+            <div class="metric-tile-sub" style="color: var(--accent-emerald);">
+              <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-emerald);"></span>
+              Verified Passports
             </div>
           </div>
 
-          <div class="card" style="padding: 1.5rem; border-radius: 20px; background: rgba(14, 18, 27, 0.85); border: 1px solid rgba(255, 255, 255, 0.08);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.04em;">
-                Live Quests
-              </span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--brand-yellow)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-            </div>
-            <div style="font-size: 2.2rem; font-weight: 900; color: var(--brand-yellow); margin-bottom: 0.25rem;" class="text-mono">
-              ${Number(stats.activeQuestsCount).toLocaleString()}
-            </div>
-            <div style="font-size: 0.78rem; color: var(--text-secondary);">
-              <a href="#" onclick="window.adminApp.switchTab('quests')" style="color: var(--brand-yellow); font-weight: 700;">Manage Active Quests →</a>
+          <div class="metric-tile">
+            <span class="metric-tile-label">Active Quests</span>
+            <div class="metric-tile-value" style="color: var(--brand-yellow);">${Number(stats.activeQuestsCount).toLocaleString()}</div>
+            <div class="metric-tile-sub">
+              <a href="#" onclick="window.adminApp.switchTab('quests')" style="color: var(--brand-yellow); text-decoration: none; font-weight: 600;">Manage Bounties →</a>
             </div>
           </div>
 
-          <div class="card" style="padding: 1.5rem; border-radius: 20px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid ${stats.pendingSubmissions > 0 ? 'rgba(239, 68, 68, 0.4)' : 'rgba(255, 255, 255, 0.08)'};">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.04em;">
-                Pending Proofs
-              </span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${stats.pendingSubmissions > 0 ? 'var(--accent-ruby)' : 'var(--text-muted)'}" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <div class="metric-tile">
+            <span class="metric-tile-label">Pending Proofs</span>
+            <div class="metric-tile-value" style="color: ${pendingSubmissions.length > 0 ? 'var(--brand-yellow)' : '#FFFFFF'};">
+              ${pendingSubmissions.length}
             </div>
-            <div style="font-size: 2.2rem; font-weight: 900; color: ${stats.pendingSubmissions > 0 ? 'var(--accent-orange)' : '#FFFFFF'}; margin-bottom: 0.25rem;" class="text-mono">
-              ${Number(stats.pendingSubmissions).toLocaleString()}
-            </div>
-            <div style="font-size: 0.78rem; color: var(--text-secondary);">
-              <a href="#" onclick="window.adminApp.switchTab('submissions')" style="color: var(--brand-yellow); font-weight: 700;">Review Queue →</a>
+            <div class="metric-tile-sub">
+              <a href="#" onclick="window.adminApp.switchTab('submissions')" style="color: var(--brand-yellow); text-decoration: none; font-weight: 600;">Review Queue →</a>
             </div>
           </div>
 
-          <div class="card" style="padding: 1.5rem; border-radius: 20px; background: rgba(14, 18, 27, 0.85); border: 1px solid rgba(255, 255, 255, 0.08);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.04em;">
-                Points Circulating
-              </span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--brand-yellow)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><line x1="12" y1="6" x2="12" y2="8"></line><line x1="12" y1="16" x2="12" y2="18"></line></svg>
-            </div>
-            <div style="font-size: 2.2rem; font-weight: 900; color: var(--accent-gold); margin-bottom: 0.25rem;" class="text-mono">
-              ${Number(stats.totalPointsDistributed).toLocaleString()}
-            </div>
-            <div style="font-size: 0.78rem; color: var(--text-secondary); font-weight: 700;">
-              $BOOBA Tokens Granted
-            </div>
+          <div class="metric-tile">
+            <span class="metric-tile-label">Tokens Distributed</span>
+            <div class="metric-tile-value">${Number(stats.totalPointsDistributed).toLocaleString()}</div>
+            <div class="metric-tile-sub">$BOOBA Points Total</div>
           </div>
 
         </div>
 
-        <!-- Recent Activity Sections -->
-        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.75rem;">
+        <!-- 2 Clean Side-by-Side Tables -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; align-items: start;">
           
-          <!-- Recent Submissions -->
-          <div class="card" style="padding: 1.75rem; border-radius: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+          <!-- Pending Proof Reviews -->
+          <div class="clean-panel">
+            <div class="clean-panel-header">
               <div>
-                <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Recent Submissions</h3>
-                <div style="font-size: 0.78rem; color: var(--text-muted);">Creator content & mission proofs</div>
+                <div class="clean-panel-title">Proof Review Queue</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Creator submissions awaiting approval</div>
               </div>
-              <a href="#" onclick="window.adminApp.switchTab('submissions')" style="font-size: 0.8rem; color: var(--brand-yellow); font-weight: 700;">View All →</a>
+              <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.switchTab('submissions')">
+                View All →
+              </button>
             </div>
 
             ${recentSubmissions.length === 0 ? `
-              <p style="color: var(--text-secondary); font-size: 0.88rem; text-align: center; padding: 2rem 0;">No user submissions recorded yet.</p>
+              <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.85rem;">
+                No submissions recorded yet.
+              </div>
             ` : `
-              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div>
                 ${recentSubmissions.map(s => `
-                  <div style="padding: 0.85rem 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                      <strong style="color: #FFFFFF; font-size: 0.88rem;">${s.username}</strong>
-                      <div style="font-size: 0.76rem; color: var(--text-muted);">${s.questTitle}</div>
+                  <div class="data-row">
+                    <div style="min-width: 0; display: flex; flex-direction: column; gap: 0.2rem;">
+                      <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <strong style="color: #FFFFFF; font-size: 0.85rem;">${s.username}</strong>
+                        <span class="badge-clean ${s.status === 'approved' ? 'badge-clean-green' : s.status === 'rejected' ? 'badge-clean-red' : 'badge-clean-yellow'}">
+                          ${s.status}
+                        </span>
+                      </div>
+                      <div style="font-size: 0.76rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${s.questTitle} • +${s.rewardBooba} BOOBA
+                      </div>
                     </div>
-                    <span class="badge-tag" style="font-size: 0.7rem; text-transform: uppercase; background: ${s.status === 'approved' ? 'rgba(16,185,129,0.15)' : s.status === 'rejected' ? 'rgba(239,68,68,0.15)' : 'rgba(243,186,47,0.15)'}; color: ${s.status === 'approved' ? 'var(--accent-emerald)' : s.status === 'rejected' ? 'var(--accent-ruby)' : 'var(--brand-yellow)'};">
-                      ${s.status}
-                    </span>
+
+                    ${s.status === 'pending' ? `
+                      <button class="btn-admin btn-admin-primary btn-admin-sm" onclick="window.adminApp.handleReview('${s.id}', 'approved')">
+                        Approve
+                      </button>
+                    ` : `
+                      <span style="font-size: 0.74rem; color: var(--text-muted); font-family: var(--font-mono);">${s.submittedAt ? s.submittedAt.slice(0, 10) : ''}</span>
+                    `}
                   </div>
                 `).join('')}
               </div>
             `}
           </div>
 
-          <!-- Recent Passports -->
-          <div class="card" style="padding: 1.75rem; border-radius: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+          <!-- Recent Citizens -->
+          <div class="clean-panel">
+            <div class="clean-panel-header">
               <div>
-                <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Recent Passports</h3>
-                <div style="font-size: 0.78rem; color: var(--text-muted);">Newly minted community accounts</div>
+                <div class="clean-panel-title">Citizens & Passports</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Newly registered community members</div>
               </div>
-              <a href="#" onclick="window.adminApp.switchTab('users')" style="font-size: 0.8rem; color: var(--brand-yellow); font-weight: 700;">View All →</a>
+              <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.switchTab('users')">
+                View All →
+              </button>
             </div>
 
             ${recentUsers.length === 0 ? `
-              <p style="color: var(--text-secondary); font-size: 0.88rem; text-align: center; padding: 2rem 0;">No registered passports yet.</p>
+              <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.85rem;">
+                No registered passports yet.
+              </div>
             ` : `
-              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div>
                 ${recentUsers.map(u => `
-                  <div style="padding: 0.85rem 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; align-items: center; gap: 0.6rem;">
-                      <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--brand-yellow);">
-                      <div>
-                        <strong style="color: #FFFFFF; font-size: 0.88rem;">${u.username}</strong>
-                        <div style="font-size: 0.74rem; color: var(--text-muted);" class="text-mono">${u.passportId}</div>
+                  <div class="data-row">
+                    <div style="display: flex; align-items: center; gap: 0.65rem; min-width: 0;">
+                      <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--brand-yellow); object-fit: cover; flex-shrink: 0;">
+                      <div style="min-width: 0;">
+                        <strong style="color: #FFFFFF; font-size: 0.85rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${u.username}</strong>
+                        <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">${u.passportId}</span>
                       </div>
                     </div>
-                    <div style="font-weight: 800; color: var(--brand-yellow); font-size: 0.88rem;" class="text-mono">
-                      +${Number(u.boobaPoints).toLocaleString()} B
+                    <div style="font-weight: 800; color: var(--brand-yellow); font-size: 0.85rem; font-family: var(--font-mono); flex-shrink: 0;">
+                      ${Number(u.boobaPoints || 0).toLocaleString()} B
                     </div>
                   </div>
                 `).join('')}
@@ -387,120 +395,131 @@ class TeamAdminApp {
   // --------------------------------------------------------------------------
 
   renderQuestsTab(container) {
-    const quests = db.quests;
+    const quests = db.quests || [];
 
     container.innerHTML = `
-      <div style="max-width: 1200px; margin: 0 auto;">
+      <div>
         
-        <div style="margin-bottom: 2rem;">
-          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
-            <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); font-size: 0.75rem;">
-              BOUNTY & EXPEDITION BUILDER
-            </span>
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Quests Studio</h1>
+            <p class="page-desc">Publish and manage community, engagement, and creator bounties.</p>
           </div>
-          <h1 style="font-size: 1.8rem; font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin: 0 0 0.25rem 0;">
-            Upload & Manage Live Quests
-          </h1>
-          <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0;">
-            Publish active bounties across Community, Engagement, and Content Production. Quests appear immediately on the main portal.
-          </p>
+          <span class="badge-clean badge-clean-green">${quests.length} Live Bounties</span>
         </div>
 
-        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem;">
+        <div style="display: grid; grid-template-columns: minmax(300px, 1fr) minmax(360px, 1.4fr); gap: 1.75rem; align-items: start;">
           
-          <!-- Quest Creator Form -->
-          <div class="card" style="padding: 2rem; border-radius: 24px; border: 1.5px solid rgba(243, 186, 47, 0.35);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-              <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 0;">Deploy New Bounty</h3>
-              <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald);">Live Sync</span>
+          <!-- Quest Creator Panel -->
+          <div class="clean-panel">
+            <div class="clean-panel-header">
+              <div class="clean-panel-title">Deploy New Bounty</div>
             </div>
             
-            <form onsubmit="window.adminApp.handleCreateQuest(event)">
-              <div class="form-group" style="margin-bottom: 1.15rem;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.82rem;">Quest Title *</label>
-                <input type="text" id="newQuestTitle" placeholder="e.g. Follow @BoobaToken on X" class="form-input" style="border-radius: 12px;" required>
+            <form onsubmit="window.adminApp.handleCreateQuest(event)" style="padding: 1.25rem;">
+              <div class="form-field">
+                <label class="form-field-label">Quest Title *</label>
+                <input type="text" id="newQuestTitle" placeholder="e.g. Follow @BoobaToken on X" class="admin-input" required>
               </div>
 
-              <div class="form-group" style="margin-bottom: 1.15rem;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.82rem;">Mission Instructions & Description *</label>
-                <textarea id="newQuestDesc" rows="2" placeholder="Explain the exact instructions the user must follow..." class="form-input" style="border-radius: 12px;" required></textarea>
+              <div class="form-field">
+                <label class="form-field-label">Instructions *</label>
+                <textarea id="newQuestDesc" rows="2" placeholder="Explain the exact instructions for the citizen..." class="admin-input" required></textarea>
               </div>
 
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.15rem;">
-                <div>
-                  <label class="form-label" style="font-weight: 700; font-size: 0.82rem;">Category *</label>
-                  <select id="newQuestCategory" class="form-input" style="border-radius: 12px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-field">
+                  <label class="form-field-label">Category *</label>
+                  <select id="newQuestCategory" class="admin-input">
                     <option value="community">Community</option>
                     <option value="engagement">Engagement</option>
                     <option value="content">Content Production</option>
                   </select>
                 </div>
-                <div>
-                  <label class="form-label" style="font-weight: 700; font-size: 0.82rem;">Reward ($BOOBA) *</label>
-                  <input type="number" id="newQuestReward" value="150" class="form-input" style="border-radius: 12px;" required>
+                <div class="form-field">
+                  <label class="form-field-label">Reward ($BOOBA) *</label>
+                  <input type="number" id="newQuestReward" value="150" class="admin-input" required>
                 </div>
               </div>
 
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.15rem;">
-                <div>
-                  <label class="form-label" style="font-weight: 700; font-size: 0.82rem;">Verification Type *</label>
-                  <select id="newQuestType" class="form-input" style="border-radius: 12px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-field">
+                  <label class="form-field-label">Verification *</label>
+                  <select id="newQuestType" class="admin-input">
                     <option value="social">Social Link Action</option>
                     <option value="proof">Proof Submission</option>
                     <option value="instant">Instant Claim</option>
                   </select>
                 </div>
-                <div>
-                  <label class="form-label" style="font-weight: 700; font-size: 0.82rem;">
-                    Target Link <span style="color: var(--brand-yellow);">*Compulsory for Community/Engagement</span>
-                  </label>
-                  <input type="url" id="newQuestUrl" placeholder="https://x.com/... or https://t.me/..." class="form-input" style="border-radius: 12px;">
+                <div class="form-field">
+                  <label class="form-field-label">Target URL</label>
+                  <input type="url" id="newQuestUrl" placeholder="https://x.com/..." class="admin-input">
                 </div>
               </div>
 
-              <div class="form-group" style="margin-bottom: 1.75rem;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.82rem;">Requirements Summary (Shown on Card)</label>
-                <input type="text" id="newQuestReqs" placeholder="e.g. Follow handle & submit tweet link" class="form-input" style="border-radius: 12px;">
+              <div class="form-field" style="margin-bottom: 1.25rem;">
+                <label class="form-field-label">Requirements Note</label>
+                <input type="text" id="newQuestReqs" placeholder="e.g. Submit post link" class="admin-input">
               </div>
 
-              <button type="submit" class="btn btn-primary btn-block" style="font-weight: 800; border-radius: 12px; padding: 0.85rem;">
-                Publish Bounty to Main Website ↗
+              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.65rem;">
+                Publish Bounty Live ↗
               </button>
             </form>
           </div>
 
-          <!-- Existing Quests List -->
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-              <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 0;">
-                Live Database Quests (${quests.length})
-              </h3>
+          <!-- Existing Quests Table -->
+          <div class="clean-panel">
+            <div class="clean-panel-header">
+              <div class="clean-panel-title">Active Database Quests (${quests.length})</div>
             </div>
             
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-              ${quests.map(q => `
-                <div class="card" style="padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08);">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.6rem;">
-                    <div>
-                      <span class="badge-tag" style="text-transform: uppercase; font-size: 0.72rem; font-weight: 800;">${q.category}</span>
-                      <strong style="font-size: 1.05rem; color: #FFFFFF; display: block; margin-top: 0.4rem;">${q.title}</strong>
-                    </div>
-                    <div style="font-weight: 900; color: var(--brand-yellow); font-size: 1rem;" class="text-mono">
-                      +${Number(q.rewardBooba).toLocaleString()} BOOBA
-                    </div>
-                  </div>
-                  <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5;">${q.description}</p>
-                  
-                  <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.75rem;">
-                    <span style="font-size: 0.75rem; color: var(--text-muted);">
-                      Type: <strong>${q.type}</strong> ${q.targetUrl ? `• <a href="${q.targetUrl}" target="_blank" style="color: var(--brand-yellow);">Link ↗</a>` : ''}
-                    </span>
-                    <button class="btn btn-ghost btn-sm" onclick="window.adminApp.handleDeleteQuest('${q.id}')" style="color: var(--accent-ruby); font-size: 0.75rem; font-weight: 700;">
-                      Delete Quest
-                    </button>
-                  </div>
-                </div>
-              `).join('')}
+            <div style="overflow-x: auto;">
+              <table class="clean-table">
+                <thead>
+                  <tr>
+                    <th>Bounty</th>
+                    <th>Category</th>
+                    <th>Reward</th>
+                    <th>Action Link</th>
+                    <th style="text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${quests.length === 0 ? `
+                    <tr>
+                      <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                        No quests found in database.
+                      </td>
+                    </tr>
+                  ` : quests.map(q => `
+                    <tr>
+                      <td>
+                        <strong style="color: #FFFFFF; display: block; font-size: 0.85rem;">${q.title}</strong>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary);">${q.description ? q.description.slice(0, 50) + '...' : ''}</span>
+                      </td>
+                      <td>
+                        <span class="badge-clean badge-clean-yellow" style="text-transform: uppercase;">${q.category}</span>
+                      </td>
+                      <td style="font-weight: 700; color: var(--brand-yellow); font-family: var(--font-mono);">
+                        +${Number(q.rewardBooba).toLocaleString()}
+                      </td>
+                      <td>
+                        ${q.targetUrl ? `
+                          <a href="${q.targetUrl}" target="_blank" style="color: var(--text-secondary); text-decoration: none; font-size: 0.78rem;">
+                            Test Link ↗
+                          </a>
+                        ` : '<span style="color: var(--text-muted); font-size: 0.75rem;">None</span>'}
+                      </td>
+                      <td style="text-align: right;">
+                        <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="window.adminApp.handleDeleteQuest('${q.id}')">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -522,7 +541,7 @@ class TeamAdminApp {
     if (!title || !description) return;
 
     if ((category === 'community' || category === 'engagement') && !targetUrl) {
-      alert('Target Action Link is COMPULSORY for Community and Engagement quests! Users must be redirected to the official link to complete their mission.');
+      alert('Target Action Link is compulsory for Community and Engagement quests!');
       document.getElementById('newQuestUrl')?.focus();
       return;
     }
@@ -538,7 +557,7 @@ class TeamAdminApp {
     });
 
     if (res.success) {
-      alert('Quest published live! Users can now view and complete it.');
+      alert('Quest published live!');
       this.render();
     } else {
       alert(res.message || 'Failed to create quest');
@@ -546,10 +565,22 @@ class TeamAdminApp {
   }
 
   async handleDeleteQuest(questId) {
-    if (!confirm('Are you sure you want to delete this quest from the database?')) return;
+    const quest = (db.quests || []).find(q => q.id === questId);
+    const questTitle = quest ? quest.title : 'this quest';
+    const adminUser = db.currentUser?.username || 'Admin';
+    const adminEmail = db.currentUser?.email || '';
+
+    const confirmMsg = `CONFIRM QUEST DELETION:\n\n` +
+      `• Bounty: "${questTitle}"\n` +
+      `• Action: Permanent removal from database and app\n` +
+      `• Executing Admin: @${adminUser} ${adminEmail ? `(${adminEmail})` : ''}\n\n` +
+      `Do you want to proceed with deleting this quest?`;
+
+    if (!confirm(confirmMsg)) return;
+
     const res = await db.deleteQuest(questId);
     if (res.success) {
-      alert('Quest deleted.');
+      alert(`✅ Quest "${res.questTitle || questTitle}" was successfully deleted by Admin @${res.deletedBy || adminUser}.`);
       this.render();
     } else {
       alert(res.message || 'Failed to delete quest');
@@ -561,95 +592,124 @@ class TeamAdminApp {
   // --------------------------------------------------------------------------
 
   renderSubmissionsTab(container) {
-    const submissions = db.submissions;
+    const allSubmissions = db.submissions || [];
+    const pendingCount = allSubmissions.filter(s => s.status === 'pending').length;
+    const approvedCount = allSubmissions.filter(s => s.status === 'approved').length;
+    const rejectedCount = allSubmissions.filter(s => s.status === 'rejected').length;
+
+    let filtered = allSubmissions;
+    if (this.submissionFilter !== 'all') {
+      filtered = allSubmissions.filter(s => s.status === this.submissionFilter);
+    }
 
     container.innerHTML = `
-      <div style="max-width: 1200px; margin: 0 auto;">
+      <div>
         
-        <div style="margin-bottom: 2rem;">
-          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
-            <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); font-size: 0.75rem;">
-              PROOF OF WORK REVIEW QUEUE
-            </span>
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Proof Review Queue</h1>
+            <p class="page-desc">Review creator content links and release $BOOBA tokens to passports.</p>
           </div>
-          <h1 style="font-size: 1.8rem; font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin: 0 0 0.25rem 0;">
-            User Proof Submissions
-          </h1>
-          <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0;">
-            Review creative creator content, verify link authenticity, and release $BOOBA tokens to user passports.
-          </p>
         </div>
 
-        ${submissions.length === 0 ? `
-          <div class="card text-center" style="padding: 4rem 2rem; border-radius: 24px;">
-            <p style="color: var(--text-secondary); font-size: 0.95rem;">No user submissions recorded in database yet.</p>
-          </div>
-        ` : `
-          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-            ${submissions.map(s => `
-              <div class="card" style="padding: 1.75rem; border-radius: 20px; border-left: 5px solid ${s.status === 'approved' ? 'var(--accent-emerald)' : s.status === 'rejected' ? 'var(--accent-ruby)' : 'var(--brand-yellow)'};">
-                
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.15rem;">
-                  <div>
-                    <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
-                      <strong style="font-size: 1.15rem; color: #FFFFFF;">${s.username}</strong>
-                      <span class="text-mono" style="font-size: 0.82rem; color: var(--text-muted);">(${s.passportId})</span>
-                      <span class="badge-tag" style="font-size: 0.72rem; text-transform: uppercase; background: ${s.status === 'approved' ? 'rgba(16,185,129,0.15)' : s.status === 'rejected' ? 'rgba(239,68,68,0.15)' : 'rgba(243,186,47,0.15)'}; color: ${s.status === 'approved' ? 'var(--accent-emerald)' : s.status === 'rejected' ? 'var(--accent-ruby)' : 'var(--brand-yellow)'}; font-weight: 800;">
+        <!-- Filter Segmented Tabs -->
+        <div class="segmented-nav">
+          <button type="button" class="segmented-btn ${this.submissionFilter === 'all' ? 'active' : ''}" onclick="window.adminApp.switchSubmissionsFilter('all')">
+            All (${allSubmissions.length})
+          </button>
+          <button type="button" class="segmented-btn ${this.submissionFilter === 'pending' ? 'active' : ''}" onclick="window.adminApp.switchSubmissionsFilter('pending')">
+            Pending (${pendingCount})
+          </button>
+          <button type="button" class="segmented-btn ${this.submissionFilter === 'approved' ? 'active' : ''}" onclick="window.adminApp.switchSubmissionsFilter('approved')">
+            Approved (${approvedCount})
+          </button>
+          <button type="button" class="segmented-btn ${this.submissionFilter === 'rejected' ? 'active' : ''}" onclick="window.adminApp.switchSubmissionsFilter('rejected')">
+            Rejected (${rejectedCount})
+          </button>
+        </div>
+
+        <div class="clean-panel">
+          <div style="overflow-x: auto;">
+            <table class="clean-table">
+              <thead>
+                <tr>
+                  <th>Citizen</th>
+                  <th>Bounty</th>
+                  <th>Reward</th>
+                  <th>Submitted Proof Link</th>
+                  <th>Notes</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Review Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filtered.length === 0 ? `
+                  <tr>
+                    <td colspan="7" style="text-align: center; padding: 4rem 2rem; color: var(--text-muted);">
+                      No ${this.submissionFilter !== 'all' ? this.submissionFilter : ''} submissions found.
+                    </td>
+                  </tr>
+                ` : filtered.map(s => `
+                  <tr>
+                    <td>
+                      <strong style="color: #FFFFFF; font-size: 0.85rem; display: block;">${s.username}</strong>
+                      <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">${s.passportId}</span>
+                    </td>
+                    <td style="color: var(--text-secondary); font-size: 0.82rem;">
+                      ${s.questTitle}
+                    </td>
+                    <td style="font-weight: 700; color: var(--brand-yellow); font-family: var(--font-mono);">
+                      +${s.rewardBooba}
+                    </td>
+                    <td>
+                      ${s.proofUrl ? `
+                        <a href="${s.proofUrl}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" style="font-size: 0.74rem;">
+                          Open Link ↗
+                        </a>
+                      ` : '<span style="color: var(--text-muted); font-size: 0.75rem;">No link</span>'}
+                    </td>
+                    <td style="font-size: 0.78rem; color: var(--text-secondary); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                      ${s.proofDescription || '—'}
+                    </td>
+                    <td>
+                      <span class="badge-clean ${s.status === 'approved' ? 'badge-clean-green' : s.status === 'rejected' ? 'badge-clean-red' : 'badge-clean-yellow'}">
                         ${s.status}
                       </span>
-                    </div>
-                    <div style="font-size: 0.88rem; color: var(--brand-yellow); font-weight: 800;">
-                      Quest: ${s.questTitle} • Reward: +${s.rewardBooba} BOOBA
-                    </div>
-                  </div>
-                  <div style="font-size: 0.78rem; color: var(--text-muted);">
-                    Submitted: ${s.submittedAt}
-                  </div>
-                </div>
-
-                <div style="background: rgba(0,0,0,0.35); padding: 1.15rem; border-radius: 14px; margin-bottom: 1.25rem; border: 1px solid rgba(255,255,255,0.06);">
-                  ${s.proofUrl ? `
-                    <div style="margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; background: rgba(243, 186, 47, 0.08); padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid rgba(243, 186, 47, 0.25);">
-                      <div>
-                        <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--brand-yellow); font-weight: 800; margin-bottom: 0.2rem;">Submitted Content Link (No Media Uploads)</div>
-                        <span style="font-family: var(--font-mono); font-size: 0.85rem; color: #FFFFFF; word-break: break-all;">${s.proofUrl}</span>
-                      </div>
-                      <a href="${s.proofUrl}" target="_blank" class="btn btn-outline btn-sm" style="font-weight: 800; font-size: 0.78rem; white-space: nowrap;">
-                        Open Content Link ↗
-                      </a>
-                    </div>
-                  ` : ''}
-                  ${s.proofDescription ? `
-                    <div style="font-size: 0.85rem; color: var(--text-secondary);"><strong style="color: #FFFFFF;">Creator Notes:</strong> ${s.proofDescription}</div>
-                  ` : ''}
-                </div>
-
-                ${s.status === 'pending' ? `
-                  <div class="flex items-center gap-3">
-                    <button class="btn btn-primary btn-sm" onclick="window.adminApp.handleReview('${s.id}', 'approved')" style="font-weight: 800;">
-                      Approve & Grant (+${s.rewardBooba} BOOBA)
-                    </button>
-                    <button class="btn btn-secondary btn-sm" onclick="window.adminApp.handleReview('${s.id}', 'rejected')" style="color: var(--accent-ruby); font-weight: 800;">
-                      Reject Submission
-                    </button>
-                  </div>
-                ` : `
-                  <div style="font-size: 0.82rem; color: var(--text-muted);">
-                    Reviewed by <strong>${s.reviewedBy || 'Admin'}</strong> on ${s.reviewedAt || 'N/A'}
-                  </div>
-                `}
-              </div>
-            `).join('')}
+                    </td>
+                    <td style="text-align: right;">
+                      ${s.status === 'pending' ? `
+                        <div style="display: inline-flex; gap: 0.4rem;">
+                          <button class="btn-admin btn-admin-primary btn-admin-sm" onclick="window.adminApp.handleReview('${s.id}', 'approved')">
+                            Approve
+                          </button>
+                          <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.handleReview('${s.id}', 'rejected')" style="color: var(--accent-ruby);">
+                            Reject
+                          </button>
+                        </div>
+                      ` : `
+                        <span style="font-size: 0.74rem; color: var(--text-muted);">Reviewed</span>
+                      `}
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
           </div>
-        `}
+        </div>
+
       </div>
     `;
+  }
+
+  switchSubmissionsFilter(filter) {
+    this.submissionFilter = filter;
+    this.renderSubmissionsTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
   }
 
   async handleReview(submissionId, action) {
     const res = await db.reviewSubmission(submissionId, action);
     if (res.success) {
-      alert(`Submission marked as ${action}! User passport balance updated.`);
+      alert(`Submission marked as ${action}!`);
       this.render();
     } else {
       alert(res.message || 'Review failed');
@@ -660,107 +720,421 @@ class TeamAdminApp {
   // 4. TOKEN & AIRDROP TAB
   // --------------------------------------------------------------------------
 
+  getAirdropRecipients() {
+    const allUsers = db.users || [];
+    if (this.airdropTargetMode === 'top_n') {
+      const sorted = [...allUsers].sort((a, b) => (Number(b.boobaPoints) || 0) - (Number(a.boobaPoints) || 0));
+      const count = Math.max(1, Number(this.airdropTopCount) || 15);
+      return sorted.slice(0, count);
+    }
+    
+    if (this.airdropTargetMode === 'search_select') {
+      if (this.airdropSelectedUserIds.size > 0) {
+        return allUsers.filter(u => this.airdropSelectedUserIds.has(String(u.id)));
+      }
+      if (this.airdropSearchQuery) {
+        const q = this.airdropSearchQuery.toLowerCase();
+        return allUsers.filter(u =>
+          (u.username && u.username.toLowerCase().includes(q)) ||
+          (u.email && u.email.toLowerCase().includes(q)) ||
+          (u.walletAddress && u.walletAddress.toLowerCase().includes(q)) ||
+          (u.passportId && u.passportId.toLowerCase().includes(q))
+        );
+      }
+      return [];
+    }
+
+    if (this.airdropTargetMode === 'active') {
+      return allUsers.filter(u => (Number(u.completedQuestsCount) || 0) > 0);
+    }
+
+    return [...allUsers];
+  }
+
   renderAirdropTab(container) {
-    const logs = db.airdropLogs;
-    const usersCount = db.users.length;
+    const logs = db.airdropLogs || [];
+    const allUsers = db.users || [];
+    const usersCount = allUsers.length;
+    const recipients = this.getAirdropRecipients();
+    const amount = Number(this.airdropAmount) || 500;
+    const totalOutflow = recipients.length * amount;
+
+    let filteredPickerUsers = allUsers;
+    if (this.airdropSearchQuery) {
+      const q = this.airdropSearchQuery.toLowerCase();
+      filteredPickerUsers = allUsers.filter(u =>
+        (u.username && u.username.toLowerCase().includes(q)) ||
+        (u.email && u.email.toLowerCase().includes(q)) ||
+        (u.walletAddress && u.walletAddress.toLowerCase().includes(q)) ||
+        (u.passportId && u.passportId.toLowerCase().includes(q))
+      );
+    }
 
     container.innerHTML = `
-      <div style="max-width: 1200px; margin: 0 auto;">
+      <div>
         
-        <div style="margin-bottom: 2rem;">
-          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
-            <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); font-size: 0.75rem;">
-              TREASURY DISPATCHER
-            </span>
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Token & Airdrop Hub</h1>
+            <p class="page-desc">Execute batch token distributions to highest holders, active questers, or custom user lists.</p>
           </div>
-          <h1 style="font-size: 1.8rem; font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin: 0 0 0.25rem 0;">
-            Token & Airdrop Hub
-          </h1>
-          <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0;">
-            Execute direct batch token grants and treasury allocations to registered passport holders in Supabase.
-          </p>
+
+          <div style="display: flex; gap: 1rem; align-items: center;">
+            <div style="text-align: right;">
+              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Recipients</div>
+              <div style="font-size: 1.15rem; font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">${recipients.length} Accounts</div>
+            </div>
+            <div style="width: 1px; height: 28px; background: var(--admin-border);"></div>
+            <div style="text-align: right;">
+              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total Outflow</div>
+              <div style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; font-family: var(--font-mono);">${totalOutflow.toLocaleString()} $BOOBA</div>
+            </div>
+          </div>
         </div>
 
-        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
-          
-          <!-- Airdrop Form -->
-          <div class="card" style="padding: 2rem; border-radius: 24px; border: 1.5px solid rgba(243, 186, 47, 0.35);">
-            <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin-bottom: 1.5rem;">Execute Live Airdrop</h3>
+        <!-- Target Mode Segmented Navigation -->
+        <div class="segmented-nav">
+          <button type="button" class="segmented-btn ${this.airdropTargetMode === 'top_n' ? 'active' : ''}" onclick="window.adminApp.switchAirdropMode('top_n')">
+            Highest Holders (Top N)
+          </button>
+          <button type="button" class="segmented-btn ${this.airdropTargetMode === 'search_select' ? 'active' : ''}" onclick="window.adminApp.switchAirdropMode('search_select')">
+            Search Citizen
+          </button>
+          <button type="button" class="segmented-btn ${this.airdropTargetMode === 'all' ? 'active' : ''}" onclick="window.adminApp.switchAirdropMode('all')">
+            All Passports (${usersCount})
+          </button>
+          <button type="button" class="segmented-btn ${this.airdropTargetMode === 'active' ? 'active' : ''}" onclick="window.adminApp.switchAirdropMode('active')">
+            Active Questers
+          </button>
+        </div>
+
+        <!-- Main Form Panel -->
+        <div class="clean-panel" style="margin-bottom: 2rem;">
+          <div style="padding: 1.5rem;">
             
-            <form onsubmit="window.adminApp.handleAirdrop(event)">
-              <div class="form-group" style="margin-bottom: 1.25rem;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.82rem;">Target Recipient Group</label>
-                <select id="airdropTarget" class="form-input" style="border-radius: 12px;">
-                  <option value="all">All Registered Passports (${usersCount} accounts)</option>
-                  <option value="top10">Top 10 Leaderboard Holders</option>
-                  <option value="active">Active Questers (Completed > 0)</option>
-                </select>
-              </div>
+            ${this.airdropTargetMode === 'top_n' ? `
+              <div style="margin-bottom: 1.5rem;">
+                <label class="form-field-label" style="display: block; margin-bottom: 0.5rem;">Quick Presets</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem;">
+                  ${[10, 15, 30, 50, 100, 500, 1000, 2000].map(cnt => `
+                    <button type="button" class="btn-admin ${Number(this.airdropTopCount) === cnt ? 'btn-admin-primary' : 'btn-admin-secondary'} btn-admin-sm" onclick="window.adminApp.setAirdropTopCount(${cnt})">
+                      Top ${cnt}
+                    </button>
+                  `).join('')}
+                </div>
 
-              <div class="form-group" style="margin-bottom: 1.25rem;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.82rem;">Amount Per User ($BOOBA)</label>
-                <input type="number" id="airdropAmount" value="500" class="form-input" style="border-radius: 12px;" required>
+                <div class="form-field" style="max-width: 320px;">
+                  <label class="form-field-label">Custom Highest Count</label>
+                  <input type="number" id="airdropTopInput" value="${this.airdropTopCount}" min="1" max="${Math.max(1, usersCount)}" class="admin-input" style="font-family: var(--font-mono); font-weight: 700; color: var(--brand-yellow);" oninput="window.adminApp.setAirdropTopCount(this.value)">
+                </div>
               </div>
+            ` : ''}
 
-              <div class="form-group" style="margin-bottom: 1.75rem;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.82rem;">Reason / Campaign Tag</label>
-                <input type="text" id="airdropReason" placeholder="e.g. Mainnet Launch Celebration Grant" class="form-input" style="border-radius: 12px;" required>
-              </div>
+            ${this.airdropTargetMode === 'search_select' ? `
+              <div style="margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                  <label class="form-field-label">Search Username, Wallet, or Email</label>
+                  <div style="display: flex; gap: 0.4rem;">
+                    <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.toggleBulkPasteModal()">
+                      📋 Bulk Paste
+                    </button>
+                    <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.clearSelectedAirdropUsers()">
+                      Clear
+                    </button>
+                  </div>
+                </div>
 
-              <button type="submit" class="btn btn-primary btn-block" style="font-weight: 800; border-radius: 12px; padding: 0.85rem;">
-                Distribute Airdrop Batch ↗
-              </button>
-            </form>
-          </div>
+                <input type="text" id="airdropSearchInput" placeholder="Search by @username, 0x wallet address, or email..." value="${this.airdropSearchQuery}" oninput="window.adminApp.handleAirdropSearch(this.value)" class="admin-input" style="margin-bottom: 0.75rem;">
 
-          <!-- Airdrop History -->
-          <div>
-            <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin-bottom: 1.25rem;">
-              Airdrop Distribution History (${logs.length})
-            </h3>
-            
-            ${logs.length === 0 ? `
-              <div class="card text-center" style="padding: 3rem; border-radius: 20px;">
-                <p style="color: var(--text-secondary); font-size: 0.88rem;">No treasury airdrops recorded yet.</p>
-              </div>
-            ` : `
-              <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-                ${logs.map(l => `
-                  <div class="card" style="padding: 1.25rem; border-radius: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                      <strong style="color: #FFFFFF; font-size: 0.95rem;">${l.reason}</strong>
-                      <span style="font-weight: 900; color: var(--brand-yellow);" class="text-mono">+${Number(l.totalDistributed).toLocaleString()} BOOBA</span>
-                    </div>
-                    <div style="font-size: 0.78rem; color: var(--text-muted);">
-                      ${l.recipientCount} Recipients (+${l.amountPerUser} each) • Executed by ${l.adminUsername} on ${l.date}
+                ${this.airdropShowBulkPaste ? `
+                  <div style="background: var(--admin-bg); border: 1px dashed var(--admin-border); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1rem;">
+                    <div style="font-size: 0.78rem; font-weight: 600; color: var(--brand-yellow); margin-bottom: 0.35rem;">Paste addresses, emails, or usernames separated by commas or lines:</div>
+                    <textarea id="bulkPasteInput" rows="3" placeholder="0x123..., alice@gmail.com, @Bob..." class="admin-input" style="font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 0.5rem;"></textarea>
+                    <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                      <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.toggleBulkPasteModal()">Cancel</button>
+                      <button type="button" class="btn-admin btn-admin-primary btn-admin-sm" onclick="window.adminApp.processBulkPasteRecipients()">Match & Select</button>
                     </div>
                   </div>
-                `).join('')}
+                ` : ''}
+
+                <!-- User Selection Rows -->
+                <div style="max-height: 220px; overflow-y: auto; border: 1px solid var(--admin-border); border-radius: var(--radius-sm);">
+                  ${filteredPickerUsers.length === 0 ? `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.82rem;">No matching citizens found.</div>
+                  ` : filteredPickerUsers.map(u => {
+                    const isSelected = this.airdropSelectedUserIds.has(String(u.id));
+                    return `
+                      <div class="data-row" style="cursor: pointer;" onclick="window.adminApp.toggleAirdropUser('${u.id}')">
+                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                          <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); window.adminApp.toggleAirdropUser('${u.id}')" style="cursor: pointer; accent-color: var(--brand-yellow);">
+                          <strong style="color: #FFFFFF; font-size: 0.85rem;">${u.username}</strong>
+                          <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">${u.walletAddress ? `${u.walletAddress.slice(0, 6)}...${u.walletAddress.slice(-4)}` : (u.email || u.passportId)}</span>
+                        </div>
+                        <div style="font-weight: 700; color: var(--brand-yellow); font-size: 0.82rem; font-family: var(--font-mono);">
+                          ${Number(u.boobaPoints || 0).toLocaleString()} B
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
               </div>
-            `}
+            ` : ''}
+
+            <!-- Distribution Parameters -->
+            <form onsubmit="window.adminApp.handleAirdrop(event)">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+                <div class="form-field">
+                  <label class="form-field-label">Amount Per User ($BOOBA) *</label>
+                  <input type="number" id="airdropAmount" value="${this.airdropAmount}" class="admin-input" style="font-weight: 800; font-family: var(--font-mono); color: var(--brand-yellow);" oninput="window.adminApp.handleAmountChange(this.value)" required>
+                </div>
+
+                <div class="form-field">
+                  <label class="form-field-label">Campaign Memo / Reason *</label>
+                  <input type="text" id="airdropReason" placeholder="e.g. Top 15 Leaderboard Bonus" value="${this.airdropReason}" class="admin-input" required>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.75rem; font-size: 0.9rem;" ${recipients.length === 0 ? 'disabled' : ''}>
+                Execute Airdrop: Distribute ${totalOutflow.toLocaleString()} $BOOBA to ${recipients.length} Accounts ↗
+              </button>
+            </form>
+
+          </div>
+        </div>
+
+        <!-- 2 Clean Tables: Preview & Logs -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; align-items: start;">
+          
+          <!-- Recipient Preview Table -->
+          <div class="clean-panel">
+            <div class="clean-panel-header">
+              <div class="clean-panel-title">Target Recipients Preview (${recipients.length})</div>
+              <span class="badge-clean badge-clean-yellow">+${amount} each</span>
+            </div>
+
+            <div style="max-height: 320px; overflow-y: auto;">
+              <table class="clean-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Citizen</th>
+                    <th>Current</th>
+                    <th style="text-align: right;">After Grant</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${recipients.length === 0 ? `
+                    <tr>
+                      <td colspan="4" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                        No recipients targeted.
+                      </td>
+                    </tr>
+                  ` : recipients.map((u, idx) => `
+                    <tr>
+                      <td style="color: var(--text-muted); font-size: 0.75rem;">${idx + 1}</td>
+                      <td>
+                        <strong style="color: #FFFFFF; font-size: 0.85rem; display: block;">${u.username}</strong>
+                        <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">${u.passportId}</span>
+                      </td>
+                      <td style="font-family: var(--font-mono); color: var(--text-secondary);">
+                        ${Number(u.boobaPoints || 0).toLocaleString()}
+                      </td>
+                      <td style="text-align: right; font-weight: 800; color: var(--accent-emerald); font-family: var(--font-mono);">
+                        ${(Number(u.boobaPoints || 0) + amount).toLocaleString()}
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Airdrop Treasury History -->
+          <div class="clean-panel">
+            <div class="clean-panel-header">
+              <div class="clean-panel-title">Airdrop Treasury Logs (${logs.length})</div>
+            </div>
+
+            <div style="max-height: 320px; overflow-y: auto;">
+              <table class="clean-table">
+                <thead>
+                  <tr>
+                    <th>Campaign / Memo</th>
+                    <th>Recipients</th>
+                    <th style="text-align: right;">Total Outflow</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${logs.length === 0 ? `
+                    <tr>
+                      <td colspan="3" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                        No airdrop logs recorded yet.
+                      </td>
+                    </tr>
+                  ` : logs.map(l => `
+                    <tr>
+                      <td>
+                        <strong style="color: #FFFFFF; font-size: 0.85rem; display: block;">${l.reason}</strong>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">${l.date} • by ${l.adminUsername}</span>
+                      </td>
+                      <td style="color: var(--text-secondary); font-size: 0.8rem;">
+                        ${l.recipientCount} (+${l.amountPerUser})
+                      </td>
+                      <td style="text-align: right; font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">
+                        +${Number(l.totalDistributed).toLocaleString()} B
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
           </div>
 
         </div>
+
       </div>
     `;
   }
 
+  switchAirdropMode(mode) {
+    this.airdropTargetMode = mode;
+    this.renderAirdropTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
+  }
+
+  setAirdropTopCount(count) {
+    const num = Math.max(1, parseInt(count, 10) || 1);
+    this.airdropTopCount = num;
+    this.renderAirdropTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
+  }
+
+  handleAirdropSearch(query) {
+    this.airdropSearchQuery = query.trim();
+    this.renderAirdropTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
+  }
+
+  handleAmountChange(val) {
+    this.airdropAmount = Math.max(1, parseInt(val, 10) || 1);
+    this.renderAirdropTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
+  }
+
+  toggleAirdropUser(userId) {
+    const idStr = String(userId);
+    if (this.airdropSelectedUserIds.has(idStr)) {
+      this.airdropSelectedUserIds.delete(idStr);
+    } else {
+      this.airdropSelectedUserIds.add(idStr);
+    }
+    this.renderAirdropTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
+  }
+
+  selectAllFilteredAirdropUsers() {
+    const allUsers = db.users || [];
+    let filtered = allUsers;
+    if (this.airdropSearchQuery) {
+      const q = this.airdropSearchQuery.toLowerCase();
+      filtered = allUsers.filter(u =>
+        (u.username && u.username.toLowerCase().includes(q)) ||
+        (u.email && u.email.toLowerCase().includes(q)) ||
+        (u.walletAddress && u.walletAddress.toLowerCase().includes(q)) ||
+        (u.passportId && u.passportId.toLowerCase().includes(q))
+      );
+    }
+    filtered.forEach(u => this.airdropSelectedUserIds.add(String(u.id)));
+    this.renderAirdropTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
+  }
+
+  clearSelectedAirdropUsers() {
+    this.airdropSelectedUserIds.clear();
+    this.renderAirdropTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
+  }
+
+  toggleBulkPasteModal() {
+    this.airdropShowBulkPaste = !this.airdropShowBulkPaste;
+    this.renderAirdropTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
+  }
+
+  processBulkPasteRecipients() {
+    const text = document.getElementById('bulkPasteInput')?.value || '';
+    if (!text.trim()) return;
+
+    const rawTokens = text.split(/[\n,; ]+/).map(t => t.trim().toLowerCase()).filter(Boolean);
+    const allUsers = db.users || [];
+    let matchedCount = 0;
+
+    rawTokens.forEach(token => {
+      const cleanToken = token.startsWith('@') ? token.slice(1) : token;
+      const matched = allUsers.find(u =>
+        (u.email && u.email.toLowerCase() === token) ||
+        (u.walletAddress && u.walletAddress.toLowerCase() === token) ||
+        (u.username && (u.username.toLowerCase() === token || u.username.toLowerCase() === cleanToken)) ||
+        (u.passportId && u.passportId.toLowerCase() === token)
+      );
+      if (matched) {
+        this.airdropSelectedUserIds.add(String(matched.id));
+        matchedCount++;
+      }
+    });
+
+    this.airdropShowBulkPaste = false;
+    alert(`Matched & selected ${matchedCount} user accounts.`);
+    this.renderAirdropTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
+  }
+
   async handleAirdrop(e) {
     e.preventDefault();
-    const targetGroup = document.getElementById('airdropTarget')?.value;
-    const amountPerUser = document.getElementById('airdropAmount')?.value;
-    const reason = document.getElementById('airdropReason')?.value.trim();
+    const recipients = this.getAirdropRecipients();
+    const amount = Number(document.getElementById('airdropAmount')?.value) || Number(this.airdropAmount) || 500;
+    const reason = document.getElementById('airdropReason')?.value.trim() || 'Treasury Grant';
 
-    if (!amountPerUser || Number(amountPerUser) <= 0) return;
+    if (recipients.length === 0) {
+      alert('Error: No target recipients selected.');
+      return;
+    }
 
-    if (!confirm(`Are you sure you want to airdrop ${amountPerUser} BOOBA points to ${targetGroup} users?`)) return;
+    if (amount <= 0) {
+      alert('Error: Amount must be greater than 0.');
+      return;
+    }
 
-    const res = await db.distributeAirdrop({ targetGroup, amountPerUser, reason });
+    const totalDistributed = recipients.length * amount;
+    let targetDescription = '';
+
+    if (this.airdropTargetMode === 'top_n') {
+      targetDescription = `Top ${recipients.length} Highest Holders`;
+    } else if (this.airdropTargetMode === 'search_select') {
+      targetDescription = `Selected ${recipients.length} Users`;
+    } else if (this.airdropTargetMode === 'active') {
+      targetDescription = `Active Questers (${recipients.length})`;
+    } else {
+      targetDescription = `All Registered Passports (${recipients.length})`;
+    }
+
+    const confirmMsg = `CONFIRM AIRDROP:\n\n` +
+      `• Target: ${targetDescription}\n` +
+      `• Recipients: ${recipients.length} accounts\n` +
+      `• Amount per user: ${amount.toLocaleString()} $BOOBA\n` +
+      `• Total Outflow: ${totalDistributed.toLocaleString()} $BOOBA\n` +
+      `• Memo: "${reason}"\n\n` +
+      `Execute distribution now?`;
+
+    if (!confirm(confirmMsg)) return;
+
+    const res = await db.distributeAirdrop({
+      targetGroup: this.airdropTargetMode,
+      topCount: this.airdropTopCount,
+      recipientUserIds: recipients.map(u => u.id),
+      amountPerUser: amount,
+      reason,
+      targetDescription
+    });
+
     if (res.success) {
-      alert(`Airdrop successful! Distributed ${res.totalDistributed.toLocaleString()} BOOBA to ${res.recipientCount} accounts.`);
+      alert(`🎉 Distributed ${res.totalDistributed.toLocaleString()} $BOOBA tokens to ${res.recipientCount} accounts.`);
+      this.airdropSelectedUserIds.clear();
       this.render();
     } else {
-      alert(res.message || 'Airdrop failed');
+      alert(res.message || 'Airdrop distribution failed.');
     }
   }
 
@@ -769,87 +1143,98 @@ class TeamAdminApp {
   // --------------------------------------------------------------------------
 
   renderUsersTab(container) {
-    let users = db.users;
+    let users = db.users || [];
 
     if (this.userSearchQuery) {
       const q = this.userSearchQuery.toLowerCase();
       users = users.filter(u => 
         (u.username && u.username.toLowerCase().includes(q)) ||
         (u.email && u.email.toLowerCase().includes(q)) ||
+        (u.walletAddress && u.walletAddress.toLowerCase().includes(q)) ||
         (u.passportId && u.passportId.toLowerCase().includes(q))
       );
     }
 
     container.innerHTML = `
-      <div style="max-width: 1200px; margin: 0 auto;">
+      <div>
         
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div class="page-header">
           <div>
-            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
-              <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); font-size: 0.75rem;">
-                PASSPORT REGISTRY
-              </span>
-            </div>
-            <h1 style="font-size: 1.8rem; font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin: 0 0 0.25rem 0;">
-              Registered Passports & Users
-            </h1>
-            <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0;">
-              All genuine community accounts registered in the live Supabase database.
-            </p>
+            <h1 class="page-title">Citizens & Passports</h1>
+            <p class="page-desc">Directory of all genuine community accounts, wallet links, and token balances.</p>
           </div>
 
-          <div>
-            <input type="text" id="userSearchInput" placeholder="Search by username, email, passport ID..." value="${this.userSearchQuery}" oninput="window.adminApp.handleUserSearch(this.value)" class="form-input" style="min-width: 280px; border-radius: 12px; font-size: 0.85rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; width: 100%; max-width: 320px;">
+            <input type="text" id="userSearchInput" placeholder="Search username, wallet 0x, email..." value="${this.userSearchQuery}" oninput="window.adminApp.handleUserSearch(this.value)" class="admin-input">
+            ${this.userSearchQuery ? `
+              <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.handleUserSearch('')">
+                Clear
+              </button>
+            ` : ''}
           </div>
         </div>
 
-        <div class="card" style="padding: 0; overflow: hidden; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08);">
+        <div class="clean-panel">
           <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+            <table class="clean-table">
               <thead>
-                <tr style="background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.04em;">
-                  <th style="padding: 1.15rem 1.25rem;">Holder / Mascot</th>
-                  <th style="padding: 1.15rem 1.25rem;">Email Address</th>
-                  <th style="padding: 1.15rem 1.25rem;">Passport ID</th>
-                  <th style="padding: 1.15rem 1.25rem;">Tier Status</th>
-                  <th style="padding: 1.15rem 1.25rem;">Quests</th>
-                  <th style="padding: 1.15rem 1.25rem; text-align: right;">BOOBA Balance</th>
+                <tr>
+                  <th>Citizen</th>
+                  <th>Email Address</th>
+                  <th>Wallet Address</th>
+                  <th>Passport ID</th>
+                  <th>Tier</th>
+                  <th>Quests</th>
+                  <th style="text-align: right;">$BOOBA Balance</th>
                 </tr>
               </thead>
               <tbody>
                 ${users.length === 0 ? `
                   <tr>
-                    <td colspan="6" style="text-align: center; padding: 3.5rem; color: var(--text-secondary);">
-                      No matching user passports found in database.
+                    <td colspan="7" style="text-align: center; padding: 4rem 2rem; color: var(--text-muted);">
+                      No matching citizens found in database.
                     </td>
                   </tr>
                 ` : users.map(u => {
                   const level = calculateLevel(u.boobaPoints || 0);
+                  const hasWallet = u.walletAddress && u.walletAddress.startsWith('0x');
                   return `
-                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.04); transition: background 0.2s ease;">
-                      <td style="padding: 1.15rem 1.25rem;">
+                    <tr>
+                      <td>
                         <div style="display: flex; align-items: center; gap: 0.65rem;">
-                          <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--brand-yellow);">
+                          <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--brand-yellow); object-fit: cover; flex-shrink: 0;">
                           <div>
-                            <strong style="color: #FFFFFF; font-size: 0.9rem;">${u.username}</strong>
-                            <div style="font-size: 0.72rem; color: var(--accent-emerald);">Streak: ${u.streakDays || 1} Days</div>
+                            <strong style="color: #FFFFFF; font-size: 0.88rem; display: block;">${u.username}</strong>
+                            <span style="font-size: 0.72rem; color: var(--accent-emerald);">Streak: ${u.streakDays || 1}d</span>
                           </div>
                         </div>
                       </td>
-                      <td style="padding: 1.15rem 1.25rem; color: var(--text-secondary);">
-                        ${u.email}
+                      <td style="color: var(--text-secondary); font-size: 0.82rem;">
+                        ${u.email || '<span style="color: var(--text-muted); font-style: italic;">dApp Wallet User</span>'}
                       </td>
-                      <td style="padding: 1.15rem 1.25rem; font-family: var(--font-mono); color: var(--brand-yellow); font-weight: 700;">
-                        ${u.passportId}
+                      <td>
+                        ${hasWallet ? `
+                          <div style="display: flex; align-items: center; gap: 0.45rem;">
+                            <span class="text-mono" style="font-size: 0.78rem; color: var(--text-secondary);">${u.walletAddress.slice(0, 6)}...${u.walletAddress.slice(-4)}</span>
+                            <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" style="padding: 0.15rem 0.45rem; font-size: 0.68rem;" onclick="navigator.clipboard.writeText('${u.walletAddress}'); alert('Copied wallet address: ${u.walletAddress}');" title="Copy Wallet Address">
+                              Copy
+                            </button>
+                          </div>
+                        ` : `
+                          <span style="color: var(--text-muted); font-size: 0.78rem; font-style: italic;">None</span>
+                        `}
                       </td>
-                      <td style="padding: 1.15rem 1.25rem;">
-                        <span class="badge-tag" style="font-size: 0.72rem; text-transform: uppercase;">Lv.${level.level} ${level.title}</span>
+                      <td class="text-mono" style="color: var(--brand-yellow); font-weight: 700; font-size: 0.82rem;">
+                        ${u.passportId || 'N/A'}
                       </td>
-                      <td style="padding: 1.15rem 1.25rem; color: var(--text-secondary); font-weight: 700;">
+                      <td>
+                        <span class="badge-clean badge-clean-yellow" style="text-transform: uppercase;">Lv.${level.level} ${level.title}</span>
+                      </td>
+                      <td style="color: var(--text-secondary); font-weight: 600; font-size: 0.82rem;">
                         ${u.completedQuestsCount || 0}
                       </td>
-                      <td style="padding: 1.15rem 1.25rem; text-align: right; font-weight: 900; color: var(--brand-yellow); font-size: 1.05rem;" class="text-mono">
-                        ${Number(u.boobaPoints).toLocaleString()}
+                      <td style="text-align: right; font-weight: 800; color: var(--brand-yellow); font-size: 0.95rem;" class="text-mono">
+                        ${Number(u.boobaPoints || 0).toLocaleString()}
                       </td>
                     </tr>
                   `;

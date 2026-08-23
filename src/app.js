@@ -523,6 +523,18 @@ class BoobaApp {
 
             </div>
 
+            <!-- Professional Browser vs dApp Notice -->
+            <div style="background: rgba(243, 186, 47, 0.08); border: 1.5px solid rgba(243, 186, 47, 0.25); border-radius: 14px; padding: 0.9rem 1.15rem; margin: 1.25rem 0; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.55; text-align: left;">
+              <div style="display: flex; align-items: center; gap: 0.45rem; font-weight: 800; color: var(--brand-yellow); margin-bottom: 0.3rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                Web3 & Browser Sign-Up Notice
+              </div>
+              <div>Direct 1-click Web3 wallet connection works natively inside your wallet's built-in <strong>dApp browser</strong> (Trust Wallet, MetaMask, OKX, Binance Web3) or desktop browser extensions.</div>
+              <div style="margin-top: 0.45rem; color: #FFFFFF; font-weight: 600;">
+                📱 <strong>On Mobile Chrome or Safari?</strong> We recommend creating your account with <span style="color: var(--brand-yellow);">Continue with Google</span> or <span style="color: var(--brand-yellow);">Email</span>, then easily copy & paste your BEP-20 wallet address into your Passport dashboard!
+              </div>
+            </div>
+
             <!-- Divider -->
             <div class="x-auth-divider">
               <span>or</span>
@@ -1376,8 +1388,10 @@ HOW TO RECOVER YOUR ACCOUNT:
       const res = await db.loginOrSignupWithWallet({ walletAddress: addr });
       if (res.success) {
         if (res.isNewUser && res.seedPhrase) {
-          this.showSeedPhraseModal(res.seedPhrase, res.user, () => {
-            window.location.href = 'dashboard.html';
+          this.promptWeb3EmailInputModal(res.user, () => {
+            this.showSeedPhraseModal(res.seedPhrase, res.user, () => {
+              window.location.href = 'dashboard.html';
+            });
           });
         } else {
           this.renderHeaderNav();
@@ -1575,8 +1589,10 @@ HOW TO RECOVER YOUR ACCOUNT:
         const res = await db.loginOrSignupWithWallet({ walletAddress });
         if (res.success) {
           if (res.isNewUser && res.seedPhrase) {
-            this.showSeedPhraseModal(res.seedPhrase, res.user, () => {
-              window.location.href = 'dashboard.html';
+            this.promptWeb3EmailInputModal(res.user, () => {
+              this.showSeedPhraseModal(res.seedPhrase, res.user, () => {
+                window.location.href = 'dashboard.html';
+              });
             });
           } else {
             alert(`Connected with ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}! Welcome ${res.user.username}.`);
@@ -1593,6 +1609,95 @@ HOW TO RECOVER YOUR ACCOUNT:
       } else {
         alert(err.message || 'Error connecting to Web3 wallet.');
       }
+    }
+  }
+
+  promptWeb3EmailInputModal(user, onComplete) {
+    const existing = document.getElementById('web3EmailModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'web3EmailModal';
+    modal.className = 'modal-backdrop open active';
+    modal.innerHTML = `
+      <div class="glass-panel" style="max-width: 460px; width: 100%; border-radius: 24px; padding: 2.25rem 2rem; border: 1.5px solid var(--brand-yellow); background: rgba(14, 18, 27, 0.98); box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 40px rgba(243, 186, 47, 0.2); position: relative; z-index: 1020; text-align: center;">
+        <div style="width: 52px; height: 52px; border-radius: 16px; background: rgba(243, 186, 47, 0.15); border: 1px solid rgba(243, 186, 47, 0.35); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto; color: var(--brand-yellow);">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+        </div>
+        
+        <h3 style="font-size: 1.4rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem;">
+          Complete Your Web3 Profile
+        </h3>
+        <p style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 1.5rem;">
+          Link your email address to your Booba Passport (<strong style="color: var(--brand-yellow);">${user.passportId || 'BB'}</strong>) for account recovery, reward notifications, and security alerts.
+        </p>
+
+        <form id="web3EmailForm" onsubmit="window.boobaApp.submitWeb3Email(event)">
+          <div style="margin-bottom: 1.25rem; text-align: left;">
+            <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.4rem; display: block;">Email Address</label>
+            <input type="email" id="web3EmailField" placeholder="name@example.com" class="form-input" style="font-size: 0.95rem; padding: 0.85rem; border-radius: 12px; width: 100%; box-sizing: border-box; background: rgba(7, 9, 14, 0.8);" required autocomplete="email">
+          </div>
+          <button type="submit" id="web3EmailSubmitBtn" class="btn btn-primary btn-block btn-lg" style="font-weight: 800; margin-bottom: 0.75rem;">
+            Save Email & Continue
+          </button>
+          <button type="button" class="btn btn-ghost btn-block btn-sm" onclick="window.boobaApp.skipWeb3Email()" style="color: var(--text-muted); font-size: 0.82rem;">
+            Skip for now
+          </button>
+        </form>
+      </div>
+    `;
+
+    this._pendingWeb3EmailCallback = onComplete;
+    document.body.appendChild(modal);
+  }
+
+  async submitWeb3Email(e) {
+    e.preventDefault();
+    const email = document.getElementById('web3EmailField')?.value.trim();
+    const btn = document.getElementById('web3EmailSubmitBtn');
+    if (!email || !email.includes('@')) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Saving Email...';
+    }
+
+    if (db.currentUser && supabase) {
+      try {
+        await supabase
+          .from('booba_users')
+          .update({ email: email.toLowerCase() })
+          .eq('id', db.currentUser.id);
+        db.currentUser.email = email.toLowerCase();
+        db.saveLocalSession(db.currentUser);
+        db.notify();
+      } catch (err) {
+        console.warn('Email update notice:', err);
+      }
+    }
+
+    const modal = document.getElementById('web3EmailModal');
+    if (modal) modal.remove();
+
+    if (this._pendingWeb3EmailCallback) {
+      this._pendingWeb3EmailCallback();
+    } else {
+      window.location.href = 'dashboard.html';
+    }
+  }
+
+  skipWeb3Email() {
+    const modal = document.getElementById('web3EmailModal');
+    if (modal) modal.remove();
+    if (this._pendingWeb3EmailCallback) {
+      this._pendingWeb3EmailCallback();
+    } else {
+      window.location.href = 'dashboard.html';
     }
   }
 

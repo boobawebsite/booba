@@ -1054,7 +1054,7 @@ HOW TO RECOVER YOUR ACCOUNT:
   // --------------------------------------------------------------------------
 
   openWalletModal() {
-    const existing = document.getElementById('walletConnectDynamicModal');
+    const existing = document.getElementById('walletConnectDynamicModal') || document.getElementById('web3WalletModal');
     if (existing) existing.remove();
 
     // Trigger fresh EIP-6963 discovery
@@ -1062,43 +1062,56 @@ HOW TO RECOVER YOUR ACCOUNT:
       window.dispatchEvent(new CustomEvent('eip6963:requestProvider'));
     }
 
+    const user = db.currentUser;
+    const isConnected = Boolean(user && user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
+    const currentAddr = isConnected ? user.walletAddress : '';
+
     const modal = document.createElement('div');
     modal.id = 'walletConnectDynamicModal';
-    modal.className = 'modal-backdrop open';
+    modal.className = 'modal-backdrop open active';
     modal.innerHTML = `
-      <div class="wallet-modal-card" style="position: relative; z-index: 1010;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-          <div style="display: flex; align-items: center; gap: 0.6rem;">
-            <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(243, 186, 47, 0.12); border: 1px solid rgba(243, 186, 47, 0.3); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+      <div class="wallet-modal-card" style="position: relative; z-index: 1010; max-width: 480px; width: 100%; border-radius: 24px; border: 1.5px solid rgba(243, 186, 47, 0.4); background: linear-gradient(180deg, rgba(20, 26, 38, 0.98) 0%, rgba(10, 13, 20, 0.99) 100%); box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 40px rgba(243, 186, 47, 0.2);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(243, 186, 47, 0.15); border: 1px solid rgba(243, 186, 47, 0.35); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
             </div>
             <div>
-              <h2 style="font-size: 1.3rem; font-weight: 800; color: #FFFFFF;">Connect Web3 Wallet</h2>
-              <span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 600;">BNB Smart Chain (BEP-20)</span>
+              <h2 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.2;">Connect Web3 Wallet</h2>
+              <span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">BNB Smart Chain (BEP-20)</span>
             </div>
           </div>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('walletConnectDynamicModal').remove()" style="border-radius: 50%; width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('walletConnectDynamicModal').remove()" style="border-radius: 50%; width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center;" aria-label="Close modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
 
         <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
-          Select your Web3 wallet provider to choose your account and connect (+100 BOOBA bonus).
+          ${user ? 'Connect your verified Web3 wallet for token claims, quests, and withdrawals.' : 'Select your Web3 wallet provider to instantly sign in or mint your Booba Passport (+100 BOOBA bonus).'}
         </p>
+
+        ${isConnected ? `
+          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 16px; padding: 0.9rem 1.1rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+            <div>
+              <div style="font-size: 0.7rem; color: var(--accent-emerald); font-weight: 800; text-transform: uppercase; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.35rem;">
+                <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--accent-emerald);"></span>
+                Active Connected Wallet
+              </div>
+              <div style="font-size: 0.85rem; font-family: var(--font-mono); font-weight: 800; color: #FFFFFF;">
+                ${currentAddr.slice(0, 8)}...${currentAddr.slice(-6)}
+              </div>
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.handleDisconnectWallet()" style="color: var(--accent-rose); font-size: 0.75rem; padding: 0.3rem 0.6rem; border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 8px;">
+              Disconnect
+            </button>
+          </div>
+        ` : ''}
 
         <div id="walletOptionsContainer" class="wallet-options-list"></div>
 
-        <!-- Divider for manual address input -->
-        <div class="x-auth-divider">
-          <span>or sign in with address</span>
+        <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.75rem; color: var(--text-muted); text-align: center; line-height: 1.4;">
+          💡 <strong>Mobile Tip:</strong> If your wallet app does not open automatically, open this page inside your wallet's built-in Web3 browser (MetaMask, Trust Wallet, OKX, or Binance Web3).
         </div>
-
-        <form id="manualWalletForm" onsubmit="window.boobaApp.handleManualWalletSubmit(event)" style="display: flex; flex-direction: column; gap: 0.65rem;">
-          <input type="text" id="manualWalletAddressInput" placeholder="Paste BNB / EVM address (0x...)" class="x-input-field text-mono" style="font-size: 0.88rem;" required>
-          <button type="submit" class="btn btn-primary btn-sm" style="padding: 0.7rem;">
-            Sign In with Address (+100 BOOBA)
-          </button>
-        </form>
       </div>
     `;
 
@@ -1110,12 +1123,12 @@ HOW TO RECOVER YOUR ACCOUNT:
     const container = document.getElementById('walletOptionsContainer');
     if (!container) return;
 
-    // Detect installed standard extensions
+    // Detect installed standard extensions / injected providers
     const hasMetaMask = Boolean(window.ethereum && (window.ethereum.isMetaMask || window.ethereum.providers?.some(p => p.isMetaMask)));
-    const hasTrust = Boolean(window.trustwallet || window.ethereum?.isTrust);
-    const hasBinance = Boolean(window.BinanceChain || window.ethereum?.isBinance);
-    const hasOKX = Boolean(window.okxwallet);
-    const hasCoinbase = Boolean(window.coinbaseWalletExtension);
+    const hasTrust = Boolean(window.trustwallet || window.ethereum?.isTrust || window.ethereum?.providers?.some(p => p.isTrust || p.isTrustWallet));
+    const hasBinance = Boolean(window.BinanceChain || window.ethereum?.isBinance || window.ethereum?.providers?.some(p => p.isBinance));
+    const hasOKX = Boolean(window.okxwallet || window.ethereum?.isOkxWallet || window.ethereum?.providers?.some(p => p.isOkxWallet));
+    const hasCoinbase = Boolean(window.coinbaseWalletExtension || window.ethereum?.isCoinbaseWallet || window.ethereum?.providers?.some(p => p.isCoinbaseWallet));
     const hasGenericWeb3 = Boolean(window.ethereum);
 
     let html = '';
@@ -1127,10 +1140,10 @@ HOW TO RECOVER YOUR ACCOUNT:
         html += `
           <div class="wallet-option-item" onclick="window.boobaApp.connectEIP6963Wallet('${key}')">
             <div class="wallet-option-left">
-              <img src="${info.icon || 'assets/mascot.jpg'}" style="width: 32px; height: 32px; border-radius: 8px; object-fit: contain;">
+              <img src="${info.icon || 'assets/mascot.jpg'}" alt="${info.name || 'Wallet'}" style="width: 32px; height: 32px; border-radius: 8px; object-fit: contain;">
               <div>
                 <div class="wallet-option-title">${info.name || 'Web3 Wallet'}</div>
-                <div class="wallet-option-desc">EIP-6963 Detected Extension</div>
+                <div class="wallet-option-desc">Auto-detected Web3 Extension</div>
               </div>
             </div>
             <span class="wallet-detected-badge">Detected</span>
@@ -1160,10 +1173,10 @@ HOW TO RECOVER YOUR ACCOUNT:
           </div>
           <div>
             <div class="wallet-option-title">MetaMask</div>
-            <div class="wallet-option-desc">Connect & choose account in MetaMask</div>
+            <div class="wallet-option-desc">Connect with MetaMask wallet</div>
           </div>
         </div>
-        ${hasMetaMask ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--text-muted);">Popular</span>`}
+        ${hasMetaMask ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Connect →</span>`}
       </div>
 
       <!-- 2. Trust Wallet -->
@@ -1180,7 +1193,7 @@ HOW TO RECOVER YOUR ACCOUNT:
             <div class="wallet-option-desc">Multi-chain mobile & browser wallet</div>
           </div>
         </div>
-        ${hasTrust ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--text-muted);">BEP-20</span>`}
+        ${hasTrust ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Connect →</span>`}
       </div>
 
       <!-- 3. Binance Web3 Wallet / BNB Chain -->
@@ -1197,7 +1210,7 @@ HOW TO RECOVER YOUR ACCOUNT:
             <div class="wallet-option-desc">Native BNB Chain Ecosystem wallet</div>
           </div>
         </div>
-        ${hasBinance ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Native</span>`}
+        ${hasBinance ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Connect →</span>`}
       </div>
 
       <!-- 4. OKX Wallet -->
@@ -1211,14 +1224,14 @@ HOW TO RECOVER YOUR ACCOUNT:
             <div class="wallet-option-desc">Multi-chain EVM Web3 provider</div>
           </div>
         </div>
-        ${hasOKX ? `<span class="wallet-detected-badge">Detected</span>` : ``}
+        ${hasOKX ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Connect →</span>`}
       </div>
 
-      <!-- 5. Coinbase / Other Browser Wallet -->
-      <div class="wallet-option-item" onclick="window.boobaApp.connectWalletProvider('injected')">
+      <!-- 5. Coinbase / Browser Wallet -->
+      <div class="wallet-option-item" onclick="window.boobaApp.connectWalletProvider('coinbase')">
         <div class="wallet-option-left">
-          <div class="wallet-logo-icon" style="background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.3);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" stroke-width="2">
+          <div class="wallet-logo-icon" style="background: rgba(0, 82, 255, 0.15); border: 1px solid rgba(0, 82, 255, 0.3);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0052FF" stroke-width="2">
               <rect x="2" y="5" width="20" height="14" rx="2"></rect>
               <line x1="2" y1="10" x2="22" y2="10"></line>
             </svg>
@@ -1228,7 +1241,7 @@ HOW TO RECOVER YOUR ACCOUNT:
             <div class="wallet-option-desc">Connect any installed EVM Web3 provider</div>
           </div>
         </div>
-        ${hasGenericWeb3 ? `<span class="wallet-detected-badge">Available</span>` : ``}
+        ${(hasCoinbase || hasGenericWeb3) ? `<span class="wallet-detected-badge">Available</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Connect →</span>`}
       </div>
     `;
 
@@ -1245,49 +1258,113 @@ HOW TO RECOVER YOUR ACCOUNT:
     let provider = null;
     let walletName = 'Web3 Wallet';
 
-    if (type === 'trust') {
-      walletName = 'Trust Wallet';
-      if (window.trustwallet?.ethereum) provider = window.trustwallet.ethereum;
-      else if (window.ethereum?.isTrust) provider = window.ethereum;
-    } else if (type === 'binance') {
-      walletName = 'Binance Web3 Wallet';
-      if (window.BinanceChain) provider = window.BinanceChain;
-      else if (window.ethereum?.isBinance) provider = window.ethereum;
-    } else if (type === 'okx') {
-      walletName = 'OKX Wallet';
-      if (window.okxwallet) provider = window.okxwallet;
-    } else if (type === 'metamask') {
-      walletName = 'MetaMask';
-      if (window.ethereum) {
-        if (window.ethereum.providers) {
-          provider = window.ethereum.providers.find(p => p.isMetaMask) || window.ethereum;
-        } else {
-          provider = window.ethereum;
+    // 1. Check EIP-6963 matching providers first
+    if (this.eip6963Providers && this.eip6963Providers.size > 0) {
+      for (const [key, detail] of this.eip6963Providers.entries()) {
+        const info = detail.info || {};
+        const rdns = (info.rdns || '').toLowerCase();
+        const name = (info.name || '').toLowerCase();
+        if (type === 'metamask' && (rdns.includes('metamask') || name.includes('metamask'))) {
+          provider = detail.provider;
+          walletName = info.name || 'MetaMask';
+          break;
+        } else if (type === 'trust' && (rdns.includes('trust') || name.includes('trust'))) {
+          provider = detail.provider;
+          walletName = info.name || 'Trust Wallet';
+          break;
+        } else if (type === 'binance' && (rdns.includes('binance') || name.includes('binance'))) {
+          provider = detail.provider;
+          walletName = info.name || 'Binance Web3 Wallet';
+          break;
+        } else if (type === 'okx' && (rdns.includes('okx') || rdns.includes('okex') || name.includes('okx'))) {
+          provider = detail.provider;
+          walletName = info.name || 'OKX Wallet';
+          break;
+        } else if (type === 'coinbase' && (rdns.includes('coinbase') || name.includes('coinbase'))) {
+          provider = detail.provider;
+          walletName = info.name || 'Coinbase Wallet';
+          break;
         }
       }
-    } else {
-      if (window.ethereum) provider = window.ethereum;
+    }
+
+    // 2. Specific window objects
+    if (!provider) {
+      if (type === 'trust') {
+        walletName = 'Trust Wallet';
+        if (window.trustwallet?.ethereum) provider = window.trustwallet.ethereum;
+        else if (window.trustwallet) provider = window.trustwallet;
+        else if (window.ethereum?.providers) provider = window.ethereum.providers.find(p => p.isTrust || p.isTrustWallet);
+        else if (window.ethereum?.isTrust) provider = window.ethereum;
+      } else if (type === 'binance') {
+        walletName = 'Binance Web3 Wallet';
+        if (window.BinanceChain) provider = window.BinanceChain;
+        else if (window.ethereum?.providers) provider = window.ethereum.providers.find(p => p.isBinance);
+        else if (window.ethereum?.isBinance) provider = window.ethereum;
+      } else if (type === 'okx') {
+        walletName = 'OKX Wallet';
+        if (window.okxwallet) provider = window.okxwallet;
+        else if (window.ethereum?.providers) provider = window.ethereum.providers.find(p => p.isOkxWallet);
+        else if (window.ethereum?.isOkxWallet) provider = window.ethereum;
+      } else if (type === 'metamask') {
+        walletName = 'MetaMask';
+        if (window.ethereum) {
+          if (window.ethereum.providers) {
+            provider = window.ethereum.providers.find(p => p.isMetaMask && !p.isBraveWallet && !p.isTrust && !p.isOkxWallet) || window.ethereum.providers.find(p => p.isMetaMask) || window.ethereum;
+          } else if (window.ethereum.isMetaMask) {
+            provider = window.ethereum;
+          }
+        }
+      } else if (type === 'coinbase') {
+        walletName = 'Coinbase Wallet';
+        if (window.coinbaseWalletExtension) provider = window.coinbaseWalletExtension;
+        else if (window.ethereum?.providers) provider = window.ethereum.providers.find(p => p.isCoinbaseWallet);
+        else if (window.ethereum?.isCoinbaseWallet) provider = window.ethereum;
+      } else {
+        walletName = 'Browser Wallet';
+        if (window.ethereum) provider = window.ethereum;
+      }
+    }
+
+    // Generic fallback if provider is available in window
+    if (!provider && window.ethereum) {
+      provider = window.ethereum;
     }
 
     if (!provider) {
-      // Check mobile deep link redirection
-      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-      const currentUrl = encodeURIComponent(window.location.href);
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+      const cleanHostAndPath = (window.location.host + window.location.pathname + window.location.search + window.location.hash).replace(/\/+$/, '');
+      const fullUrl = window.location.href;
 
-      if (isMobile && type === 'metamask') {
-        window.location.href = `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`;
-        return;
-      }
-      if (isMobile && type === 'trust') {
-        window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${currentUrl}`;
-        return;
+      if (isMobile) {
+        if (type === 'metamask') {
+          window.location.href = `https://metamask.app.link/dapp/${cleanHostAndPath}`;
+          return;
+        } else if (type === 'trust') {
+          window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(fullUrl)}`;
+          return;
+        } else if (type === 'okx') {
+          window.location.href = `okx://wallet/dapp/url?dappUrl=${encodeURIComponent(fullUrl)}`;
+          setTimeout(() => {
+            window.location.href = 'https://www.okx.com/web3';
+          }, 1500);
+          return;
+        } else if (type === 'binance') {
+          window.location.href = `bnc://app.binance.com/cedefi/webview?url=${encodeURIComponent(fullUrl)}`;
+          setTimeout(() => {
+            window.location.href = 'https://www.binance.com/en/web3wallet';
+          }, 1500);
+          return;
+        } else if (type === 'coinbase') {
+          window.location.href = `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(fullUrl)}`;
+          return;
+        } else {
+          window.location.href = `https://metamask.app.link/dapp/${cleanHostAndPath}`;
+          return;
+        }
       }
 
-      const shouldManual = confirm(`${walletName} was not detected in this browser.\n\nWould you like to enter your BNB wallet address manually to sign in?`);
-      if (shouldManual) {
-        const addrInput = document.getElementById('manualWalletAddressInput');
-        if (addrInput) addrInput.focus();
-      }
+      alert(`${walletName} extension was not detected in this browser.\n\nPlease make sure your ${walletName} browser extension is installed and enabled, or try another wallet.`);
       return;
     }
 
@@ -1298,35 +1375,32 @@ HOW TO RECOVER YOUR ACCOUNT:
     try {
       let accounts = [];
 
-      // Request permissions first to trigger official account picker dialog
-      try {
-        if (typeof provider.request === 'function') {
-          const perm = await provider.request({
-            method: 'wallet_requestPermissions',
-            params: [{ eth_accounts: {} }]
-          });
-          if (perm && perm[0] && perm[0].caveats) {
-            accounts = await provider.request({ method: 'eth_accounts' });
-          }
-        }
-      } catch (permErr) {
-        // Fallback to standard eth_requestAccounts
-      }
-
-      if (!accounts || accounts.length === 0) {
-        if (typeof provider.request === 'function') {
+      // Request accounts using standard eth_requestAccounts
+      if (typeof provider.request === 'function') {
+        try {
           accounts = await provider.request({ method: 'eth_requestAccounts' });
-        } else if (typeof provider.enable === 'function') {
-          accounts = await provider.enable();
+        } catch (reqErr) {
+          if (reqErr.code === 4001 || reqErr.code === '4001') {
+            alert('Connection request was cancelled in your Web3 wallet.');
+            return;
+          }
+          // Try fallback to eth_accounts
+          try {
+            accounts = await provider.request({ method: 'eth_accounts' });
+          } catch (e) {}
         }
+      } else if (typeof provider.enable === 'function') {
+        accounts = await provider.enable();
       }
 
       if (!accounts || accounts.length === 0) {
-        alert('No account selected in your Web3 wallet.');
+        alert(`No account selected or permission denied in ${walletName}.`);
         return;
       }
 
-      // Check BNB Chain network (Chain ID 56 / 0x38)
+      const walletAddress = accounts[0];
+
+      // Verify and suggest BNB Smart Chain (Chain ID 56 / 0x38)
       try {
         if (typeof provider.request === 'function') {
           const chainId = await provider.request({ method: 'eth_chainId' });
@@ -1337,7 +1411,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                 params: [{ chainId: '0x38' }]
               });
             } catch (switchError) {
-              if (switchError.code === 4902) {
+              if (switchError.code === 4902 || switchError.message?.includes('4902')) {
                 await provider.request({
                   method: 'wallet_addEthereumChain',
                   params: [{
@@ -1352,30 +1426,42 @@ HOW TO RECOVER YOUR ACCOUNT:
             }
           }
         }
-      } catch (netErr) {
-        console.warn('Network check:', netErr);
+      } catch (chainErr) {
+        console.warn('Chain switch notice:', chainErr);
       }
 
-      const walletAddress = accounts[0];
-      const res = await db.loginOrSignupWithWallet({ walletAddress });
-
-      const modal = document.getElementById('walletConnectDynamicModal');
+      // Close modal
+      const modal = document.getElementById('walletConnectDynamicModal') || document.getElementById('web3WalletModal');
       if (modal) modal.remove();
 
-      if (res.success) {
-        if (res.isNewUser && res.seedPhrase) {
-          this.showSeedPhraseModal(res.seedPhrase, res.user, () => {
-            window.location.href = 'dashboard.html';
-          });
+      // Check whether user is logged in
+      if (db.currentUser) {
+        const res = await db.updateWalletAddress(walletAddress);
+        if (res.success) {
+          alert(`Web3 Wallet Connected: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`);
+          this.renderHeaderNav();
+          this.renderPage();
         } else {
-          alert(`Connected with ${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}! Welcome ${res.user.username}.`);
-          window.location.href = 'dashboard.html';
+          alert(res.message || 'Failed to update wallet address.');
         }
       } else {
-        alert(res.message || 'Failed to authenticate with Web3 wallet.');
+        const res = await db.loginOrSignupWithWallet({ walletAddress });
+        if (res.success) {
+          if (res.isNewUser && res.seedPhrase) {
+            this.showSeedPhraseModal(res.seedPhrase, res.user, () => {
+              window.location.href = 'dashboard.html';
+            });
+          } else {
+            alert(`Connected with ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}! Welcome ${res.user.username}.`);
+            window.location.href = 'dashboard.html';
+          }
+        } else {
+          alert(res.message || 'Failed to authenticate with Web3 wallet.');
+        }
       }
     } catch (err) {
-      if (err.code === 4001) {
+      console.error('Wallet auth error:', err);
+      if (err.code === 4001 || err.code === '4001') {
         alert('Connection rejected in your wallet.');
       } else {
         alert(err.message || 'Error connecting to Web3 wallet.');
@@ -1383,32 +1469,20 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
   }
 
-  async handleManualWalletSubmit(e) {
-    e.preventDefault();
-    const input = document.getElementById('manualWalletAddressInput');
-    const addr = input?.value.trim();
-
-    if (!addr || !addr.startsWith('0x') || addr.length < 15) {
-      alert('Please enter a valid BNB Chain / EVM address starting with 0x (42 characters).');
-      return;
-    }
-
-    const res = await db.loginOrSignupWithWallet({ walletAddress: addr });
-    const modal = document.getElementById('walletConnectDynamicModal');
-    if (modal) modal.remove();
-
+  async handleDisconnectWallet() {
+    if (!db.currentUser) return;
+    const res = await db.updateWalletAddress('');
     if (res.success) {
-      if (res.isNewUser && res.seedPhrase) {
-        this.showSeedPhraseModal(res.seedPhrase, res.user, () => {
-          window.location.href = 'dashboard.html';
-        });
-      } else {
-        alert(`Welcome back, ${res.user.username}!`);
-        window.location.href = 'dashboard.html';
-      }
-    } else {
-      alert(res.message || 'Failed to sign in with address.');
+      alert('Web3 wallet disconnected.');
+      const modal = document.getElementById('walletConnectDynamicModal') || document.getElementById('web3WalletModal');
+      if (modal) modal.remove();
+      this.renderHeaderNav();
+      this.renderPage();
     }
+  }
+
+  updateNavState() {
+    this.renderHeaderNav();
   }
 
   // --------------------------------------------------------------------------
@@ -5395,142 +5469,6 @@ HOW TO RECOVER YOUR ACCOUNT:
     track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
   }
 
-  openWalletModal() {
-    const existing = document.getElementById('web3WalletModal');
-    if (existing) existing.remove();
-
-    const user = db.currentUser;
-    const isConnected = Boolean(user && user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
-    const currentAddr = isConnected ? user.walletAddress : '';
-
-    const modal = document.createElement('div');
-    modal.id = 'web3WalletModal';
-    modal.className = 'modal-backdrop open active';
-    modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1rem;';
-
-    modal.innerHTML = `
-      <div class="card" style="max-width: 480px; width: 100%; padding: 2.25rem; border-radius: 28px; border: 1.5px solid rgba(243, 186, 47, 0.4); background: linear-gradient(180deg, rgba(20, 26, 38, 0.98) 0%, rgba(10, 13, 20, 0.99) 100%); box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 40px rgba(243, 186, 47, 0.2); position: relative; animation: popInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
-        
-        <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('web3WalletModal').remove()" style="position: absolute; top: 1.25rem; right: 1.25rem; border-radius: 50%; width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-
-        <div style="text-align: center; margin-bottom: 1.75rem;">
-          <div style="width: 56px; height: 56px; border-radius: 18px; background: rgba(243, 186, 47, 0.15); border: 1px solid rgba(243, 186, 47, 0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; color: var(--brand-yellow);">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
-          </div>
-          <h3 style="font-size: 1.45rem; font-weight: 800; color: #FFFFFF; margin: 0 0 0.35rem 0;">Connect Web3 Wallet</h3>
-          <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Connect your BNB Smart Chain BEP-20 wallet for instant token withdrawals</p>
-        </div>
-
-        ${isConnected ? `
-          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; text-align: center;">
-            <div style="font-size: 0.72rem; color: var(--accent-emerald); font-weight: 800; text-transform: uppercase; margin-bottom: 0.25rem;">Active Connected Wallet</div>
-            <div style="font-size: 0.88rem; font-family: var(--font-mono); font-weight: 800; color: #FFFFFF; word-break: break-all;">${currentAddr}</div>
-          </div>
-        ` : ''}
-
-        <!-- Web3 Wallet Providers Grid -->
-        <div style="display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 1.5rem;">
-          <button type="button" class="btn btn-secondary btn-block" onclick="window.boobaApp.connectBrowserWallet('MetaMask')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.25rem;">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <span style="font-size: 1.2rem;">🦊</span>
-              <span style="font-weight: 800; color: #FFFFFF;">MetaMask</span>
-            </div>
-            <span style="font-size: 0.72rem; color: var(--brand-yellow); font-weight: 800;">Connect →</span>
-          </button>
-
-          <button type="button" class="btn btn-secondary btn-block" onclick="window.boobaApp.connectBrowserWallet('Trust Wallet')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.25rem;">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <span style="font-size: 1.2rem;">🛡️</span>
-              <span style="font-weight: 800; color: #FFFFFF;">Trust Wallet</span>
-            </div>
-            <span style="font-size: 0.72rem; color: var(--brand-yellow); font-weight: 800;">Connect →</span>
-          </button>
-
-          <button type="button" class="btn btn-secondary btn-block" onclick="window.boobaApp.connectBrowserWallet('Binance Web3')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.25rem;">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <span style="font-size: 1.2rem;">🔶</span>
-              <span style="font-weight: 800; color: #FFFFFF;">Binance Web3 Wallet</span>
-            </div>
-            <span style="font-size: 0.72rem; color: var(--brand-yellow); font-weight: 800;">Connect →</span>
-          </button>
-        </div>
-
-        <!-- Manual Address Input Form -->
-        <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 1.25rem;">
-          <div style="font-size: 0.78rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 0.5rem;">Or Enter BEP-20 Address Manually:</div>
-          <div style="display: flex; gap: 0.5rem;">
-            <input type="text" id="manualWalletInput" class="form-input text-mono" placeholder="0x..." value="${currentAddr}" style="font-size: 0.82rem;">
-            <button type="button" class="btn btn-primary btn-sm" onclick="window.boobaApp.handleSaveManualWallet(document.getElementById('manualWalletInput').value)" style="white-space: nowrap;">
-              Save
-            </button>
-          </div>
-        </div>
-
-        ${isConnected ? `
-          <div style="margin-top: 1.25rem; text-align: center;">
-            <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.handleDisconnectWallet()" style="color: var(--accent-rose); font-size: 0.75rem;">
-              Disconnect Wallet
-            </button>
-          </div>
-        ` : ''}
-
-      </div>
-    `;
-
-    document.body.appendChild(modal);
-  }
-
-  async connectBrowserWallet(providerName = 'MetaMask') {
-    if (typeof window.ethereum !== 'undefined') {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        if (accounts && accounts.length > 0) {
-          const address = accounts[0];
-          await db.updateWalletAddress(address);
-          alert(`${providerName} Connected: ${address}`);
-          const modal = document.getElementById('web3WalletModal');
-          if (modal) modal.remove();
-          this.updateNavState();
-          this.renderPage();
-        }
-      } catch (e) {
-        alert(`Could not connect to ${providerName}: ${e.message}`);
-      }
-    } else {
-      const address = prompt(`No Web3 extension detected for ${providerName}. Please enter or paste your BEP-20 Wallet Address (0x...):`);
-      if (address) {
-        await this.handleSaveManualWallet(address);
-      }
-    }
-  }
-
-  async handleSaveManualWallet(address) {
-    if (!address || !address.startsWith('0x') || address.length < 10) {
-      alert('Please enter a valid EVM/BEP-20 wallet address starting with 0x.');
-      return;
-    }
-    const res = await db.updateWalletAddress(address.trim());
-    if (res.success) {
-      alert('Web3 Wallet Address successfully connected and saved!');
-      const modal = document.getElementById('web3WalletModal');
-      if (modal) modal.remove();
-      this.updateNavState();
-      this.renderPage();
-    } else {
-      alert(res.message || 'Failed to update wallet address.');
-    }
-  }
-
-  async handleDisconnectWallet() {
-    await db.updateWalletAddress('');
-    alert('Web3 wallet disconnected.');
-    const modal = document.getElementById('web3WalletModal');
-    if (modal) modal.remove();
-    this.updateNavState();
-    this.renderPage();
-  }
 
   showTgeWithdrawModal() {
     const existing = document.getElementById('tgeNoticeModal');

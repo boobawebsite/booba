@@ -2315,71 +2315,7 @@ HOW TO RECOVER YOUR ACCOUNT:
         </div>
       </section>
 
-      <!-- 3. INTERACTIVE STAKING MULTIPLIER CALCULATOR (DEVELOPER MINI-TOOL) -->
-      <section class="section-container" style="padding: 5rem 0;">
-        <div class="container">
-          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center;">
-            
-            <div>
-              <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 800; color: #FFFFFF; line-height: 1.2; margin-bottom: 1rem;">
-                Staking & Yield Multiplier Calculator
-              </h2>
-              <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 2rem;">
-                Drag the slider to project your quest multiplier boost, daily check-in yield, and unlocked Passport Tier status when staking $BOOBA tokens.
-              </p>
-
-              <div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <label for="stakingCalcSlider" style="font-size: 0.9rem; font-weight: 700; color: #FFFFFF;">$BOOBA Tokens Staked:</label>
-                  <span id="stakingCalcAmountDisplay" class="text-mono" style="font-size: 1.25rem; font-weight: 800; color: var(--brand-yellow);">10,000 $BOOBA</span>
-                </div>
-                <input type="range" id="stakingCalcSlider" class="calc-range-slider" min="0" max="50000" step="1000" value="10000" oninput="window.boobaApp.updateAboutStakingCalc(this.value)">
-                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
-                  <span>0 $BOOBA</span>
-                  <span>25,000 $BOOBA</span>
-                  <span>50,000+ $BOOBA</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Live Calculated Display Card -->
-            <div class="glass-panel" style="padding: 2rem; border-radius: 20px; border: 1.5px solid var(--border-medium); background: rgba(7, 9, 14, 0.9);">
-              <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
-                Live Projected Benefits
-              </div>
-
-              <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span style="color: var(--text-secondary); font-size: 0.9rem;">Bounty Multiplier Boost:</span>
-                  <strong id="calcMultiplierOutput" class="text-mono" style="font-size: 1.4rem; color: var(--brand-yellow);">2.00x Boost</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span style="color: var(--text-secondary); font-size: 0.9rem;">Est. Daily Streak Earnings:</span>
-                  <strong id="calcDailyYieldOutput" class="text-mono" style="font-size: 1.15rem; color: var(--accent-emerald);">+100 BOOBA / day</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span style="color: var(--text-secondary); font-size: 0.9rem;">Unlocked Passport Tier:</span>
-                  <strong id="calcTierOutput" style="font-size: 0.95rem; color: #FFFFFF; background: rgba(243, 186, 47, 0.15); padding: 0.2rem 0.6rem; border-radius: 999px; border: 1px solid rgba(243, 186, 47, 0.3);">Lv.6 Champion</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span style="color: var(--text-secondary); font-size: 0.9rem;">Base Vault APY:</span>
-                  <strong class="text-mono" style="font-size: 1.05rem; color: var(--accent-purple);">18.5% Base APY</strong>
-                </div>
-              </div>
-
-              <div style="margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle); text-align: center;">
-                <a href="quests.html" class="btn btn-primary btn-block btn-sm" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;">
-                  <span>Start Earning & Staking</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      <!-- 4. OFFICIAL TOKENOMICS & 3D MULTI-MODE DISTRIBUTION -->
+      <!-- 3. OFFICIAL TOKENOMICS & 3D MULTI-MODE DISTRIBUTION -->
       <section id="tokenomics" class="section-container" style="padding: 5rem 0; background: var(--bg-surface); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
         <div class="container">
           
@@ -2420,17 +2356,17 @@ HOW TO RECOVER YOUR ACCOUNT:
             </div>
 
             <!-- Contract Address 1-Click Copy Bar -->
-            <div style="background: rgba(7, 9, 14, 0.7); border: 1px solid var(--border-medium); border-radius: 14px; padding: 0.85rem 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-              <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                <span class="badge-tag" style="margin: 0;">Contract</span>
-                <span id="tokenContractAddr" class="text-mono" style="font-size: 0.92rem; color: var(--brand-yellow); word-break: break-all;">0x712B00BA99E74f8812cCdA15D5881a7a1c92F3a1</span>
+            <div class="contract-strip" style="background: rgba(7, 9, 14, 0.85); border: 1.5px solid var(--border-medium); border-radius: 16px; padding: 1.1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; width: 100%; box-sizing: border-box; overflow: hidden;">
+              <div class="contract-address-box" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; min-width: 0; max-width: 100%;">
+                <span class="badge-tag" style="margin: 0; font-size: 0.75rem; flex-shrink: 0;">Contract</span>
+                <span id="tokenContractAddr" class="text-mono" style="font-size: clamp(0.78rem, 2.5vw, 0.92rem); color: var(--brand-yellow); word-break: break-all; max-width: 100%;">0x712B00BA99E74f8812cCdA15D5881a7a1c92F3a1</span>
               </div>
-              <div style="display: flex; gap: 0.75rem;">
-                <button type="button" class="btn btn-primary btn-sm" onclick="window.boobaApp.copyContractAddress()">
+              <div class="contract-actions" style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-primary btn-sm" onclick="window.boobaApp.copyContractAddress()" style="white-space: nowrap;">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                   <span id="copyContractBtnText">Copy Contract</span>
                 </button>
-                <a href="https://bscscan.com" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                <a href="https://bscscan.com/token/0x712B00BA99E74f8812cCdA15D5881a7a1c92F3a1" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap;">
                   <span>View on BscScan</span>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                 </a>
@@ -3081,36 +3017,6 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
   }
 
-  updateAboutStakingCalc(amount) {
-    const val = Number(amount);
-    const amountDisp = document.getElementById('stakingCalcAmountDisplay');
-    const multDisp = document.getElementById('calcMultiplierOutput');
-    const yieldDisp = document.getElementById('calcDailyYieldOutput');
-    const tierDisp = document.getElementById('calcTierOutput');
-
-    if (amountDisp) amountDisp.textContent = `${Number(val).toLocaleString()} $BOOBA`;
-
-    // Multiplier curve: 1.0x at 0 to 3.5x at 50k
-    const mult = Math.min(3.5, 1.0 + (val / 50000) * 2.5).toFixed(2);
-    if (multDisp) multDisp.textContent = `${mult}x Boost`;
-
-    // Daily points estimate
-    const dailyPts = Math.round(50 * Number(mult));
-    if (yieldDisp) yieldDisp.textContent = `+${dailyPts} BOOBA / day`;
-
-    // Tier projection
-    let tierName = 'Lv.1 Explorer';
-    if (val >= 40000) tierName = 'Lv.10 Booba Master';
-    else if (val >= 30000) tierName = 'Lv.9 Warlord';
-    else if (val >= 20000) tierName = 'Lv.8 Commander';
-    else if (val >= 15000) tierName = 'Lv.7 Veteran';
-    else if (val >= 10000) tierName = 'Lv.6 Champion';
-    else if (val >= 5000) tierName = 'Lv.5 Guardian';
-    else if (val >= 2000) tierName = 'Lv.3 Pioneer';
-    else if (val >= 500) tierName = 'Lv.2 Pathfinder';
-
-    if (tierDisp) tierDisp.textContent = tierName;
-  }
 
   toggleAboutFaq(idx) {
     const card = document.getElementById(`faqItem${idx}`);

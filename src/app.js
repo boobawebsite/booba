@@ -1088,7 +1088,7 @@ HOW TO RECOVER YOUR ACCOUNT:
         </div>
 
         <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
-          ${user ? 'Connect your verified Web3 wallet for token claims, quests, and withdrawals.' : 'Select your Web3 wallet provider to instantly sign in or mint your Booba Passport (+100 BOOBA bonus).'}
+          ${user ? `Connect your BEP-20 wallet to Passport <strong>${user.passportId || 'BB'}</strong> for token withdrawals & rewards.` : 'Connect your verified Web3 wallet to instantly sign in or mint your Booba Passport (+100 BOOBA bonus).'}
         </p>
 
         ${isConnected ? `
@@ -1108,10 +1108,31 @@ HOW TO RECOVER YOUR ACCOUNT:
           </div>
         ` : ''}
 
+        <!-- Direct Instant BEP-20 Wallet Address Connect / Paste Bar -->
+        <div style="background: rgba(243, 186, 47, 0.08); border: 1.5px solid rgba(243, 186, 47, 0.3); border-radius: 18px; padding: 1.1rem; margin-bottom: 1.25rem;">
+          <div style="font-size: 0.8rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.4rem; display: flex; align-items: center; justify-content: space-between;">
+            <span>⚡ Instant Connect / Paste BEP-20 Address</span>
+            <span style="font-size: 0.72rem; color: var(--brand-yellow);">No App Switching</span>
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.6rem;">
+            <input type="text" id="manualWalletInputAddress" class="form-input text-mono" placeholder="0x... Paste your Trust/MetaMask BEP-20 address" style="flex: 1; font-size: 0.82rem; padding: 0.6rem 0.8rem; border-radius: 10px; background: rgba(0,0,0,0.5);" value="${currentAddr || ''}">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.boobaApp.pasteWalletAddressFromClipboard()" style="padding: 0 0.75rem; font-size: 0.75rem; white-space: nowrap;">
+              Paste
+            </button>
+          </div>
+          <button type="button" class="btn btn-primary btn-block btn-sm" onclick="window.boobaApp.handleManualWalletConnect()" style="margin-top: 0.75rem; font-weight: 800; font-size: 0.85rem; padding: 0.65rem;">
+            ⚡ Link Wallet to My Account
+          </button>
+        </div>
+
+        <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.75rem; text-align: center;">
+          — Or Auto-Connect with Wallet App —
+        </div>
+
         <div id="walletOptionsContainer" class="wallet-options-list"></div>
 
         <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.75rem; color: var(--text-muted); text-align: center; line-height: 1.4;">
-          💡 <strong>Mobile Tip:</strong> If your wallet app does not open automatically, open this page inside your wallet's built-in Web3 browser (MetaMask, Trust Wallet, OKX, or Binance Web3).
+          💡 <strong>Tip:</strong> You can copy your BEP-20 address from Trust Wallet or MetaMask and paste it above to connect your Chrome account in 1 second!
         </div>
       </div>
     `;
@@ -1311,6 +1332,60 @@ HOW TO RECOVER YOUR ACCOUNT:
     const provider = window.trustwallet?.ethereum || window.trustwallet || window.okxwallet || window.BinanceChain || window.ethereum;
     if (provider) {
       await this.authenticateWithProvider(provider, 'In-App Web3 Wallet');
+    }
+  }
+
+  async pasteWalletAddressFromClipboard() {
+    try {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        const text = await navigator.clipboard.readText();
+        const input = document.getElementById('manualWalletInputAddress');
+        if (input && text) {
+          input.value = text.trim();
+        }
+      } else {
+        alert('Please paste your 0x BEP-20 address directly into the field.');
+      }
+    } catch (e) {
+      alert('Please paste your 0x BEP-20 address directly into the field.');
+    }
+  }
+
+  async handleManualWalletConnect() {
+    const input = document.getElementById('manualWalletInputAddress');
+    const addr = (input?.value || '').trim();
+
+    if (!addr || !addr.startsWith('0x') || addr.length < 20) {
+      alert('Please enter a valid BEP-20 wallet address (starting with 0x...).');
+      return;
+    }
+
+    const modal = document.getElementById('walletConnectDynamicModal');
+    if (modal) modal.remove();
+
+    if (db.currentUser) {
+      const res = await db.updateWalletAddress(addr);
+      if (res.success) {
+        alert(`🎉 Web3 Wallet Connected Successfully!\nAddress: ${addr.slice(0, 6)}...${addr.slice(-4)}`);
+        this.renderHeaderNav();
+        this.renderPage();
+      } else {
+        alert(res.message || 'Failed to link wallet address.');
+      }
+    } else {
+      const res = await db.loginOrSignupWithWallet({ walletAddress: addr });
+      if (res.success) {
+        if (res.isNewUser && res.seedPhrase) {
+          this.showSeedPhraseModal(res.seedPhrase, res.user, () => {
+            window.location.href = 'dashboard.html';
+          });
+        } else {
+          this.renderHeaderNav();
+          this.renderPage();
+        }
+      } else {
+        alert(res.message || 'Failed to authenticate wallet.');
+      }
     }
   }
 

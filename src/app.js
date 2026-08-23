@@ -1124,35 +1124,36 @@ HOW TO RECOVER YOUR ACCOUNT:
     const container = document.getElementById('walletOptionsContainer');
     if (!container) return;
 
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+    const cleanHostAndPath = (window.location.host + window.location.pathname + window.location.search + window.location.hash).replace(/\/+$/, '');
+    const fullUrl = window.location.href;
+
     // Detect installed standard extensions / injected providers
     const hasMetaMask = Boolean(window.ethereum && (window.ethereum.isMetaMask || window.ethereum.providers?.some(p => p.isMetaMask)));
     const hasTrust = Boolean(window.trustwallet || window.ethereum?.isTrust || window.ethereum?.providers?.some(p => p.isTrust || p.isTrustWallet));
     const hasBinance = Boolean(window.BinanceChain || window.ethereum?.isBinance || window.ethereum?.providers?.some(p => p.isBinance));
     const hasOKX = Boolean(window.okxwallet || window.ethereum?.isOkxWallet || window.ethereum?.providers?.some(p => p.isOkxWallet));
     const hasCoinbase = Boolean(window.coinbaseWalletExtension || window.ethereum?.isCoinbaseWallet || window.ethereum?.providers?.some(p => p.isCoinbaseWallet));
-    const hasGenericWeb3 = Boolean(window.ethereum);
+    const hasGenericInjected = Boolean(window.ethereum || window.trustwallet || window.okxwallet || window.BinanceChain);
 
     let html = '';
 
-    // 0. Primary Featured: WalletConnect (Direct Mobile Pairing for Chrome/Safari)
-    html += `
-      <div class="wallet-option-item" onclick="window.boobaApp.connectWalletConnect()" style="background: linear-gradient(135deg, rgba(59, 153, 252, 0.15) 0%, rgba(20, 26, 38, 0.9) 100%); border: 1.5px solid rgba(59, 153, 252, 0.45);">
-        <div class="wallet-option-left">
-          <div class="wallet-logo-icon" style="background: rgba(59, 153, 252, 0.2); border: 1px solid rgba(59, 153, 252, 0.5);">
-            <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-              <path d="M6.5 10.5C11.75 5.25 20.25 5.25 25.5 10.5L26.2 11.2C26.5 11.5 26.5 12 26.2 12.3L23.9 14.6C23.7 14.8 23.4 14.8 23.2 14.6L22.2 13.6C18.8 10.2 13.2 10.2 9.8 13.6L8.8 14.6C8.6 14.8 8.3 14.8 8.1 14.6L5.8 12.3C5.5 12 5.5 11.5 5.8 11.2L6.5 10.5ZM29.2 14.2L31.2 16.2C31.5 16.5 31.5 17 31.2 17.3L22.1 26.4C21.8 26.7 21.3 26.7 21 26.4L16 21.4C15.9 21.3 15.7 21.3 15.6 21.4L10.6 26.4C10.3 26.7 9.8 26.7 9.5 26.4L0.4 17.3C0.1 17 0.1 16.5 0.4 16.2L2.4 14.2C2.7 13.9 3.2 13.9 3.5 14.2L8.5 19.2C8.6 19.3 8.8 19.3 8.9 19.2L13.9 14.2C14.2 13.9 14.7 13.9 15 14.2L16 15.2C16.1 15.3 16.3 15.3 16.4 15.2L17.4 14.2C17.7 13.9 18.2 13.9 18.5 14.2L23.5 19.2C23.6 19.3 23.8 19.3 23.9 19.2L28.9 14.2C29 13.9 29.5 13.9 29.2 14.2Z" fill="#3B99FC"/>
-            </svg>
+    // If an injected wallet is active (e.g. inside Trust Wallet/MetaMask App Browser or Desktop Extension)
+    if (hasGenericInjected) {
+      html += `
+        <div style="background: rgba(16, 185, 129, 0.15); border: 1.5px solid rgba(16, 185, 129, 0.4); border-radius: 14px; padding: 0.85rem 1rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span class="pulse-dot" style="width: 8px; height: 8px; background: var(--accent-emerald);"></span>
+            <div style="font-size: 0.82rem; font-weight: 700; color: #FFFFFF;">In-App Web3 Provider Detected</div>
           </div>
-          <div>
-            <div class="wallet-option-title" style="color: #FFFFFF;">WalletConnect (Mobile & Desktop)</div>
-            <div class="wallet-option-desc">Connect Trust Wallet, MetaMask & 300+ Wallets in Chrome</div>
-          </div>
+          <button type="button" class="btn btn-primary btn-sm" onclick="window.boobaApp.connectInjectedDirect()" style="font-size: 0.76rem; padding: 0.35rem 0.75rem;">
+            1-Click Connect
+          </button>
         </div>
-        <span class="wallet-detected-badge" style="background: rgba(59, 153, 252, 0.2); color: #3B99FC; border-color: rgba(59, 153, 252, 0.4);">Mobile Pairing</span>
-      </div>
-    `;
+      `;
+    }
 
-    // If EIP-6963 providers exist, show them dynamically
+    // Dynamic EIP-6963 Wallets
     if (this.eip6963Providers && this.eip6963Providers.size > 0) {
       this.eip6963Providers.forEach((detail, key) => {
         const info = detail.info || {};
@@ -1171,10 +1172,9 @@ HOW TO RECOVER YOUR ACCOUNT:
       });
     }
 
-    // Standard list
+    // 1. Trust Wallet
     html += `
-      <!-- 1. Trust Wallet -->
-      <div class="wallet-option-item" onclick="window.boobaApp.connectWalletProvider('trust')">
+      <div class="wallet-option-item" onclick="window.boobaApp.handleWalletOptionSelect('trust')">
         <div class="wallet-option-left">
           <div class="wallet-logo-icon" style="background: rgba(5, 0, 255, 0.15); border: 1px solid rgba(51, 117, 255, 0.3);">
             <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
@@ -1184,14 +1184,14 @@ HOW TO RECOVER YOUR ACCOUNT:
           </div>
           <div>
             <div class="wallet-option-title">Trust Wallet</div>
-            <div class="wallet-option-desc">Connect & authorize in Trust Wallet</div>
+            <div class="wallet-option-desc">${isMobile ? 'Open & Connect in Trust Wallet App' : 'Multi-chain mobile & browser wallet'}</div>
           </div>
         </div>
-        ${hasTrust ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Connect →</span>`}
+        ${hasTrust ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">${isMobile ? 'Open App →' : 'Connect →'}</span>`}
       </div>
 
       <!-- 2. MetaMask -->
-      <div class="wallet-option-item" onclick="window.boobaApp.connectWalletProvider('metamask')">
+      <div class="wallet-option-item" onclick="window.boobaApp.handleWalletOptionSelect('metamask')">
         <div class="wallet-option-left">
           <div class="wallet-logo-icon" style="background: rgba(230, 100, 30, 0.15); border: 1px solid rgba(230, 100, 30, 0.3);">
             <svg width="24" height="24" viewBox="0 0 32 32">
@@ -1209,14 +1209,14 @@ HOW TO RECOVER YOUR ACCOUNT:
           </div>
           <div>
             <div class="wallet-option-title">MetaMask</div>
-            <div class="wallet-option-desc">Connect with MetaMask wallet</div>
+            <div class="wallet-option-desc">${isMobile ? 'Open & Connect in MetaMask App' : 'Connect with MetaMask wallet'}</div>
           </div>
         </div>
-        ${hasMetaMask ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Connect →</span>`}
+        ${hasMetaMask ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">${isMobile ? 'Open App →' : 'Connect →'}</span>`}
       </div>
 
-      <!-- 3. Binance Web3 Wallet / BNB Chain -->
-      <div class="wallet-option-item" onclick="window.boobaApp.connectWalletProvider('binance')">
+      <!-- 3. Binance Web3 Wallet -->
+      <div class="wallet-option-item" onclick="window.boobaApp.handleWalletOptionSelect('binance')">
         <div class="wallet-option-left">
           <div class="wallet-logo-icon" style="background: rgba(243, 186, 47, 0.15); border: 1px solid rgba(243, 186, 47, 0.3);">
             <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
@@ -1226,45 +1226,118 @@ HOW TO RECOVER YOUR ACCOUNT:
           </div>
           <div>
             <div class="wallet-option-title">Binance Web3 Wallet</div>
-            <div class="wallet-option-desc">Native BNB Chain Ecosystem wallet</div>
+            <div class="wallet-option-desc">${isMobile ? 'Open in Binance App' : 'Native BNB Chain wallet'}</div>
           </div>
         </div>
-        ${hasBinance ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Connect →</span>`}
+        ${hasBinance ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">${isMobile ? 'Open App →' : 'Connect →'}</span>`}
       </div>
 
       <!-- 4. OKX Wallet -->
-      <div class="wallet-option-item" onclick="window.boobaApp.connectWalletProvider('okx')">
+      <div class="wallet-option-item" onclick="window.boobaApp.handleWalletOptionSelect('okx')">
         <div class="wallet-option-left">
           <div class="wallet-logo-icon" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25);">
             <span style="font-weight: 900; font-size: 14px; color: #FFFFFF;">OKX</span>
           </div>
           <div>
             <div class="wallet-option-title">OKX Wallet</div>
-            <div class="wallet-option-desc">Multi-chain EVM Web3 provider</div>
+            <div class="wallet-option-desc">${isMobile ? 'Open in OKX App' : 'Multi-chain EVM provider'}</div>
           </div>
         </div>
-        ${hasOKX ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Connect →</span>`}
+        ${hasOKX ? `<span class="wallet-detected-badge">Detected</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">${isMobile ? 'Open App →' : 'Connect →'}</span>`}
       </div>
 
-      <!-- 5. Coinbase / Browser Wallet -->
-      <div class="wallet-option-item" onclick="window.boobaApp.connectWalletProvider('coinbase')">
+      <!-- 5. WalletConnect (Universal Pairing) -->
+      <div class="wallet-option-item" onclick="window.boobaApp.connectWalletConnect()" style="background: rgba(59, 153, 252, 0.1); border: 1px solid rgba(59, 153, 252, 0.35);">
         <div class="wallet-option-left">
-          <div class="wallet-logo-icon" style="background: rgba(0, 82, 255, 0.15); border: 1px solid rgba(0, 82, 255, 0.3);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0052FF" stroke-width="2">
-              <rect x="2" y="5" width="20" height="14" rx="2"></rect>
-              <line x1="2" y1="10" x2="22" y2="10"></line>
+          <div class="wallet-logo-icon" style="background: rgba(59, 153, 252, 0.2); border: 1px solid rgba(59, 153, 252, 0.5);">
+            <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+              <path d="M6.5 10.5C11.75 5.25 20.25 5.25 25.5 10.5L26.2 11.2C26.5 11.5 26.5 12 26.2 12.3L23.9 14.6C23.7 14.8 23.4 14.8 23.2 14.6L22.2 13.6C18.8 10.2 13.2 10.2 9.8 13.6L8.8 14.6C8.6 14.8 8.3 14.8 8.1 14.6L5.8 12.3C5.5 12 5.5 11.5 5.8 11.2L6.5 10.5ZM29.2 14.2L31.2 16.2C31.5 16.5 31.5 17 31.2 17.3L22.1 26.4C21.8 26.7 21.3 26.7 21 26.4L16 21.4C15.9 21.3 15.7 21.3 15.6 21.4L10.6 26.4C10.3 26.7 9.8 26.7 9.5 26.4L0.4 17.3C0.1 17 0.1 16.5 0.4 16.2L2.4 14.2C2.7 13.9 3.2 13.9 3.5 14.2L8.5 19.2C8.6 19.3 8.8 19.3 8.9 19.2L13.9 14.2C14.2 13.9 14.7 13.9 15 14.2L16 15.2C16.1 15.3 16.3 15.3 16.4 15.2L17.4 14.2C17.7 13.9 18.2 13.9 18.5 14.2L23.5 19.2C23.6 19.3 23.8 19.3 23.9 19.2L28.9 14.2C29 13.9 29.5 13.9 29.2 14.2Z" fill="#3B99FC"/>
             </svg>
           </div>
           <div>
-            <div class="wallet-option-title">Coinbase / Browser Wallet</div>
-            <div class="wallet-option-desc">Connect any installed EVM Web3 provider</div>
+            <div class="wallet-option-title">WalletConnect (QR & Pairing)</div>
+            <div class="wallet-option-desc">Connect via WalletConnect protocol</div>
           </div>
         </div>
-        ${(hasCoinbase || hasGenericWeb3) ? `<span class="wallet-detected-badge">Available</span>` : `<span style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Connect →</span>`}
+        <span class="wallet-detected-badge" style="background: rgba(59, 153, 252, 0.2); color: #3B99FC; border-color: rgba(59, 153, 252, 0.4);">QR / Pairing</span>
       </div>
     `;
 
     container.innerHTML = html;
+  }
+
+  handleWalletOptionSelect(type) {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+    const cleanHostAndPath = (window.location.host + window.location.pathname + window.location.search + window.location.hash).replace(/\/+$/, '');
+    const fullUrl = window.location.href;
+
+    // 1. If provider is directly injected in window (e.g. extension on desktop or inside wallet app), connect immediately
+    let injected = this.getInjectedProvider(type);
+    if (injected) {
+      this.authenticateWithProvider(injected, type);
+      return;
+    }
+
+    // 2. On Mobile (Chrome / Safari): Launch the wallet app directly with universal link
+    if (isMobile) {
+      if (type === 'trust') {
+        window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(fullUrl)}`;
+        return;
+      } else if (type === 'metamask') {
+        window.location.href = `https://metamask.app.link/dapp/${cleanHostAndPath}`;
+        return;
+      } else if (type === 'okx') {
+        window.location.href = `okx://wallet/dapp/url?dappUrl=${encodeURIComponent(fullUrl)}`;
+        setTimeout(() => { window.location.href = 'https://www.okx.com/web3'; }, 1500);
+        return;
+      } else if (type === 'binance') {
+        window.location.href = `bnc://app.binance.com/cedefi/webview?url=${encodeURIComponent(fullUrl)}`;
+        setTimeout(() => { window.location.href = 'https://www.binance.com/en/web3wallet'; }, 1500);
+        return;
+      } else if (type === 'coinbase') {
+        window.location.href = `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(fullUrl)}`;
+        return;
+      }
+    }
+
+    // 3. On Desktop without extension: Alert user
+    alert(`Please install the ${type} browser extension, or use WalletConnect.`);
+  }
+
+  getInjectedProvider(type) {
+    if (this.eip6963Providers && this.eip6963Providers.size > 0) {
+      for (const [key, detail] of this.eip6963Providers.entries()) {
+        const info = detail.info || {};
+        const rdns = (info.rdns || '').toLowerCase();
+        const name = (info.name || '').toLowerCase();
+        if (type && (rdns.includes(type) || name.includes(type))) {
+          return detail.provider;
+        }
+      }
+    }
+    if (type === 'trust') {
+      return window.trustwallet?.ethereum || window.trustwallet || window.ethereum?.providers?.find(p => p.isTrust || p.isTrustWallet) || (window.ethereum?.isTrust ? window.ethereum : null);
+    }
+    if (type === 'metamask') {
+      return window.ethereum?.providers?.find(p => p.isMetaMask && !p.isBraveWallet && !p.isTrust && !p.isOkxWallet) || (window.ethereum?.isMetaMask ? window.ethereum : null);
+    }
+    if (type === 'binance') {
+      return window.BinanceChain || window.ethereum?.providers?.find(p => p.isBinance) || (window.ethereum?.isBinance ? window.ethereum : null);
+    }
+    if (type === 'okx') {
+      return window.okxwallet || window.ethereum?.providers?.find(p => p.isOkxWallet) || (window.ethereum?.isOkxWallet ? window.ethereum : null);
+    }
+    if (type === 'coinbase') {
+      return window.coinbaseWalletExtension || window.ethereum?.providers?.find(p => p.isCoinbaseWallet) || (window.ethereum?.isCoinbaseWallet ? window.ethereum : null);
+    }
+    return window.ethereum || null;
+  }
+
+  async connectInjectedDirect() {
+    const provider = window.trustwallet?.ethereum || window.trustwallet || window.okxwallet || window.BinanceChain || window.ethereum;
+    if (provider) {
+      await this.authenticateWithProvider(provider, 'In-App Web3 Wallet');
+    }
   }
 
   async initWalletConnectProvider() {
@@ -1304,30 +1377,6 @@ HOW TO RECOVER YOUR ACCOUNT:
         }
       });
 
-      // Direct Deep Linking Listener for Mobile Chrome/Safari
-      this.wcProvider.on('display_uri', (uri) => {
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
-        if (isMobile && this.targetWalletDeepLink) {
-          const encoded = encodeURIComponent(uri);
-          const wallet = this.targetWalletDeepLink;
-          if (wallet === 'trust') {
-            window.location.href = `trust://wc?uri=${encoded}`;
-          } else if (wallet === 'metamask') {
-            window.location.href = `metamask://wc?uri=${encoded}`;
-          } else if (wallet === 'okx') {
-            window.location.href = `okx://wallet/wc?uri=${encoded}`;
-          } else if (wallet === 'binance') {
-            window.location.href = `bnc://app.binance.com/wc?uri=${encoded}`;
-          } else if (wallet === 'coinbase') {
-            window.location.href = `cbwallet://wc?uri=${encoded}`;
-          } else if (wallet === 'rainbow') {
-            window.location.href = `rainbow://wc?uri=${encoded}`;
-          } else {
-            window.location.href = `wc:${uri}`;
-          }
-        }
-      });
-
       return this.wcProvider;
     } catch (err) {
       console.warn('WalletConnect initialization notice:', err);
@@ -1335,27 +1384,20 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
   }
 
-  async connectWalletConnect(targetWallet = null) {
+  async connectWalletConnect() {
     try {
-      this.targetWalletDeepLink = targetWallet;
       const modal = document.getElementById('walletConnectDynamicModal');
       if (modal) modal.remove();
 
       const provider = await this.initWalletConnectProvider();
       if (!provider) {
-        alert('Could not initialize WalletConnect. Please check your internet connection or try another wallet.');
+        alert('Could not initialize WalletConnect. Please check your internet connection.');
         return;
-      }
-
-      // If a previous session exists and is active, disconnect to request fresh pairing if needed
-      if (provider.session && !provider.connected) {
-        try { await provider.disconnect(); } catch (e) {}
       }
 
       const accounts = await provider.enable();
       if (accounts && accounts.length > 0) {
-        const name = targetWallet === 'trust' ? 'Trust Wallet' : (targetWallet === 'metamask' ? 'MetaMask' : (targetWallet === 'binance' ? 'Binance Web3 Wallet' : (targetWallet === 'okx' ? 'OKX Wallet' : 'WalletConnect')));
-        await this.authenticateWithProvider(provider, name);
+        await this.authenticateWithProvider(provider, 'WalletConnect');
       }
     } catch (err) {
       if (err.message && (err.message.includes('User rejected') || err.message.includes('User closed modal') || err.code === 4001)) {
@@ -1374,90 +1416,7 @@ HOW TO RECOVER YOUR ACCOUNT:
   }
 
   async connectWalletProvider(type) {
-    let provider = null;
-    let walletName = 'Web3 Wallet';
-
-    // 1. Check EIP-6963 matching providers first
-    if (this.eip6963Providers && this.eip6963Providers.size > 0) {
-      for (const [key, detail] of this.eip6963Providers.entries()) {
-        const info = detail.info || {};
-        const rdns = (info.rdns || '').toLowerCase();
-        const name = (info.name || '').toLowerCase();
-        if (type === 'metamask' && (rdns.includes('metamask') || name.includes('metamask'))) {
-          provider = detail.provider;
-          walletName = info.name || 'MetaMask';
-          break;
-        } else if (type === 'trust' && (rdns.includes('trust') || name.includes('trust'))) {
-          provider = detail.provider;
-          walletName = info.name || 'Trust Wallet';
-          break;
-        } else if (type === 'binance' && (rdns.includes('binance') || name.includes('binance'))) {
-          provider = detail.provider;
-          walletName = info.name || 'Binance Web3 Wallet';
-          break;
-        } else if (type === 'okx' && (rdns.includes('okx') || rdns.includes('okex') || name.includes('okx'))) {
-          provider = detail.provider;
-          walletName = info.name || 'OKX Wallet';
-          break;
-        } else if (type === 'coinbase' && (rdns.includes('coinbase') || name.includes('coinbase'))) {
-          provider = detail.provider;
-          walletName = info.name || 'Coinbase Wallet';
-          break;
-        }
-      }
-    }
-
-    // 2. Specific window objects
-    if (!provider) {
-      if (type === 'trust') {
-        walletName = 'Trust Wallet';
-        if (window.trustwallet?.ethereum) provider = window.trustwallet.ethereum;
-        else if (window.trustwallet) provider = window.trustwallet;
-        else if (window.ethereum?.providers) provider = window.ethereum.providers.find(p => p.isTrust || p.isTrustWallet);
-        else if (window.ethereum?.isTrust) provider = window.ethereum;
-      } else if (type === 'binance') {
-        walletName = 'Binance Web3 Wallet';
-        if (window.BinanceChain) provider = window.BinanceChain;
-        else if (window.ethereum?.providers) provider = window.ethereum.providers.find(p => p.isBinance);
-        else if (window.ethereum?.isBinance) provider = window.ethereum;
-      } else if (type === 'okx') {
-        walletName = 'OKX Wallet';
-        if (window.okxwallet) provider = window.okxwallet;
-        else if (window.ethereum?.providers) provider = window.ethereum.providers.find(p => p.isOkxWallet);
-        else if (window.ethereum?.isOkxWallet) provider = window.ethereum;
-      } else if (type === 'metamask') {
-        walletName = 'MetaMask';
-        if (window.ethereum) {
-          if (window.ethereum.providers) {
-            provider = window.ethereum.providers.find(p => p.isMetaMask && !p.isBraveWallet && !p.isTrust && !p.isOkxWallet) || window.ethereum.providers.find(p => p.isMetaMask) || window.ethereum;
-          } else if (window.ethereum.isMetaMask) {
-            provider = window.ethereum;
-          }
-        }
-      } else if (type === 'coinbase') {
-        walletName = 'Coinbase Wallet';
-        if (window.coinbaseWalletExtension) provider = window.coinbaseWalletExtension;
-        else if (window.ethereum?.providers) provider = window.ethereum.providers.find(p => p.isCoinbaseWallet);
-        else if (window.ethereum?.isCoinbaseWallet) provider = window.ethereum;
-      } else {
-        walletName = 'Browser Wallet';
-        if (window.ethereum) provider = window.ethereum;
-      }
-    }
-
-    // Generic fallback if provider is available in window
-    if (!provider && window.ethereum) {
-      provider = window.ethereum;
-    }
-
-    // If no injected provider is available (e.g. browsing on Mobile Chrome or Mobile Safari)
-    // Connect via WalletConnect to pair directly with Trust Wallet / MetaMask without opening dApp in wallet browser
-    if (!provider) {
-      await this.connectWalletConnect(type);
-      return;
-    }
-
-    await this.authenticateWithProvider(provider, walletName);
+    this.handleWalletOptionSelect(type);
   }
 
   async authenticateWithProvider(provider, walletName) {

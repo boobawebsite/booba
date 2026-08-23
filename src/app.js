@@ -1267,10 +1267,6 @@ HOW TO RECOVER YOUR ACCOUNT:
   }
 
   handleWalletOptionSelect(type) {
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
-    const cleanHostAndPath = (window.location.host + window.location.pathname + window.location.search + window.location.hash).replace(/\/+$/, '');
-    const fullUrl = window.location.href;
-
     // 1. If provider is directly injected in window (e.g. extension on desktop or inside wallet app), connect immediately
     let injected = this.getInjectedProvider(type);
     if (injected) {
@@ -1278,30 +1274,8 @@ HOW TO RECOVER YOUR ACCOUNT:
       return;
     }
 
-    // 2. On Mobile (Chrome / Safari): Launch the wallet app directly with universal link
-    if (isMobile) {
-      if (type === 'trust') {
-        window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(fullUrl)}`;
-        return;
-      } else if (type === 'metamask') {
-        window.location.href = `https://metamask.app.link/dapp/${cleanHostAndPath}`;
-        return;
-      } else if (type === 'okx') {
-        window.location.href = `okx://wallet/dapp/url?dappUrl=${encodeURIComponent(fullUrl)}`;
-        setTimeout(() => { window.location.href = 'https://www.okx.com/web3'; }, 1500);
-        return;
-      } else if (type === 'binance') {
-        window.location.href = `bnc://app.binance.com/cedefi/webview?url=${encodeURIComponent(fullUrl)}`;
-        setTimeout(() => { window.location.href = 'https://www.binance.com/en/web3wallet'; }, 1500);
-        return;
-      } else if (type === 'coinbase') {
-        window.location.href = `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(fullUrl)}`;
-        return;
-      }
-    }
-
-    // 3. On Desktop without extension: Alert user
-    alert(`Please install the ${type} browser extension, or use WalletConnect.`);
+    // 2. On Mobile (Chrome / Safari): Use WalletConnect pairing so user connects to their active Chrome account
+    this.connectWalletConnect(type);
   }
 
   getInjectedProvider(type) {
@@ -1377,6 +1351,29 @@ HOW TO RECOVER YOUR ACCOUNT:
         }
       });
 
+      this.wcProvider.on('display_uri', (uri) => {
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+        if (isMobile && this.targetWalletDeepLink) {
+          const encoded = encodeURIComponent(uri);
+          const wallet = this.targetWalletDeepLink;
+          if (wallet === 'trust') {
+            window.location.href = `trust://wc?uri=${encoded}`;
+          } else if (wallet === 'metamask') {
+            window.location.href = `metamask://wc?uri=${encoded}`;
+          } else if (wallet === 'okx') {
+            window.location.href = `okx://wallet/wc?uri=${encoded}`;
+          } else if (wallet === 'binance') {
+            window.location.href = `bnc://app.binance.com/wc?uri=${encoded}`;
+          } else if (wallet === 'coinbase') {
+            window.location.href = `cbwallet://wc?uri=${encoded}`;
+          } else if (wallet === 'rainbow') {
+            window.location.href = `rainbow://wc?uri=${encoded}`;
+          } else {
+            window.location.href = `wc:${uri}`;
+          }
+        }
+      });
+
       return this.wcProvider;
     } catch (err) {
       console.warn('WalletConnect initialization notice:', err);
@@ -1384,8 +1381,9 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
   }
 
-  async connectWalletConnect() {
+  async connectWalletConnect(targetWallet = null) {
     try {
+      this.targetWalletDeepLink = targetWallet;
       const modal = document.getElementById('walletConnectDynamicModal');
       if (modal) modal.remove();
 
@@ -1395,9 +1393,15 @@ HOW TO RECOVER YOUR ACCOUNT:
         return;
       }
 
+      // If a previous session exists and is active, disconnect to request fresh pairing if needed
+      if (provider.session && !provider.connected) {
+        try { await provider.disconnect(); } catch (e) {}
+      }
+
       const accounts = await provider.enable();
       if (accounts && accounts.length > 0) {
-        await this.authenticateWithProvider(provider, 'WalletConnect');
+        const name = targetWallet === 'trust' ? 'Trust Wallet' : (targetWallet === 'metamask' ? 'MetaMask' : (targetWallet === 'binance' ? 'Binance Web3 Wallet' : (targetWallet === 'okx' ? 'OKX Wallet' : 'WalletConnect')));
+        await this.authenticateWithProvider(provider, name);
       }
     } catch (err) {
       if (err.message && (err.message.includes('User rejected') || err.message.includes('User closed modal') || err.code === 4001)) {

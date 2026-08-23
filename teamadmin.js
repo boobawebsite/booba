@@ -1,6 +1,6 @@
 /* ==========================================================================
    BOOBA (BNB baby) — Team Admin Console Logic (teamadmin.js)
-   Live Supabase Backend • Whitelist Guard • Professional Web3 Studio
+   Live Supabase Backend • Whitelist Guard • Professional Web3 Pro Studio
    ========================================================================== */
 
 import { db, calculateLevel, LEVEL_TIERS } from './src/services/db.js';
@@ -14,11 +14,13 @@ class TeamAdminApp {
     
     // Token & Airdrop Hub state
     this.airdropTargetMode = 'top_n'; // 'top_n' | 'search_select' | 'all' | 'active'
-    this.airdropTopCount = 15; // default 15, customizable e.g. 15, 30, 100, 2000
+    this.airdropTopCount = 15;
     this.airdropSearchQuery = '';
     this.airdropSelectedUserIds = new Set();
     this.airdropAmount = 500;
     this.airdropReason = '';
+    this.airdropShowBulkPaste = false;
+
     const hashTab = (window.location.hash || '').replace('#', '');
     if (['overview', 'quests', 'airdrop', 'submissions', 'users'].includes(hashTab)) {
       this.activeTab = hashTab;
@@ -107,7 +109,43 @@ class TeamAdminApp {
   }
 
   showToast(message, type = 'success') {
-    alert((type === 'success' ? 'Success: ' : 'Notice: ') + message);
+    const container = document.getElementById('adminToastContainer');
+    if (!container) {
+      alert((type === 'success' ? '✅ ' : type === 'error' ? '❌ ' : 'ℹ️ ') + message);
+      return;
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `admin-toast ${type}`;
+    
+    let iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--accent-emerald);"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    if (type === 'error') {
+      iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--accent-ruby);"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+    } else if (type === 'notice') {
+      iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--brand-yellow);"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+    }
+
+    toast.innerHTML = `
+      <div style="flex-shrink: 0; display: flex; align-items: center;">${iconSvg}</div>
+      <div style="flex: 1; font-size: 0.84rem; color: #FFFFFF; font-weight: 500;">${message}</div>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px) scale(0.95)';
+      setTimeout(() => toast.remove(), 300);
+    }, 3800);
+  }
+
+  copyToClipboard(text, label = 'Copied to clipboard') {
+    navigator.clipboard.writeText(text).then(() => {
+      this.showToast(`${label}: ${text.length > 20 ? text.slice(0, 8) + '...' + text.slice(-6) : text}`);
+    }).catch(() => {
+      this.showToast('Failed to copy', 'error');
+    });
   }
 
   // --------------------------------------------------------------------------
@@ -170,41 +208,41 @@ class TeamAdminApp {
 
   renderAccessGate(container) {
     container.innerHTML = `
-      <div style="max-width: 420px; margin: 5rem auto; padding: 2rem; border-radius: var(--radius-md); background: var(--admin-surface); border: 1px solid var(--admin-border); text-align: center;">
+      <div style="max-width: 440px; margin: 4rem auto; padding: 2.25rem; border-radius: var(--radius-md); background: var(--admin-surface); border: 1px solid var(--admin-border); text-align: center; box-shadow: var(--shadow-elevated);">
         
-        <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--brand-yellow-subtle); border: 1px solid rgba(243, 186, 47, 0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto; color: var(--brand-yellow);">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <div style="width: 58px; height: 58px; border-radius: 50%; background: var(--brand-yellow-subtle); border: 1.5px solid rgba(243, 186, 47, 0.35); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.35rem auto; color: var(--brand-yellow); box-shadow: 0 0 20px rgba(243, 186, 47, 0.15);">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         </div>
 
-        <h2 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.35rem; letter-spacing: -0.01em;">
+        <h2 style="font-size: 1.4rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.35rem; letter-spacing: -0.02em;">
           Core Admin Authentication
         </h2>
-        <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.5rem;">
-          Restricted to authorized core team emails registered in the whitelist.
+        <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.6rem;">
+          Restricted to authorized core team emails registered in the security whitelist.
         </p>
 
         <form id="adminLoginForm" onsubmit="window.adminApp.handleAdminLogin(event)" style="text-align: left;">
           <div class="form-field">
             <label class="form-field-label">Admin Email</label>
-            <input type="email" id="adminEmailInput" placeholder="admin@gmail.com" class="admin-input" required>
+            <input type="email" id="adminEmailInput" placeholder="admin@gmail.com" class="admin-input" required autocomplete="username">
           </div>
 
           <div class="form-field" style="margin-bottom: 1.5rem;">
             <label class="form-field-label">Password</label>
-            <input type="password" id="adminPasswordInput" placeholder="••••••••" class="admin-input" required>
+            <input type="password" id="adminPasswordInput" placeholder="••••••••" class="admin-input" required autocomplete="current-password">
           </div>
           
-          <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.75rem; font-size: 0.9rem;">
+          <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.8rem; font-size: 0.9rem;">
             Sign In to Console ↗
           </button>
         </form>
 
-        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--admin-border); font-size: 0.75rem; color: var(--text-muted);">
-          Whitelisted: <span class="text-mono" style="color: var(--brand-yellow);">${ADMIN_EMAILS.join(', ')}</span>
+        <div style="margin-top: 1.5rem; padding-top: 1.15rem; border-top: 1px solid var(--admin-border); font-size: 0.75rem; color: var(--text-muted);">
+          Whitelisted: <span class="text-mono" style="color: var(--brand-yellow); font-weight: 600;">${ADMIN_EMAILS.join(', ')}</span>
         </div>
 
-        <div style="margin-top: 1rem;">
-          <a href="index.html" style="font-size: 0.8rem; color: var(--text-secondary); text-decoration: none;">
+        <div style="margin-top: 1.25rem;">
+          <a href="index.html" style="font-size: 0.82rem; color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
             ← Back to Main Website
           </a>
         </div>
@@ -219,16 +257,16 @@ class TeamAdminApp {
     if (!email || !password) return;
 
     if (!isUserAdmin(email)) {
-      alert(`Access Denied: "${email}" is not registered in the ADMIN_EMAILS whitelist.`);
+      this.showToast(`Access Denied: "${email}" is not in whitelist.`, 'error');
       return;
     }
 
     const res = await db.login({ emailOrUsername: email, password });
     if (res.success) {
-      alert(`Welcome to Admin Console, ${res.user.username}!`);
+      this.showToast(`Welcome back, ${res.user.username}!`, 'success');
       this.render();
     } else {
-      alert(res.message || 'Authentication failed. Please check your credentials.');
+      this.showToast(res.message || 'Authentication failed. Check credentials.', 'error');
     }
   }
 
@@ -249,12 +287,12 @@ class TeamAdminApp {
         <div class="page-header">
           <div>
             <h1 class="page-title">Admin Dashboard</h1>
-            <p class="page-desc">Telemetry overview, pending creator proofs, and passport statistics.</p>
+            <p class="page-desc">Telemetry overview, creator proof queue, and live passport statistics.</p>
           </div>
 
-          <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <div style="display: flex; gap: 0.6rem; align-items: center;">
             <button type="button" class="btn-admin btn-admin-secondary" onclick="window.adminApp.switchTab('quests')">
-              + Deploy Quest
+              + Deploy Bounty
             </button>
             <button type="button" class="btn-admin btn-admin-primary" onclick="window.adminApp.switchTab('submissions')">
               Review Queue (${pendingSubmissions.length})
@@ -266,16 +304,26 @@ class TeamAdminApp {
         <div class="metrics-row">
           
           <div class="metric-tile">
-            <span class="metric-tile-label">Registered Citizens</span>
+            <div class="metric-tile-header">
+              <span class="metric-tile-label">Registered Citizens</span>
+              <div class="metric-tile-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              </div>
+            </div>
             <div class="metric-tile-value">${Number(stats.totalUsers).toLocaleString()}</div>
             <div class="metric-tile-sub" style="color: var(--accent-emerald);">
-              <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-emerald);"></span>
+              <span class="live-pulse-dot" style="width: 5px; height: 5px;"></span>
               Verified Passports
             </div>
           </div>
 
           <div class="metric-tile">
-            <span class="metric-tile-label">Active Quests</span>
+            <div class="metric-tile-header">
+              <span class="metric-tile-label">Active Quests</span>
+              <div class="metric-tile-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              </div>
+            </div>
             <div class="metric-tile-value" style="color: var(--brand-yellow);">${Number(stats.activeQuestsCount).toLocaleString()}</div>
             <div class="metric-tile-sub">
               <a href="#" onclick="window.adminApp.switchTab('quests')" style="color: var(--brand-yellow); text-decoration: none; font-weight: 600;">Manage Bounties →</a>
@@ -283,7 +331,12 @@ class TeamAdminApp {
           </div>
 
           <div class="metric-tile">
-            <span class="metric-tile-label">Pending Proofs</span>
+            <div class="metric-tile-header">
+              <span class="metric-tile-label">Pending Proofs</span>
+              <div class="metric-tile-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line></svg>
+              </div>
+            </div>
             <div class="metric-tile-value" style="color: ${pendingSubmissions.length > 0 ? 'var(--brand-yellow)' : '#FFFFFF'};">
               ${pendingSubmissions.length}
             </div>
@@ -293,7 +346,12 @@ class TeamAdminApp {
           </div>
 
           <div class="metric-tile">
-            <span class="metric-tile-label">Tokens Distributed</span>
+            <div class="metric-tile-header">
+              <span class="metric-tile-label">Tokens Distributed</span>
+              <div class="metric-tile-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M17 10l-5-5-5 5"></path></svg>
+              </div>
+            </div>
             <div class="metric-tile-value">${Number(stats.totalPointsDistributed).toLocaleString()}</div>
             <div class="metric-tile-sub">$BOOBA Points Total</div>
           </div>
@@ -316,22 +374,23 @@ class TeamAdminApp {
             </div>
 
             ${recentSubmissions.length === 0 ? `
-              <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.85rem;">
+              <div style="text-align: center; padding: 3.5rem 1rem; color: var(--text-muted); font-size: 0.85rem;">
                 No submissions recorded yet.
               </div>
             ` : `
               <div>
                 ${recentSubmissions.map(s => `
                   <div class="data-row">
-                    <div style="min-width: 0; display: flex; flex-direction: column; gap: 0.2rem;">
+                    <div style="min-width: 0; display: flex; flex-direction: column; gap: 0.25rem;">
                       <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <strong style="color: #FFFFFF; font-size: 0.85rem;">${s.username}</strong>
                         <span class="badge-clean ${s.status === 'approved' ? 'badge-clean-green' : s.status === 'rejected' ? 'badge-clean-red' : 'badge-clean-yellow'}">
+                          <span style="width: 5px; height: 5px; border-radius: 50%; background: currentColor;"></span>
                           ${s.status}
                         </span>
                       </div>
                       <div style="font-size: 0.76rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                        ${s.questTitle} • +${s.rewardBooba} BOOBA
+                        ${s.questTitle} • <span style="color: var(--brand-yellow); font-family: var(--font-mono); font-weight: 600;">+${s.rewardBooba} BOOBA</span>
                       </div>
                     </div>
 
@@ -361,15 +420,15 @@ class TeamAdminApp {
             </div>
 
             ${recentUsers.length === 0 ? `
-              <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.85rem;">
+              <div style="text-align: center; padding: 3.5rem 1rem; color: var(--text-muted); font-size: 0.85rem;">
                 No registered passports yet.
               </div>
             ` : `
               <div>
                 ${recentUsers.map(u => `
                   <div class="data-row">
-                    <div style="display: flex; align-items: center; gap: 0.65rem; min-width: 0;">
-                      <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--brand-yellow); object-fit: cover; flex-shrink: 0;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
+                      <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--brand-yellow); object-fit: cover; flex-shrink: 0;">
                       <div style="min-width: 0;">
                         <strong style="color: #FFFFFF; font-size: 0.85rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${u.username}</strong>
                         <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">${u.passportId}</span>
@@ -405,7 +464,10 @@ class TeamAdminApp {
             <h1 class="page-title">Quests Studio</h1>
             <p class="page-desc">Publish and manage community, engagement, and creator bounties.</p>
           </div>
-          <span class="badge-clean badge-clean-green">${quests.length} Live Bounties</span>
+          <span class="badge-clean badge-clean-green">
+            <span class="live-pulse-dot" style="width: 5px; height: 5px;"></span>
+            ${quests.length} Live Bounties
+          </span>
         </div>
 
         <div style="display: grid; grid-template-columns: minmax(300px, 1fr) minmax(360px, 1.4fr); gap: 1.75rem; align-items: start;">
@@ -413,10 +475,13 @@ class TeamAdminApp {
           <!-- Quest Creator Panel -->
           <div class="clean-panel">
             <div class="clean-panel-header">
-              <div class="clean-panel-title">Deploy New Bounty</div>
+              <div class="clean-panel-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Deploy New Bounty
+              </div>
             </div>
             
-            <form onsubmit="window.adminApp.handleCreateQuest(event)" style="padding: 1.25rem;">
+            <form onsubmit="window.adminApp.handleCreateQuest(event)" style="padding: 1.35rem;">
               <div class="form-field">
                 <label class="form-field-label">Quest Title *</label>
                 <input type="text" id="newQuestTitle" placeholder="e.g. Follow @BoobaToken on X" class="admin-input" required>
@@ -424,7 +489,7 @@ class TeamAdminApp {
 
               <div class="form-field">
                 <label class="form-field-label">Instructions *</label>
-                <textarea id="newQuestDesc" rows="2" placeholder="Explain the exact instructions for the citizen..." class="admin-input" required></textarea>
+                <textarea id="newQuestDesc" rows="2" placeholder="Explain the exact steps for the citizen..." class="admin-input" required></textarea>
               </div>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
@@ -438,7 +503,7 @@ class TeamAdminApp {
                 </div>
                 <div class="form-field">
                   <label class="form-field-label">Reward ($BOOBA) *</label>
-                  <input type="number" id="newQuestReward" value="150" class="admin-input" required>
+                  <input type="number" id="newQuestReward" value="150" class="admin-input" required style="font-family: var(--font-mono); font-weight: 700; color: var(--brand-yellow);">
                 </div>
               </div>
 
@@ -457,12 +522,12 @@ class TeamAdminApp {
                 </div>
               </div>
 
-              <div class="form-field" style="margin-bottom: 1.25rem;">
+              <div class="form-field" style="margin-bottom: 1.35rem;">
                 <label class="form-field-label">Requirements Note</label>
                 <input type="text" id="newQuestReqs" placeholder="e.g. Submit post link" class="admin-input">
               </div>
 
-              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.65rem;">
+              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.75rem;">
                 Publish Bounty Live ↗
               </button>
             </form>
@@ -474,21 +539,21 @@ class TeamAdminApp {
               <div class="clean-panel-title">Active Database Quests (${quests.length})</div>
             </div>
             
-            <div style="overflow-x: auto;">
+            <div class="table-scroll-container">
               <table class="clean-table">
                 <thead>
                   <tr>
                     <th>Bounty</th>
                     <th>Category</th>
                     <th>Reward</th>
-                    <th>Action Link</th>
+                    <th>Link</th>
                     <th style="text-align: right;">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   ${quests.length === 0 ? `
                     <tr>
-                      <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                      <td colspan="5" style="text-align: center; padding: 3.5rem; color: var(--text-muted);">
                         No quests found in database.
                       </td>
                     </tr>
@@ -496,7 +561,7 @@ class TeamAdminApp {
                     <tr>
                       <td>
                         <strong style="color: #FFFFFF; display: block; font-size: 0.85rem;">${q.title}</strong>
-                        <span style="font-size: 0.75rem; color: var(--text-secondary);">${q.description ? q.description.slice(0, 50) + '...' : ''}</span>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary);">${q.description ? q.description.slice(0, 48) + '...' : ''}</span>
                       </td>
                       <td>
                         <span class="badge-clean badge-clean-yellow" style="text-transform: uppercase;">${q.category}</span>
@@ -506,10 +571,10 @@ class TeamAdminApp {
                       </td>
                       <td>
                         ${q.targetUrl ? `
-                          <a href="${q.targetUrl}" target="_blank" style="color: var(--text-secondary); text-decoration: none; font-size: 0.78rem;">
-                            Test Link ↗
+                          <a href="${q.targetUrl}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" style="font-size: 0.72rem; padding: 0.2rem 0.5rem;">
+                            Test ↗
                           </a>
-                        ` : '<span style="color: var(--text-muted); font-size: 0.75rem;">None</span>'}
+                        ` : '<span style="color: var(--text-muted); font-size: 0.75rem;">—</span>'}
                       </td>
                       <td style="text-align: right;">
                         <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="window.adminApp.handleDeleteQuest('${q.id}')">
@@ -541,7 +606,7 @@ class TeamAdminApp {
     if (!title || !description) return;
 
     if ((category === 'community' || category === 'engagement') && !targetUrl) {
-      alert('Target Action Link is compulsory for Community and Engagement quests!');
+      this.showToast('Target Action Link is required for Community and Engagement quests!', 'notice');
       document.getElementById('newQuestUrl')?.focus();
       return;
     }
@@ -557,10 +622,10 @@ class TeamAdminApp {
     });
 
     if (res.success) {
-      alert('Quest published live!');
+      this.showToast('Quest published live!', 'success');
       this.render();
     } else {
-      alert(res.message || 'Failed to create quest');
+      this.showToast(res.message || 'Failed to create quest', 'error');
     }
   }
 
@@ -580,10 +645,10 @@ class TeamAdminApp {
 
     const res = await db.deleteQuest(questId);
     if (res.success) {
-      alert(`✅ Quest "${res.questTitle || questTitle}" was successfully deleted by Admin @${res.deletedBy || adminUser}.`);
+      this.showToast(`Quest "${res.questTitle || questTitle}" was successfully deleted.`, 'success');
       this.render();
     } else {
-      alert(res.message || 'Failed to delete quest');
+      this.showToast(res.message || 'Failed to delete quest', 'error');
     }
   }
 
@@ -629,7 +694,7 @@ class TeamAdminApp {
         </div>
 
         <div class="clean-panel">
-          <div style="overflow-x: auto;">
+          <div class="table-scroll-container">
             <table class="clean-table">
               <thead>
                 <tr>
@@ -673,6 +738,7 @@ class TeamAdminApp {
                     </td>
                     <td>
                       <span class="badge-clean ${s.status === 'approved' ? 'badge-clean-green' : s.status === 'rejected' ? 'badge-clean-red' : 'badge-clean-yellow'}">
+                        <span style="width: 5px; height: 5px; border-radius: 50%; background: currentColor;"></span>
                         ${s.status}
                       </span>
                     </td>
@@ -709,10 +775,10 @@ class TeamAdminApp {
   async handleReview(submissionId, action) {
     const res = await db.reviewSubmission(submissionId, action);
     if (res.success) {
-      alert(`Submission marked as ${action}!`);
+      this.showToast(`Submission marked as ${action}!`, 'success');
       this.render();
     } else {
-      alert(res.message || 'Review failed');
+      this.showToast(res.message || 'Review failed', 'error');
     }
   }
 
@@ -833,7 +899,7 @@ class TeamAdminApp {
 
             ${this.airdropTargetMode === 'search_select' ? `
               <div style="margin-bottom: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
                   <label class="form-field-label">Search Username, Wallet, or Email</label>
                   <div style="display: flex; gap: 0.4rem;">
                     <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.toggleBulkPasteModal()">
@@ -895,7 +961,7 @@ class TeamAdminApp {
                 </div>
               </div>
 
-              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.75rem; font-size: 0.9rem;" ${recipients.length === 0 ? 'disabled' : ''}>
+              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.8rem; font-size: 0.9rem;" ${recipients.length === 0 ? 'disabled' : ''}>
                 Execute Airdrop: Distribute ${totalOutflow.toLocaleString()} $BOOBA to ${recipients.length} Accounts ↗
               </button>
             </form>
@@ -913,7 +979,7 @@ class TeamAdminApp {
               <span class="badge-clean badge-clean-yellow">+${amount} each</span>
             </div>
 
-            <div style="max-height: 320px; overflow-y: auto;">
+            <div class="table-scroll-container" style="max-height: 320px; overflow-y: auto;">
               <table class="clean-table">
                 <thead>
                   <tr>
@@ -956,7 +1022,7 @@ class TeamAdminApp {
               <div class="clean-panel-title">Airdrop Treasury Logs (${logs.length})</div>
             </div>
 
-            <div style="max-height: 320px; overflow-y: auto;">
+            <div class="table-scroll-container" style="max-height: 320px; overflow-y: auto;">
               <table class="clean-table">
                 <thead>
                   <tr>
@@ -1077,7 +1143,7 @@ class TeamAdminApp {
     });
 
     this.airdropShowBulkPaste = false;
-    alert(`Matched & selected ${matchedCount} user accounts.`);
+    this.showToast(`Matched & selected ${matchedCount} accounts.`, 'success');
     this.renderAirdropTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
   }
 
@@ -1088,12 +1154,12 @@ class TeamAdminApp {
     const reason = document.getElementById('airdropReason')?.value.trim() || 'Treasury Grant';
 
     if (recipients.length === 0) {
-      alert('Error: No target recipients selected.');
+      this.showToast('Error: No target recipients selected.', 'error');
       return;
     }
 
     if (amount <= 0) {
-      alert('Error: Amount must be greater than 0.');
+      this.showToast('Error: Amount must be greater than 0.', 'error');
       return;
     }
 
@@ -1130,11 +1196,11 @@ class TeamAdminApp {
     });
 
     if (res.success) {
-      alert(`🎉 Distributed ${res.totalDistributed.toLocaleString()} $BOOBA tokens to ${res.recipientCount} accounts.`);
+      this.showToast(`Distributed ${res.totalDistributed.toLocaleString()} $BOOBA to ${res.recipientCount} accounts!`, 'success');
       this.airdropSelectedUserIds.clear();
       this.render();
     } else {
-      alert(res.message || 'Airdrop distribution failed.');
+      this.showToast(res.message || 'Airdrop distribution failed.', 'error');
     }
   }
 
@@ -1175,7 +1241,7 @@ class TeamAdminApp {
         </div>
 
         <div class="clean-panel">
-          <div style="overflow-x: auto;">
+          <div class="table-scroll-container">
             <table class="clean-table">
               <thead>
                 <tr>
@@ -1201,8 +1267,8 @@ class TeamAdminApp {
                   return `
                     <tr>
                       <td>
-                        <div style="display: flex; align-items: center; gap: 0.65rem;">
-                          <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--brand-yellow); object-fit: cover; flex-shrink: 0;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                          <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--brand-yellow); object-fit: cover; flex-shrink: 0;">
                           <div>
                             <strong style="color: #FFFFFF; font-size: 0.88rem; display: block;">${u.username}</strong>
                             <span style="font-size: 0.72rem; color: var(--accent-emerald);">Streak: ${u.streakDays || 1}d</span>
@@ -1216,7 +1282,7 @@ class TeamAdminApp {
                         ${hasWallet ? `
                           <div style="display: flex; align-items: center; gap: 0.45rem;">
                             <span class="text-mono" style="font-size: 0.78rem; color: var(--text-secondary);">${u.walletAddress.slice(0, 6)}...${u.walletAddress.slice(-4)}</span>
-                            <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" style="padding: 0.15rem 0.45rem; font-size: 0.68rem;" onclick="navigator.clipboard.writeText('${u.walletAddress}'); alert('Copied wallet address: ${u.walletAddress}');" title="Copy Wallet Address">
+                            <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" style="padding: 0.15rem 0.45rem; font-size: 0.68rem;" onclick="window.adminApp.copyToClipboard('${u.walletAddress}', 'Wallet address')" title="Copy Wallet Address">
                               Copy
                             </button>
                           </div>

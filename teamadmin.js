@@ -969,21 +969,21 @@ class TeamAdminApp {
       <div>
         
         <!-- Header -->
-        <div class="page-header">
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
           <div>
             <h1 class="page-title">Token & Airdrop Hub</h1>
             <p class="page-desc">Execute batch token distributions to highest holders, active questers, or custom user lists.</p>
           </div>
 
-          <div style="display: flex; gap: 1rem; align-items: center;">
-            <div style="text-align: right;">
-              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Recipients</div>
-              <div style="font-size: 1.15rem; font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">${recipients.length} Accounts</div>
+          <div class="airdrop-stats-card" style="display: flex; gap: 1.25rem; align-items: center;">
+            <div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Recipients</div>
+              <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">${recipients.length} Accounts</div>
             </div>
             <div style="width: 1px; height: 28px; background: var(--admin-border);"></div>
-            <div style="text-align: right;">
-              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total Outflow</div>
-              <div style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; font-family: var(--font-mono);">${totalOutflow.toLocaleString()} $BOOBA</div>
+            <div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total Outflow</div>
+              <div style="font-size: 1.1rem; font-weight: 800; color: #FFFFFF; font-family: var(--font-mono);">${totalOutflow.toLocaleString()} $BOOBA</div>
             </div>
           </div>
         </div>
@@ -1006,12 +1006,12 @@ class TeamAdminApp {
 
         <!-- Main Form Panel -->
         <div class="clean-panel" style="margin-bottom: 2rem;">
-          <div style="padding: 1.5rem;">
+          <div style="padding: 1.35rem;">
             
             ${this.airdropTargetMode === 'top_n' ? `
-              <div style="margin-bottom: 1.5rem;">
+              <div style="margin-bottom: 1.35rem;">
                 <label class="form-field-label" style="display: block; margin-bottom: 0.5rem;">Quick Presets</label>
-                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem;">
+                <div class="airdrop-presets-grid" style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem;">
                   ${[10, 15, 30, 50, 100, 500, 1000, 2000].map(cnt => `
                     <button type="button" class="btn-admin ${Number(this.airdropTopCount) === cnt ? 'btn-admin-primary' : 'btn-admin-secondary'} btn-admin-sm" onclick="window.adminApp.setAirdropTopCount(${cnt})">
                       Top ${cnt}
@@ -1019,7 +1019,7 @@ class TeamAdminApp {
                   `).join('')}
                 </div>
 
-                <div class="form-field" style="max-width: 320px;">
+                <div class="form-field" style="max-width: 320px; margin-bottom: 0;">
                   <label class="form-field-label">Custom Highest Count</label>
                   <input type="number" id="airdropTopInput" value="${this.airdropTopCount}" min="1" max="${Math.max(1, usersCount)}" class="admin-input" style="font-family: var(--font-mono); font-weight: 700; color: var(--brand-yellow);" oninput="window.adminApp.setAirdropTopCount(this.value)">
                 </div>
@@ -1027,7 +1027,7 @@ class TeamAdminApp {
             ` : ''}
 
             ${this.airdropTargetMode === 'search_select' ? `
-              <div style="margin-bottom: 1.5rem;">
+              <div style="margin-bottom: 1.35rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
                   <label class="form-field-label">Search Username, Wallet, or Email</label>
                   <div style="display: flex; gap: 0.4rem;">
@@ -1078,20 +1078,21 @@ class TeamAdminApp {
 
             <!-- Distribution Parameters -->
             <form onsubmit="window.adminApp.handleAirdrop(event)">
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
-                <div class="form-field">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+                <div class="form-field" style="margin-bottom: 0;">
                   <label class="form-field-label">Amount Per User ($BOOBA) *</label>
                   <input type="number" id="airdropAmount" value="${this.airdropAmount}" class="admin-input" style="font-weight: 800; font-family: var(--font-mono); color: var(--brand-yellow);" oninput="window.adminApp.handleAmountChange(this.value)" required>
                 </div>
 
-                <div class="form-field">
+                <div class="form-field" style="margin-bottom: 0;">
                   <label class="form-field-label">Campaign Memo / Reason *</label>
                   <input type="text" id="airdropReason" placeholder="e.g. Top 15 Leaderboard Bonus" value="${this.airdropReason}" class="admin-input" required>
                 </div>
               </div>
 
-              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.8rem; font-size: 0.9rem;" ${recipients.length === 0 ? 'disabled' : ''}>
-                Execute Airdrop: Distribute ${totalOutflow.toLocaleString()} $BOOBA to ${recipients.length} Accounts ↗
+              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.85rem 1rem; font-size: 0.88rem; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; border-radius: 12px;" ${recipients.length === 0 ? 'disabled' : ''}>
+                <span>⚡ Execute Airdrop: Distribute <strong>${totalOutflow.toLocaleString()} $BOOBA</strong></span>
+                <span style="font-size: 0.74rem; font-weight: 600; opacity: 0.85;">(${recipients.length} Target Accounts @ ${amount.toLocaleString()} $BOOBA each)</span>
               </button>
             </form>
 

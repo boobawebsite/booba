@@ -875,6 +875,48 @@ textarea.admin-input {
   .admin-mobile-only {
     display: block !important;
   }
+  .btn-admin {
+    white-space: normal !important;
+    text-align: center;
+    line-height: 1.25;
+  }
+  .segmented-nav {
+    width: 100% !important;
+    display: flex !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-bottom: 1.15rem !important;
+  }
+  .segmented-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .segmented-btn {
+    padding: 0.4rem 0.65rem !important;
+    font-size: 0.74rem !important;
+    flex-shrink: 0;
+  }
+  .airdrop-presets-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.35rem !important;
+  }
+  .airdrop-presets-grid .btn-admin {
+    padding: 0.45rem 0.2rem !important;
+    font-size: 0.72rem !important;
+    min-width: 0 !important;
+  }
+  .airdrop-stats-card {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.5rem !important;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem !important;
+    margin-top: 0.5rem !important;
+  }
   .metrics-row {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.85rem;
@@ -897,6 +939,9 @@ textarea.admin-input {
 }
 
 @media (max-width: 480px) {
+  .airdrop-presets-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
   .metrics-row {
     grid-template-columns: 1fr;
   }

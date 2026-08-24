@@ -4178,34 +4178,38 @@
     font-size: 0.75rem !important;
   }
 
-  /* 12. Dashboard Passport Hero Card & Claim Button Fix */
+  /* 12. Ultra-Sleek Dashboard Passport Hero Card */
   .dashboard-hero-card {
-    padding: 1.15rem 1rem !important;
-    border-radius: 18px !important;
-    margin-bottom: 1.15rem !important;
+    padding: 1.15rem 1.15rem !important;
+    border-radius: 20px !important;
+    margin-bottom: 1.25rem !important;
     overflow: hidden !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
 
+  .dashboard-hero-bg-watermark {
+    display: none !important;
+  }
+
   .dashboard-hero-content {
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 0.85rem !important;
+    gap: 1rem !important;
     width: 100% !important;
   }
 
   .dashboard-user-info {
     flex-direction: row !important;
     align-items: center !important;
-    gap: 0.75rem !important;
+    gap: 0.85rem !important;
     width: 100% !important;
   }
 
   .dashboard-user-avatar {
-    width: 54px !important;
-    height: 54px !important;
+    width: 52px !important;
+    height: 52px !important;
     border-radius: 14px !important;
   }
 
@@ -4216,18 +4220,43 @@
 
   .dashboard-user-subdetails {
     font-size: 0.72rem !important;
-    gap: 0.35rem !important;
-    margin-top: 0.25rem !important;
+    gap: 0.4rem !important;
+    margin-top: 0.3rem !important;
+    flex-wrap: wrap !important;
   }
 
   .dashboard-action-wrapper {
     width: 100% !important;
-    display: flex !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.45rem !important;
   }
 
-  .dashboard-claim-btn,
-  .dashboard-action-wrapper .btn,
-  .btn-lg {
+  .dashboard-action-wrapper .btn {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0.55rem 0.35rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.25rem !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    min-height: 38px !important;
+    height: auto !important;
+  }
+
+  .dashboard-action-wrapper .btn svg {
+    width: 14px !important;
+    height: 14px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .dashboard-claim-btn {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
@@ -4237,23 +4266,11 @@
     justify-content: center !important;
     white-space: normal !important;
     text-align: center !important;
-    height: auto !important;
     min-height: 40px !important;
   }
 
-  .dashboard-claim-btn svg {
-    width: 16px !important;
-    height: 16px !important;
-    flex-shrink: 0 !important;
-  }
-
-  .dashboard-claim-btn span {
-    font-size: 0.82rem !important;
-    line-height: 1.2 !important;
-  }
-
   .dashboard-progress-wrap {
-    margin-top: 1rem !important;
+    margin-top: 0.85rem !important;
     padding-top: 0.75rem !important;
   }
 }

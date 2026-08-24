@@ -3481,93 +3481,90 @@ HOW TO RECOVER YOUR ACCOUNT:
       <div class="container page-content">
         
         <!-- USER PROFILE QUICK HERO BANNER / PASSPORT IDENTITY HERO -->
-        <div class="dashboard-hero-card ${levelInfo.themeClass}" style="background: ${levelInfo.bgGradient}; border: 2px solid ${levelInfo.borderColor}; border-radius: 28px; padding: 2.5rem; margin-bottom: 2rem; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 45px ${levelInfo.glowColor};">
+        <div class="dashboard-hero-card ${levelInfo.themeClass}" style="background: ${levelInfo.bgGradient}; border: 1.5px solid ${levelInfo.borderColor}; border-radius: 24px; padding: 1.75rem 2rem; margin-bottom: 1.75rem; position: relative; overflow: hidden; box-shadow: 0 16px 45px rgba(0, 0, 0, 0.85), 0 0 35px ${levelInfo.glowColor};">
           
-          <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.12; pointer-events: none;">
-            <img src="assets/mascot.jpg" style="width: 260px; height: 260px; border-radius: 50%;">
+          <div class="dashboard-hero-bg-watermark" style="position: absolute; right: -15px; bottom: -25px; opacity: 0.1; pointer-events: none;">
+            <img src="assets/mascot.jpg" style="width: 220px; height: 220px; border-radius: 50%;">
           </div>
 
-          <div class="dashboard-hero-content" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; position: relative; z-index: 1;">
-            <div class="dashboard-user-info" style="display: flex; align-items: center; gap: 1.5rem;">
-              <div style="position: relative; flex-shrink: 0;">
-                <img src="${user.avatar || 'assets/mascot.jpg'}" class="dashboard-user-avatar" style="width: 84px; height: 84px; border-radius: 20px; border: 2.5px solid ${levelInfo.accentColor}; object-fit: cover; box-shadow: 0 0 25px ${levelInfo.glowColor};">
-                <div style="position: absolute; bottom: -4px; right: -4px; background: ${levelInfo.accentColor}; color: #000000; font-size: 0.72rem; font-weight: 900; padding: 0.15rem 0.45rem; border-radius: 999px; border: 2px solid #000000;">
-                  Lv.${levelInfo.level}
-                </div>
-              </div>
-              <div class="dashboard-user-meta">
-                <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
-                  <h2 style="font-size: 1.4rem; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.2;">${user.username}</h2>
-                  ${isWalletUser ? `
-                    <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.openAddUsernameModal()" style="font-size: 0.74rem; padding: 0.2rem 0.55rem; color: ${levelInfo.accentColor}; border: 1px solid ${levelInfo.borderColor}; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem;">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                      ${isDefaultWalletName ? 'Add Username' : 'Edit Username'}
-                    </button>
-                  ` : ''}
-                  <span class="badge-tag theme-badge" style="background: ${levelInfo.accentColor}; color: #000000; font-weight: 900; font-size: 0.78rem; border-color: ${levelInfo.accentColor};">
-                    Lv.${levelInfo.level} ${levelInfo.title}
-                  </span>
-                  <span class="badge-tag" style="background: rgba(255, 255, 255, 0.08); color: ${levelInfo.accentColor}; border: 1px solid ${levelInfo.borderColor}; font-weight: 700; font-size: 0.74rem;">
-                    ${levelInfo.material}
-                  </span>
-                  ${user.role === 'admin' ? `<a href="teamadmin.html" class="badge-tag" style="background: ${levelInfo.glowColor}; color: ${levelInfo.accentColor}; border: 1px solid ${levelInfo.borderColor}; font-weight: 800; display: inline-flex; align-items: center; gap: 0.35rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Admin Access</a>` : ''}
+          <div class="dashboard-hero-content" style="position: relative; z-index: 1;">
+            
+            <!-- Top Row: Avatar + Name + Badges -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+              
+              <div class="dashboard-user-info" style="display: flex; align-items: center; gap: 1rem;">
+                <div style="position: relative; flex-shrink: 0;">
+                  <img src="${user.avatar || 'assets/mascot.jpg'}" class="dashboard-user-avatar" style="width: 62px; height: 62px; border-radius: 16px; border: 2px solid ${levelInfo.accentColor}; object-fit: cover; box-shadow: 0 0 18px ${levelInfo.glowColor};">
+                  <div style="position: absolute; bottom: -3px; right: -3px; background: ${levelInfo.accentColor}; color: #000000; font-size: 0.65rem; font-weight: 900; padding: 0.1rem 0.4rem; border-radius: 999px; border: 1.5px solid #000000;">
+                    Lv.${levelInfo.level}
+                  </div>
                 </div>
 
-                <div class="dashboard-user-subdetails" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.4rem; display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
-                  <span>Passport: <strong class="text-mono" style="color: ${levelInfo.accentColor}; font-weight: 800;">${user.passportId}</strong></span>
-                  <span>•</span>
-                  <span>Tier: <strong style="color: #FFFFFF;">${levelInfo.tierBadge}</strong></span>
-                  <span>•</span>
-                  <span>Ref: <strong class="text-mono" style="color: var(--text-primary);">${user.referralCode}</strong></span>
-                  <span>•</span>
-                  <span style="color: var(--accent-emerald); font-weight: 600; display: flex; align-items: center; gap: 0.35rem;">
-                    <span class="pulse-dot" style="width: 6px; height: 6px;"></span> Non-Custodial BIP-39 Active
-                  </span>
+                <div class="dashboard-user-meta">
+                  <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <h2 style="font-size: 1.3rem; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.2;">${user.username}</h2>
+                    ${isWalletUser ? `
+                      <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.openAddUsernameModal()" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; color: ${levelInfo.accentColor}; border: 1px solid ${levelInfo.borderColor}; border-radius: 6px; font-weight: 700; display: inline-flex; align-items: center; gap: 0.25rem;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        ${isDefaultWalletName ? 'Add @name' : 'Edit @name'}
+                      </button>
+                    ` : ''}
+                    <span class="badge-tag theme-badge" style="background: ${levelInfo.accentColor}; color: #000000; font-weight: 900; font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: 999px;">
+                      Lv.${levelInfo.level} ${levelInfo.title}
+                    </span>
+                    ${user.role === 'admin' ? `<a href="teamadmin.html" class="badge-tag" style="background: ${levelInfo.glowColor}; color: ${levelInfo.accentColor}; border: 1px solid ${levelInfo.borderColor}; font-weight: 800; font-size: 0.7rem; padding: 0.2rem 0.55rem; border-radius: 999px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Admin Access</a>` : ''}
+                  </div>
+
+                  <div class="dashboard-user-subdetails" style="font-size: 0.76rem; color: var(--text-secondary); margin-top: 0.35rem; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                    <span>Passport: <strong class="text-mono" style="color: ${levelInfo.accentColor}; font-weight: 800;">${user.passportId}</strong></span>
+                    <span>•</span>
+                    <span>Ref: <strong class="text-mono" style="color: #FFFFFF;">${user.referralCode}</strong></span>
+                    <span>•</span>
+                    <span style="color: var(--accent-emerald); font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem;">
+                      <span class="pulse-dot" style="width: 5px; height: 5px;"></span> Non-Custodial
+                    </span>
+                  </div>
                 </div>
               </div>
+
             </div>
 
-            <!-- Quick Action Buttons -->
-            <div class="dashboard-action-wrapper" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
-              <a href="passport.html" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; border: 1.5px solid ${levelInfo.borderColor}; color: #FFFFFF; background: rgba(255,255,255,0.06);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${levelInfo.accentColor}" stroke-width="2.5"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
-                <span>3D Passport →</span>
+            <!-- Action Buttons Row (Unified Grid) -->
+            <div class="dashboard-action-wrapper" style="margin-top: 1.25rem; display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
+              <a href="passport.html" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; text-decoration: none; border: 1.5px solid ${levelInfo.borderColor}; color: #FFFFFF; background: rgba(255,255,255,0.06); font-size: 0.8rem; font-weight: 700; border-radius: 10px; padding: 0.6rem 0.9rem;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="${levelInfo.accentColor}" stroke-width="2.5"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
+                <span>3D Passport</span>
               </a>
-              ${isWalletUser ? `
-                <!-- dApp Wallet Registered User: Prominent Add Username Button -->
-                <button class="btn btn-lg" onclick="window.boobaApp.openAddUsernameModal()" style="display: inline-flex; align-items: center; gap: 0.5rem; background: ${levelInfo.accentColor}; color: #000000; font-weight: 900; border: none; box-shadow: 0 0 20px ${levelInfo.glowColor};">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                  <span>${isDefaultWalletName ? '+ Add Username' : 'Edit Username'}</span>
-                </button>
-                <button class="btn btn-outline btn-lg" onclick="window.boobaApp.openAddWalletModal()" style="display: inline-flex; align-items: center; gap: 0.5rem; border-color: ${levelInfo.borderColor};">
-                  <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--accent-emerald);"></span>
-                  <span>${formattedWallet || 'Wallet'}</span>
+
+              ${isWalletConnected ? `
+                <button type="button" class="btn btn-secondary" onclick="window.boobaApp.openAddWalletModal()" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; background: rgba(255,255,255,0.06); border: 1.5px solid ${levelInfo.borderColor}; color: #FFFFFF; font-size: 0.8rem; font-weight: 700; border-radius: 10px; padding: 0.6rem 0.75rem;">
+                  <span class="pulse-dot" style="width: 5px; height: 5px; background: var(--accent-emerald);"></span>
+                  <span class="text-mono">${formattedWallet}</span>
                 </button>
               ` : `
-                <!-- Gmail / Email Registered User: Prominent Add Wallet Button -->
-                <button class="btn btn-lg" onclick="window.boobaApp.openAddWalletModal()" style="display: inline-flex; align-items: center; gap: 0.5rem; ${isWalletConnected ? `background: rgba(255,255,255,0.06); border: 1.5px solid ${levelInfo.borderColor}; color: #FFFFFF;` : `background: ${levelInfo.accentColor}; color: #000000; font-weight: 900; border: none; box-shadow: 0 0 20px ${levelInfo.glowColor};`}">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
-                  <span>${isWalletConnected ? `Wallet: ${formattedWallet}` : '+ Add Wallet'}</span>
+                <button type="button" class="btn" onclick="window.boobaApp.openAddWalletModal()" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; background: ${levelInfo.accentColor}; color: #000000; font-weight: 900; font-size: 0.8rem; border: none; border-radius: 10px; padding: 0.6rem 0.9rem; box-shadow: 0 0 15px ${levelInfo.glowColor};">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+                  <span>+ Add Wallet</span>
                 </button>
               `}
 
-              <a href="withdraw.html" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; border-color: ${levelInfo.borderColor}; background: rgba(255,255,255,0.06);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
-                <span>Withdraw $BOOBA</span>
+              <a href="withdraw.html" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; text-decoration: none; border: 1.5px solid ${levelInfo.borderColor}; background: rgba(255,255,255,0.06); color: #FFFFFF; font-size: 0.8rem; font-weight: 700; border-radius: 10px; padding: 0.6rem 0.9rem;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                <span>Withdraw</span>
               </a>
             </div>
 
-          </div>
+            <!-- Level Progression Bar -->
+            <div class="dashboard-progress-wrap" style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+              <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 0.45rem; color: var(--text-secondary);">
+                <span>Next: <strong style="color: #FFFFFF;">${levelInfo.nextTier ? levelInfo.nextTier.title : 'MAX LEVEL'}</strong></span>
+                <span><strong style="color: ${levelInfo.accentColor};">${Number(user.boobaPoints).toLocaleString()}</strong> / ${levelInfo.nextTier ? levelInfo.nextTier.min.toLocaleString() : 'MAX'} (${levelInfo.progressPercent}%)</span>
+              </div>
+              <div style="width: 100%; height: 7px; background: rgba(255, 255, 255, 0.08); border-radius: 999px; overflow: hidden;">
+                <div style="height: 100%; width: ${levelInfo.progressPercent}%; background: linear-gradient(90deg, ${levelInfo.accentColor}99 0%, ${levelInfo.accentColor} 100%); border-radius: 999px; box-shadow: 0 0 10px ${levelInfo.glowColor};"></div>
+              </div>
+            </div>
 
-          <!-- Level Progression Bar -->
-          <div class="dashboard-progress-wrap" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
-            <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.6rem; color: var(--text-secondary);">
-              <span>Next Milestone: <strong style="color: #FFFFFF;">${levelInfo.nextTier ? levelInfo.nextTier.title : 'MAX LEVEL'}</strong></span>
-              <span><strong style="color: ${levelInfo.accentColor};">${Number(user.boobaPoints).toLocaleString()}</strong> / ${levelInfo.nextTier ? levelInfo.nextTier.min.toLocaleString() : 'MAX'} $BOOBA (${levelInfo.progressPercent}%)</span>
-            </div>
-            <div style="width: 100%; height: 10px; background: rgba(255, 255, 255, 0.06); border-radius: 999px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08);">
-              <div style="height: 100%; width: ${levelInfo.progressPercent}%; background: linear-gradient(90deg, ${levelInfo.accentColor}99 0%, ${levelInfo.accentColor} 100%); border-radius: 999px; box-shadow: 0 0 15px ${levelInfo.glowColor};"></div>
-            </div>
           </div>
         </div>
 

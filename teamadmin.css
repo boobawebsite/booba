@@ -750,7 +750,98 @@ textarea.admin-input {
 /* --------------------------------------------------------------------------
    5. Responsive Breakpoints & Mobile Optimization
    -------------------------------------------------------------------------- */
+.quest-studio-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.4fr);
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.admin-desktop-only {
+  display: block;
+}
+.admin-mobile-only {
+  display: none;
+}
+
+/* Mobile Card Lists (Quests, Submissions, Citizens) */
+.mobile-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem;
+}
+
+.mobile-bounty-card,
+.mobile-submission-card,
+.mobile-citizen-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: all var(--transition);
+}
+
+.mobile-bounty-card:hover,
+.mobile-submission-card:hover,
+.mobile-citizen-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.mobile-card-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.35;
+}
+
+.mobile-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+
+.mobile-card-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.mobile-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--admin-border-subtle);
+  flex-wrap: wrap;
+}
+
+.mobile-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
 @media (max-width: 1024px) {
+  .quest-studio-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
   .admin-sidebar {
     position: fixed;
     top: 0;
@@ -778,6 +869,12 @@ textarea.admin-input {
 }
 
 @media (max-width: 768px) {
+  .admin-desktop-only {
+    display: none !important;
+  }
+  .admin-mobile-only {
+    display: block !important;
+  }
   .metrics-row {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.85rem;

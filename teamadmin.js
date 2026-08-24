@@ -459,21 +459,33 @@ class TeamAdminApp {
     container.innerHTML = `
       <div>
         
-        <div class="page-header">
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
           <div>
             <h1 class="page-title">Quests Studio</h1>
-            <p class="page-desc">Publish and manage community, engagement, and creator bounties.</p>
+            <p class="page-desc">Publish, test, and manage community bounties and reward allocations.</p>
           </div>
-          <span class="badge-clean badge-clean-green">
-            <span class="live-pulse-dot" style="width: 5px; height: 5px;"></span>
-            ${quests.length} Live Bounties
+          <span class="badge-clean badge-clean-green" style="font-size: 0.78rem; padding: 0.35rem 0.85rem;">
+            <span class="live-pulse-dot" style="width: 6px; height: 6px;"></span>
+            ${quests.length} Active Bounties
           </span>
         </div>
 
-        <div style="display: grid; grid-template-columns: minmax(300px, 1fr) minmax(360px, 1.4fr); gap: 1.75rem; align-items: start;">
+        <!-- Mobile-Only Sub-Tab Switcher -->
+        <div class="admin-mobile-only" style="margin-bottom: 1.25rem;">
+          <div class="segmented-nav" style="width: 100%; display: flex; margin-bottom: 0;">
+            <button type="button" class="segmented-btn ${(!this.questStudioTab || this.questStudioTab === 'list') ? 'active' : ''}" onclick="window.adminApp.switchQuestStudioTab('list')" style="flex: 1; text-align: center; justify-content: center;">
+              📋 Active Bounties (${quests.length})
+            </button>
+            <button type="button" class="segmented-btn ${this.questStudioTab === 'create' ? 'active' : ''}" onclick="window.adminApp.switchQuestStudioTab('create')" style="flex: 1; text-align: center; justify-content: center;">
+              ➕ Deploy Bounty
+            </button>
+          </div>
+        </div>
+
+        <div class="quest-studio-layout">
           
           <!-- Quest Creator Panel -->
-          <div class="clean-panel">
+          <div class="clean-panel ${this.questStudioTab === 'list' ? 'admin-desktop-only' : ''}" id="questCreatorPanel">
             <div class="clean-panel-header">
               <div class="clean-panel-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -527,19 +539,23 @@ class TeamAdminApp {
                 <input type="text" id="newQuestReqs" placeholder="e.g. Follow @BoobaToken on X / Submit tweet URL" class="admin-input">
               </div>
 
-              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.75rem;">
+              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.75rem; font-weight: 800;">
                 Publish Bounty Live ↗
               </button>
             </form>
           </div>
 
-          <!-- Existing Quests Table -->
-          <div class="clean-panel">
-            <div class="clean-panel-header">
+          <!-- Existing Quests Table / Mobile Cards -->
+          <div class="clean-panel ${this.questStudioTab === 'create' ? 'admin-desktop-only' : ''}" id="activeQuestsPanel">
+            <div class="clean-panel-header" style="display: flex; justify-content: space-between; align-items: center;">
               <div class="clean-panel-title">Active Database Quests (${quests.length})</div>
+              <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm admin-mobile-only" onclick="window.adminApp.switchQuestStudioTab('create')">
+                + New Bounty
+              </button>
             </div>
             
-            <div class="table-scroll-container">
+            <!-- DESKTOP TABLE VIEW -->
+            <div class="table-scroll-container admin-desktop-only">
               <table class="clean-table">
                 <thead>
                   <tr>
@@ -586,6 +602,55 @@ class TeamAdminApp {
                 </tbody>
               </table>
             </div>
+
+            <!-- MOBILE CARDS LIST VIEW -->
+            <div class="admin-mobile-only mobile-card-list">
+              ${quests.length === 0 ? `
+                <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.88rem;">
+                  No active bounties found in database.<br>
+                  <button type="button" class="btn-admin btn-admin-primary btn-admin-sm" style="margin-top: 1rem;" onclick="window.adminApp.switchQuestStudioTab('create')">
+                    Deploy First Bounty ↗
+                  </button>
+                </div>
+              ` : quests.map(q => `
+                <div class="mobile-bounty-card">
+                  <div class="mobile-card-header">
+                    <div style="min-width: 0;">
+                      <div class="mobile-card-title">${q.title}</div>
+                      <div class="mobile-card-meta">
+                        <span class="badge-clean badge-clean-yellow" style="text-transform: uppercase; font-size: 0.68rem;">${q.category}</span>
+                        <span class="badge-clean" style="background: rgba(255,255,255,0.06); color: var(--text-secondary); font-size: 0.68rem;">
+                          ${q.type === 'social' ? '⚡ Social Link' : q.type === 'proof' ? '🛡️ Proof Submission' : '🔥 Streak Matrix'}
+                        </span>
+                      </div>
+                    </div>
+                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--brand-yellow); font-family: var(--font-mono); white-space: nowrap;">
+                      +${Number(q.rewardBooba).toLocaleString()}
+                    </div>
+                  </div>
+
+                  <div class="mobile-card-desc">
+                    ${q.description || 'No description provided.'}
+                  </div>
+
+                  <div class="mobile-card-footer">
+                    <div>
+                      ${q.targetUrl ? `
+                        <a href="${q.targetUrl}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" style="font-size: 0.72rem; padding: 0.35rem 0.65rem;">
+                          Test Link ↗
+                        </a>
+                      ` : '<span style="color: var(--text-muted); font-size: 0.72rem;">No Link</span>'}
+                    </div>
+                    <div class="mobile-card-actions">
+                      <button type="button" class="btn-admin btn-admin-danger btn-admin-sm" onclick="window.adminApp.handleDeleteQuest('${q.id}')" style="padding: 0.4rem 0.85rem; font-weight: 700; font-size: 0.75rem;">
+                        Delete 🗑️
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
           </div>
 
         </div>
@@ -652,6 +717,11 @@ class TeamAdminApp {
     }
   }
 
+  switchQuestStudioTab(tab) {
+    this.questStudioTab = tab;
+    this.render();
+  }
+
   // --------------------------------------------------------------------------
   // 3. PROOF SUBMISSIONS TAB (REVIEW & APPROVE)
   // --------------------------------------------------------------------------
@@ -694,7 +764,9 @@ class TeamAdminApp {
         </div>
 
         <div class="clean-panel">
-          <div class="table-scroll-container">
+          
+          <!-- DESKTOP TABLE VIEW -->
+          <div class="table-scroll-container admin-desktop-only">
             <table class="clean-table">
               <thead>
                 <tr>
@@ -761,6 +833,63 @@ class TeamAdminApp {
               </tbody>
             </table>
           </div>
+
+          <!-- MOBILE SMART CARDS VIEW -->
+          <div class="admin-mobile-only mobile-card-list">
+            ${filtered.length === 0 ? `
+              <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.88rem;">
+                No ${this.submissionFilter !== 'all' ? this.submissionFilter : ''} submissions found in review queue.
+              </div>
+            ` : filtered.map(s => `
+              <div class="mobile-submission-card">
+                <div class="mobile-card-header">
+                  <div>
+                    <strong style="color: #FFFFFF; font-size: 0.95rem; display: block;">${s.username}</strong>
+                    <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">${s.passportId}</span>
+                  </div>
+                  <span class="badge-clean ${s.status === 'approved' ? 'badge-clean-green' : s.status === 'rejected' ? 'badge-clean-red' : 'badge-clean-yellow'}">
+                    ${s.status}
+                  </span>
+                </div>
+
+                <div>
+                  <div style="font-size: 0.88rem; font-weight: 700; color: #FFFFFF; margin-bottom: 0.2rem;">${s.questTitle}</div>
+                  <div style="font-size: 0.82rem; font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">
+                    Reward: +${s.rewardBooba} $BOOBA
+                  </div>
+                </div>
+
+                ${s.proofDescription ? `
+                  <div style="font-size: 0.8rem; color: var(--text-secondary); background: rgba(0,0,0,0.3); padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid var(--admin-border-subtle);">
+                    ${s.proofDescription}
+                  </div>
+                ` : ''}
+
+                <div class="mobile-card-footer">
+                  <div>
+                    ${s.proofUrl ? `
+                      <a href="${s.proofUrl}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" style="font-size: 0.74rem;">
+                        View Proof ↗
+                      </a>
+                    ` : '<span style="color: var(--text-muted); font-size: 0.72rem;">No link</span>'}
+                  </div>
+                  <div class="mobile-card-actions">
+                    ${s.status === 'pending' ? `
+                      <button type="button" class="btn-admin btn-admin-primary btn-admin-sm" onclick="window.adminApp.handleReview('${s.id}', 'approved')" style="padding: 0.4rem 0.8rem; font-weight: 800;">
+                        Approve ✓
+                      </button>
+                      <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.handleReview('${s.id}', 'rejected')" style="color: var(--accent-ruby); padding: 0.4rem 0.6rem;">
+                        Reject
+                      </button>
+                    ` : `
+                      <span style="font-size: 0.75rem; color: var(--text-muted);">Reviewed</span>
+                    `}
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
         </div>
 
       </div>
@@ -1241,7 +1370,9 @@ class TeamAdminApp {
         </div>
 
         <div class="clean-panel">
-          <div class="table-scroll-container">
+          
+          <!-- DESKTOP TABLE VIEW -->
+          <div class="table-scroll-container admin-desktop-only">
             <table class="clean-table">
               <thead>
                 <tr>
@@ -1308,6 +1439,61 @@ class TeamAdminApp {
               </tbody>
             </table>
           </div>
+
+          <!-- MOBILE SMART CARDS VIEW -->
+          <div class="admin-mobile-only mobile-card-list">
+            ${users.length === 0 ? `
+              <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.88rem;">
+                No matching citizens found in database.
+              </div>
+            ` : users.map(u => {
+              const level = calculateLevel(u.boobaPoints || 0);
+              const hasWallet = u.walletAddress && u.walletAddress.startsWith('0x');
+              return `
+                <div class="mobile-citizen-card">
+                  <div class="mobile-card-header">
+                    <div style="display: flex; align-items: center; gap: 0.65rem;">
+                      <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid ${level.accentColor}; object-fit: cover; flex-shrink: 0; box-shadow: 0 0 8px ${level.glowColor};">
+                      <div>
+                        <strong style="color: #FFFFFF; font-size: 0.92rem; display: block;">${u.username}</strong>
+                        <span class="text-mono" style="font-size: 0.72rem; color: ${level.accentColor}; font-weight: 700;">${u.passportId || 'No Passport'}</span>
+                      </div>
+                    </div>
+                    <span class="badge-clean" style="background: ${level.glowColor}; color: ${level.accentColor}; border: 1px solid ${level.borderColor}; font-weight: 800; font-size: 0.7rem;">
+                      Lv.${level.level}
+                    </span>
+                  </div>
+
+                  <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid var(--admin-border-subtle);">
+                    <div>
+                      <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;">Points Balance</div>
+                      <div class="text-mono" style="font-size: 1.05rem; font-weight: 800; color: ${level.accentColor};">
+                        ${Number(u.boobaPoints || 0).toLocaleString()} <span style="font-size: 0.75rem;">$BOOBA</span>
+                      </div>
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;">Quests Done</div>
+                      <div style="font-size: 0.95rem; font-weight: 700; color: #FFFFFF;">
+                        ${u.completedQuestsCount || 0}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mobile-card-footer">
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                      ${hasWallet ? `0x: ${u.walletAddress.slice(0, 6)}...${u.walletAddress.slice(-4)}` : (u.email || 'dApp User')}
+                    </div>
+                    ${hasWallet ? `
+                      <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" style="padding: 0.25rem 0.6rem; font-size: 0.72rem;" onclick="window.adminApp.copyToClipboard('${u.walletAddress}', 'Wallet address')">
+                        Copy Wallet 📋
+                      </button>
+                    ` : ''}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
         </div>
       </div>
     `;

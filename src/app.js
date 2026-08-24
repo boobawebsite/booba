@@ -265,13 +265,13 @@ class BoobaApp {
       const formattedWallet = isWalletConnected ? `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}` : '';
 
       authButtonsDesktop = `
-        <div class="user-profile-pill" style="display: flex; align-items: center; gap: 0.65rem; background: var(--bg-surface-elevated); padding: 0.35rem 0.85rem; border-radius: var(--radius-full); border: 1px solid var(--border-medium);">
-          <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--brand-yellow);">
+        <div class="user-profile-pill" style="display: flex; align-items: center; gap: 0.65rem; background: var(--bg-surface-elevated); padding: 0.35rem 0.85rem; border-radius: var(--radius-full); border: 1.5px solid ${levelInfo.borderColor}; box-shadow: 0 0 15px ${levelInfo.glowColor};">
+          <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid ${levelInfo.accentColor}; object-fit: cover;">
           <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">
             ${user.username}
           </div>
-          <span style="font-size: 0.78rem; font-weight: 800; color: var(--brand-yellow); background: var(--brand-yellow-subtle); padding: 0.15rem 0.5rem; border-radius: var(--radius-full);">
-            ${Number(user.boobaPoints).toLocaleString()} BOOBA
+          <span style="font-size: 0.78rem; font-weight: 800; color: ${levelInfo.accentColor}; background: ${levelInfo.glowColor}; padding: 0.15rem 0.55rem; border-radius: var(--radius-full); border: 1px solid ${levelInfo.borderColor};">
+            Lv.${levelInfo.level} • ${Number(user.boobaPoints).toLocaleString()} BOOBA
           </span>
           <button class="btn btn-ghost btn-sm" onclick="window.boobaApp.logout()" title="Sign Out" style="padding: 0.2rem 0.4rem; color: var(--text-muted);">
             Sign Out
@@ -280,19 +280,19 @@ class BoobaApp {
       `;
 
       authButtonsMobile = `
-        <div style="padding: 0.85rem; background: var(--bg-surface-elevated); border-radius: 16px; margin-bottom: 0.75rem; border: 1px solid rgba(255,255,255,0.08);">
+        <div style="padding: 0.85rem; background: var(--bg-surface-elevated); border-radius: 16px; margin-bottom: 0.75rem; border: 1.5px solid ${levelInfo.borderColor}; box-shadow: 0 0 15px ${levelInfo.glowColor};">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
             <div style="display: flex; align-items: center; gap: 0.65rem;">
-              <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--brand-yellow);">
+              <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid ${levelInfo.accentColor}; object-fit: cover;">
               <div>
                 <div style="font-weight: 800; color: var(--text-primary); font-size: 0.92rem;">${user.username}</div>
-                <div style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">${Number(user.boobaPoints).toLocaleString()} BOOBA • Lv.${levelInfo.level}</div>
+                <div style="font-size: 0.75rem; color: ${levelInfo.accentColor}; font-weight: 700;">${Number(user.boobaPoints).toLocaleString()} BOOBA • Lv.${levelInfo.level} ${levelInfo.title}</div>
               </div>
             </div>
             <a href="settings.html" class="btn btn-outline btn-sm" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">Settings</a>
           </div>
           <button type="button" class="btn ${isWalletConnected ? 'btn-secondary' : 'btn-primary'} btn-block btn-sm" onclick="window.boobaApp.openWalletModal()" style="display: flex; align-items: center; justify-content: center; gap: 0.45rem;">
-            <span class="pulse-dot" style="width: 6px; height: 6px; background: ${isWalletConnected ? 'var(--accent-emerald)' : 'var(--brand-yellow)'};"></span>
+            <span class="pulse-dot" style="width: 6px; height: 6px; background: ${isWalletConnected ? 'var(--accent-emerald)' : levelInfo.accentColor};"></span>
             <span>${isWalletConnected ? `Wallet: ${formattedWallet}` : 'Connect Web3 Wallet'}</span>
           </button>
         </div>
@@ -3480,8 +3480,8 @@ HOW TO RECOVER YOUR ACCOUNT:
     container.innerHTML = `
       <div class="container page-content">
         
-        <!-- USER PROFILE QUICK HERO BANNER -->
-        <div class="dashboard-hero-card" style="background: linear-gradient(135deg, rgba(243, 186, 47, 0.12) 0%, rgba(14, 18, 27, 0.85) 60%, rgba(7, 9, 14, 0.95) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px; padding: 2.5rem; margin-bottom: 2rem; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(243, 186, 47, 0.12);">
+        <!-- USER PROFILE QUICK HERO BANNER / PASSPORT IDENTITY HERO -->
+        <div class="dashboard-hero-card ${levelInfo.themeClass}" style="background: ${levelInfo.bgGradient}; border: 2px solid ${levelInfo.borderColor}; border-radius: 28px; padding: 2.5rem; margin-bottom: 2rem; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 45px ${levelInfo.glowColor};">
           
           <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.12; pointer-events: none;">
             <img src="assets/mascot.jpg" style="width: 260px; height: 260px; border-radius: 50%;">
@@ -3490,8 +3490,8 @@ HOW TO RECOVER YOUR ACCOUNT:
           <div class="dashboard-hero-content" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; position: relative; z-index: 1;">
             <div class="dashboard-user-info" style="display: flex; align-items: center; gap: 1.5rem;">
               <div style="position: relative; flex-shrink: 0;">
-                <img src="${user.avatar || 'assets/mascot.jpg'}" class="dashboard-user-avatar" style="width: 84px; height: 84px; border-radius: 20px; border: 2.5px solid var(--brand-yellow); object-fit: cover; box-shadow: 0 0 25px var(--brand-yellow-glow);">
-                <div style="position: absolute; bottom: -4px; right: -4px; background: var(--brand-yellow); color: #000; font-size: 0.72rem; font-weight: 800; padding: 0.15rem 0.45rem; border-radius: 999px; border: 2px solid #000;">
+                <img src="${user.avatar || 'assets/mascot.jpg'}" class="dashboard-user-avatar" style="width: 84px; height: 84px; border-radius: 20px; border: 2.5px solid ${levelInfo.accentColor}; object-fit: cover; box-shadow: 0 0 25px ${levelInfo.glowColor};">
+                <div style="position: absolute; bottom: -4px; right: -4px; background: ${levelInfo.accentColor}; color: #000000; font-size: 0.72rem; font-weight: 900; padding: 0.15rem 0.45rem; border-radius: 999px; border: 2px solid #000000;">
                   Lv.${levelInfo.level}
                 </div>
               </div>
@@ -3499,19 +3499,24 @@ HOW TO RECOVER YOUR ACCOUNT:
                 <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
                   <h2 style="font-size: 1.4rem; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.2;">${user.username}</h2>
                   ${isWalletUser ? `
-                    <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.openAddUsernameModal()" style="font-size: 0.74rem; padding: 0.2rem 0.55rem; color: var(--brand-yellow); border: 1px solid rgba(243, 186, 47, 0.35); border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem;">
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.openAddUsernameModal()" style="font-size: 0.74rem; padding: 0.2rem 0.55rem; color: ${levelInfo.accentColor}; border: 1px solid ${levelInfo.borderColor}; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem;">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                       ${isDefaultWalletName ? 'Add Username' : 'Edit Username'}
                     </button>
                   ` : ''}
-                  <span class="badge-tag" style="background: var(--brand-yellow); color: #000; font-weight: 800; font-size: 0.78rem;">
+                  <span class="badge-tag theme-badge" style="background: ${levelInfo.accentColor}; color: #000000; font-weight: 900; font-size: 0.78rem; border-color: ${levelInfo.accentColor};">
                     Lv.${levelInfo.level} ${levelInfo.title}
                   </span>
-                  ${user.role === 'admin' ? '<a href="teamadmin.html" class="badge-tag" style="background: rgba(243, 186, 47, 0.2); color: var(--brand-yellow); border-color: var(--brand-yellow); font-weight: 800; display: inline-flex; align-items: center; gap: 0.35rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Admin Access</a>' : ''}
+                  <span class="badge-tag" style="background: rgba(255, 255, 255, 0.08); color: ${levelInfo.accentColor}; border: 1px solid ${levelInfo.borderColor}; font-weight: 700; font-size: 0.74rem;">
+                    ${levelInfo.material}
+                  </span>
+                  ${user.role === 'admin' ? `<a href="teamadmin.html" class="badge-tag" style="background: ${levelInfo.glowColor}; color: ${levelInfo.accentColor}; border: 1px solid ${levelInfo.borderColor}; font-weight: 800; display: inline-flex; align-items: center; gap: 0.35rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Admin Access</a>` : ''}
                 </div>
 
                 <div class="dashboard-user-subdetails" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.4rem; display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
-                  <span>Passport: <strong class="text-mono" style="color: var(--brand-yellow);">${user.passportId}</strong></span>
+                  <span>Passport: <strong class="text-mono" style="color: ${levelInfo.accentColor}; font-weight: 800;">${user.passportId}</strong></span>
+                  <span>•</span>
+                  <span>Tier: <strong style="color: #FFFFFF;">${levelInfo.tierBadge}</strong></span>
                   <span>•</span>
                   <span>Ref: <strong class="text-mono" style="color: var(--text-primary);">${user.referralCode}</strong></span>
                   <span>•</span>
@@ -3524,25 +3529,29 @@ HOW TO RECOVER YOUR ACCOUNT:
 
             <!-- Quick Action Buttons -->
             <div class="dashboard-action-wrapper" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+              <a href="passport.html" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; border: 1.5px solid ${levelInfo.borderColor}; color: #FFFFFF; background: rgba(255,255,255,0.06);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${levelInfo.accentColor}" stroke-width="2.5"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
+                <span>3D Passport →</span>
+              </a>
               ${isWalletUser ? `
                 <!-- dApp Wallet Registered User: Prominent Add Username Button -->
-                <button class="btn btn-primary btn-lg" onclick="window.boobaApp.openAddUsernameModal()" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <button class="btn btn-lg" onclick="window.boobaApp.openAddUsernameModal()" style="display: inline-flex; align-items: center; gap: 0.5rem; background: ${levelInfo.accentColor}; color: #000000; font-weight: 900; border: none; box-shadow: 0 0 20px ${levelInfo.glowColor};">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                   <span>${isDefaultWalletName ? '+ Add Username' : 'Edit Username'}</span>
                 </button>
-                <button class="btn btn-outline btn-lg" onclick="window.boobaApp.openAddWalletModal()" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <button class="btn btn-outline btn-lg" onclick="window.boobaApp.openAddWalletModal()" style="display: inline-flex; align-items: center; gap: 0.5rem; border-color: ${levelInfo.borderColor};">
                   <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--accent-emerald);"></span>
                   <span>${formattedWallet || 'Wallet'}</span>
                 </button>
               ` : `
                 <!-- Gmail / Email Registered User: Prominent Add Wallet Button -->
-                <button class="btn ${isWalletConnected ? 'btn-outline' : 'btn-primary'} btn-lg" onclick="window.boobaApp.openAddWalletModal()" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <button class="btn btn-lg" onclick="window.boobaApp.openAddWalletModal()" style="display: inline-flex; align-items: center; gap: 0.5rem; ${isWalletConnected ? `background: rgba(255,255,255,0.06); border: 1.5px solid ${levelInfo.borderColor}; color: #FFFFFF;` : `background: ${levelInfo.accentColor}; color: #000000; font-weight: 900; border: none; box-shadow: 0 0 20px ${levelInfo.glowColor};`}">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
                   <span>${isWalletConnected ? `Wallet: ${formattedWallet}` : '+ Add Wallet'}</span>
                 </button>
               `}
 
-              <a href="withdraw.html" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+              <a href="withdraw.html" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; border-color: ${levelInfo.borderColor}; background: rgba(255,255,255,0.06);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
                 <span>Withdraw $BOOBA</span>
               </a>
@@ -3554,19 +3563,19 @@ HOW TO RECOVER YOUR ACCOUNT:
           <div class="dashboard-progress-wrap" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
             <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.6rem; color: var(--text-secondary);">
               <span>Next Milestone: <strong style="color: #FFFFFF;">${levelInfo.nextTier ? levelInfo.nextTier.title : 'MAX LEVEL'}</strong></span>
-              <span><strong style="color: var(--brand-yellow);">${Number(user.boobaPoints).toLocaleString()}</strong> / ${levelInfo.nextTier ? levelInfo.nextTier.min.toLocaleString() : 'MAX'} $BOOBA (${levelInfo.progressPercent}%)</span>
+              <span><strong style="color: ${levelInfo.accentColor};">${Number(user.boobaPoints).toLocaleString()}</strong> / ${levelInfo.nextTier ? levelInfo.nextTier.min.toLocaleString() : 'MAX'} $BOOBA (${levelInfo.progressPercent}%)</span>
             </div>
             <div style="width: 100%; height: 10px; background: rgba(255, 255, 255, 0.06); border-radius: 999px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08);">
-              <div style="height: 100%; width: ${levelInfo.progressPercent}%; background: linear-gradient(90deg, var(--brand-yellow-light) 0%, var(--brand-yellow) 100%); border-radius: 999px; box-shadow: 0 0 15px var(--brand-yellow-glow);"></div>
+              <div style="height: 100%; width: ${levelInfo.progressPercent}%; background: linear-gradient(90deg, ${levelInfo.accentColor}99 0%, ${levelInfo.accentColor} 100%); border-radius: 999px; box-shadow: 0 0 15px ${levelInfo.glowColor};"></div>
             </div>
           </div>
         </div>
 
         <!-- NOTIFICATION / PROMPT BANNER FOR MISSING WALLET OR MISSING USERNAME -->
         ${!isWalletConnected ? `
-          <div style="background: rgba(243, 186, 47, 0.08); border: 1.5px solid rgba(243, 186, 47, 0.3); border-radius: 20px; padding: 1.15rem 1.6rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div style="background: ${levelInfo.glowColor}; border: 1.5px solid ${levelInfo.borderColor}; border-radius: 20px; padding: 1.15rem 1.6rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             <div style="display: flex; align-items: center; gap: 0.85rem;">
-              <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(243, 186, 47, 0.15); border: 1px solid rgba(243, 186, 47, 0.35); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow); flex-shrink: 0;">
+              <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(255, 255, 255, 0.08); border: 1px solid ${levelInfo.borderColor}; display: flex; align-items: center; justify-content: center; color: ${levelInfo.accentColor}; flex-shrink: 0;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
               </div>
               <div>
@@ -3574,14 +3583,14 @@ HOW TO RECOVER YOUR ACCOUNT:
                 <div style="font-size: 0.82rem; color: var(--text-secondary);">Input your BNB Smart Chain address to enable token airdrops, quest rewards & instant withdrawals.</div>
               </div>
             </div>
-            <button type="button" class="btn btn-primary btn-sm" onclick="window.boobaApp.openAddWalletModal()" style="white-space: nowrap; padding: 0.55rem 1.35rem; font-weight: 800; border-radius: 10px;">
+            <button type="button" class="btn btn-sm" onclick="window.boobaApp.openAddWalletModal()" style="background: ${levelInfo.accentColor}; color: #000000; white-space: nowrap; padding: 0.55rem 1.35rem; font-weight: 900; border-radius: 10px; border: none; box-shadow: 0 0 15px ${levelInfo.glowColor};">
               + Add Wallet
             </button>
           </div>
         ` : (isDefaultWalletName ? `
-          <div style="background: rgba(243, 186, 47, 0.08); border: 1.5px solid rgba(243, 186, 47, 0.3); border-radius: 20px; padding: 1.15rem 1.6rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div style="background: ${levelInfo.glowColor}; border: 1.5px solid ${levelInfo.borderColor}; border-radius: 20px; padding: 1.15rem 1.6rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             <div style="display: flex; align-items: center; gap: 0.85rem;">
-              <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(243, 186, 47, 0.15); border: 1px solid rgba(243, 186, 47, 0.35); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow); flex-shrink: 0;">
+              <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(255, 255, 255, 0.08); border: 1px solid ${levelInfo.borderColor}; display: flex; align-items: center; justify-content: center; color: ${levelInfo.accentColor}; flex-shrink: 0;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
               </div>
               <div>
@@ -3589,7 +3598,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                 <div style="font-size: 0.82rem; color: var(--text-secondary);">You're registered via Web3 dApp wallet. Choose your custom @username for your Booba Passport!</div>
               </div>
             </div>
-            <button type="button" class="btn btn-primary btn-sm" onclick="window.boobaApp.openAddUsernameModal()" style="white-space: nowrap; padding: 0.55rem 1.35rem; font-weight: 800; border-radius: 10px;">
+            <button type="button" class="btn btn-sm" onclick="window.boobaApp.openAddUsernameModal()" style="background: ${levelInfo.accentColor}; color: #000000; white-space: nowrap; padding: 0.55rem 1.35rem; font-weight: 900; border-radius: 10px; border: none; box-shadow: 0 0 15px ${levelInfo.glowColor};">
               + Add Username
             </button>
           </div>
@@ -3601,9 +3610,9 @@ HOW TO RECOVER YOUR ACCOUNT:
           <div class="card card-hover" style="padding: 1.75rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
               <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Token Balance</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brand-yellow);"><circle cx="12" cy="12" r="8"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: ${levelInfo.accentColor};"><circle cx="12" cy="12" r="8"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
             </div>
-            <div style="font-size: 2rem; font-weight: 800; color: var(--brand-yellow); line-height: 1.1;" data-counter-target="${user.boobaPoints}">
+            <div style="font-size: 2rem; font-weight: 800; color: ${levelInfo.accentColor}; line-height: 1.1;" data-counter-target="${user.boobaPoints}">
               ${Number(user.boobaPoints).toLocaleString()}
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
@@ -3630,7 +3639,7 @@ HOW TO RECOVER YOUR ACCOUNT:
           <div class="card card-hover" style="padding: 1.75rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
               <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Completed Quests</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brand-yellow);"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: ${levelInfo.accentColor};"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
             </div>
             <div style="font-size: 2rem; font-weight: 800; color: var(--text-primary); line-height: 1.1;">
               ${Number(user.completedQuestsCount || 0)}
@@ -3658,17 +3667,23 @@ HOW TO RECOVER YOUR ACCOUNT:
         <!-- 3 ACTION HUBS -->
         <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.75rem; margin-bottom: 2.5rem;">
           
-          <div class="card card-hover" style="padding: 2.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+          <div class="card card-hover" style="padding: 2.25rem; display: flex; flex-direction: column; justify-content: space-between; border-color: ${levelInfo.borderColor}; background: linear-gradient(180deg, ${levelInfo.glowColor} 0%, rgba(14, 18, 27, 0.9) 100%);">
             <div>
-              <div class="bento-icon-badge" style="margin-bottom: 1.25rem;">
+              <div class="bento-icon-badge" style="background: ${levelInfo.glowColor}; color: ${levelInfo.accentColor}; border-color: ${levelInfo.borderColor}; margin-bottom: 1.25rem;">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
               </div>
-              <h3 style="font-size: 1.3rem; margin-bottom: 0.6rem; color: #FFFFFF;">Digital Booba Passport</h3>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.4rem;">
+                <h3 style="font-size: 1.3rem; margin: 0; color: #FFFFFF;">Digital Booba Passport</h3>
+                <span class="badge-tag" style="background: ${levelInfo.accentColor}; color: #000000; font-weight: 900; font-size: 0.72rem;">Lv.${levelInfo.level}</span>
+              </div>
+              <div style="font-size: 0.75rem; color: ${levelInfo.accentColor}; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.85rem;">
+                ${levelInfo.material} • ${levelInfo.tierBadge}
+              </div>
               <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1.5rem;">
-                View your 3D interactive metal identity card, holographic security chip, and progress through the 10 VIP rank tiers.
+                Your ${levelInfo.title} card is live on BNB Smart Chain. View your 3D interactive holographic card, cryptographic chip, and tier unlock criteria.
               </p>
             </div>
-            <a href="passport.html" class="btn btn-secondary btn-block">Open My Passport →</a>
+            <a href="passport.html" class="btn btn-secondary btn-block" style="border-color: ${levelInfo.borderColor};">Open My Passport (${levelInfo.title}) →</a>
           </div>
 
           <div class="card card-hover" style="padding: 2.25rem; display: flex; flex-direction: column; justify-content: space-between;">
@@ -3977,6 +3992,7 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
 
     const isWalletConnected = Boolean(user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
+    const levelInfo = calculateLevel(user.boobaPoints);
     const currentAvatar = user.avatar || 'assets/mascot.jpg';
 
     container.innerHTML = `
@@ -3988,7 +4004,7 @@ HOW TO RECOVER YOUR ACCOUNT:
             Account & Security Settings
           </h1>
           <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0 auto; max-width: 600px;">
-            Update your public profile handle, connect your self-custody Web3 wallet, and secure your password.
+            Update your public profile handle, connect your self-custody Web3 wallet, and manage your level passport credentials.
           </p>
         </div>
 
@@ -3998,12 +4014,12 @@ HOW TO RECOVER YOUR ACCOUNT:
           <!-- CARD 1: PROFILE & WALLET -->
           <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.1);">
             <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(243, 186, 47, 0.15); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: ${levelInfo.glowColor}; display: flex; align-items: center; justify-content: center; color: ${levelInfo.accentColor}; border: 1px solid ${levelInfo.borderColor};">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
               </div>
               <div>
                 <h3 style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin: 0;">Profile & Wallet</h3>
-                <div style="font-size: 0.75rem; color: var(--text-muted);">Public identity and BEP-20 address</div>
+                <div style="font-size: 0.75rem; color: ${levelInfo.accentColor}; font-weight: 700;">Lv.${levelInfo.level} ${levelInfo.title} • ${levelInfo.material}</div>
               </div>
             </div>
 
@@ -4011,7 +4027,7 @@ HOW TO RECOVER YOUR ACCOUNT:
               
               <!-- Avatar Preview & Selection -->
               <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1.25rem;">
-                <img id="settingsAvatarPreview" src="${currentAvatar}" style="width: 56px; height: 56px; border-radius: 16px; border: 2px solid var(--brand-yellow); object-fit: cover; box-shadow: 0 0 15px rgba(243, 186, 47, 0.4);">
+                <img id="settingsAvatarPreview" src="${currentAvatar}" style="width: 56px; height: 56px; border-radius: 16px; border: 2px solid ${levelInfo.accentColor}; object-fit: cover; box-shadow: 0 0 15px ${levelInfo.glowColor};">
                 <div>
                   <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.25rem;">Mascot Avatar</div>
                   <div style="display: flex; gap: 0.35rem;">
@@ -4132,108 +4148,7 @@ HOW TO RECOVER YOUR ACCOUNT:
 
     const levelInfo = calculateLevel(user.boobaPoints);
 
-    const TIERS_CONFIG = [
-      {
-        level: 1,
-        title: 'Booba Baby',
-        min: 0,
-        unlock: 'Basic Booba Passport & Community Access',
-        themeClass: 'card-theme-lv1',
-        accentColor: '#CD7F32',
-        tierBadge: 'Genesis Member',
-        material: 'Bronze Brushed Titanium'
-      },
-      {
-        level: 2,
-        title: 'Booba Rookie',
-        min: 500,
-        unlock: 'Custom Passport Badge & Daily Streak Bonus',
-        themeClass: 'card-theme-lv2',
-        accentColor: '#10B981',
-        tierBadge: 'Certified Rookie',
-        material: 'Cyber Emerald Matrix'
-      },
-      {
-        level: 3,
-        title: 'Booba Starter',
-        min: 1500,
-        unlock: 'Special Profile Badge & Discord Role',
-        themeClass: 'card-theme-lv3',
-        accentColor: '#3B82F6',
-        tierBadge: 'Active Starter',
-        material: 'Royal Sapphire Cobalt'
-      },
-      {
-        level: 4,
-        title: 'Booba Hustler',
-        min: 3000,
-        unlock: 'Multiplier on Creative Quest Rewards (+10%)',
-        themeClass: 'card-theme-lv4',
-        accentColor: '#F59E0B',
-        tierBadge: '1.1x Multiplier',
-        material: 'Neon Amber Cyberpunk'
-      },
-      {
-        level: 5,
-        title: 'Booba Grinder',
-        min: 5000,
-        unlock: 'Exclusive Community Alpha Channel Access',
-        themeClass: 'card-theme-lv5',
-        accentColor: '#A855F7',
-        tierBadge: 'Alpha Syndicate',
-        material: 'Obsidian Violet Nebula'
-      },
-      {
-        level: 6,
-        title: 'Booba Warrior',
-        min: 10000,
-        unlock: 'Early Access to BOOBA Airdrop Allocation',
-        themeClass: 'card-theme-lv6',
-        accentColor: '#F43F5E',
-        tierBadge: 'Airdrop Priority',
-        material: 'Crimson Ruby Titanium'
-      },
-      {
-        level: 7,
-        title: 'Booba Elite',
-        min: 25000,
-        unlock: 'VIP Pass to Virtual AMAs & Special Merch Drops',
-        themeClass: 'card-theme-lv7',
-        accentColor: '#E2E8F0',
-        tierBadge: 'VIP AMA Pass',
-        material: 'Frosted Platinum Mirror'
-      },
-      {
-        level: 8,
-        title: 'Booba Legend',
-        min: 50000,
-        unlock: 'Exclusive Governance Voting Rights',
-        themeClass: 'card-theme-lv8',
-        accentColor: '#F3BA2F',
-        tierBadge: 'Governance Senator',
-        material: '24K Imperial Gold'
-      },
-      {
-        level: 9,
-        title: 'Booba OG',
-        min: 100000,
-        unlock: 'BNB Baby Treasury Allocation Perks',
-        themeClass: 'card-theme-lv9',
-        accentColor: '#C084FC',
-        tierBadge: 'Treasury Royalty',
-        material: 'Prismatic Liquid Chrome'
-      },
-      {
-        level: 10,
-        title: 'Booba Master',
-        min: 250000,
-        unlock: 'Ambassador Status & Direct Team Advisory',
-        themeClass: 'card-theme-lv10',
-        accentColor: '#FFD700',
-        tierBadge: 'Grandmaster Council',
-        material: 'Celestial Quantum Void & Gold'
-      }
-    ];
+    const TIERS_CONFIG = LEVEL_TIERS;
 
     container.innerHTML = `
       <div class="container page-content">
@@ -4603,11 +4518,11 @@ HOW TO RECOVER YOUR ACCOUNT:
 
           ${user ? `
             <div style="display: flex; align-items: center; gap: 0.85rem;">
-              <span class="badge-tag" style="background: rgba(243, 186, 47, 0.12); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.35); font-size: 0.82rem; padding: 0.4rem 0.95rem;">
-                <span class="pulse-dot" style="width: 6px; height: 6px;"></span>
+              <span class="badge-tag" style="background: ${userLevel.glowColor}; color: ${userLevel.accentColor}; border: 1.5px solid ${userLevel.borderColor}; font-size: 0.82rem; padding: 0.4rem 0.95rem; font-weight: 800;">
+                <span class="pulse-dot" style="width: 6px; height: 6px; background: ${userLevel.accentColor};"></span>
                 <span>Lv.${userLevel.level} ${userLevel.title}</span>
               </span>
-              <a href="passport.html" class="btn btn-outline btn-sm" style="white-space: nowrap;">
+              <a href="passport.html" class="btn btn-outline btn-sm" style="white-space: nowrap; border-color: ${userLevel.borderColor}; color: #FFFFFF;">
                 View Passport →
               </a>
             </div>
@@ -5002,15 +4917,20 @@ HOW TO RECOVER YOUR ACCOUNT:
                   </div>
 
                 </div>
-              ` : filtered.map(q => `
-                <div class="card card-hover" style="display: flex; flex-direction: column; justify-content: space-between; padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); position: relative; overflow: hidden;">
+              ` : filtered.map(q => {
+                const userStatus = db.getQuestUserStatus ? db.getQuestUserStatus(q.id) : { completed: false, status: 'unclaimed' };
+                const isProofMode = q.type === 'proof' || q.category === 'content' || q.category === 'Content Production';
+                const isDailyInstant = q.type === 'instant' || q.category === 'daily';
+
+                return `
+                <div class="card card-hover" style="display: flex; flex-direction: column; justify-content: space-between; padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.75); border: 1px solid ${userStatus.completed ? 'rgba(16, 185, 129, 0.4)' : (userStatus.status === 'pending_review' ? 'rgba(243, 186, 47, 0.4)' : 'rgba(255, 255, 255, 0.08)')}; position: relative; overflow: hidden;">
                   
                   <div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
                       <span class="badge-tag" style="text-transform: uppercase; font-size: 0.72rem; padding: 0.3rem 0.75rem; letter-spacing: 0.04em;">
                         ${getCategoryLabel(q.category)}
                       </span>
-                      <div style="font-size: 0.88rem; font-weight: 900; color: var(--brand-yellow); background: rgba(243, 186, 47, 0.14); border: 1px solid rgba(243, 186, 47, 0.35); padding: 0.35rem 0.85rem; border-radius: 999px;" class="text-mono">
+                      <div style="font-size: 0.88rem; font-weight: 900; color: ${userStatus.completed ? 'var(--accent-emerald)' : 'var(--brand-yellow)'}; background: ${userStatus.completed ? 'rgba(16, 185, 129, 0.14)' : 'rgba(243, 186, 47, 0.14)'}; border: 1px solid ${userStatus.completed ? 'rgba(16, 185, 129, 0.35)' : 'rgba(243, 186, 47, 0.35)'}; padding: 0.35rem 0.85rem; border-radius: 999px;" class="text-mono">
                         +${Number(q.rewardBooba).toLocaleString()} BOOBA
                       </div>
                     </div>
@@ -5021,18 +4941,33 @@ HOW TO RECOVER YOUR ACCOUNT:
                     </p>
 
                     <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.75rem; background: rgba(0,0,0,0.4); padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 0.5rem;">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand-yellow)" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-                      <span style="color: var(--text-secondary);">${q.requirements || 'Complete mission and submit proof'}</span>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="${isProofMode ? 'var(--accent-violet)' : 'var(--brand-yellow)'}" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                      <span style="color: var(--text-secondary);">${isProofMode ? (q.requirements || 'Submit content link for admin verification & approval') : (q.requirements || 'Click action link to receive allocated coins immediately')}</span>
                     </div>
                   </div>
 
                   <div>
-                    ${q.type === 'instant' ? `
+                    ${userStatus.completed ? `
+                      <button class="btn btn-outline btn-block" disabled style="opacity: 0.9; border-color: var(--accent-emerald); color: var(--accent-emerald); background: rgba(16, 185, 129, 0.08); font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: default;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Completed & Claimed (+${q.rewardBooba} BOOBA)</span>
+                      </button>
+                    ` : userStatus.status === 'pending_review' ? `
+                      <button class="btn btn-outline btn-block" disabled style="opacity: 0.95; border-color: rgba(243, 186, 47, 0.5); color: var(--brand-yellow); background: rgba(243, 186, 47, 0.08); font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: default;">
+                        <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--brand-yellow);"></span>
+                        <span>Proof Under Admin Review ⏳</span>
+                      </button>
+                    ` : userStatus.status === 'rejected' ? `
+                      <button class="btn btn-block" onclick="window.boobaApp.openProofModal('${q.id}')" style="background: var(--accent-ruby); color: #FFFFFF; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                        <span>Rejected • Resubmit Proof Link</span>
+                      </button>
+                    ` : isDailyInstant ? `
                       <button class="btn btn-primary btn-block" onclick="window.boobaApp.setQuestFilter('daily')" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 800;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                         <span>Open 100-Day Streak Matrix</span>
                       </button>
-                    ` : q.category === 'content' || q.type === 'proof' ? `
+                    ` : isProofMode ? `
                       <div style="display: flex; flex-direction: column; gap: 0.6rem;">
                         ${q.targetUrl ? `
                           <a href="${q.targetUrl}" target="_blank" class="btn btn-outline btn-block" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem;">
@@ -5042,19 +4977,20 @@ HOW TO RECOVER YOUR ACCOUNT:
                         ` : ''}
                         <button class="btn btn-primary btn-block" onclick="window.boobaApp.openProofModal('${q.id}')" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 800; font-size: 0.88rem;">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                          <span>Submit Proof Link</span>
+                          <span>Submit Proof Link (Coins on Approval)</span>
                         </button>
                       </div>
                     ` : `
-                      <button class="btn btn-primary btn-block" onclick="window.boobaApp.openSocialModal('${q.id}')" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 800;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                        <span>${q.actionText || 'Follow & Verify'}</span>
+                      <button class="btn btn-primary btn-block" onclick="window.boobaApp.handleSocialLinkAction('${q.id}')" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 800;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        <span>${q.targetUrl ? 'Open Link & Receive Coins →' : (q.actionText || 'Claim Bounty')}</span>
                       </button>
                     `}
                   </div>
 
                 </div>
-              `).join('')}
+              `;
+              }).join('')}
             </div>
           `}
         </div>
@@ -5324,19 +5260,19 @@ HOW TO RECOVER YOUR ACCOUNT:
                       </td>
                       <td style="padding: 1.25rem 1.5rem;">
                         <div style="display: flex; align-items: center; gap: 0.85rem;">
-                          <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid ${isMe ? 'var(--brand-yellow)' : 'rgba(255, 255, 255, 0.15)'}; object-fit: cover;">
+                          <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid ${lvl.accentColor}; object-fit: cover; box-shadow: 0 0 10px ${lvl.glowColor};">
                           <div>
                             <div style="font-weight: 700; color: #FFFFFF; display: flex; align-items: center; gap: 0.5rem;">
                               <span>${u.username}</span>
                               ${isMe ? '<span class="badge-tag" style="background: var(--brand-yellow); color: #000; font-size: 0.65rem; padding: 0.15rem 0.45rem; font-weight: 800;">YOU</span>' : ''}
                               ${u.role === 'admin' ? '<span class="badge-tag" style="font-size: 0.65rem; padding: 0.15rem 0.45rem;">Admin</span>' : ''}
                             </div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted);" class="text-mono">Passport: ${u.passportId || 'BB-MAIN'}</div>
+                            <div style="font-size: 0.75rem; color: ${lvl.accentColor};" class="text-mono">Passport: ${u.passportId || 'BB-MAIN'}</div>
                           </div>
                         </div>
                       </td>
                       <td style="padding: 1.25rem 1.5rem;">
-                        <span class="badge-tag" style="font-size: 0.75rem;">Lv.${lvl.level} ${lvl.title}</span>
+                        <span class="badge-tag" style="font-size: 0.75rem; background: ${lvl.glowColor}; color: ${lvl.accentColor}; border: 1px solid ${lvl.borderColor}; font-weight: 700;">Lv.${lvl.level} ${lvl.title}</span>
                       </td>
                       <td style="padding: 1.25rem 1.5rem;">
                         <span style="color: var(--accent-emerald); font-weight: 700; font-size: 0.88rem;">${u.reputation || 75}/100</span>
@@ -5369,10 +5305,10 @@ HOW TO RECOVER YOUR ACCOUNT:
               else if (rank === 3) rankBadgeClass = 'mob-rank-badge-bronze';
 
               return `
-                <div class="mob-rank-item ${isMe ? 'is-current-user' : ''}" style="animation-delay: ${idx * 0.035}s;">
+                <div class="mob-rank-item ${isMe ? 'is-current-user' : ''}" style="animation-delay: ${idx * 0.035}s; border-color: ${isMe ? lvl.borderColor : 'rgba(255,255,255,0.08)'};">
                   <div class="mob-rank-left">
                     <div class="mob-rank-pill ${rankBadgeClass}">#${rank}</div>
-                    <img src="${u.avatar || 'assets/mascot.jpg'}" class="mob-item-avatar" alt="${u.username}">
+                    <img src="${u.avatar || 'assets/mascot.jpg'}" class="mob-item-avatar" alt="${u.username}" style="border: 1.5px solid ${lvl.accentColor};">
                     <div class="mob-item-meta">
                       <div class="mob-item-name">
                         <span class="mob-item-uname">${u.username}</span>
@@ -5380,7 +5316,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                         ${u.role === 'admin' ? '<span class="mob-tag-admin">Admin</span>' : ''}
                       </div>
                       <div class="mob-item-sub">
-                        <span class="mob-item-tier">Lv.${lvl.level}</span>
+                        <span class="mob-item-tier" style="color: ${lvl.accentColor}; font-weight: 700;">Lv.${lvl.level} ${lvl.title}</span>
                         <span class="mob-item-streak">🔥 ${u.streakDays || 1}d</span>
                       </div>
                     </div>
@@ -5491,34 +5427,33 @@ HOW TO RECOVER YOUR ACCOUNT:
     this.renderPage();
   }
 
-  openSocialModal(questId) {
+  // Immediately open social link AND credit allocated coins to citizen's balance
+  async handleSocialLinkAction(questId) {
     if (!db.currentUser) {
+      alert('Please sign in or mint your Booba Passport first to claim mission rewards.');
       window.location.href = 'signin.html#signup';
       return;
     }
     const quest = db.quests.find(q => q.id === questId);
     if (!quest) return;
-    this.selectedQuestForSocial = quest;
 
-    const modal = document.getElementById('socialVerifyModal');
-    const titleEl = document.getElementById('socialModalTitle');
-    const rewardEl = document.getElementById('socialModalReward');
-    const reopenBtn = document.getElementById('reopenTargetUrlBtn');
-
-    if (titleEl) titleEl.textContent = quest.title;
-    if (rewardEl) rewardEl.textContent = `+${quest.rewardBooba} BOOBA`;
-
-    if (reopenBtn) {
-      reopenBtn.onclick = () => {
-        if (quest.targetUrl) window.open(quest.targetUrl, '_blank');
-      };
-    }
-
+    // 1. Immediately open target mission link in new tab if available
     if (quest.targetUrl) {
-      window.open(quest.targetUrl, '_blank');
+      window.open(quest.targetUrl, '_blank', 'noopener,noreferrer');
     }
 
-    if (modal) modal.classList.add('active');
+    // 2. Immediately award allocated coins to user
+    const res = await db.completeSocialQuest(questId);
+    if (res.success) {
+      alert(`🎉 Social Link Action Verified!\n\n+${res.reward} $BOOBA has been instantly credited to your passport balance!`);
+      this.render();
+    } else {
+      alert(res.message || 'Unable to complete quest.');
+    }
+  }
+
+  openSocialModal(questId) {
+    this.handleSocialLinkAction(questId);
   }
 
   async handleConfirmSocial() {
@@ -5527,10 +5462,8 @@ HOW TO RECOVER YOUR ACCOUNT:
     const confirmBtn = document.getElementById('confirmSocialVerifyBtn');
     if (confirmBtn) {
       confirmBtn.disabled = true;
-      confirmBtn.textContent = 'Verifying API status...';
+      confirmBtn.textContent = 'Verifying status...';
     }
-
-    await new Promise(r => setTimeout(r, 1200));
 
     const res = await db.completeSocialQuest(this.selectedQuestForSocial.id);
     this.closeModal();
@@ -5540,7 +5473,8 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
 
     if (res.success) {
-      alert(`Social Mission Verified! +${res.reward} BOOBA credited to your passport balance!`);
+      alert(`🎉 Social Mission Verified! +${res.reward} $BOOBA credited to your passport balance!`);
+      this.render();
     } else {
       alert(res.message || 'Verification failed');
     }
@@ -5566,7 +5500,7 @@ HOW TO RECOVER YOUR ACCOUNT:
     const descEl = document.getElementById('proofDescriptionInput');
 
     if (titleEl) titleEl.textContent = quest.title;
-    if (rewardEl) rewardEl.textContent = `Reward: +${Number(quest.rewardBooba).toLocaleString()} BOOBA on team verification`;
+    if (rewardEl) rewardEl.textContent = `Reward: +${Number(quest.rewardBooba).toLocaleString()} BOOBA (Coins released upon Admin Approval)`;
     if (inputEl) inputEl.value = '';
     if (descEl) descEl.value = '';
 
@@ -5605,7 +5539,8 @@ HOW TO RECOVER YOUR ACCOUNT:
 
     this.closeModal();
     if (res.success) {
-      alert('Proof submitted successfully! The core team will review your content in the Admin Console.');
+      alert(`✅ Proof Submitted Successfully!\n\nYour proof is now queued in the Admin Review Queue. Your +${Number(this.selectedQuestForProof.rewardBooba).toLocaleString()} $BOOBA coins will be credited once approved by the admin.`);
+      this.render();
     } else {
       alert(res.message || 'Submission failed');
     }

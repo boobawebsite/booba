@@ -116,18 +116,148 @@ export async function hashPassword(password) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Level definitions
+// Level definitions with comprehensive color and theme metadata
 export const LEVEL_TIERS = [
-  { level: 1, title: 'Booba Baby', min: 0, max: 499, unlock: 'Basic Booba Passport & Community Access' },
-  { level: 2, title: 'Booba Rookie', min: 500, max: 1499, unlock: 'Custom Passport Badge & Daily Streak Bonus' },
-  { level: 3, title: 'Booba Starter', min: 1500, max: 2999, unlock: 'Special Profile Badge & Discord Role' },
-  { level: 4, title: 'Booba Hustler', min: 3000, max: 4999, unlock: 'Multiplier on Creative Quest Rewards (+10%)' },
-  { level: 5, title: 'Booba Grinder', min: 5000, max: 9999, unlock: 'Exclusive Community Alpha Channel Access' },
-  { level: 6, title: 'Booba Warrior', min: 10000, max: 24999, unlock: 'Early Access to BOOBA Airdrop Allocation' },
-  { level: 7, title: 'Booba Elite', min: 25000, max: 49999, unlock: 'VIP Pass to Virtual AMAs & Special Merch Drops' },
-  { level: 8, title: 'Booba Legend', min: 50000, max: 99999, unlock: 'Exclusive Governance Voting Rights' },
-  { level: 9, title: 'Booba OG', min: 100000, max: 249999, unlock: 'BNB Baby Treasury Allocation Perks' },
-  { level: 10, title: 'Booba Master', min: 250000, max: Infinity, unlock: 'Ambassador Status & Direct Team Advisory' }
+  {
+    level: 1,
+    title: 'Booba Baby',
+    min: 0,
+    max: 499,
+    unlock: 'Basic Booba Passport & Community Access',
+    themeClass: 'card-theme-lv1',
+    accentColor: '#CD7F32',
+    tierBadge: 'Genesis Member',
+    material: 'Bronze Brushed Titanium',
+    glowColor: 'rgba(205, 127, 50, 0.35)',
+    bgGradient: 'linear-gradient(145deg, #1d222e 0%, #0a0d14 100%)',
+    borderColor: 'rgba(205, 127, 50, 0.6)'
+  },
+  {
+    level: 2,
+    title: 'Booba Rookie',
+    min: 500,
+    max: 1499,
+    unlock: 'Custom Passport Badge & Daily Streak Bonus',
+    themeClass: 'card-theme-lv2',
+    accentColor: '#10B981',
+    tierBadge: 'Certified Rookie',
+    material: 'Cyber Emerald Matrix',
+    glowColor: 'rgba(16, 185, 129, 0.35)',
+    bgGradient: 'linear-gradient(145deg, #0a2618 0%, #04120a 100%)',
+    borderColor: 'rgba(16, 185, 129, 0.65)'
+  },
+  {
+    level: 3,
+    title: 'Booba Starter',
+    min: 1500,
+    max: 2999,
+    unlock: 'Special Profile Badge & Discord Role',
+    themeClass: 'card-theme-lv3',
+    accentColor: '#3B82F6',
+    tierBadge: 'Active Starter',
+    material: 'Royal Sapphire Cobalt',
+    glowColor: 'rgba(59, 130, 246, 0.35)',
+    bgGradient: 'linear-gradient(145deg, #091e3e 0%, #030b18 100%)',
+    borderColor: 'rgba(59, 130, 246, 0.7)'
+  },
+  {
+    level: 4,
+    title: 'Booba Hustler',
+    min: 3000,
+    max: 4999,
+    unlock: 'Multiplier on Creative Quest Rewards (+10%)',
+    themeClass: 'card-theme-lv4',
+    accentColor: '#F59E0B',
+    tierBadge: '1.1x Multiplier',
+    material: 'Neon Amber Cyberpunk',
+    glowColor: 'rgba(245, 158, 11, 0.35)',
+    bgGradient: 'linear-gradient(145deg, #2b1700 0%, #120800 100%)',
+    borderColor: 'rgba(245, 158, 11, 0.75)'
+  },
+  {
+    level: 5,
+    title: 'Booba Grinder',
+    min: 5000,
+    max: 9999,
+    unlock: 'Exclusive Community Alpha Channel Access',
+    themeClass: 'card-theme-lv5',
+    accentColor: '#A855F7',
+    tierBadge: 'Alpha Syndicate',
+    material: 'Obsidian Violet Nebula',
+    glowColor: 'rgba(168, 85, 247, 0.35)',
+    bgGradient: 'linear-gradient(145deg, #280942 0%, #10021c 100%)',
+    borderColor: 'rgba(168, 85, 247, 0.75)'
+  },
+  {
+    level: 6,
+    title: 'Booba Warrior',
+    min: 10000,
+    max: 24999,
+    unlock: 'Early Access to BOOBA Airdrop Allocation',
+    themeClass: 'card-theme-lv6',
+    accentColor: '#F43F5E',
+    tierBadge: 'Airdrop Priority',
+    material: 'Crimson Ruby Titanium',
+    glowColor: 'rgba(244, 63, 94, 0.35)',
+    bgGradient: 'linear-gradient(145deg, #3c0a17 0%, #170207 100%)',
+    borderColor: 'rgba(244, 63, 94, 0.8)'
+  },
+  {
+    level: 7,
+    title: 'Booba Elite',
+    min: 25000,
+    max: 49999,
+    unlock: 'VIP Pass to Virtual AMAs & Special Merch Drops',
+    themeClass: 'card-theme-lv7',
+    accentColor: '#E2E8F0',
+    tierBadge: 'VIP AMA Pass',
+    material: 'Frosted Platinum Mirror',
+    glowColor: 'rgba(226, 232, 240, 0.35)',
+    bgGradient: 'linear-gradient(145deg, #2c3645 0%, #101620 100%)',
+    borderColor: 'rgba(226, 232, 240, 0.85)'
+  },
+  {
+    level: 8,
+    title: 'Booba Legend',
+    min: 50000,
+    max: 99999,
+    unlock: 'Exclusive Governance Voting Rights',
+    themeClass: 'card-theme-lv8',
+    accentColor: '#F3BA2F',
+    tierBadge: 'Governance Senator',
+    material: '24K Imperial Gold',
+    glowColor: 'rgba(243, 186, 47, 0.45)',
+    bgGradient: 'linear-gradient(145deg, #3d2c00 0%, #171000 100%)',
+    borderColor: 'rgba(243, 186, 47, 0.9)'
+  },
+  {
+    level: 9,
+    title: 'Booba OG',
+    min: 100000,
+    max: 249999,
+    unlock: 'BNB Baby Treasury Allocation Perks',
+    themeClass: 'card-theme-lv9',
+    accentColor: '#C084FC',
+    tierBadge: 'Treasury Royalty',
+    material: 'Prismatic Liquid Chrome',
+    glowColor: 'rgba(192, 132, 252, 0.45)',
+    bgGradient: 'linear-gradient(145deg, #1b2845 0%, #311042 50%, #0d1b2a 100%)',
+    borderColor: 'rgba(192, 132, 252, 0.9)'
+  },
+  {
+    level: 10,
+    title: 'Booba Master',
+    min: 250000,
+    max: Infinity,
+    unlock: 'Ambassador Status & Direct Team Advisory',
+    themeClass: 'card-theme-lv10',
+    accentColor: '#FFD700',
+    tierBadge: 'Grandmaster Council',
+    material: 'Celestial Quantum Void & Gold',
+    glowColor: 'rgba(255, 215, 0, 0.55)',
+    bgGradient: 'linear-gradient(145deg, #18002e 0%, #050505 50%, #291d00 100%)',
+    borderColor: 'rgba(255, 215, 0, 0.95)'
+  }
 ];
 
 export function calculateLevel(boobaPoints) {
@@ -1267,85 +1397,160 @@ class DatabaseService {
     }
   }
 
+  // Check user completion or submission status for a specific quest
+  getQuestUserStatus(questId) {
+    if (!this.currentUser) return { completed: false, status: 'unclaimed' };
+
+    // Check if user already claimed via social link / instant action
+    const completedList = this.currentUser.completedQuestIds || [];
+    if (completedList.includes(questId)) {
+      return { completed: true, status: 'completed' };
+    }
+
+    // Check proof submissions
+    const sub = (this.submissions || []).find(s => 
+      (s.userId === this.currentUser.id || s.username === this.currentUser.username) && 
+      (s.questId === questId || s.quest_id === questId)
+    );
+
+    if (sub) {
+      if (sub.status === 'approved') return { completed: true, status: 'approved', submission: sub };
+      if (sub.status === 'pending') return { completed: false, status: 'pending_review', submission: sub };
+      if (sub.status === 'rejected') return { completed: false, status: 'rejected', submission: sub };
+    }
+
+    return { completed: false, status: 'unclaimed' };
+  }
+
   async reviewSubmission(submissionId, action, adminNotes = '') {
-    if (!supabase) return { success: false, message: 'Supabase client not connected' };
     const sub = this.submissions.find(s => s.id === submissionId);
     if (!sub) return { success: false, message: 'Submission not found' };
 
     try {
-      const { error: subError } = await supabase
-        .from('booba_submissions')
-        .update({
-          status: action,
-          reviewed_by: this.currentUser?.username || 'Booba Admin',
-          reviewed_at: new Date().toISOString(),
-          admin_notes: adminNotes
-        })
-        .eq('id', submissionId);
+      if (supabase) {
+        const { error: subError } = await supabase
+          .from('booba_submissions')
+          .update({
+            status: action,
+            reviewed_by: this.currentUser?.username || 'Booba Admin',
+            reviewed_at: new Date().toISOString(),
+            admin_notes: adminNotes
+          })
+          .eq('id', submissionId);
 
-      if (subError) throw subError;
+        if (subError) console.warn('Supabase review update error:', subError);
 
-      if (action === 'approved' && sub.userId) {
-        const { data: userData } = await supabase
-          .from('booba_users')
-          .select('booba_points, completed_quests, reputation')
-          .eq('id', sub.userId)
-          .single();
-
-        if (userData) {
-          const updatedPoints = (Number(userData.booba_points) || 0) + sub.rewardBooba;
-          const updatedCount = (Number(userData.completed_quests) || 0) + 1;
-          const updatedRep = Math.min(100, (Number(userData.reputation) || 75) + 2);
-
-          await supabase
+        // When approved, release and credit coins to the submitting citizen
+        if (action === 'approved' && sub.userId) {
+          const { data: userData } = await supabase
             .from('booba_users')
-            .update({
-              booba_points: updatedPoints,
-              completed_quests: updatedCount,
-              reputation: updatedRep
-            })
-            .eq('id', sub.userId);
+            .select('booba_points, completed_quests, reputation')
+            .eq('id', sub.userId)
+            .single();
+
+          if (userData) {
+            const rewardAmt = Number(sub.rewardBooba) || 0;
+            const updatedPoints = (Number(userData.booba_points) || 0) + rewardAmt;
+            const updatedCount = (Number(userData.completed_quests) || 0) + 1;
+            const updatedRep = Math.min(100, (Number(userData.reputation) || 75) + 2);
+
+            await supabase
+              .from('booba_users')
+              .update({
+                booba_points: updatedPoints,
+                completed_quests: updatedCount,
+                reputation: updatedRep
+              })
+              .eq('id', sub.userId);
+          }
         }
       }
 
-      await Promise.all([this.fetchSubmissions(), this.fetchUsers()]);
+      // Update local memory state
+      sub.status = action;
+      sub.reviewedBy = this.currentUser?.username || 'Booba Admin';
+      sub.reviewedAt = new Date().toLocaleDateString();
+      sub.adminNotes = adminNotes;
+
+      // Update target user points & completed quests list in memory
+      const rewardAmt = Number(sub.rewardBooba) || 0;
+      const targetUser = this.users.find(u => u.id === sub.userId || u.username === sub.username);
+      if (targetUser && action === 'approved') {
+        targetUser.boobaPoints = (Number(targetUser.boobaPoints) || 0) + rewardAmt;
+        targetUser.completedQuestsCount = (Number(targetUser.completedQuestsCount) || 0) + 1;
+        targetUser.reputation = Math.min(100, (Number(targetUser.reputation) || 75) + 2);
+        targetUser.completedQuestIds = targetUser.completedQuestIds || [];
+        if (sub.questId && !targetUser.completedQuestIds.includes(sub.questId)) {
+          targetUser.completedQuestIds.push(sub.questId);
+        }
+      }
+
+      // If current logged-in user is the submitter, update active session
+      if (this.currentUser && (this.currentUser.id === sub.userId || this.currentUser.username === sub.username) && action === 'approved') {
+        this.currentUser.boobaPoints = (Number(this.currentUser.boobaPoints) || 0) + rewardAmt;
+        this.currentUser.completedQuestsCount = (Number(this.currentUser.completedQuestsCount) || 0) + 1;
+        this.currentUser.completedQuestIds = this.currentUser.completedQuestIds || [];
+        if (sub.questId && !this.currentUser.completedQuestIds.includes(sub.questId)) {
+          this.currentUser.completedQuestIds.push(sub.questId);
+        }
+        this.saveLocalSession(this.currentUser);
+      }
+
+      if (supabase) {
+        await Promise.all([this.fetchSubmissions(), this.fetchUsers()]);
+      }
       this.notify();
-      return { success: true, status: action };
+      return { success: true, status: action, rewardBooba: rewardAmt };
     } catch (e) {
       return { success: false, message: e.message };
     }
   }
 
   // --------------------------------------------------------------------------
-  // SOCIAL & DAILY INSTANT QUESTS
+  // SOCIAL & DAILY INSTANT QUESTS (Immediate coins on link click)
   // --------------------------------------------------------------------------
 
   async completeSocialQuest(questId) {
-    if (!this.currentUser) return { success: false, message: 'Please sign in first' };
+    if (!this.currentUser) return { success: false, message: 'Please sign in or mint your passport first.' };
     const quest = this.quests.find(q => q.id === questId);
-    if (!quest) return { success: false, message: 'Quest not found' };
+    if (!quest) return { success: false, message: 'Quest not found.' };
 
-    const reward = quest.rewardBooba;
-    const newPoints = (this.currentUser.boobaPoints || 0) + reward;
-    const newCount = (this.currentUser.completedQuestsCount || 0) + 1;
+    this.currentUser.completedQuestIds = this.currentUser.completedQuestIds || [];
+    if (this.currentUser.completedQuestIds.includes(questId)) {
+      return { success: false, message: 'You have already claimed the rewards for this quest!' };
+    }
+
+    const reward = Number(quest.rewardBooba) || 0;
+    const newPoints = (Number(this.currentUser.boobaPoints) || 0) + reward;
+    const newCount = (Number(this.currentUser.completedQuestsCount) || 0) + 1;
+    const newRep = Math.min(100, (Number(this.currentUser.reputation) || 75) + 1);
+
+    this.currentUser.completedQuestIds.push(questId);
+    this.currentUser.boobaPoints = newPoints;
+    this.currentUser.completedQuestsCount = newCount;
+    this.currentUser.reputation = newRep;
 
     try {
       if (supabase && this.currentUser.id) {
         await supabase
           .from('booba_users')
-          .update({ booba_points: newPoints, completed_quests: newCount })
+          .update({ 
+            booba_points: newPoints, 
+            completed_quests: newCount,
+            reputation: newRep 
+          })
           .eq('id', this.currentUser.id);
       }
 
-      this.currentUser.boobaPoints = newPoints;
-      this.currentUser.completedQuestsCount = newCount;
       this.saveLocalSession(this.currentUser);
       await this.fetchUsers();
       this.notify();
 
-      return { success: true, reward, title: quest.title };
+      return { success: true, reward, title: quest.title, newPoints };
     } catch (e) {
-      return { success: false, message: e.message };
+      this.saveLocalSession(this.currentUser);
+      this.notify();
+      return { success: true, reward, title: quest.title, newPoints };
     }
   }
 

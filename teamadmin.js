@@ -509,22 +509,22 @@ class TeamAdminApp {
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                 <div class="form-field">
-                  <label class="form-field-label">Verification *</label>
+                  <label class="form-field-label">Verification Mode *</label>
                   <select id="newQuestType" class="admin-input">
-                    <option value="social">Social Link Action</option>
-                    <option value="proof">Proof Submission</option>
-                    <option value="instant">Instant Claim</option>
+                    <option value="social">⚡ Social Link Action (Instant coins on click)</option>
+                    <option value="proof">🛡️ Proof Submission (Coins on Admin Approval)</option>
+                    <option value="instant">🔥 Streak Matrix (Daily check-in claim)</option>
                   </select>
                 </div>
                 <div class="form-field">
-                  <label class="form-field-label">Target URL</label>
-                  <input type="url" id="newQuestUrl" placeholder="https://x.com/..." class="admin-input">
+                  <label class="form-field-label">Target Action URL *</label>
+                  <input type="url" id="newQuestUrl" placeholder="https://x.com/... or https://t.me/..." class="admin-input">
                 </div>
               </div>
 
               <div class="form-field" style="margin-bottom: 1.35rem;">
-                <label class="form-field-label">Requirements Note</label>
-                <input type="text" id="newQuestReqs" placeholder="e.g. Submit post link" class="admin-input">
+                <label class="form-field-label">Requirements / Instructions Note</label>
+                <input type="text" id="newQuestReqs" placeholder="e.g. Follow @BoobaToken on X / Submit tweet URL" class="admin-input">
               </div>
 
               <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.75rem;">
@@ -1268,7 +1268,7 @@ class TeamAdminApp {
                     <tr>
                       <td>
                         <div style="display: flex; align-items: center; gap: 0.75rem;">
-                          <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--brand-yellow); object-fit: cover; flex-shrink: 0;">
+                          <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid ${level.accentColor}; object-fit: cover; flex-shrink: 0; box-shadow: 0 0 8px ${level.glowColor};">
                           <div>
                             <strong style="color: #FFFFFF; font-size: 0.88rem; display: block;">${u.username}</strong>
                             <span style="font-size: 0.72rem; color: var(--accent-emerald);">Streak: ${u.streakDays || 1}d</span>
@@ -1290,16 +1290,16 @@ class TeamAdminApp {
                           <span style="color: var(--text-muted); font-size: 0.78rem; font-style: italic;">None</span>
                         `}
                       </td>
-                      <td class="text-mono" style="color: var(--brand-yellow); font-weight: 700; font-size: 0.82rem;">
+                      <td class="text-mono" style="color: ${level.accentColor}; font-weight: 700; font-size: 0.82rem;">
                         ${u.passportId || 'N/A'}
                       </td>
                       <td>
-                        <span class="badge-clean badge-clean-yellow" style="text-transform: uppercase;">Lv.${level.level} ${level.title}</span>
+                        <span class="badge-clean" style="background: ${level.glowColor}; color: ${level.accentColor}; border: 1px solid ${level.borderColor}; font-weight: 800; font-size: 0.72rem; text-transform: uppercase;">Lv.${level.level} ${level.title}</span>
                       </td>
                       <td style="color: var(--text-secondary); font-weight: 600; font-size: 0.82rem;">
                         ${u.completedQuestsCount || 0}
                       </td>
-                      <td style="text-align: right; font-weight: 800; color: var(--brand-yellow); font-size: 0.95rem;" class="text-mono">
+                      <td style="text-align: right; font-weight: 800; color: ${level.accentColor}; font-size: 0.95rem;" class="text-mono">
                         ${Number(u.boobaPoints || 0).toLocaleString()}
                       </td>
                     </tr>

@@ -1173,13 +1173,14 @@ HOW TO RECOVER YOUR ACCOUNT:
               Paste
             </button>
           </div>
-          <button type="button" id="saveManualAddWalletBtn" class="btn btn-primary btn-block btn-sm" onclick="window.boobaApp.handleSaveManualWallet()" style="margin-top: 0.85rem; font-weight: 800; font-size: 0.88rem; padding: 0.7rem;">
-            ⚡ Link Wallet to My Account
+          <button type="button" id="saveManualAddWalletBtn" class="btn btn-primary btn-block btn-sm" onclick="window.boobaApp.handleSaveManualWallet()" style="margin-top: 0.85rem; font-weight: 800; font-size: 0.88rem; padding: 0.7rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span>Link Wallet to My Account</span>
           </button>
         </div>
 
         <div style="padding-top: 0.75rem; font-size: 0.76rem; color: var(--text-muted); text-align: center; line-height: 1.45;">
-          💡 <strong>Tip:</strong> Open Trust Wallet, MetaMask, or Binance, copy your <strong>BNB Smart Chain (BEP-20)</strong> deposit address, and paste it above.
+          <strong>Tip:</strong> Open Trust Wallet, MetaMask, or Binance, copy your <strong>BNB Smart Chain (BEP-20)</strong> deposit address, and paste it above.
         </div>
       </div>
     `;
@@ -1484,7 +1485,7 @@ HOW TO RECOVER YOUR ACCOUNT:
       if (db.currentUser) {
         const res = await db.updateWalletAddress(addr);
         if (res.success) {
-          alert(`🎉 BEP-20 Wallet Linked Successfully!\nAddress: ${addr.slice(0, 6)}...${addr.slice(-4)}`);
+          alert(`BEP-20 Wallet Linked Successfully!\nAddress: ${addr.slice(0, 6)}...${addr.slice(-4)}`);
           const modal = document.getElementById('addWalletDynamicModal') || document.getElementById('walletConnectDynamicModal');
           if (modal) modal.remove();
           this.renderHeaderNav();
@@ -1514,7 +1515,7 @@ HOW TO RECOVER YOUR ACCOUNT:
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.textContent = '⚡ Link Wallet to My Account';
+        btn.textContent = 'Link Wallet to My Account';
       }
     }
   }
@@ -1538,7 +1539,7 @@ HOW TO RECOVER YOUR ACCOUNT:
     try {
       const res = await db.updateUsername(username);
       if (res.success) {
-        alert(`🎉 Username updated to "@${res.user.username}"!`);
+        alert(`Username updated to "@${res.user.username}"!`);
         const modal = document.getElementById('addUsernameDynamicModal');
         if (modal) modal.remove();
         this.renderHeaderNav();
@@ -2605,7 +2606,10 @@ HOW TO RECOVER YOUR ACCOUNT:
               </div>
               <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Fixed 1 Billion Supply</h3>
               <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Strictly capped at 1,000,000,000 $BOOBA. Zero minting exploits, zero inflationary dilution, and no secondary tokens created.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ Hard-Capped BEP-20 Mint</div>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Hard-Capped BEP-20 Mint</span>
+              </div>
             </div>
 
             <!-- Pillar 2: 0% Tax Structure -->
@@ -2618,7 +2622,10 @@ HOW TO RECOVER YOUR ACCOUNT:
               </div>
               <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">0% Buy & 0% Sell Tax</h3>
               <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Zero developer taxes on transactions. Trade freely across DEX protocols without unexpected fees or hidden slippage traps.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ 100% Frictionless Trading</div>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>100% Frictionless Trading</span>
+              </div>
             </div>
 
             <!-- Pillar 3: 24-Month Liquidity Lock -->
@@ -2631,7 +2638,10 @@ HOW TO RECOVER YOUR ACCOUNT:
               </div>
               <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">24-Month Liquidity Lock</h3>
               <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">20% of total supply (200,000,000 $BOOBA) dedicated to DEX liquidity is locked for 24 months via verifiable smart contract timelocks.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ Rug-Proof Timelock</div>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Rug-Proof Timelock</span>
+              </div>
             </div>
 
             <!-- Pillar 4: Dynamic Staking Multipliers -->
@@ -2644,7 +2654,10 @@ HOW TO RECOVER YOUR ACCOUNT:
               </div>
               <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Dynamic Staking Boost</h3>
               <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Deposit $BOOBA or LP tokens to activate dynamic 1.5x – 3.5x multiplier boosters on all daily check-in and bounty payouts.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-purple); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ Up to 3.5x Quest Multiplier</div>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-purple); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Up to 3.5x Quest Multiplier</span>
+              </div>
             </div>
 
             <!-- Pillar 5: Non-Custodial Passport Identity -->
@@ -2657,7 +2670,10 @@ HOW TO RECOVER YOUR ACCOUNT:
               </div>
               <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Non-Custodial DID</h3>
               <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Client-side BIP-39 mnemonic seed generation with a unique citizen ID (BB-XXXXXX) for sovereign digital ownership.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ 12-Word Master Cryptography</div>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>12-Word Master Cryptography</span>
+              </div>
             </div>
 
             <!-- Pillar 6: Proof-of-Engagement Bounties -->
@@ -2670,7 +2686,10 @@ HOW TO RECOVER YOUR ACCOUNT:
               </div>
               <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Proof-of-Engagement</h3>
               <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">40% of tokens are earned by active community participants through daily streak check-ins, social raids, and creative bounties.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ Merit-Based Fair Allocation</div>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Merit-Based Fair Allocation</span>
+              </div>
             </div>
 
             <!-- Pillar 7: Arcade & GameFi Ecosystem -->
@@ -2683,7 +2702,10 @@ HOW TO RECOVER YOUR ACCOUNT:
               </div>
               <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Arcade & Gamification</h3>
               <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Use $BOOBA to play the Spin-to-Earn Lucky Wheel, unlock exclusive Lv.1–10 badge titles, and participate in competitive leaderboard seasons.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-orange); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ Spin-to-Earn & Tier Rewards</div>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-orange); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Spin-to-Earn & Tier Rewards</span>
+              </div>
             </div>
 
             <!-- Pillar 8: Decentralized DAO Governance -->
@@ -2696,7 +2718,11 @@ HOW TO RECOVER YOUR ACCOUNT:
               </div>
               <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Decentralized Governance</h3>
               <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Direct voting power over ecosystem treasury allocations, community grants, pool upgrades, and strategic multi-chain expansions.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-purple); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em;">✓ 100% Community Sovereign Rule</div>
+              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-purple); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>100% Community Sovereign Rule</span>
+              </div>
+            </div>
             </div>
 
           </div>
@@ -3915,7 +3941,9 @@ HOW TO RECOVER YOUR ACCOUNT:
                 
                 <div style="display: flex; flex-direction: column; gap: 0.85rem;">
                   <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-                    <span style="width: 20px; height: 20px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; flex-shrink: 0; margin-top: 0.1rem;">✓</span>
+                    <span style="width: 20px; height: 20px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 0.1rem;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
                     <div>
                       <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF;">Phase 1: Proof-of-Engagement Distribution</div>
                       <div style="font-size: 0.76rem; color: var(--text-secondary);">400M $BOOBA pool allocated to early bounties and daily streaks. [ACTIVE]</div>
@@ -4952,7 +4980,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                     ` : userStatus.status === 'pending_review' ? `
                       <button class="btn btn-outline btn-block" disabled style="opacity: 0.95; border-color: rgba(243, 186, 47, 0.5); color: var(--brand-yellow); background: rgba(243, 186, 47, 0.08); font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: default;">
                         <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--brand-yellow);"></span>
-                        <span>Proof Under Admin Review ⏳</span>
+                        <span>Proof Under Admin Review</span>
                       </button>
                     ` : userStatus.status === 'rejected' ? `
                       <button class="btn btn-block" onclick="window.boobaApp.openProofModal('${q.id}')" style="background: var(--accent-ruby); color: #FFFFFF; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
@@ -5312,10 +5340,10 @@ HOW TO RECOVER YOUR ACCOUNT:
                         ${isMe ? '<span class="mob-tag-you">YOU</span>' : ''}
                         ${u.role === 'admin' ? '<span class="mob-tag-admin">Admin</span>' : ''}
                       </div>
-                      <div class="mob-item-sub">
-                        <span class="mob-item-tier" style="color: ${lvl.accentColor}; font-weight: 700;">Lv.${lvl.level} ${lvl.title}</span>
-                        <span class="mob-item-streak">🔥 ${u.streakDays || 1}d</span>
-                      </div>
+                        <span class="mob-item-streak" style="display: inline-flex; align-items: center; gap: 0.2rem;">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                          <span>${u.streakDays || 1}d</span>
+                        </span>
                     </div>
                   </div>
                   <div class="mob-rank-right">
@@ -5442,7 +5470,7 @@ HOW TO RECOVER YOUR ACCOUNT:
     // 2. Immediately award allocated coins to user
     const res = await db.completeSocialQuest(questId);
     if (res.success) {
-      alert(`🎉 Social Link Action Verified!\n\n+${res.reward} $BOOBA has been instantly credited to your passport balance!`);
+      alert(`Social Link Action Verified!\n\n+${res.reward} $BOOBA has been instantly credited to your passport balance!`);
       this.render();
     } else {
       alert(res.message || 'Unable to complete quest.');
@@ -5470,7 +5498,7 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
 
     if (res.success) {
-      alert(`🎉 Social Mission Verified! +${res.reward} $BOOBA credited to your passport balance!`);
+      alert(`Social Mission Verified! +${res.reward} $BOOBA credited to your passport balance!`);
       this.render();
     } else {
       alert(res.message || 'Verification failed');
@@ -5536,7 +5564,7 @@ HOW TO RECOVER YOUR ACCOUNT:
 
     this.closeModal();
     if (res.success) {
-      alert(`✅ Proof Submitted Successfully!\n\nYour proof is now queued in the Admin Review Queue. Your +${Number(this.selectedQuestForProof.rewardBooba).toLocaleString()} $BOOBA coins will be credited once approved by the admin.`);
+      alert(`Proof Submitted Successfully!\n\nYour proof is now queued in the Admin Review Queue. Your +${Number(this.selectedQuestForProof.rewardBooba).toLocaleString()} $BOOBA coins will be credited once approved by the admin.`);
       this.render();
     } else {
       alert(res.message || 'Submission failed');

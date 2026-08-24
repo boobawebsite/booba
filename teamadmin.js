@@ -111,7 +111,7 @@ class TeamAdminApp {
   showToast(message, type = 'success') {
     const container = document.getElementById('adminToastContainer');
     if (!container) {
-      alert((type === 'success' ? '✅ ' : type === 'error' ? '❌ ' : 'ℹ️ ') + message);
+      alert((type === 'success' ? 'Success: ' : type === 'error' ? 'Error: ' : 'Info: ') + message);
       return;
     }
 
@@ -473,11 +473,13 @@ class TeamAdminApp {
         <!-- Mobile-Only Sub-Tab Switcher -->
         <div class="admin-mobile-only" style="margin-bottom: 1.25rem;">
           <div class="segmented-nav" style="width: 100%; display: flex; margin-bottom: 0;">
-            <button type="button" class="segmented-btn ${(!this.questStudioTab || this.questStudioTab === 'list') ? 'active' : ''}" onclick="window.adminApp.switchQuestStudioTab('list')" style="flex: 1; text-align: center; justify-content: center;">
-              📋 Active Bounties (${quests.length})
+            <button type="button" class="segmented-btn ${(!this.questStudioTab || this.questStudioTab === 'list') ? 'active' : ''}" onclick="window.adminApp.switchQuestStudioTab('list')" style="flex: 1; text-align: center; justify-content: center; display: inline-flex; align-items: center; gap: 0.35rem;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+              <span>Active Bounties (${quests.length})</span>
             </button>
-            <button type="button" class="segmented-btn ${this.questStudioTab === 'create' ? 'active' : ''}" onclick="window.adminApp.switchQuestStudioTab('create')" style="flex: 1; text-align: center; justify-content: center;">
-              ➕ Deploy Bounty
+            <button type="button" class="segmented-btn ${this.questStudioTab === 'create' ? 'active' : ''}" onclick="window.adminApp.switchQuestStudioTab('create')" style="flex: 1; text-align: center; justify-content: center; display: inline-flex; align-items: center; gap: 0.35rem;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>Deploy Bounty</span>
             </button>
           </div>
         </div>
@@ -523,9 +525,9 @@ class TeamAdminApp {
                 <div class="form-field">
                   <label class="form-field-label">Verification Mode *</label>
                   <select id="newQuestType" class="admin-input">
-                    <option value="social">⚡ Social Link Action (Instant coins on click)</option>
-                    <option value="proof">🛡️ Proof Submission (Coins on Admin Approval)</option>
-                    <option value="instant">🔥 Streak Matrix (Daily check-in claim)</option>
+                    <option value="social">Social Link Action (Instant coins on click)</option>
+                    <option value="proof">Proof Submission (Coins on Admin Approval)</option>
+                    <option value="instant">Streak Matrix (Daily check-in claim)</option>
                   </select>
                 </div>
                 <div class="form-field">
@@ -620,7 +622,7 @@ class TeamAdminApp {
                       <div class="mobile-card-meta">
                         <span class="badge-clean badge-clean-yellow" style="text-transform: uppercase; font-size: 0.68rem;">${q.category}</span>
                         <span class="badge-clean" style="background: rgba(255,255,255,0.06); color: var(--text-secondary); font-size: 0.68rem;">
-                          ${q.type === 'social' ? '⚡ Social Link' : q.type === 'proof' ? '🛡️ Proof Submission' : '🔥 Streak Matrix'}
+                          ${q.type === 'social' ? 'Social Link' : q.type === 'proof' ? 'Proof Submission' : 'Streak Matrix'}
                         </span>
                       </div>
                     </div>
@@ -642,8 +644,9 @@ class TeamAdminApp {
                       ` : '<span style="color: var(--text-muted); font-size: 0.72rem;">No Link</span>'}
                     </div>
                     <div class="mobile-card-actions">
-                      <button type="button" class="btn-admin btn-admin-danger btn-admin-sm" onclick="window.adminApp.handleDeleteQuest('${q.id}')" style="padding: 0.4rem 0.85rem; font-weight: 700; font-size: 0.75rem;">
-                        Delete 🗑️
+                      <button type="button" class="btn-admin btn-admin-danger btn-admin-sm" onclick="window.adminApp.handleDeleteQuest('${q.id}')" style="padding: 0.4rem 0.85rem; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <span>Delete</span>
                       </button>
                     </div>
                   </div>
@@ -875,8 +878,9 @@ class TeamAdminApp {
                   </div>
                   <div class="mobile-card-actions">
                     ${s.status === 'pending' ? `
-                      <button type="button" class="btn-admin btn-admin-primary btn-admin-sm" onclick="window.adminApp.handleReview('${s.id}', 'approved')" style="padding: 0.4rem 0.8rem; font-weight: 800;">
-                        Approve ✓
+                      <button type="button" class="btn-admin btn-admin-primary btn-admin-sm" onclick="window.adminApp.handleReview('${s.id}', 'approved')" style="padding: 0.4rem 0.8rem; font-weight: 800; display: inline-flex; align-items: center; gap: 0.25rem;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Approve</span>
                       </button>
                       <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.handleReview('${s.id}', 'rejected')" style="color: var(--accent-ruby); padding: 0.4rem 0.6rem;">
                         Reject
@@ -1031,8 +1035,9 @@ class TeamAdminApp {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
                   <label class="form-field-label">Search Username, Wallet, or Email</label>
                   <div style="display: flex; gap: 0.4rem;">
-                    <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.toggleBulkPasteModal()">
-                      📋 Bulk Paste
+                    <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.toggleBulkPasteModal()" style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                      <span>Bulk Paste</span>
                     </button>
                     <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.clearSelectedAirdropUsers()">
                       Clear
@@ -1091,7 +1096,10 @@ class TeamAdminApp {
               </div>
 
               <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.85rem 1rem; font-size: 0.88rem; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; border-radius: 12px;" ${recipients.length === 0 ? 'disabled' : ''}>
-                <span>⚡ Execute Airdrop: Distribute <strong>${totalOutflow.toLocaleString()} $BOOBA</strong></span>
+                <span style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                  <span>Execute Airdrop: Distribute <strong>${totalOutflow.toLocaleString()} $BOOBA</strong></span>
+                </span>
                 <span style="font-size: 0.74rem; font-weight: 600; opacity: 0.85;">(${recipients.length} Target Accounts @ ${amount.toLocaleString()} $BOOBA each)</span>
               </button>
             </form>
@@ -1485,8 +1493,9 @@ class TeamAdminApp {
                       ${hasWallet ? `0x: ${u.walletAddress.slice(0, 6)}...${u.walletAddress.slice(-4)}` : (u.email || 'dApp User')}
                     </div>
                     ${hasWallet ? `
-                      <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" style="padding: 0.25rem 0.6rem; font-size: 0.72rem;" onclick="window.adminApp.copyToClipboard('${u.walletAddress}', 'Wallet address')">
-                        Copy Wallet 📋
+                      <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" style="padding: 0.25rem 0.6rem; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 0.25rem;" onclick="window.adminApp.copyToClipboard('${u.walletAddress}', 'Wallet address')">
+                        <span>Copy Wallet</span>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                       </button>
                     ` : ''}
                   </div>

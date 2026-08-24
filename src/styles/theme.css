@@ -86,7 +86,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   width: 100%;
-  max-width: 100%;
+  max-width: 100vw;
   overflow-x: hidden;
 }
 
@@ -97,7 +97,7 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   width: 100%;
-  max-width: 100%;
+  max-width: 100vw;
   overflow-x: hidden;
   position: relative;
   background-image: 
@@ -105,6 +105,29 @@ body {
     radial-gradient(circle at 100% 50%, rgba(255, 184, 0, 0.03) 0%, transparent 50%),
     radial-gradient(circle at 0% 80%, rgba(243, 186, 47, 0.04) 0%, transparent 50%);
   background-attachment: fixed;
+}
+
+/* Universal Anti-Overflow & Word-Wrap Safeguards */
+p, h1, h2, h3, h4, h5, h6, span, strong, a, label, button, .card, .panel, .badge-tag, .btn, .metric-card {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* Mono text, addresses, hashes, and passport IDs truncate gracefully */
+.text-mono, .wallet-addr, .tx-hash, .address-pill {
+  word-break: break-all;
+  max-width: 100%;
+}
+
+/* Ensure flex children and grid items can shrink and never blow out parent containers */
+.flex, .grid, .card, .dashboard-hero-card, .clean-panel, .form-field, .modal-body, .card-body {
+  min-width: 0;
+}
+
+/* Ensure all media stays within bounds */
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
 }
 
 /* Background Ambient Lighting */

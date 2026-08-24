@@ -4103,6 +4103,24 @@
     font-size: 0.68rem !important;
   }
 
+  /* Universal Mobile Cards & Grid Safety */
+  .grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .card, .panel {
+    padding: 1.25rem 1rem !important;
+    border-radius: 18px !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .form-input, .admin-input, input, select, textarea {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
   /* 9. Compact Quests & Bounties */
   .quests-grid, .achievements-grid {
     grid-template-columns: 1fr !important;

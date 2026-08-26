@@ -356,6 +356,23 @@ a {
     align-items: center !important;
     text-align: left !important;
   }
+
+  /* Daily Check-In Mobile Optimization: Hide description & target chip, reduce Active Expedition to icon */
+  .daily-epoch-desc,
+  .daily-epoch-target-chip {
+    display: none !important;
+  }
+
+  .epoch-status-desktop {
+    display: none !important;
+  }
+
+  .epoch-status-mobile {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+  }
 }
 
 .flex { display: flex; }

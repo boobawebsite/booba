@@ -4013,8 +4013,8 @@
   }
 
   .hero-title {
-    font-size: clamp(0.92rem, 4.4vw, 1.45rem) !important;
-    line-height: 1.2 !important;
+    font-size: clamp(1.65rem, 6.8vw, 2.3rem) !important;
+    line-height: 1.22 !important;
     letter-spacing: -0.025em !important;
     font-weight: 900 !important;
     color: #FFFFFF !important;
@@ -4022,10 +4022,16 @@
     margin: 0 auto 0.75rem auto !important;
     max-width: 100% !important;
     width: 100% !important;
-    white-space: nowrap !important;
+    white-space: normal !important;
     text-align: center !important;
     overflow: visible !important;
     text-overflow: clip !important;
+    display: block !important;
+  }
+
+  .hero-title span {
+    white-space: normal !important;
+    display: inline !important;
   }
 
   .hero-subtitle {
@@ -7315,15 +7321,27 @@
     flex-shrink: 0 !important;
   }
 
-  #homeAboutTokenSection .coinbase-hero-title {
-    font-size: clamp(1.35rem, 5.2vw, 1.75rem) !important;
-    line-height: 1.18 !important;
+  #homeAboutTokenSection .coinbase-hero-title,
+  .coinbase-hero-title {
+    font-size: clamp(1.25rem, 5.2vw, 1.7rem) !important;
+    line-height: 1.25 !important;
     color: #FFFFFF !important;
     font-weight: 900 !important;
     margin-bottom: 0.4rem !important;
     text-shadow: 0 4px 20px rgba(0, 0, 0, 0.95) !important;
     text-align: center !important;
-    word-break: break-word !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    display: block !important;
+  }
+
+  #homeAboutTokenSection .coinbase-hero-title span,
+  .coinbase-hero-title span {
+    white-space: normal !important;
+    display: inline !important;
   }
 
   #homeAboutTokenSection .coinbase-hero-desc {

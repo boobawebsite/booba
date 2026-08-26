@@ -8834,6 +8834,14 @@
     align-items: center !important;
     text-align: left !important;
   }
+
+  /* 7. Remove Ecosystem Expedition Map from Mobile */
+  .crypto-expedition-map-section,
+  #roadmapMapSection,
+  .ecosystem-expedition-map-section,
+  .map-trajectory-container {
+    display: none !important;
+  }
 }
 
 /* ==========================================================================

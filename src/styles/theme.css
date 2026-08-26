@@ -373,6 +373,44 @@ a {
     justify-content: center !important;
     line-height: 1 !important;
   }
+
+  /* Unboxed Clean Mobile HUD Telemetry (Enclosing Pill Removed) */
+  .map-hud-bar {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 auto 1.5rem auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.35rem !important;
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .map-hud-bar .map-hud-item {
+    font-size: 0.74rem !important;
+    justify-content: center !important;
+    gap: 0.35rem !important;
+    white-space: nowrap !important;
+  }
+
+  .map-hud-bar .map-hud-item:first-child {
+    font-size: 0.7rem !important;
+    font-weight: 800 !important;
+    color: var(--accent-emerald) !important;
+    letter-spacing: 0.08em !important;
+    background: rgba(16, 185, 129, 0.12) !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    padding: 0.2rem 0.65rem !important;
+    border-radius: 9999px !important;
+    margin-bottom: 0.15rem !important;
+  }
 }
 
 .flex { display: flex; }

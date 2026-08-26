@@ -8874,12 +8874,17 @@
     text-align: left !important;
   }
 
-  /* 7. Remove Ecosystem Expedition Map from Mobile */
+  /* 7. Remove Ecosystem Expedition Map from About Page on Mobile */
   .crypto-expedition-map-section,
   #roadmapMapSection,
-  .ecosystem-expedition-map-section,
-  .map-trajectory-container {
+  .ecosystem-expedition-map-section {
     display: none !important;
+  }
+
+  /* Explicitly Keep Daily Check-In 100-Day Expedition Route Active on Mobile */
+  .daily-expedition-map-container,
+  .daily-expedition-map-container .map-trajectory-container {
+    display: block !important;
   }
 
   /* 8. About Page Hero Title on Mobile — Auto-scales on Single Line */

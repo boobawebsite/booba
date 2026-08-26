@@ -2919,8 +2919,8 @@ HOW TO RECOVER YOUR ACCOUNT:
         <div class="container text-center" style="position: relative; z-index: 2;">
           
           <!-- ABOUT PAGE MAIN HEADING -->
-          <div class="about-hero-header" style="text-align: center; max-width: 860px; margin: 0 auto 2.5rem auto; position: relative; z-index: 10;">
-            <h1 class="page-title hero-title" style="font-size: clamp(1.8rem, 4.5vw, 3.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.03em; line-height: 1.12; font-family: var(--font-heading); margin-bottom: 0; white-space: nowrap;">
+          <div class="about-hero-header">
+            <h1 class="page-title hero-title about-hero-title">
               About <span class="text-gradient-gold">Our Token</span>
             </h1>
           </div>

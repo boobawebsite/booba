@@ -3772,7 +3772,7 @@
   }
 
   .section-title {
-    font-size: clamp(1.05rem, 4.6vw, 1.45rem) !important;
+    font-size: clamp(0.86rem, 3.8vw, 1.25rem) !important;
     line-height: 1.25 !important;
     margin-bottom: 0.35rem !important;
     letter-spacing: -0.02em !important;
@@ -3780,8 +3780,8 @@
     white-space: nowrap !important;
     max-width: 100% !important;
     width: 100% !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
   }
 
   .section-subtitle {
@@ -4013,7 +4013,7 @@
   }
 
   .hero-title {
-    font-size: clamp(1.2rem, 5.2vw, 1.85rem) !important;
+    font-size: clamp(0.92rem, 4.4vw, 1.45rem) !important;
     line-height: 1.2 !important;
     letter-spacing: -0.025em !important;
     font-weight: 900 !important;
@@ -4024,8 +4024,8 @@
     width: 100% !important;
     white-space: nowrap !important;
     text-align: center !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
   }
 
   .hero-subtitle {
@@ -8118,7 +8118,7 @@
   }
 
   .sparo-unboxed-title {
-    font-size: clamp(1.2rem, 5.2vw, 1.85rem) !important;
+    font-size: clamp(0.92rem, 4.4vw, 1.45rem) !important;
     line-height: 1.2 !important;
     margin-bottom: 0.65rem !important;
     text-shadow: 0 4px 20px rgba(0, 0, 0, 0.95) !important;
@@ -8126,8 +8126,8 @@
     white-space: nowrap !important;
     max-width: 100% !important;
     width: 100% !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
   }
 
   .sparo-unboxed-desc {

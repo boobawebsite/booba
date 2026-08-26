@@ -6719,7 +6719,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                     <svg width="42" height="42" viewBox="0 0 24 24" fill="#000000"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                   </div>
                   <div>
-                    <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
+                    <div class="nft-spotlight-badges" style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
                       <span class="badge-tag" style="background: #FFD700; color: #000; font-weight: 900; font-size: 0.72rem; padding: 0.2rem 0.65rem;">
                         DAY 100 APEX SUMMIT REWARD
                       </span>

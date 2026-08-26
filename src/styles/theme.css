@@ -411,6 +411,12 @@ a {
     border-radius: 9999px !important;
     margin-bottom: 0.15rem !important;
   }
+
+  /* Day 100 Summit Badge Pills Hidden on Mobile */
+  .nft-spotlight-badges,
+  .nft-grand-spotlight .nft-spotlight-badges {
+    display: none !important;
+  }
 }
 
 .flex { display: flex; }

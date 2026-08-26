@@ -6629,8 +6629,19 @@ HOW TO RECOVER YOUR ACCOUNT:
                               <div style="font-size: 0.75rem; font-weight: 800; font-family: var(--font-mono); color: ${isEpochCompleted ? 'var(--accent-emerald)' : isEpochActive ? 'var(--brand-yellow)' : 'var(--text-muted)'}; text-transform: uppercase; letter-spacing: 0.06em;">
                                 EPOCH ${ep.num} • DAYS ${ep.startDay}–${ep.endDay}
                               </div>
-                              <span class="badge-tag" style="font-size: 0.7rem; padding: 0.2rem 0.65rem; background: ${isEpochCompleted ? 'rgba(16, 185, 129, 0.15)' : isEpochActive ? 'rgba(243, 186, 47, 0.15)' : 'rgba(255, 255, 255, 0.05)'}; color: ${isEpochCompleted ? 'var(--accent-emerald)' : isEpochActive ? 'var(--brand-yellow)' : 'var(--text-muted)'}; border-color: ${isEpochCompleted ? 'rgba(16, 185, 129, 0.3)' : isEpochActive ? 'rgba(243, 186, 47, 0.4)' : 'rgba(255, 255, 255, 0.1)'};">
-                                ${isEpochCompleted ? '✓ Conquered' : isEpochActive ? '● Active Expedition' : '🔒 Locked'}
+                              <span class="badge-tag epoch-status-badge" style="font-size: 0.7rem; padding: 0.2rem 0.65rem; background: ${isEpochCompleted ? 'rgba(16, 185, 129, 0.15)' : isEpochActive ? 'rgba(243, 186, 47, 0.15)' : 'rgba(255, 255, 255, 0.05)'}; color: ${isEpochCompleted ? 'var(--accent-emerald)' : isEpochActive ? 'var(--brand-yellow)' : 'var(--text-muted)'}; border-color: ${isEpochCompleted ? 'rgba(16, 185, 129, 0.3)' : isEpochActive ? 'rgba(243, 186, 47, 0.4)' : 'rgba(255, 255, 255, 0.1)'};">
+                                ${isEpochCompleted ? `
+                                  <span class="epoch-status-desktop">✓ Conquered</span>
+                                  <span class="epoch-status-mobile">✓</span>
+                                ` : isEpochActive ? `
+                                  <span class="epoch-status-desktop">● Active Expedition</span>
+                                  <span class="epoch-status-mobile" style="display: none; align-items: center; justify-content: center;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                  </span>
+                                ` : `
+                                  <span class="epoch-status-desktop">🔒 Locked</span>
+                                  <span class="epoch-status-mobile">🔒</span>
+                                `}
                               </span>
                             </div>
 
@@ -6638,12 +6649,12 @@ HOW TO RECOVER YOUR ACCOUNT:
                               ${ep.title}
                             </h3>
 
-                            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55; margin: 0 0 1.25rem 0;">
+                            <p class="daily-epoch-desc" style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55; margin: 0 0 1.25rem 0;">
                               ${ep.desc}
                             </p>
 
                             <!-- Target Perk Chip -->
-                            <div style="background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 0.65rem 0.95rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                            <div class="daily-epoch-target-chip" style="background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 0.65rem 0.95rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
                               <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-family: var(--font-mono);">Milestone Target:</span>
                               <span style="font-size: 0.86rem; font-weight: 800; color: ${ep.index === 9 ? '#FFD700' : 'var(--brand-yellow)'}; font-family: var(--font-mono);">${ep.perk}</span>
                             </div>

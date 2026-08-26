@@ -8919,11 +8919,44 @@
   #homeAboutTokenSection .coinbase-text-block {
     margin-bottom: 0.75rem !important;
   }
+
+  /* 10. Daily Check-in Mobile Optimization: Hide description and target chip, reduce Active Expedition to icon */
+  .daily-epoch-desc,
+  .daily-epoch-target-chip {
+    display: none !important;
+  }
+
+  .epoch-status-desktop {
+    display: none !important;
+  }
+
+  .epoch-status-mobile {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+  }
 }
 
 /* ==========================================================================
    PASSPORT 10-TIER LIVING MASCOT SHOWCASE & ANIMATIONS
    ========================================================================== */
+.epoch-status-desktop {
+  display: inline;
+}
+
+.epoch-status-mobile {
+  display: none !important;
+}
+
+.daily-epoch-desc {
+  display: block;
+}
+
+.daily-epoch-target-chip {
+  display: flex;
+}
+
 .passport-mascots-showcase {
   margin-top: 5rem;
   padding-top: 3rem;

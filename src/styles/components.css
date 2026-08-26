@@ -8885,6 +8885,17 @@
     margin: 0 auto !important;
     display: block !important;
   }
+
+  /* 9. Homepage About Token Section — Hide Paragraph Descriptions on Mobile (Desktop Untouched) */
+  .coinbase-about-token-section .coinbase-hero-desc,
+  #homeAboutTokenSection .coinbase-hero-desc {
+    display: none !important;
+  }
+
+  .coinbase-about-token-section .coinbase-text-block,
+  #homeAboutTokenSection .coinbase-text-block {
+    margin-bottom: 0.75rem !important;
+  }
 }
 
 /* ==========================================================================

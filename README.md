@@ -4,7 +4,12 @@
 [![BNB Chain](https://img.shields.io/badge/Network-BNB%20Chain-F3BA2F?logo=binance)](https://bscscan.com)
 [![Status: Production](https://img.shields.io/badge/Status-Production%20Ready-emerald)](https://booba.crypto)
 
-**BOOBA** (nickname: **BNB baby**, symbol: **BOOBA**) is a next-generation gamified crypto community & rewards platform built to Google design standards.
+**BOOBA** (nickname: **BNB baby**, symbol: **BOOBA**) is a next-generation gamified crypto community & rewards platform built to Google design standards on BNB Smart Chain.
+
+- **Official BEP-20 Contract**: `0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B`
+- **BscScan Explorer**: [https://bscscan.com/token/0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B](https://bscscan.com/token/0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B)
+- **Total Supply**: 1,000,000,000 $BOOBA (Fixed)
+- **Buy / Sell Tax**: 0% / 0% (Zero Tax)
 
 ---
 

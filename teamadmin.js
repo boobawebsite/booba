@@ -232,8 +232,9 @@ class TeamAdminApp {
             <input type="password" id="adminPasswordInput" placeholder="••••••••" class="admin-input" required autocomplete="current-password">
           </div>
           
-          <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.8rem; font-size: 0.9rem;">
-            Sign In to Console ↗
+          <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.8rem; font-size: 0.9rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;">
+            <span>Sign In to Console</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
           </button>
         </form>
 
@@ -243,7 +244,8 @@ class TeamAdminApp {
 
         <div style="margin-top: 1.25rem;">
           <a href="index.html" style="font-size: 0.82rem; color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
-            ← Back to Main Website
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span>Back to Main Website</span>
           </a>
         </div>
       </div>
@@ -541,8 +543,9 @@ class TeamAdminApp {
                 <input type="text" id="newQuestReqs" placeholder="e.g. Follow @BoobaToken on X / Submit tweet URL" class="admin-input">
               </div>
 
-              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.75rem; font-weight: 800;">
-                Publish Bounty Live ↗
+              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                <span>Publish Bounty Live</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
               </button>
             </form>
           </div>
@@ -589,8 +592,9 @@ class TeamAdminApp {
                       </td>
                       <td>
                         ${q.targetUrl ? `
-                          <a href="${q.targetUrl}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" style="font-size: 0.72rem; padding: 0.2rem 0.5rem;">
-                            Test ↗
+                          <a href="${q.targetUrl}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" style="font-size: 0.72rem; padding: 0.2rem 0.5rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                            <span>Test</span>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                           </a>
                         ` : '<span style="color: var(--text-muted); font-size: 0.75rem;">—</span>'}
                       </td>
@@ -610,8 +614,9 @@ class TeamAdminApp {
               ${quests.length === 0 ? `
                 <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.88rem;">
                   No active bounties found in database.<br>
-                  <button type="button" class="btn-admin btn-admin-primary btn-admin-sm" style="margin-top: 1rem;" onclick="window.adminApp.switchQuestStudioTab('create')">
-                    Deploy First Bounty ↗
+                  <button type="button" class="btn-admin btn-admin-primary btn-admin-sm" style="margin-top: 1rem; display: inline-flex; align-items: center; gap: 0.35rem;" onclick="window.adminApp.switchQuestStudioTab('create')">
+                    <span>Deploy First Bounty</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                   </button>
                 </div>
               ` : quests.map(q => `
@@ -638,8 +643,9 @@ class TeamAdminApp {
                   <div class="mobile-card-footer">
                     <div>
                       ${q.targetUrl ? `
-                        <a href="${q.targetUrl}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" style="font-size: 0.72rem; padding: 0.35rem 0.65rem;">
-                          Test Link ↗
+                        <a href="${q.targetUrl}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" style="font-size: 0.72rem; padding: 0.35rem 0.65rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+                          <span>Test Link</span>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                         </a>
                       ` : '<span style="color: var(--text-muted); font-size: 0.72rem;">No Link</span>'}
                     </div>
@@ -803,8 +809,9 @@ class TeamAdminApp {
                     </td>
                     <td>
                       ${s.proofUrl ? `
-                        <a href="${s.proofUrl}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" style="font-size: 0.74rem;">
-                          Open Link ↗
+                        <a href="${s.proofUrl}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" style="font-size: 0.74rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+                          <span>Open Link</span>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                         </a>
                       ` : '<span style="color: var(--text-muted); font-size: 0.75rem;">No link</span>'}
                     </td>
@@ -871,8 +878,9 @@ class TeamAdminApp {
                 <div class="mobile-card-footer">
                   <div>
                     ${s.proofUrl ? `
-                      <a href="${s.proofUrl}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" style="font-size: 0.74rem;">
-                        View Proof ↗
+                      <a href="${s.proofUrl}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" style="font-size: 0.74rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+                        <span>View Proof</span>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                       </a>
                     ` : '<span style="color: var(--text-muted); font-size: 0.72rem;">No link</span>'}
                   </div>

@@ -266,7 +266,7 @@ class BoobaApp {
 
       authButtonsDesktop = `
         <div class="user-profile-pill" style="display: flex; align-items: center; gap: 0.65rem; background: var(--bg-surface-elevated); padding: 0.35rem 0.85rem; border-radius: var(--radius-full); border: 1.5px solid ${levelInfo.borderColor}; box-shadow: 0 0 15px ${levelInfo.glowColor};">
-          <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid ${levelInfo.accentColor}; object-fit: cover;">
+          <img src="${levelInfo.mascotImage || 'assets/mascot_level1.png'}" style="width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid ${levelInfo.accentColor}; object-fit: cover; background: rgba(0,0,0,0.5);">
           <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">
             ${user.username}
           </div>
@@ -283,7 +283,7 @@ class BoobaApp {
         <div style="padding: 0.85rem; background: var(--bg-surface-elevated); border-radius: 16px; margin-bottom: 0.75rem; border: 1.5px solid ${levelInfo.borderColor}; box-shadow: 0 0 15px ${levelInfo.glowColor};">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
             <div style="display: flex; align-items: center; gap: 0.65rem;">
-              <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid ${levelInfo.accentColor}; object-fit: cover;">
+              <img src="${levelInfo.mascotImage || 'assets/mascot_level1.png'}" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid ${levelInfo.accentColor}; object-fit: cover; background: rgba(0,0,0,0.5);">
               <div>
                 <div style="font-weight: 800; color: var(--text-primary); font-size: 0.92rem;">${user.username}</div>
                 <div style="font-size: 0.75rem; color: ${levelInfo.accentColor}; font-weight: 700;">${Number(user.boobaPoints).toLocaleString()} BOOBA • Lv.${levelInfo.level} ${levelInfo.title}</div>
@@ -2127,7 +2127,7 @@ HOW TO RECOVER YOUR ACCOUNT:
           </div>
           <div class="ticker-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"></path></svg>
-            <strong>0% Buy & 0% Sell Tax</strong> Fair Web3 Economics
+            <strong>3% Buy & 3% Sell Tax</strong> Protocol Growth & Liquidity
           </div>
           <!-- Duplicate set for infinite loop -->
           <div class="ticker-item">
@@ -2158,13 +2158,14 @@ HOW TO RECOVER YOUR ACCOUNT:
             </h1>
             
             <p class="hero-subtitle">
-              Mint your digital non-custodial Booba Passport, conquer live bounties, stake in the multiplier vault, and claim your share of the 1,000,000,000 $BOOBA treasury.
+              Mint your digital Booba Passport, conquer live bounties, level up your citizen rank, and claim your share of the 1,000,000,000 $BOOBA treasury.
             </p>
 
             <div class="hero-actions">
               ${user ? `
-                <a href="dashboard.html" class="btn btn-primary btn-lg">
-                  Launch Dashboard ↗
+                <a href="dashboard.html" class="btn btn-primary btn-lg" style="display: inline-flex; align-items: center; gap: 0.45rem;">
+                  <span>Launch Dashboard</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                 </a>
                 <a href="about.html" class="btn btn-secondary btn-lg">
                   About & Tokenomics
@@ -2199,209 +2200,610 @@ HOW TO RECOVER YOUR ACCOUNT:
             <div class="mascot-hologram-wrapper">
               <img src="assets/mascot.jpg" alt="Booba Mascot" class="hero-mascot-img">
               <div class="mascot-glow-ring"></div>
-              <div class="mascot-floating-pill">
-                <span class="pulse-dot"></span>
-                <span>BOOBA • BNB baby Mascot</span>
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- 3. ABOUT THE TOKEN (HOMEPAGE SHOWCASE) -->
-      <section class="section-container" style="background: var(--bg-surface); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); padding: 6rem 0;">
-        <div class="container">
-          <div class="section-header text-center" style="margin-bottom: 4rem;">
-            <h2 class="section-title" style="font-size: clamp(2rem, 3.8vw, 3rem); color: #FFFFFF;">About The Token</h2>
-            <p class="section-subtitle" style="font-size: 1.1rem; color: var(--text-secondary); max-width: 650px; margin: 0.75rem auto 0 auto;">
-              Discover the core token mechanics, real utilities, zero-tax economics, and fair distribution powering the $BOOBA coin on BNB Smart Chain.
-            </p>
-          </div>
-
-          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.75rem;">
+      
+            <!-- 3. ABOUT THE TOKEN (HOMEPAGE SHOWCASE - COINBASE FLAGSHIP STYLE) -->
+      <section class="section-container coinbase-about-token-section" id="homeAboutTokenSection">
+        <div class="coinbase-showcase-stage">
+          <div class="container">
             
-            <!-- COIN BOX 1: BEP-20 Foundation & 0% Tax (Golden Moving Edge Light) -->
-            <div class="chain-glow-card card-speed-1">
-              <div class="chain-glow-inner">
-                <div>
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-                    <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(243, 186, 47, 0.15); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow); border: 1px solid rgba(243, 186, 47, 0.3);">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M15 9.5a3.5 3.5 0 0 0-5 0c0 2 5 2 5 4.5a3.5 3.5 0 0 1-5 0"></path></svg>
-                    </div>
-                    <span class="badge-tag" style="font-size: 0.72rem; padding: 0.25rem 0.6rem; background: rgba(243, 186, 47, 0.12); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.3);">1B FIXED SUPPLY</span>
+            <div class="section-header showcase-section-header">
+              <h2 class="section-title showcase-main-heading">About The <span class="text-gradient-gold">$BOOBA</span> Token</h2>
+            </div>
+
+            <div class="coinbase-showcase-container">
+              
+              <!-- PILLAR 1: Built on BNB Smart Chain -->
+              <div class="coinbase-showcase-row active">
+                <div class="coinbase-content-col">
+                  <div class="coinbase-text-block">
+                    <h2 class="coinbase-hero-title">
+                      Engineered on BNB Smart Chain
+                    </h2>
+                    <p class="coinbase-hero-desc">
+                      Natively deployed on the high-throughput, low-latency BNB Smart Chain (BSC) with full EVM compatibility, sub-second block settlement times, negligible network gas fees, and institutional-grade Proof-of-Authority security.
+                    </p>
                   </div>
 
-                  <h3 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.65rem; letter-spacing: -0.01em;">BNB Chain & Zero Tax</h3>
-                  <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.35rem;">
-                    The $BOOBA coin is natively minted on BNB Smart Chain (BEP-20) with a fixed supply of 1,000,000,000 tokens and 0% Buy / 0% Sell taxes for frictionless decentralized trading.
-                  </p>
-
-                  <div style="display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1.5rem;">
-                    <span style="font-size: 0.74rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-secondary);">1,000,000,000 Supply</span>
-                    <span style="font-size: 0.74rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--accent-emerald);">0% Buy / Sell Tax</span>
-                    <span style="font-size: 0.74rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-secondary);">BEP-20 Standard</span>
+                  <div class="coinbase-actions-group">
+                    <a href="about.html" class="coinbase-action-btn">
+                      <span>Learn more</span>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                    <a href="https://bscscan.com/token/0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B" target="_blank" rel="noopener" class="btn btn-secondary" style="border-radius: 9999px; padding: 0.95rem 1.6rem; font-weight: 700; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 0.4rem; border: 1.5px solid rgba(255, 255, 255, 0.2);">
+                      <span>View on BscScan</span>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                    </a>
                   </div>
                 </div>
+                <div class="coinbase-canvas-col">
+                <div class="booba-showcase-canvas">
+                  <div class="booba-canvas-glow"></div>
 
-                <a href="about.html#tokenomics" class="btn btn-secondary btn-block btn-sm" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;">
-                  <span>View Token Specs</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
+                  <!-- Video Scene 1: Blockchain Engine & Sub-Second Settlement -->
+                  <div class="video-scene-stage">
+                    <div class="story-video-theater">
+                      
+                      <!-- Brand Anchor Header -->
+                      <div class="story-brand-header">
+                        <div class="story-brand-icon">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                          </svg>
+                        </div>
+                        <div>
+                          <div class="story-brand-title text-gradient-gold">BNB SMART CHAIN (BSC)</div>
+                          <div class="story-brand-subtitle">High-Throughput EVM Layer 1 • Chain ID 56</div>
+                        </div>
+                      </div>
+
+                      <!-- 3-Act Cinematic Viewport -->
+                      <div class="story-timeline-stage">
+                        
+                        <!-- Act 1: Action Command Input -->
+                        <div class="story-act-layer act-1">
+                          <div class="story-search-bar">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand-yellow)" stroke-width="2.5"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                            <span class="search-input-mock">
+                              <span>Deploy $BOOBA Smart Contract...</span>
+                              <span class="typing-cursor"></span>
+                            </span>
+                            <span class="search-btn-badge">BEP-20</span>
+                          </div>
+                        </div>
+
+                        <!-- Act 2: Mining Highway & Validator Consensus -->
+                        <div class="story-act-layer act-2">
+                          <div class="story-scanner-card">
+                            <div class="scanner-top-row">
+                              <span style="color: var(--brand-yellow); display: flex; align-items: center; gap: 0.4rem;">
+                                <span class="pulse-dot-green"></span>
+                                <span>Block #42,891,850 Mined</span>
+                              </span>
+                              <span style="color: #10B981;">0.8s Validation</span>
+                            </div>
+                            <div class="scan-radar-line">
+                              <div class="scan-radar-beam"></div>
+                            </div>
+                            <div style="font-size: 0.65rem; color: var(--text-muted); font-family: var(--font-mono); display: flex; justify-content: space-between;">
+                              <span>PoSA Validators: 21/21 Signed</span>
+                              <span style="color: var(--brand-yellow);">Gas: $0.003</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Act 3: Settlement Confirmation Result Card -->
+                        <div class="story-act-layer act-3">
+                          <div class="story-result-card">
+                            <div class="result-talent-row">
+                              <img src="assets/coin.jpg" class="result-talent-avatar" style="border-color: var(--brand-yellow); box-shadow: 0 0 15px rgba(243,186,47,0.4);" alt="Coin">
+                              <div>
+                                <div class="result-talent-name">Sub-Second Settlement Confirmed</div>
+                                <div class="result-talent-badge" style="color: #10B981;">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                  <span>2,500+ TPS • &lt; $0.005 Avg Gas Fee</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="result-footer-row">
+                              <span style="color: var(--text-secondary);">Contract: 0x005f...B21B</span>
+                              <span class="result-hire-pill" style="background: rgba(243,186,47,0.15); border-color: rgba(243,186,47,0.4); color: var(--brand-yellow); display: inline-flex; align-items: center; gap: 0.35rem;">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                <span>Mainnet Live</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <!-- Video Player Footer & Scrubber -->
+                  <div class="video-player-footer">
+                    <div class="video-scrubber-track">
+                      <div class="video-scrubber-fill"></div>
+                    </div>
+                    <div class="video-scrubber-meta">
+                      <span><span class="meta-highlight">PoSA Consensus</span> • 3.0s Block Finality</span>
+                      <span>00:08 / 00:08</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- COIN BOX 2: 40% Community Distribution (Golden Moving Edge Light) -->
-            <div class="chain-glow-card card-speed-2">
-              <div class="chain-glow-inner">
-                <div>
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-                    <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3);">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+            <!-- PILLAR 2: 100% Powered by the Community -->
+            <div class="coinbase-showcase-row reverse">
+              <div class="coinbase-content-col">
+                <div class="coinbase-text-block">
+                  <h2 class="coinbase-hero-title">
+                    100% Powered by the Community
+                  </h2>
+                  <p class="coinbase-hero-desc">
+                    At its core, $BOOBA is driven entirely by its vibrant worldwide community. Through decentralized engagement rewards, daily quest bounties, viral creator incentives, and open governance, every milestone is shaped by active holders.
+                  </p>
+                </div>
+                <div class="coinbase-actions-group">
+                  <a href="quests.html" class="coinbase-action-btn">
+                    <span>Join Community</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  </a>
+                </div>
+              </div>
+              <div class="coinbase-canvas-col">
+                <div class="booba-showcase-canvas community-theme">
+                  <div class="booba-canvas-glow glow-emerald"></div>
+
+                  <!-- Video Scene 2: Community Bounty & Reward Drop -->
+                  <div class="video-scene-stage">
+                    <div class="story-video-theater">
+                      
+                      <!-- Brand Anchor Header -->
+                      <div class="story-brand-header" style="border-color: rgba(16,185,129,0.3);">
+                        <div class="story-brand-icon icon-emerald">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                          </svg>
+                        </div>
+                        <div>
+                          <div class="story-brand-title" style="color: var(--accent-emerald);">100% COMMUNITY ECOSYSTEM</div>
+                          <div class="story-brand-subtitle">Fair Launch • Proof-of-Engagement Rewards</div>
+                        </div>
+                      </div>
+
+                      <!-- 3-Act Cinematic Viewport -->
+                      <div class="story-timeline-stage">
+                        
+                        <!-- Act 1: Quest Dispatch Prompt -->
+                        <div class="story-act-layer act-1">
+                          <div class="story-search-bar theme-emerald">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+                            <span class="search-input-mock">
+                              <span>Bounty: Create Viral Meme Quest...</span>
+                              <span class="typing-cursor cursor-emerald"></span>
+                            </span>
+                            <span class="search-btn-badge" style="background: var(--accent-emerald); color: #07090E;">+500 BOOBA</span>
+                          </div>
+                        </div>
+
+                        <!-- Act 2: Proof Verification & Consensus -->
+                        <div class="story-act-layer act-2">
+                          <div class="story-scanner-card" style="border-color: rgba(16,185,129,0.3);">
+                            <div class="scanner-top-row">
+                              <span style="color: var(--accent-emerald); display: flex; align-items: center; gap: 0.4rem;">
+                                <span class="pulse-dot-emerald"></span>
+                                <span>@CryptoKing Submitted Proof</span>
+                              </span>
+                              <span style="color: var(--brand-yellow);">DAO Voting</span>
+                            </div>
+                            <div class="scan-radar-line">
+                              <div class="scan-radar-beam beam-emerald"></div>
+                            </div>
+                            <div style="font-size: 0.65rem; color: var(--text-muted); font-family: var(--font-mono); display: flex; justify-content: space-between; align-items: center;">
+                              <span>Community Votes: 100% Approval</span>
+                              <span style="color: #10B981; display: inline-flex; align-items: center; gap: 0.25rem;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>Proof Verified</span></span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Act 3: Instant Airdrop Reward Result Card -->
+                        <div class="story-act-layer act-3">
+                          <div class="story-result-card result-emerald">
+                            <div class="result-talent-row">
+                              <img src="assets/mascot.jpg" class="result-talent-avatar" style="border-color: var(--accent-emerald); box-shadow: 0 0 15px rgba(16,185,129,0.4);" alt="Mascot">
+                              <div>
+                                <div class="result-talent-name">+500 $BOOBA Reward Sent!</div>
+                                <div class="result-talent-badge" style="color: var(--accent-emerald);">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                  <span>400,000,000 $BOOBA Vault Pool</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="result-footer-row">
+                              <span style="color: var(--text-secondary);">Streak Boost: 7 Days Active</span>
+                              <span class="result-hire-pill" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                <span>Instant On-Chain</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+
                     </div>
-                    <span class="badge-tag" style="font-size: 0.72rem; padding: 0.25rem 0.6rem; background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">400M $BOOBA POOL</span>
                   </div>
 
-                  <h3 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.65rem; letter-spacing: -0.01em;">Fair Community Earning</h3>
-                  <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.35rem;">
-                    40% (400 Million $BOOBA) is distributed directly to active community members. Earn $BOOBA through daily check-in streaks, social raids, creative bounties, and genuine referrals.
-                  </p>
-
-                  <div style="display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1.5rem;">
-                    <span style="font-size: 0.74rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-secondary);">40% Community Pool</span>
-                    <span style="font-size: 0.74rem; background: rgba(243, 186, 47, 0.08); border: 1px solid rgba(243, 186, 47, 0.3); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--brand-yellow);">Daily Streaks</span>
-                    <span style="font-size: 0.74rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-secondary);">Anti-Bot Fair Play</span>
+                  <!-- Video Player Footer & Scrubber -->
+                  <div class="video-player-footer">
+                    <div class="video-scrubber-track">
+                      <div class="video-scrubber-fill fill-emerald"></div>
+                    </div>
+                    <div class="video-scrubber-meta">
+                      <span><span class="meta-highlight">100% Community-Led</span> • Proof-of-Engagement</span>
+                      <span>00:08 / 00:08</span>
+                    </div>
                   </div>
                 </div>
-
-                <a href="quests.html" class="btn btn-secondary btn-block btn-sm" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;">
-                  <span>Earn $BOOBA Today</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
               </div>
             </div>
 
-            <!-- COIN BOX 3: Staking Multipliers & Vault Yield (Golden Moving Edge Light) -->
-            <div class="chain-glow-card card-speed-3">
-              <div class="chain-glow-inner">
-                <div>
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-                    <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-purple); border: 1px solid rgba(139, 92, 246, 0.3);">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+            <!-- PILLAR 3: Founder & Engine of Booba Market -->
+            <div class="coinbase-showcase-row">
+              <div class="coinbase-content-col">
+                <div class="coinbase-text-block">
+                  <h2 class="coinbase-hero-title">
+                    Architect of Booba Market
+                  </h2>
+                  <p class="coinbase-hero-desc">
+                    $BOOBA is the foundational cryptocurrency and core economic engine behind <strong>Booba Market</strong> — an innovative platform that empowers individuals to discover jobs, freelance opportunities, and professional services with verifiable Web3 reputation.
+                  </p>
+                </div>
+                <div class="coinbase-actions-group">
+                  <a href="about.html" class="coinbase-action-btn">
+                    <span>Explore Booba Market</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  </a>
+                </div>
+              </div>
+              <div class="coinbase-canvas-col">
+                <div class="booba-showcase-canvas market-theme">
+                  <div class="booba-canvas-glow glow-purple"></div>
+
+                  <!-- Video Scene 3: Building SVG, Search Query & Result Card -->
+                  <div class="video-scene-stage">
+                    <div class="story-video-theater">
+                      
+                      <!-- Brand Anchor: Animated Building SVG + BOOBA MARKET text -->
+                      <div class="story-brand-header" style="border-color: rgba(139,92,246,0.35);">
+                        <div class="story-brand-icon icon-purple">
+                          <!-- Animated Web3 Marketplace Storefront / Building SVG -->
+                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 21h18"></path>
+                            <path d="M5 21V7l7-4 7 4v14"></path>
+                            <path d="M9 10h1"></path>
+                            <path d="M14 10h1"></path>
+                            <path d="M9 14h1"></path>
+                            <path d="M14 14h1"></path>
+                            <path d="M10 21v-4h4v4"></path>
+                          </svg>
+                        </div>
+                        <div>
+                          <div class="story-brand-title" style="color: var(--accent-purple);">BOOBA MARKET</div>
+                          <div class="story-brand-subtitle">Web3 Freelance, Services & Jobs Hub</div>
+                        </div>
+                      </div>
+
+                      <!-- 3-Act Cinematic Viewport -->
+                      <div class="story-timeline-stage">
+                        
+                        <!-- Act 1: Search Bar Pill with animated typing "I need a carpenter..." -->
+                        <div class="story-act-layer act-1">
+                          <div class="story-search-bar theme-purple">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <span class="search-input-mock">
+                              <span>I need a carpenter...</span>
+                              <span class="typing-cursor cursor-purple"></span>
+                            </span>
+                            <span class="search-btn-badge" style="background: var(--accent-purple); color: #FFFFFF;">Search</span>
+                          </div>
+                        </div>
+
+                        <!-- Act 2: Live Credential Scan & Match -->
+                        <div class="story-act-layer act-2">
+                          <div class="story-scanner-card" style="border-color: rgba(139,92,246,0.3);">
+                            <div class="scanner-top-row">
+                              <span style="color: var(--accent-purple); display: flex; align-items: center; gap: 0.4rem;">
+                                <span class="pulse-dot-purple"></span>
+                                <span>Searching Web3 Talent Network...</span>
+                              </span>
+                              <span style="color: var(--brand-yellow);">1 Match Found</span>
+                            </div>
+                            <div class="scan-radar-line">
+                              <div class="scan-radar-beam beam-purple"></div>
+                            </div>
+                            <div style="font-size: 0.65rem; color: var(--text-muted); font-family: var(--font-mono); display: flex; justify-content: space-between; align-items: center;">
+                              <span>Category: Master Carpentry & Build</span>
+                              <span style="color: #10B981; display: inline-flex; align-items: center; gap: 0.25rem;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>Escrow Ready</span></span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Act 3: Professional Search Result Card & Instant Escrow Hire -->
+                        <div class="story-act-layer act-3">
+                          <div class="story-result-card result-purple">
+                            <div class="result-talent-row">
+                              <img src="assets/mascot.jpg" class="result-talent-avatar" alt="Talent Avatar">
+                              <div>
+                                <div class="result-talent-name">Alex D. (Master Carpenter & Builder)</div>
+                                <div class="result-talent-badge" style="display: flex; align-items: center; gap: 0.35rem;">
+                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="var(--brand-yellow)" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                  <span>5.0 (48 Jobs Completed on BSC)</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="result-footer-row">
+                              <span style="color: var(--brand-yellow); font-weight: 800;">250 $BOOBA / Service</span>
+                              <span class="result-hire-pill">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                <span>Smart Escrow Hire</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+
                     </div>
-                    <span class="badge-tag" style="font-size: 0.72rem; padding: 0.25rem 0.6rem; background: rgba(139, 92, 246, 0.12); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3);">UP TO 3.5X BOOST</span>
                   </div>
 
-                  <h3 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.65rem; letter-spacing: -0.01em;">Staking & Yield Boosts</h3>
-                  <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.35rem;">
-                    Stake $BOOBA or $BOOBA/BNB LP inside the Booba Vault to earn sustainable staking APY and multiply all your quest payouts by up to 3.5x across the entire platform.
-                  </p>
-
-                  <div style="display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1.5rem;">
-                    <span style="font-size: 0.74rem; background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.3); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--accent-purple);">Up to 3.5x Multiplier</span>
-                    <span style="font-size: 0.74rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-secondary);">Staking APY</span>
-                    <span style="font-size: 0.74rem; background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.3); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--accent-cyan);">LP Locked 24 Mos</span>
+                  <!-- Video Player Footer & Scrubber -->
+                  <div class="video-player-footer">
+                    <div class="video-scrubber-track">
+                      <div class="video-scrubber-fill fill-purple"></div>
+                    </div>
+                    <div class="video-scrubber-meta">
+                      <span><span class="meta-highlight">Verifiable Reputation</span> • Direct P2P Escrow</span>
+                      <span>00:08 / 00:08</span>
+                    </div>
                   </div>
                 </div>
-
-                <a href="about.html#tokenomics" class="btn btn-secondary btn-block btn-sm" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;">
-                  <span>Explore Vault Staking</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
               </div>
             </div>
 
-            <!-- COIN BOX 4: Real Ecosystem Utility & Governance (Golden Moving Edge Light) -->
-            <div class="chain-glow-card card-speed-4">
-              <div class="chain-glow-inner">
-                <div>
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-                    <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(255, 122, 0, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-orange); border: 1px solid rgba(255, 122, 0, 0.3);">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+            <!-- PILLAR 4: Multi-Functional Utility Token -->
+            <div class="coinbase-showcase-row reverse">
+              <div class="coinbase-content-col">
+                <div class="coinbase-text-block">
+                  <h2 class="coinbase-hero-title">
+                    A Multi-Functional Utility Token
+                  </h2>
+                  <p class="coinbase-hero-desc">
+                    Far beyond a digital currency, $BOOBA serves as the primary utility token across the ecosystem — unlocking reputation passport tiers (Lv.1 to Lv.10), powering daily arcade reward multipliers, marketplace transactions, and decentralized governance voting.
+                  </p>
+                </div>
+                <div class="coinbase-actions-group">
+                  <a href="about.html" class="coinbase-action-btn">
+                    <span>Discover Utilities</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  </a>
+                </div>
+              </div>
+              <div class="coinbase-canvas-col">
+                <div class="booba-showcase-canvas utility-theme">
+                  <div class="booba-canvas-glow glow-orange"></div>
+
+                  <!-- Video Scene 4: Passport Leveling, Citizen Multipliers & DAO Governance -->
+                  <div class="video-scene-stage">
+                    <div class="story-video-theater">
+                      
+                      <!-- Brand Anchor Header -->
+                      <div class="story-brand-header" style="border-color: rgba(255,122,0,0.35);">
+                        <div class="story-brand-icon icon-orange">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                          </svg>
+                        </div>
+                        <div>
+                          <div class="story-brand-title" style="color: var(--accent-orange);">DYNAMIC UTILITY MATRIX</div>
+                          <div class="story-brand-subtitle">10 Passport Tiers • Multipliers • DAO Governance</div>
+                        </div>
+                      </div>
+
+                      <!-- 3-Act Cinematic Viewport -->
+                      <div class="story-timeline-stage">
+                        
+                        <!-- Act 1: Action Input -->
+                        <div class="story-act-layer act-1">
+                          <div class="story-search-bar theme-orange">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-orange)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                            <span class="search-input-mock">
+                              <span>Upgrading to Lv.10 Emperor Passport...</span>
+                              <span class="typing-cursor cursor-orange"></span>
+                            </span>
+                            <span class="search-btn-badge" style="background: var(--accent-orange); color: #FFFFFF;">Boost</span>
+                          </div>
+                        </div>
+
+                        <!-- Act 2: Passport Level Up Progression -->
+                        <div class="story-act-layer act-2">
+                          <div class="story-scanner-card" style="border-color: rgba(255,122,0,0.3);">
+                            <div class="scanner-top-row">
+                              <span style="color: var(--accent-orange); display: flex; align-items: center; gap: 0.4rem;">
+                                <span class="pulse-dot-orange"></span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.3rem;">Passport Leveling: Lv.1 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg> Lv.10</span>
+                              </span>
+                              <span style="color: var(--brand-yellow); display: inline-flex; align-items: center; gap: 0.3rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path></svg> <span>Max Tier</span></span>
+                            </div>
+                            <div class="scan-radar-line">
+                              <div class="scan-radar-beam beam-orange"></div>
+                            </div>
+                            <div style="font-size: 0.65rem; color: var(--text-muted); font-family: var(--font-mono); display: flex; justify-content: space-between; align-items: center;">
+                              <span>Citizen Rank Multiplier: 3.5X Boost</span>
+                              <span style="color: #10B981; display: inline-flex; align-items: center; gap: 0.25rem;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>DAO Power Unlocked</span></span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Act 3: Multiplier & DAO Governance Result Card -->
+                        <div class="story-act-layer act-3">
+                          <div class="story-result-card result-orange">
+                            <div class="result-talent-row">
+                              <div class="multiplier-gauge-circle" style="width: 44px; height: 44px; border-width: 2px; flex-shrink: 0;">
+                                <span class="gauge-num text-gradient-gold" style="font-size: 0.95rem;">3.5X</span>
+                              </div>
+                              <div>
+                                <div class="result-talent-name">Lv.10 Emperor Multiplier!</div>
+                                <div class="result-talent-badge" style="color: var(--accent-orange);">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                  <span>10,000 DAO Votes (1 Token = 1 Vote)</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="result-footer-row">
+                              <span style="color: var(--text-secondary);">Proposal #08: Passed (98.7%)</span>
+                              <span class="result-hire-pill" style="background: rgba(255,122,0,0.15); border-color: rgba(255,122,0,0.4); color: var(--accent-orange); display: inline-flex; align-items: center; gap: 0.35rem;">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                <span>Active Governance</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+
                     </div>
-                    <span class="badge-tag" style="font-size: 0.72rem; padding: 0.25rem 0.6rem; background: rgba(255, 122, 0, 0.12); color: var(--accent-orange); border-color: rgba(255, 122, 0, 0.3);">REAL UTILITIES</span>
                   </div>
 
-                  <h3 style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.65rem; letter-spacing: -0.01em;">Arcade, Tiers & DAO</h3>
-                  <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.35rem;">
-                    The $BOOBA coin powers daily Lucky Wheel spins, unlocks all 10 Passport progression tiers (Lv.1 to Lv.10), and gives holders decentralized DAO voting rights on treasury allocations.
-                  </p>
-
-                  <div style="display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1.5rem;">
-                    <span style="font-size: 0.74rem; background: rgba(255, 122, 0, 0.08); border: 1px solid rgba(255, 122, 0, 0.3); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--accent-orange);">Daily Spin Wheel</span>
-                    <span style="font-size: 0.74rem; background: rgba(243, 186, 47, 0.08); border: 1px solid rgba(243, 186, 47, 0.3); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--brand-yellow);">10 Passport Tiers</span>
-                    <span style="font-size: 0.74rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-secondary);">DAO Voting Rights</span>
+                  <!-- Video Player Footer & Scrubber -->
+                  <div class="video-player-footer">
+                    <div class="video-scrubber-track">
+                      <div class="video-scrubber-fill fill-orange"></div>
+                    </div>
+                    <div class="video-scrubber-meta">
+                      <span><span class="meta-highlight">10 Passport Tiers</span> • 3.5X Multiplier • DAO Governance</span>
+                      <span>00:08 / 00:08</span>
+                    </div>
                   </div>
                 </div>
-
-                <a href="about.html" class="btn btn-secondary btn-block btn-sm" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;">
-                  <span>Explore All Utilities</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
               </div>
             </div>
 
-          </div>
-
-          <!-- SPOTLIGHT PORTAL BANNER TO THE DEDICATED ABOUT & TOKENOMICS PAGE -->
-          <div class="glass-panel" style="margin-top: 3.5rem; padding: 2.5rem; border-radius: 24px; border: 1.5px solid rgba(243, 186, 47, 0.35); background: linear-gradient(135deg, rgba(243, 186, 47, 0.08) 0%, rgba(14, 18, 27, 0.85) 100%); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2rem;">
-            <div style="max-width: 680px;">
-              <h3 style="font-size: 1.6rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem;">
-                Want to Discover the Full Story & Official Tokenomics?
-              </h3>
-              <p class="portal-banner-desc" style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.6;">
-                Check out our dedicated About & Tokenomics hub to inspect the token distribution percentages, smart contract verification, 24-month liquidity lock, and 4-phase ecosystem roadmap.
-              </p>
-            </div>
-            <a href="about.html" class="btn btn-primary btn-lg" style="white-space: nowrap;">
-              Explore About & Tokenomics Hub →
-            </a>
           </div>
 
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- 4. 4-STEP PIPELINE: HOW TO WIN IN THE BOOBA UNIVERSE -->
-      <section class="section-container" style="padding: 6rem 0;">
+      <section class="section-container pipeline-section" style="padding: 6rem 0;">
         <div class="container">
-          <div class="section-header text-center" style="margin-bottom: 4rem;">
-            <h2 class="section-title" style="font-size: clamp(2rem, 3.8vw, 3rem); color: #FFFFFF;">How to Join & Earn in 4 Simple Steps</h2>
-            <p class="section-subtitle" style="font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0.75rem auto 0 auto;">
-              No gas required to mint your passport. Get started on BNB Smart Chain in seconds.
-            </p>
+          <div class="section-header text-center" style="margin-bottom: 3.5rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+            <h2 class="section-title pipeline-main-heading">Earn in <span class="text-gradient-gold">4 Simple Steps</span></h2>
           </div>
 
-          <div class="pipeline-grid">
+          <div class="pipeline-showcase-stack">
             
-            <div class="pipeline-card">
-              <div class="pipeline-step-num">STEP 01</div>
-              <h3 class="pipeline-step-title">Mint Passport</h3>
-              <p class="pipeline-step-desc">
-                Sign up with 1-click Google OAuth or your username to instantly receive your digital Booba Passport and +100 $BOOBA bonus.
-              </p>
+            <!-- STEP 01 -->
+            <div class="pipeline-showcase-card">
+              <div class="pipeline-card-glow-1" aria-hidden="true"></div>
+              <div class="pipeline-card-glow-2" aria-hidden="true"></div>
+              <div class="pipeline-card-grid-texture" aria-hidden="true"></div>
+              
+              <div class="pipeline-card-content">
+                <div class="pipeline-step-badge">
+                  <span>STEP 01</span>
+                </div>
+                <h3 class="pipeline-showcase-title">Mint Passport</h3>
+                <p class="pipeline-showcase-desc">
+                  Sign up with 1-click Google OAuth or your username to instantly receive your digital Booba Passport and claim your +100 $BOOBA bonus.
+                </p>
+                <div class="pipeline-card-action">
+                  <a href="signin.html#signup" class="btn btn-primary btn-lg" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                    <span>Mint Free Passport (+100 BOOBA)</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  </a>
+                </div>
+              </div>
             </div>
 
-            <div class="pipeline-card">
-              <div class="pipeline-step-num">STEP 02</div>
-              <h3 class="pipeline-step-title">Save Master Key</h3>
-              <p class="pipeline-step-desc">
-                Save your private 12-word cryptographic seed phrase for 100% non-custodial password recovery and security.
-              </p>
+            <!-- STEP 02 -->
+            <div class="pipeline-showcase-card">
+              <div class="pipeline-card-glow-1" aria-hidden="true"></div>
+              <div class="pipeline-card-glow-2" aria-hidden="true"></div>
+              <div class="pipeline-card-grid-texture" aria-hidden="true"></div>
+              
+              <div class="pipeline-card-content">
+                <div class="pipeline-step-badge">
+                  <span>STEP 02</span>
+                </div>
+                <h3 class="pipeline-showcase-title">Save Master Key</h3>
+                <p class="pipeline-showcase-desc">
+                  Save your private 12-word cryptographic seed phrase for 100% non-custodial password recovery, asset safety, and sovereign account security.
+                </p>
+                <div class="pipeline-card-action">
+                  <a href="passport.html" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                    <span>Explore Passport Architecture</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  </a>
+                </div>
+              </div>
             </div>
 
-            <div class="pipeline-card">
-              <div class="pipeline-step-num">STEP 03</div>
-              <h3 class="pipeline-step-title">Conquer Quests</h3>
-              <p class="pipeline-step-desc">
-                Complete daily check-in streaks, viral meme bounties, and community challenges published by the core studio team.
-              </p>
+            <!-- STEP 03 -->
+            <div class="pipeline-showcase-card">
+              <div class="pipeline-card-glow-1" aria-hidden="true"></div>
+              <div class="pipeline-card-glow-2" aria-hidden="true"></div>
+              <div class="pipeline-card-grid-texture" aria-hidden="true"></div>
+              
+              <div class="pipeline-card-content">
+                <div class="pipeline-step-badge">
+                  <span>STEP 03</span>
+                </div>
+                <h3 class="pipeline-showcase-title">Conquer Quests</h3>
+                <p class="pipeline-showcase-desc">
+                  Complete daily check-in streaks, viral meme bounties, and community challenges published by the core studio team to stack rewards.
+                </p>
+                <div class="pipeline-card-action">
+                  <a href="quests.html" class="btn btn-primary btn-lg" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                    <span>Explore Live Quests</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  </a>
+                </div>
+              </div>
             </div>
 
-            <div class="pipeline-card">
-              <div class="pipeline-step-num">STEP 04</div>
-              <h3 class="pipeline-step-title">Claim & Level Up</h3>
-              <p class="pipeline-step-desc">
-                Climb to Lv.10 Booba Master, climb the community leaderboard, and lock in your share of exclusive airdrop snapshots.
-              </p>
+            <!-- STEP 04 -->
+            <div class="pipeline-showcase-card">
+              <div class="pipeline-card-glow-1" aria-hidden="true"></div>
+              <div class="pipeline-card-glow-2" aria-hidden="true"></div>
+              <div class="pipeline-card-grid-texture" aria-hidden="true"></div>
+              
+              <div class="pipeline-card-content">
+                <div class="pipeline-step-badge">
+                  <span>STEP 04</span>
+                </div>
+                <h3 class="pipeline-showcase-title">Claim & Level Up</h3>
+                <p class="pipeline-showcase-desc">
+                  Climb to Lv.10 Booba Commander, climb the community leaderboard, and lock in your share of exclusive airdrop snapshots and multiplier boosts.
+                </p>
+                <div class="pipeline-card-action">
+                  <a href="leaderboard.html" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                    <span>View Leaderboard Rankings</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  </a>
+                </div>
+              </div>
             </div>
 
           </div>
@@ -2425,7 +2827,10 @@ HOW TO RECOVER YOUR ACCOUNT:
 
               <div style="display: flex; justify-content: center; gap: 1.25rem; flex-wrap: wrap;">
                 ${user ? `
-                  <a href="dashboard.html" class="btn btn-primary btn-lg">Launch My Dashboard ↗</a>
+                  <a href="dashboard.html" class="btn btn-primary btn-lg" style="display: inline-flex; align-items: center; gap: 0.45rem;">
+                    <span>Launch My Dashboard</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                  </a>
                   <a href="quests.html" class="btn btn-secondary btn-lg">Explore Live Quests</a>
                 ` : `
                   <a href="signin.html#signup" class="btn btn-primary btn-lg">Mint Free Passport (+100 BOOBA)</a>
@@ -2469,7 +2874,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                 </div>
                 <div style="background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 10px; padding: 0.45rem 0.6rem;">
                   <div style="font-size: 0.72rem; font-weight: 800; color: var(--accent-purple);">20% • 200M</div>
-                  <div style="font-size: 0.64rem; color: var(--text-secondary);">Vault Staking</div>
+                  <div style="font-size: 0.64rem; color: var(--text-secondary);">Rewards Vault</div>
                 </div>
                 <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 10px; padding: 0.45rem 0.6rem;">
                   <div style="font-size: 0.72rem; font-weight: 800; color: var(--accent-emerald);">20% • 200M</div>
@@ -2513,35 +2918,12 @@ HOW TO RECOVER YOUR ACCOUNT:
 
         <div class="container text-center" style="position: relative; z-index: 2;">
           
-          <!-- DESKTOP BADGES (SIDE-BY-SIDE IN ONE ROW) -->
-          <div class="about-hero-badges-desktop">
-            <span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); display: inline-flex; align-items: center; gap: 0.45rem;">
-              <span class="pulse-dot"></span> BNB Smart Chain Mainnet
-            </span>
-            <span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); display: inline-flex; align-items: center; gap: 0.45rem;">
-              <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg> BEP-20 Standard
-            </span>
-            <span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3); display: inline-flex; align-items: center; gap: 0.45rem;">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> 0% Buy / 0% Sell Tax
-            </span>
+          <!-- ABOUT PAGE MAIN HEADING -->
+          <div class="about-hero-header" style="text-align: center; max-width: 860px; margin: 0 auto 2.5rem auto; position: relative; z-index: 10;">
+            <h1 class="page-title hero-title" style="font-size: clamp(1.8rem, 4.5vw, 3.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.03em; line-height: 1.12; font-family: var(--font-heading); margin-bottom: 0; white-space: nowrap;">
+              About <span class="text-gradient-gold">Our Token</span>
+            </h1>
           </div>
-
-          <!-- MOBILE BADGES ROTATOR (ONE AFTER ANOTHER IN THE CENTER) -->
-          <div class="about-hero-badges-mobile" id="aboutHeroBadgesMobile">
-            <div id="aboutMobileBadgeSlot" style="display: inline-flex; align-items: center; justify-content: center; transition: opacity 0.25s ease, transform 0.25s ease;">
-              <span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); display: inline-flex; align-items: center; gap: 0.45rem;">
-                <span class="pulse-dot"></span> BNB Smart Chain Mainnet
-              </span>
-            </div>
-          </div>
-
-          <h1 style="font-size: clamp(2.4rem, 5.5vw, 4.2rem); font-weight: 800; color: #FFFFFF; letter-spacing: -0.025em; max-width: 960px; margin: 0 auto 1.5rem auto; line-height: 1.12;">
-            The Next-Generation Gamified Protocol on <span class="text-gradient-gold">BNB Chain</span>
-          </h1>
-
-          <p style="font-size: clamp(1.05rem, 2vw, 1.22rem); color: var(--text-secondary); max-width: 780px; margin: 0 auto 2.5rem auto; line-height: 1.7;">
-            An all-in-one Web3 ecosystem unifying non-custodial cryptographic digital identity, decentralized quest bounties, dynamic multiplier staking vaults, and real-time community governance.
-          </p>
 
           <!-- LIVING TV TELEMETRY BROADCAST SCREEN (ROTATING 1-BOX STATS) -->
           <div class="tv-telemetry-screen" id="aboutTvScreen">
@@ -2554,10 +2936,14 @@ HOW TO RECOVER YOUR ACCOUNT:
                 </div>
                 <div class="tv-controls-group">
                   <div class="tv-channel-dots">
-                    <div class="tv-channel-dot active" onclick="window.boobaApp.setTvStatSlide(0)" title="Channel 1"></div>
-                    <div class="tv-channel-dot" onclick="window.boobaApp.setTvStatSlide(1)" title="Channel 2"></div>
-                    <div class="tv-channel-dot" onclick="window.boobaApp.setTvStatSlide(2)" title="Channel 3"></div>
-                    <div class="tv-channel-dot" onclick="window.boobaApp.setTvStatSlide(3)" title="Channel 4"></div>
+                    <div class="tv-channel-dot active" onclick="window.boobaApp.setTvStatSlide(0)" title="Channel 1: BOOBA Live"></div>
+                    <div class="tv-channel-dot" onclick="window.boobaApp.setTvStatSlide(1)" title="Channel 2: Token Name"></div>
+                    <div class="tv-channel-dot" onclick="window.boobaApp.setTvStatSlide(2)" title="Channel 3: Token Symbol"></div>
+                    <div class="tv-channel-dot" onclick="window.boobaApp.setTvStatSlide(3)" title="Channel 4: Token Nickname"></div>
+                    <div class="tv-channel-dot" onclick="window.boobaApp.setTvStatSlide(4)" title="Channel 5: Live Price"></div>
+                    <div class="tv-channel-dot" onclick="window.boobaApp.setTvStatSlide(5)" title="Channel 6: 24h Volume"></div>
+                    <div class="tv-channel-dot" onclick="window.boobaApp.setTvStatSlide(6)" title="Channel 7: Liquidity"></div>
+                    <div class="tv-channel-dot" onclick="window.boobaApp.setTvStatSlide(7)" title="Channel 8: Market Cap"></div>
                   </div>
                   <div class="tv-nav-arrows" style="display: flex; gap: 0.35rem;">
                     <button type="button" class="tv-nav-btn" onclick="window.boobaApp.prevTvStatSlide()" aria-label="Previous Channel">
@@ -2572,9 +2958,32 @@ HOW TO RECOVER YOUR ACCOUNT:
 
               <!-- TV SCREEN DISPLAY FRAME -->
               <div class="tv-stat-card-frame" id="tvStatFrame">
-                <div class="tv-stat-number" id="tvStatNumber" style="color: var(--brand-yellow);">1,000,000,000</div>
-                <div class="tv-stat-label" id="tvStatLabel">Fixed Total Supply</div>
-                <div class="tv-stat-desc" id="tvStatDesc">Strictly capped BEP-20 supply natively minted on BNB Smart Chain with zero inflation risk.</div>
+                <div class="tv-market-telemetry-widget" style="width: 100%; max-width: 640px; margin: 0 auto;">
+                  <div style="text-align: center; margin-bottom: 1rem;">
+                    <div style="font-size: 1.4rem; font-weight: 900; color: #FFFFFF; font-family: var(--font-heading);">
+                      BOOBA Live
+                    </div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; width: 100%; text-align: left;">
+                    <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 0.8rem 1rem;">
+                      <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Price</div>
+                      <div style="font-size: 1.18rem; font-weight: 900; color: #FFFFFF; font-family: var(--font-mono);" id="tvLivePrice">$0.00</div>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 0.8rem 1rem;">
+                      <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">24h Volume</div>
+                      <div style="font-size: 1.18rem; font-weight: 900; color: var(--accent-emerald); font-family: var(--font-mono);" id="tvLiveVol">$0.00</div>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 0.8rem 1rem;">
+                      <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Liquidity</div>
+                      <div style="font-size: 1.18rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono);" id="tvLiveLiq">$0.00</div>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 0.8rem 1rem;">
+                      <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Market Cap</div>
+                      <div style="font-size: 1.18rem; font-weight: 900; color: #FFFFFF; font-family: var(--font-mono);" id="tvLiveMcap">$0.00</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -2582,440 +2991,608 @@ HOW TO RECOVER YOUR ACCOUNT:
         </div>
       </section>
 
-      <!-- 2. 8 CORE PILLARS ABOUT THE TOKEN -->
-      <section class="section-container" style="padding: 5rem 0; background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle);">
-        <div class="container">
+      
+      
+      
+      
+      <!-- ==========================================================================
+           ABOUT THE TOKEN: SPAROPAY SCROLL-PINNED 8-STEP PRESENTATION (EDITORIAL WATERMARK)
+           ========================================================================== -->
+      <section class="sparo-token-showcase-section" id="sparoTokenShowcaseSection">
+        <div class="sparo-sticky-stage" id="sparoStickyStage">
           
-          <div class="section-header text-center" style="margin-bottom: 3.5rem;">
-            <h2 class="section-title" style="font-size: clamp(2rem, 3.8vw, 3rem); color: #FFFFFF;">About The Token</h2>
-            <p class="section-subtitle" style="font-size: 1.1rem; color: var(--text-secondary); max-width: 720px; margin: 0.75rem auto 0 auto;">
-              Engineered natively on BNB Smart Chain for maximum security, real GameFi & DeFi utility, and long-term community value.
-            </p>
-          </div>
-
-          <!-- 8 Token Pillars Grid (Clean, Modern Responsive Layout with Typing Animation) -->
-          <div class="grid" id="tokenPillarsGrid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+          <!-- Ambient Radial Glow & Dot Matrix -->
+          <div class="sparo-unboxed-ambient-glow"></div>
+          <div class="sparo-unboxed-matrix-grid"></div>
+          
+          <div class="container" style="max-width: 1240px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 2.5rem 1.5rem; position: relative; z-index: 10;">
             
-            <!-- Pillar 1: Fixed 1 Billion Supply -->
-            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(243, 186, 47, 0.3); position: relative;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(243, 186, 47, 0.15); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M15 9.5a3.5 3.5 0 0 0-5 0c0 2 5 2 5 4.5a3.5 3.5 0 0 1-5 0"></path></svg>
-                </div>
-                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(243, 186, 47, 0.12); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.3);">01 • SUPPLY</span>
-              </div>
-              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Fixed 1 Billion Supply</h3>
-              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Strictly capped at 1,000,000,000 $BOOBA. Zero minting exploits, zero inflationary dilution, and no secondary tokens created.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Hard-Capped BEP-20 Mint</span>
-              </div>
+            <!-- TOP HEADER (BOLD HEADER TEXT) -->
+            <div style="text-align: center; width: 100%; padding-bottom: 0.75rem;">
+              <h3 style="font-size: clamp(1.4rem, 2.8vw, 2.1rem); font-weight: 900; color: var(--brand-yellow); text-transform: uppercase; letter-spacing: 0.08em; margin: 0; text-shadow: 0 0 25px rgba(243, 186, 47, 0.3);">
+                About The Token
+              </h3>
             </div>
 
-            <!-- Pillar 2: 0% Tax Structure -->
-            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.3); position: relative;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-emerald);">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"></line><circle cx="6.5" cy="6.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg>
-                </div>
-                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">02 • TAX FREE</span>
-              </div>
-              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">0% Buy & 0% Sell Tax</h3>
-              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Zero developer taxes on transactions. Trade freely across DEX protocols without unexpected fees or hidden slippage traps.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>100% Frictionless Trading</span>
-              </div>
+            <!-- CENTER STAGE: EDITORIAL WATERMARK PRESENTATION -->
+            <div class="sparo-unboxed-center-viewport">
+              
+          <div class="sparo-unboxed-slide active" id="sparoSlide0">
+            <!-- SLIDE BACKDROP IMAGE (MOBILE FULLSCREEN & DESKTOP AMBIENCE) -->
+            <div class="sparo-slide-backdrop">
+              <img src="assets/mascot_level1.png" alt="Verified BEP-20 Contract" class="sparo-slide-backdrop-img">
+              <div class="sparo-slide-backdrop-overlay"></div>
             </div>
 
-            <!-- Pillar 3: 24-Month Liquidity Lock -->
-            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(6, 182, 212, 0.3); position: relative;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(6, 182, 212, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-cyan);">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                </div>
-                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(6, 182, 212, 0.12); color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.3);">03 • SECURITY</span>
-              </div>
-              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">24-Month Liquidity Lock</h3>
-              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">20% of total supply (200,000,000 $BOOBA) dedicated to DEX liquidity is locked for 24 months via verifiable smart contract timelocks.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Rug-Proof Timelock</span>
-              </div>
-            </div>
+            <!-- LEFT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-left">01</div>
 
-            <!-- Pillar 4: Dynamic Staking Multipliers -->
-            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(139, 92, 246, 0.3); position: relative;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-purple);">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                </div>
-                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(139, 92, 246, 0.12); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3);">04 • YIELD BOOST</span>
-              </div>
-              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Dynamic Staking Boost</h3>
-              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Deposit $BOOBA or LP tokens to activate dynamic 1.5x – 3.5x multiplier boosters on all daily check-in and bounty payouts.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-purple); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Up to 3.5x Quest Multiplier</span>
-              </div>
-            </div>
+            <!-- CENTER CONTENT WRAP -->
+            <div class="sparo-unboxed-content-wrap">
+              
+              <!-- GIANT TITLE -->
+              <h2 class="sparo-unboxed-title">
+                Verified BEP-20 Smart Contract
+              </h2>
 
-            <!-- Pillar 5: Non-Custodial Passport Identity -->
-            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(243, 186, 47, 0.3); position: relative;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(243, 186, 47, 0.15); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line></svg>
-                </div>
-                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(243, 186, 47, 0.12); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.3);">05 • IDENTITY</span>
-              </div>
-              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Non-Custodial DID</h3>
-              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Client-side BIP-39 mnemonic seed generation with a unique citizen ID (BB-XXXXXX) for sovereign digital ownership.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>12-Word Master Cryptography</span>
-              </div>
-            </div>
+              <!-- DESCRIPTION -->
+              <p class="sparo-unboxed-desc">
+                Natively deployed on BNB Smart Chain with a permanently verified, immutable contract architecture. Zero proxy vulnerabilities, 100% open-source transparency on BscScan.
+              </p>
 
-            <!-- Pillar 6: Proof-of-Engagement Bounties -->
-            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.3); position: relative;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-emerald);">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-                </div>
-                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">06 • COMMUNITY</span>
-              </div>
-              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Proof-of-Engagement</h3>
-              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">40% of tokens are earned by active community participants through daily streak check-ins, social raids, and creative bounties.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Merit-Based Fair Allocation</span>
-              </div>
-            </div>
-
-            <!-- Pillar 7: Arcade & GameFi Ecosystem -->
-            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(255, 122, 0, 0.3); position: relative;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(255, 122, 0, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-orange);">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="3"></rect><path d="M6 12h4M8 10v4M15 11h.01M18 13h.01"></path></svg>
-                </div>
-                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(255, 122, 0, 0.12); color: var(--accent-orange); border-color: rgba(255, 122, 0, 0.3);">07 • GAMEFI</span>
-              </div>
-              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Arcade & Gamification</h3>
-              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Use $BOOBA to play the Spin-to-Earn Lucky Wheel, unlock exclusive Lv.1–10 badge titles, and participate in competitive leaderboard seasons.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-orange); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Spin-to-Earn & Tier Rewards</span>
-              </div>
-            </div>
-
-            <!-- Pillar 8: Decentralized DAO Governance -->
-            <div class="glass-panel token-pillar-card" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(139, 92, 246, 0.3); position: relative;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-purple);">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                </div>
-                <span class="badge-tag" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(139, 92, 246, 0.12); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3);">08 • DAO</span>
-              </div>
-              <h3 class="typewriter-text" style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; min-height: 1.4em;">Decentralized Governance</h3>
-              <p class="typewriter-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; min-height: 4.8em;">Direct voting power over ecosystem treasury allocations, community grants, pool upgrades, and strategic multi-chain expansions.</p>
-              <div class="typewriter-text" style="font-size: 0.75rem; color: var(--accent-purple); font-weight: 700; font-family: var(--font-mono); min-height: 1.2em; display: flex; align-items: center; gap: 0.35rem;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>100% Community Sovereign Rule</span>
-              </div>
-            </div>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      <!-- 3. OFFICIAL TOKENOMICS & 3D MULTI-MODE DISTRIBUTION -->
-      <section id="tokenomics" class="section-container" style="padding: 5rem 0; background: var(--bg-surface); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
-        <div class="container">
-          
-          <div class="section-header text-center" style="margin-bottom: 3.5rem;">
-            <h2 class="section-title" style="font-size: clamp(2rem, 3.8vw, 3rem); color: #FFFFFF;">$BOOBA Official Tokenomics</h2>
-            <p class="section-subtitle" style="font-size: 1.1rem; color: var(--text-secondary); max-width: 680px; margin: 0.75rem auto 0 auto;">
-              Designed with 0% transaction taxes, a fixed 1 Billion supply, and community-first distributions.
-            </p>
-          </div>
-
-          <!-- SMART CONTRACT SPECIFICATIONS (CLEAN UNBOXED STRIP) -->
-          <div style="margin-bottom: 3.5rem;">
-            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
-              <div style="padding: 1rem 0;">
-                <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Token Name</div>
-                <div style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin-top: 0.25rem;">BOOBA (BNB baby)</div>
-              </div>
-              <div style="padding: 1rem 0;">
-                <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Ticker Symbol</div>
-                <div style="font-size: 1.2rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.25rem; font-family: var(--font-mono);">$BOOBA</div>
-              </div>
-              <div style="padding: 1rem 0;">
-                <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Blockchain</div>
-                <div style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin-top: 0.25rem;">BNB Chain (BEP-20)</div>
-              </div>
-              <div style="padding: 1rem 0;">
-                <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Total Supply</div>
-                <div style="font-size: 1.2rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.25rem; font-family: var(--font-mono);">1,000,000,000</div>
-              </div>
-              <div style="padding: 1rem 0;">
-                <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Buy / Sell Tax</div>
-                <div style="font-size: 1.2rem; font-weight: 800; color: var(--accent-emerald); margin-top: 0.25rem;">0% / 0% (Zero Tax)</div>
-              </div>
-              <div style="padding: 1rem 0;">
-                <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Liquidity Lock</div>
-                <div style="font-size: 1.2rem; font-weight: 800; color: var(--accent-cyan); margin-top: 0.25rem;">24 Months Verifiable</div>
-              </div>
-            </div>
-
-            <!-- Contract Address 1-Click Copy Bar -->
-            <div class="contract-strip" style="background: rgba(7, 9, 14, 0.85); border: 1.5px solid var(--border-medium); border-radius: 16px; padding: 1.1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; width: 100%; box-sizing: border-box; overflow: hidden;">
-              <div class="contract-address-box" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; min-width: 0; max-width: 100%;">
-                <span class="badge-tag" style="margin: 0; font-size: 0.75rem; flex-shrink: 0;">Contract</span>
-                <span id="tokenContractAddr" class="text-mono" style="font-size: clamp(0.78rem, 2.5vw, 0.92rem); color: var(--brand-yellow); word-break: break-all; max-width: 100%;">0x712B00BA99E74f8812cCdA15D5881a7a1c92F3a1</span>
-              </div>
-              <div class="contract-actions" style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
-                <button type="button" class="btn btn-primary btn-sm" onclick="window.boobaApp.copyContractAddress()" style="white-space: nowrap;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                  <span id="copyContractBtnText">Copy Contract</span>
-                </button>
-                <a href="https://bscscan.com/token/0x712B00BA99E74f8812cCdA15D5881a7a1c92F3a1" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap;">
+              <!-- BUTTON -->
+              <div style="margin-top: 1.5rem; width: 100%; display: flex; justify-content: center;">
+                <a href="https://bscscan.com/token/0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B" target="_blank" rel="noopener" class="btn btn-primary btn-lg" style="border-radius: 9999px; padding: 0.9rem 2.4rem; font-weight: 800; font-size: 1rem; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35); display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;">
                   <span>View on BscScan</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                 </a>
               </div>
+
+            </div>
+
+            <!-- RIGHT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-right">08</div>
+
+          </div>
+        
+          <div class="sparo-unboxed-slide " id="sparoSlide1">
+            <!-- SLIDE BACKDROP IMAGE -->
+            <div class="sparo-slide-backdrop">
+              <img src="assets/mascot_level2.png" alt="Fixed Total Supply" class="sparo-slide-backdrop-img">
+              <div class="sparo-slide-backdrop-overlay"></div>
+            </div>
+
+            <!-- LEFT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-left">02</div>
+
+            <!-- CENTER CONTENT WRAP -->
+            <div class="sparo-unboxed-content-wrap">
+              
+              <!-- GIANT TITLE -->
+              <h2 class="sparo-unboxed-title">
+                100 Quadrillion Fixed Total Supply
+              </h2>
+
+              <!-- DESCRIPTION -->
+              <p class="sparo-unboxed-desc">
+                Strictly hard-capped at 100,000,000,000,000,000 $BOOBA tokens minted at genesis on BNB Chain. No additional tokens can ever be minted, guaranteeing complete protection against inflationary dilution.
+              </p>
+
+              <!-- BUTTON -->
+              <div style="margin-top: 1.5rem; width: 100%; display: flex; justify-content: center;">
+                <a href="#tokenomics" class="btn btn-primary btn-lg" style="border-radius: 9999px; padding: 0.9rem 2.4rem; font-weight: 800; font-size: 1rem; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35); display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;">
+                  <span>Explore Token Distribution</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+              </div>
+
+            </div>
+
+            <!-- RIGHT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-right">08</div>
+
+          </div>
+        
+          <div class="sparo-unboxed-slide " id="sparoSlide2">
+            <!-- SLIDE BACKDROP IMAGE -->
+            <div class="sparo-slide-backdrop">
+              <img src="assets/mascot_level3.png" alt="3% Buy & 3% Sell Tax" class="sparo-slide-backdrop-img">
+              <div class="sparo-slide-backdrop-overlay"></div>
+            </div>
+
+            <!-- LEFT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-left">03</div>
+
+            <!-- CENTER CONTENT WRAP -->
+            <div class="sparo-unboxed-content-wrap">
+              
+              <!-- GIANT TITLE -->
+              <h2 class="sparo-unboxed-title">
+                3% Buy & 3% Sell Tax
+              </h2>
+
+              <!-- DESCRIPTION -->
+              <p class="sparo-unboxed-desc">
+                A sustainable 3% Buy and 3% Sell protocol tax dedicated to liquidity pool depth, staking rewards, and continuous global marketing initiatives to ensure long-term ecosystem growth.
+              </p>
+
+              <!-- BUTTON -->
+              <div style="margin-top: 1.5rem; width: 100%; display: flex; justify-content: center;">
+                <a href="https://pancakeswap.finance" target="_blank" rel="noopener" class="btn btn-primary btn-lg" style="border-radius: 9999px; padding: 0.9rem 2.4rem; font-weight: 800; font-size: 1rem; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35); display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;">
+                  <span>Trade on PancakeSwap</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                </a>
+              </div>
+
+            </div>
+
+            <!-- RIGHT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-right">08</div>
+
+          </div>
+        
+          <div class="sparo-unboxed-slide " id="sparoSlide3">
+            <!-- SLIDE BACKDROP IMAGE -->
+            <div class="sparo-slide-backdrop">
+              <img src="assets/mascot_level4.png" alt="Community-First Architecture" class="sparo-slide-backdrop-img">
+              <div class="sparo-slide-backdrop-overlay"></div>
+            </div>
+
+            <!-- LEFT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-left">04</div>
+
+            <!-- CENTER CONTENT WRAP -->
+            <div class="sparo-unboxed-content-wrap">
+              
+              <!-- GIANT TITLE -->
+              <h2 class="sparo-unboxed-title">
+                Community-First Economic Architecture
+              </h2>
+
+              <!-- DESCRIPTION -->
+              <p class="sparo-unboxed-desc">
+                Engineered to empower every citizen. Combining 40% locked PancakeSwap liquidity, 20% high-yield staking and multiplier rewards, and 10% community development grants, the $BOOBA ecosystem ensures sustainable value and decentralized growth for all holders.
+              </p>
+
+              <!-- BUTTON -->
+              <div style="margin-top: 1.5rem; width: 100%; display: flex; justify-content: center;">
+                <a href="#tokenomics" class="btn btn-primary btn-lg" style="border-radius: 9999px; padding: 0.9rem 2.4rem; font-weight: 800; font-size: 1rem; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35); display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;">
+                  <span>Explore Tokenomics</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+              </div>
+
+            </div>
+
+            <!-- RIGHT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-right">08</div>
+
+          </div>
+        
+          <div class="sparo-unboxed-slide " id="sparoSlide4">
+            <!-- SLIDE BACKDROP IMAGE -->
+            <div class="sparo-slide-backdrop">
+              <img src="assets/mascot_level5.png" alt="Liquidity Lock" class="sparo-slide-backdrop-img">
+              <div class="sparo-slide-backdrop-overlay"></div>
+            </div>
+
+            <!-- LEFT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-left">05</div>
+
+            <!-- CENTER CONTENT WRAP -->
+            <div class="sparo-unboxed-content-wrap">
+              
+              <!-- GIANT TITLE -->
+              <h2 class="sparo-unboxed-title">
+                24-Month Liquidity Lock
+              </h2>
+
+              <!-- DESCRIPTION -->
+              <p class="sparo-unboxed-desc">
+                100% of decentralized exchange liquidity is locked for 24 months via verifiable smart contract timelocks on BNB Smart Chain for complete rug-proof investor protection.
+              </p>
+
+              <!-- BUTTON -->
+              <div style="margin-top: 1.5rem; width: 100%; display: flex; justify-content: center;">
+                <a href="https://bscscan.com" target="_blank" rel="noopener" class="btn btn-primary btn-lg" style="border-radius: 9999px; padding: 0.9rem 2.4rem; font-weight: 800; font-size: 1rem; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35); display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;">
+                  <span>Verify Timelock on BscScan</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                </a>
+              </div>
+
+            </div>
+
+            <!-- RIGHT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-right">08</div>
+
+          </div>
+        
+          <div class="sparo-unboxed-slide " id="sparoSlide5">
+            <!-- SLIDE BACKDROP IMAGE -->
+            <div class="sparo-slide-backdrop">
+              <img src="assets/mascot_level6.png" alt="Smart Contract" class="sparo-slide-backdrop-img">
+              <div class="sparo-slide-backdrop-overlay"></div>
+            </div>
+
+            <!-- LEFT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-left">06</div>
+
+            <!-- CENTER CONTENT WRAP -->
+            <div class="sparo-unboxed-content-wrap">
+              
+              <!-- GIANT TITLE -->
+              <h2 class="sparo-unboxed-title">
+                Official Smart Contract
+              </h2>
+
+              <!-- CONTRACT ADDRESS MONOSPACE DISPLAY -->
+              <div style="margin: 0.5rem 0 1.25rem 0;">
+                <span class="text-mono" style="font-size: clamp(0.9rem, 2.2vw, 1.35rem); font-weight: 800; color: var(--brand-yellow); background: rgba(243, 186, 47, 0.08); padding: 0.6rem 1.4rem; border-radius: 14px; border: 1.5px solid rgba(243, 186, 47, 0.35); display: inline-block; word-break: break-all;">
+                  0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B
+                </span>
+              </div>
+
+              <!-- DESCRIPTION -->
+              <p class="sparo-unboxed-desc">
+                Verified BEP-20 immutable contract architecture natively deployed on BNB Smart Chain with 100% open-source transparency and zero proxy vulnerabilities.
+              </p>
+
+              <!-- BUTTONS (COPY & VIEW ON BSCSCAN) -->
+              <div style="margin-top: 1.5rem; display: flex; gap: 0.85rem; justify-content: center; flex-wrap: wrap; width: 100%;">
+                <button type="button" onclick="window.boobaApp.copyContractAddress()" class="btn btn-primary btn-lg" style="border-radius: 9999px; padding: 0.9rem 2rem; font-weight: 800; font-size: 1rem; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <span>Copy Contract</span>
+                </button>
+                <a href="https://bscscan.com/token/0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B" target="_blank" rel="noopener" class="btn btn-secondary btn-lg" style="border-radius: 9999px; padding: 0.9rem 2rem; font-weight: 800; font-size: 1rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                  <span>View on BscScan</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                </a>
+              </div>
+
+            </div>
+
+            <!-- RIGHT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-right">08</div>
+
+          </div>
+        
+          <div class="sparo-unboxed-slide " id="sparoSlide6">
+            <!-- SLIDE BACKDROP IMAGE -->
+            <div class="sparo-slide-backdrop">
+              <img src="assets/mascot_level7.png" alt="Passport Progression" class="sparo-slide-backdrop-img">
+              <div class="sparo-slide-backdrop-overlay"></div>
+            </div>
+
+            <!-- LEFT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-left">07</div>
+
+            <!-- CENTER CONTENT WRAP -->
+            <div class="sparo-unboxed-content-wrap">
+              
+              <!-- GIANT TITLE -->
+              <h2 class="sparo-unboxed-title">
+                10 Passport Progression Tiers
+              </h2>
+
+              <!-- DESCRIPTION -->
+              <p class="sparo-unboxed-desc">
+                Every citizen mints a non-custodial digital Booba Passport secured by a 12-word cryptographic seed phrase, leveling up from Level 1 Baby to Level 10 Master.
+              </p>
+
+              <!-- BUTTON -->
+              <div style="margin-top: 1.5rem; width: 100%; display: flex; justify-content: center;">
+                <a href="passport.html" class="btn btn-primary btn-lg" style="border-radius: 9999px; padding: 0.9rem 2.4rem; font-weight: 800; font-size: 1rem; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35); display: inline-flex; align-items: center; justify-content: center;">
+                  <span>Mint Your Passport →</span>
+                </a>
+              </div>
+
+            </div>
+
+            <!-- RIGHT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-right">08</div>
+
+          </div>
+        
+          <div class="sparo-unboxed-slide " id="sparoSlide7">
+            <!-- SLIDE BACKDROP IMAGE -->
+            <div class="sparo-slide-backdrop">
+              <img src="assets/mascot_level10.png" alt="DAO Governance" class="sparo-slide-backdrop-img">
+              <div class="sparo-slide-backdrop-overlay"></div>
+            </div>
+
+            <!-- LEFT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-left">08</div>
+
+            <!-- CENTER CONTENT WRAP -->
+            <div class="sparo-unboxed-content-wrap">
+              
+              <!-- GIANT TITLE -->
+              <h2 class="sparo-unboxed-title">
+                DAO Governance & Community Voting
+              </h2>
+
+              <!-- DESCRIPTION -->
+              <p class="sparo-unboxed-desc">
+                The $BOOBA coin grants decentralized voting rights on community treasury allocations, ecosystem grants, partnership proposals, and protocol roadmap decisions.
+              </p>
+
+              <!-- BUTTON -->
+              <div style="margin-top: 1.5rem; width: 100%; display: flex; justify-content: center;">
+                <a href="quests.html" class="btn btn-primary btn-lg" style="border-radius: 9999px; padding: 0.9rem 2.4rem; font-weight: 800; font-size: 1rem; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35); display: inline-flex; align-items: center; justify-content: center;">
+                  <span>Explore Ecosystem Utilities →</span>
+                </a>
+              </div>
+
+            </div>
+
+            <!-- RIGHT AMBIENT WATERMARK NUMBER (LOW OPACITY) -->
+            <div class="sparo-watermark-right">08</div>
+
+          </div>
+        
+            </div>
+
+            <!-- EMPTY BOTTOM SPACER FOR BALANCE -->
+            <div style="height: 1.5rem;"></div>
+
+          </div>
+        </div>
+      </section>
+    
+
+      <!-- ==========================================================================
+           3. UNBOXED 2D TOKEN ALLOCATION SHOWCASE (PRO EXPANSIVE DIAGRAMS)
+           ========================================================================== -->
+      <section id="tokenomics" class="section-container" style="padding: 6rem 0; background: var(--bg-surface); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
+        <div class="container">
+          
+          <!-- SECTION HEADER (BOLD GOLD HEADER TEXT) -->
+          <div style="text-align: center; width: 100%; margin-bottom: 3.5rem;">
+            <h3 style="font-size: clamp(1.4rem, 2.8vw, 2.1rem); font-weight: 900; color: var(--brand-yellow); text-transform: uppercase; letter-spacing: 0.08em; margin: 0; text-shadow: 0 0 25px rgba(243, 186, 47, 0.3);">
+              Tokenomics
+            </h3>
+          </div>
+
+          <!-- COINBASE SPLIT STAGE: LEFT TYPOGRAPHY + RIGHT PRO 2D DIAGRAM -->
+          <div class="coinbase-showcase-row" style="align-items: center; gap: 3rem;">
+            
+            <!-- LEFT COLUMN: ONE-AT-A-TIME TYPOGRAPHY -->
+            <div class="coinbase-content-col" style="flex: 1.1;">
+              <div class="coinbase-alloc-viewport" style="position: relative; min-height: 380px;">
+                
+          <!-- SLIDE 0: 40% PANCAKESWAP LIQUIDITY -->
+          <div class="coinbase-alloc-slide active" id="allocSlide0">
+            <h2 class="coinbase-hero-title" style="font-size: clamp(2.4rem, 4.5vw, 3.8rem); font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.025em; color: #FFFFFF;">
+              PancakeSwap Liquidity
+            </h2>
+            <p class="coinbase-hero-desc" style="font-size: clamp(1.05rem, 1.8vw, 1.25rem); color: var(--text-secondary); line-height: 1.7; max-width: 580px; margin-bottom: 2.5rem;">
+              400 Million tokens (40% of total supply) permanently locked with BNB for PancakeSwap decentralized exchange liquidity pool trading depth. Secured by verifiable on-chain smart contract timelocks for 100% rug-proof safety.
+            </p>
+            <div>
+              <button type="button" onclick="window.boobaApp.nextAllocSlide()" class="btn btn-primary btn-lg" style="border-radius: 9999px; padding: 1rem 3rem; font-weight: 800; font-size: 1.1rem; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 0.65rem;">
+                <span>Next</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </button>
+            </div>
+          </div>
+        
+          <!-- SLIDE 1: 20% STAKING & YIELD -->
+          <div class="coinbase-alloc-slide" id="allocSlide1">
+            <h2 class="coinbase-hero-title" style="font-size: clamp(2.4rem, 4.5vw, 3.8rem); font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.025em; color: #FFFFFF;">
+              Staking & Multiplier Yield
+            </h2>
+            <p class="coinbase-hero-desc" style="font-size: clamp(1.05rem, 1.8vw, 1.25rem); color: var(--text-secondary); line-height: 1.7; max-width: 580px; margin-bottom: 2.5rem;">
+              200 Million tokens (20% of total supply) dedicated to staking pools and dynamic citizen passport multipliers. Lock $BOOBA to earn high-yield compounding APY and amplify daily rewards across the ecosystem.
+            </p>
+            <div>
+              <button type="button" onclick="window.boobaApp.nextAllocSlide()" class="btn btn-primary btn-lg" style="border-radius: 9999px; padding: 1rem 3rem; font-weight: 800; font-size: 1.1rem; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 0.65rem;">
+                <span>Next</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </button>
+            </div>
+          </div>
+        
+          <!-- SLIDE 2: 15% MARKETING -->
+          <div class="coinbase-alloc-slide" id="allocSlide2">
+            <h2 class="coinbase-hero-title" style="font-size: clamp(2.4rem, 4.5vw, 3.8rem); font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.025em; color: #FFFFFF;">
+              Marketing & Growth
+            </h2>
+            <p class="coinbase-hero-desc" style="font-size: clamp(1.05rem, 1.8vw, 1.25rem); color: var(--text-secondary); line-height: 1.7; max-width: 580px; margin-bottom: 2.5rem;">
+              150 Million tokens (15% of total supply) allocated for global viral marketing, international PR, Tier-1 crypto influencer campaigns, and rapid worldwide user acquisition.
+            </p>
+            <div>
+              <button type="button" onclick="window.boobaApp.nextAllocSlide()" class="btn btn-primary btn-lg" style="border-radius: 9999px; padding: 1rem 3rem; font-weight: 800; font-size: 1.1rem; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 0.65rem;">
+                <span>Next</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </button>
+            </div>
+          </div>
+        
+          <!-- SLIDE 3: 10% PARTNERS -->
+          <div class="coinbase-alloc-slide" id="allocSlide3">
+            <h2 class="coinbase-hero-title" style="font-size: clamp(2.4rem, 4.5vw, 3.8rem); font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.025em; color: #FFFFFF;">
+              Strategic Partners
+            </h2>
+            <p class="coinbase-hero-desc" style="font-size: clamp(1.05rem, 1.8vw, 1.25rem); color: var(--text-secondary); line-height: 1.7; max-width: 580px; margin-bottom: 2.5rem;">
+              100 Million tokens (10% of total supply) reserved for tier-1 exchange market makers, Web3 venture partners, institutional liquidity backers, and ecosystem alliances.
+            </p>
+            <div>
+              <button type="button" onclick="window.boobaApp.nextAllocSlide()" class="btn btn-primary btn-lg" style="border-radius: 9999px; padding: 1rem 3rem; font-weight: 800; font-size: 1.1rem; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 0.65rem;">
+                <span>Next</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </button>
             </div>
           </div>
 
-          <!-- TOKEN ALLOCATION MULTI-REPRESENTATION VISUALIZER (UNBOXED SINGLE-LINE TABS) & BREAKDOWN -->
-          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center;">
-            
-            <!-- 3D VISUALIZER PANEL (UNBOXED CLEAN CANVAS) -->
-            <div style="text-align: center;">
-              
-              <!-- 3D Mode Switcher Tabs (In One Line) -->
-              <div class="rep-switcher-bar" style="display: inline-flex; flex-wrap: nowrap; gap: 0.5rem; justify-content: center; margin-bottom: 2rem;">
-                <button type="button" id="repTabPie" class="rep-switch-btn active" onclick="window.boobaApp.switchTokenomicsView('pie3d')">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
-                  <span>3D Pie Chart</span>
-                </button>
-                <button type="button" id="repTabColumn" class="rep-switch-btn" onclick="window.boobaApp.switchTokenomicsView('column3d')">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
-                  <span>3D Column Chart</span>
-                </button>
-                <button type="button" id="repTabLine" class="rep-switch-btn" onclick="window.boobaApp.switchTokenomicsView('line3d')">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                  <span>3D Line Graph</span>
-                </button>
+          <!-- SLIDE 4: 10% COMMUNITY DEVELOPMENT -->
+          <div class="coinbase-alloc-slide" id="allocSlide4">
+            <h2 class="coinbase-hero-title" style="font-size: clamp(2.4rem, 4.5vw, 3.8rem); font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.025em; color: #FFFFFF;">
+              Community Development
+            </h2>
+            <p class="coinbase-hero-desc" style="font-size: clamp(1.05rem, 1.8vw, 1.25rem); color: var(--text-secondary); line-height: 1.7; max-width: 580px; margin-bottom: 2.5rem;">
+              100 Million tokens (10% of total supply) dedicated to community developer bounties, creator grants, meme contests, hackathons, and decentralized DAO ecosystem governance.
+            </p>
+            <div>
+              <button type="button" onclick="window.boobaApp.nextAllocSlide()" class="btn btn-primary btn-lg" style="border-radius: 9999px; padding: 1rem 3rem; font-weight: 800; font-size: 1.1rem; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 0.65rem;">
+                <span>Next</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- SLIDE 5: 5% TEAM -->
+          <div class="coinbase-alloc-slide" id="allocSlide5">
+            <h2 class="coinbase-hero-title" style="font-size: clamp(2.4rem, 4.5vw, 3.8rem); font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.025em; color: #FFFFFF;">
+              Core Team & Founders
+            </h2>
+            <p class="coinbase-hero-desc" style="font-size: clamp(1.05rem, 1.8vw, 1.25rem); color: var(--text-secondary); line-height: 1.7; max-width: 580px; margin-bottom: 2.5rem;">
+              50 Million tokens (5% of total supply) allocated to the core development and smart contract engineering team, secured under a transparent 12-month linear smart contract vesting schedule.
+            </p>
+            <div>
+              <button type="button" onclick="window.boobaApp.nextAllocSlide()" class="btn btn-primary btn-lg" style="border-radius: 9999px; padding: 1rem 3rem; font-weight: 800; font-size: 1.1rem; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 0.65rem;">
+                <span>Next</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </button>
+            </div>
+          </div>
+        
               </div>
+            </div>
 
-              <!-- VIEW 1: 3D SOLID ISOMETRIC PIE CHART -->
-              <div id="viewPie3D" style="display: block;">
-                <div class="chart-3d-stage">
-                  <div class="chart-3d-rotator">
-                    <svg width="230" height="230" viewBox="0 0 100 100" style="overflow: visible;">
-                      <!-- 3D Base Thickness Shadow Platform -->
-                      <ellipse cx="50" cy="58" rx="42" ry="42" fill="rgba(0,0,0,0.75)"></ellipse>
-                      <ellipse cx="50" cy="54" rx="41" ry="41" fill="rgba(10, 14, 22, 0.9)" stroke="rgba(243, 186, 47, 0.2)" stroke-width="1.5"></ellipse>
+            <!-- RIGHT COLUMN: EXPANSIVE 2D DIAGRAM (SEAMLESS ON SAME BACKGROUND) -->
+            <div class="coinbase-canvas-col" style="flex: 1.1;">
+              <div class="unboxed-2d-diagram-stage" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 420px; position: relative;">
 
-                      <!-- Solid 3D Pie Slices (Layered & Shaded) -->
-                      <!-- Sector 1: 40% Community (Yellow) - 0 to 144 deg -->
-                      <path d="M50 50 L50 10 A40 40 0 0 1 73.5 82.4 Z" fill="#F3BA2F" style="filter: drop-shadow(0 0 10px rgba(243, 186, 47, 0.5)); stroke: #111; stroke-width: 0.75;"></path>
-                      
-                      <!-- Sector 2: 20% Staking Vault (Purple) - 144 to 216 deg -->
-                      <path d="M50 50 L73.5 82.4 A40 40 0 0 1 26.5 82.4 Z" fill="#8B5CF6" style="filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.5)); stroke: #111; stroke-width: 0.75;"></path>
-                      
-                      <!-- Sector 3: 20% DEX Liquidity (Emerald) - 216 to 288 deg -->
-                      <path d="M50 50 L26.5 82.4 A40 40 0 0 1 11.9 37.6 Z" fill="#10B981" style="filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5)); stroke: #111; stroke-width: 0.75;"></path>
-                      
-                      <!-- Sector 4: 10% Ecosystem (Cyan) - 288 to 324 deg -->
-                      <path d="M50 50 L11.9 37.6 A40 40 0 0 1 26.5 17.6 Z" fill="#06B6D4" style="filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.5)); stroke: #111; stroke-width: 0.75;"></path>
-                      
-                      <!-- Sector 5: 10% Core Team (Orange) - 324 to 360 deg -->
-                      <path d="M50 50 L26.5 17.6 A40 40 0 0 1 50 10 Z" fill="#FF7A00" style="filter: drop-shadow(0 0 8px rgba(255, 122, 0, 0.5)); stroke: #111; stroke-width: 0.75;"></path>
-
-                      <!-- Center Specular Highlight -->
-                      <circle cx="50" cy="50" r="3.5" fill="#FFFFFF" opacity="0.9"></circle>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <!-- VIEW 2: 3D ISOMETRIC COLUMN / BAR CHART -->
-              <div id="viewColumn3D" style="display: none; animation: fadeIn 0.25s ease;">
-                <div class="column-3d-stage">
+                <!-- 2D DIAGRAM CANVAS VIEWPORT (BIGGER & CRISP) -->
+                <div style="position: relative; width: 100%; max-width: 480px; display: flex; align-items: center; justify-content: center; z-index: 10;">
                   
-                  <!-- Col 1: 40% Community (Yellow) -->
-                  <div class="column-3d-bar" style="height: 165px;">
-                    <div class="col-3d-val-tag" style="color: var(--brand-yellow);">40%</div>
-                    <div class="col-3d-front" style="height: 165px; background: linear-gradient(180deg, #F3BA2F 0%, #B8860B 100%); box-shadow: 0 0 15px rgba(243, 186, 47, 0.4);"></div>
-                    <div class="col-3d-top" style="background: #FEE75C;"></div>
-                    <div class="col-3d-side" style="height: 165px; background: #996515;"></div>
+                  <!-- DIAGRAM 1: PRO 2D DONUT PIE CHART (LARGE & EXPANSIVE) -->
+                  <div id="diagPie2D" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+                    <div style="position: relative; width: 340px; height: 340px; display: flex; align-items: center; justify-content: center;">
+                      <svg width="340" height="340" viewBox="0 0 300 300" style="transform: rotate(-90deg); overflow: visible;">
+                        <!-- Track Background -->
+                        <circle cx="150" cy="150" r="110" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="34"></circle>
+                        
+                        <!-- Sector 0: 40% PancakeSwap Liquidity (Yellow) -->
+                        <circle id="pieSlice0" cx="150" cy="150" r="110" fill="none" stroke="#F3BA2F" stroke-width="42" stroke-dasharray="276.46 691.15" stroke-dashoffset="0" style="transition: all 0.4s ease; cursor: pointer; filter: drop-shadow(0 0 16px rgba(243, 186, 47, 0.7));" onclick="window.boobaApp.setAllocSlide(0)"></circle>
+                        
+                        <!-- Sector 1: 20% Staking & Multipliers (Emerald) -->
+                        <circle id="pieSlice1" cx="150" cy="150" r="110" fill="none" stroke="#10B981" stroke-width="34" stroke-dasharray="138.23 691.15" stroke-dashoffset="-276.46" style="transition: all 0.4s ease; cursor: pointer; opacity: 0.55;" onclick="window.boobaApp.setAllocSlide(1)"></circle>
+                        
+                        <!-- Sector 2: 15% Marketing & Growth (Violet) -->
+                        <circle id="pieSlice2" cx="150" cy="150" r="110" fill="none" stroke="#8B5CF6" stroke-width="34" stroke-dasharray="103.67 691.15" stroke-dashoffset="-414.69" style="transition: all 0.4s ease; cursor: pointer; opacity: 0.55;" onclick="window.boobaApp.setAllocSlide(2)"></circle>
+                        
+                        <!-- Sector 3: 10% Strategic Partners (Cyan) -->
+                        <circle id="pieSlice3" cx="150" cy="150" r="110" fill="none" stroke="#06B6D4" stroke-width="34" stroke-dasharray="69.12 691.15" stroke-dashoffset="-518.36" style="transition: all 0.4s ease; cursor: pointer; opacity: 0.55;" onclick="window.boobaApp.setAllocSlide(3)"></circle>
+                        
+                        <!-- Sector 4: 10% Community Development (Royal Blue) -->
+                        <circle id="pieSlice4" cx="150" cy="150" r="110" fill="none" stroke="#3B82F6" stroke-width="34" stroke-dasharray="69.12 691.15" stroke-dashoffset="-587.48" style="transition: all 0.4s ease; cursor: pointer; opacity: 0.55;" onclick="window.boobaApp.setAllocSlide(4)"></circle>
+
+                        <!-- Sector 5: 5% Core Team (Orange) -->
+                        <circle id="pieSlice5" cx="150" cy="150" r="110" fill="none" stroke="#FF7A00" stroke-width="34" stroke-dasharray="34.56 691.15" stroke-dashoffset="-656.60" style="transition: all 0.4s ease; cursor: pointer; opacity: 0.55;" onclick="window.boobaApp.setAllocSlide(5)"></circle>
+                      </svg>
+
+                      <!-- Center Live 2D Readout (Large & Prominent) -->
+                      <div style="position: absolute; text-align: center; pointer-events: none;">
+                        <div id="pieCenterVal" style="font-size: 3rem; font-weight: 900; font-family: var(--font-mono); color: #F3BA2F; line-height: 1; text-shadow: 0 0 20px rgba(243, 186, 47, 0.4);">40%</div>
+                        <div id="pieCenterLbl" style="font-size: 0.95rem; color: var(--text-secondary); margin-top: 0.45rem; font-weight: 800; font-family: var(--font-mono); letter-spacing: 0.02em;">400M $BOOBA</div>
+                      </div>
+                    </div>
                   </div>
 
-                  <!-- Col 2: 20% Vault (Purple) -->
-                  <div class="column-3d-bar" style="height: 95px;">
-                    <div class="col-3d-val-tag" style="color: var(--accent-purple);">20%</div>
-                    <div class="col-3d-front" style="height: 95px; background: linear-gradient(180deg, #8B5CF6 0%, #6D28D9 100%); box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);"></div>
-                    <div class="col-3d-top" style="background: #C4B5FD;"></div>
-                    <div class="col-3d-side" style="height: 95px; background: #4C1D95;"></div>
+                  <!-- DIAGRAM 2: PRO 2D FLAT BAR GRAPH (6 BARS) -->
+                  <div id="diagBar2D" style="display: none; width: 100%; height: 260px; align-items: flex-end; justify-content: space-between; padding: 0 0.5rem; gap: 0.4rem;">
+                    <!-- Bar 0 (40% - 175px) -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.55rem; cursor: pointer; flex: 1;" onclick="window.boobaApp.setAllocSlide(0)">
+                      <span id="barVal0" style="font-size: 0.88rem; font-weight: 800; color: #F3BA2F; transform: scale(1.15); font-family: var(--font-mono);">40%</span>
+                      <div id="barCol0" style="width: 100%; max-width: 42px; height: 175px; background: #F3BA2F; border-radius: 8px 8px 3px 3px; box-shadow: 0 0 20px rgba(243, 186, 47, 0.6); opacity: 1; transition: all 0.35s ease;"></div>
+                      <span style="font-size: 0.72rem; color: #FFFFFF; font-weight: 700; font-family: var(--font-mono);">400M</span>
+                    </div>
+
+                    <!-- Bar 1 (20% - 95px) -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.55rem; cursor: pointer; flex: 1;" onclick="window.boobaApp.setAllocSlide(1)">
+                      <span id="barVal1" style="font-size: 0.88rem; font-weight: 800; color: #10B981; font-family: var(--font-mono);">20%</span>
+                      <div id="barCol1" style="width: 100%; max-width: 42px; height: 95px; background: #10B981; border-radius: 8px 8px 3px 3px; opacity: 0.45; transition: all 0.35s ease;"></div>
+                      <span style="font-size: 0.72rem; color: var(--text-secondary); font-family: var(--font-mono);">200M</span>
+                    </div>
+
+                    <!-- Bar 2 (15% - 72px) -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.55rem; cursor: pointer; flex: 1;" onclick="window.boobaApp.setAllocSlide(2)">
+                      <span id="barVal2" style="font-size: 0.88rem; font-weight: 800; color: #8B5CF6; font-family: var(--font-mono);">15%</span>
+                      <div id="barCol2" style="width: 100%; max-width: 42px; height: 72px; background: #8B5CF6; border-radius: 8px 8px 3px 3px; opacity: 0.45; transition: all 0.35s ease;"></div>
+                      <span style="font-size: 0.72rem; color: var(--text-secondary); font-family: var(--font-mono);">150M</span>
+                    </div>
+
+                    <!-- Bar 3 (10% - 52px) -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.55rem; cursor: pointer; flex: 1;" onclick="window.boobaApp.setAllocSlide(3)">
+                      <span id="barVal3" style="font-size: 0.88rem; font-weight: 800; color: #06B6D4; font-family: var(--font-mono);">10%</span>
+                      <div id="barCol3" style="width: 100%; max-width: 42px; height: 52px; background: #06B6D4; border-radius: 8px 8px 3px 3px; opacity: 0.45; transition: all 0.35s ease;"></div>
+                      <span style="font-size: 0.72rem; color: var(--text-secondary); font-family: var(--font-mono);">100M</span>
+                    </div>
+
+                    <!-- Bar 4 (10% - 52px) -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.55rem; cursor: pointer; flex: 1;" onclick="window.boobaApp.setAllocSlide(4)">
+                      <span id="barVal4" style="font-size: 0.88rem; font-weight: 800; color: #3B82F6; font-family: var(--font-mono);">10%</span>
+                      <div id="barCol4" style="width: 100%; max-width: 42px; height: 52px; background: #3B82F6; border-radius: 8px 8px 3px 3px; opacity: 0.45; transition: all 0.35s ease;"></div>
+                      <span style="font-size: 0.72rem; color: var(--text-secondary); font-family: var(--font-mono);">100M</span>
+                    </div>
+
+                    <!-- Bar 5 (5% - 28px) -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.55rem; cursor: pointer; flex: 1;" onclick="window.boobaApp.setAllocSlide(5)">
+                      <span id="barVal5" style="font-size: 0.88rem; font-weight: 800; color: #FF7A00; font-family: var(--font-mono);">5%</span>
+                      <div id="barCol5" style="width: 100%; max-width: 42px; height: 28px; background: #FF7A00; border-radius: 8px 8px 3px 3px; opacity: 0.45; transition: all 0.35s ease;"></div>
+                      <span style="font-size: 0.72rem; color: var(--text-secondary); font-family: var(--font-mono);">50M</span>
+                    </div>
                   </div>
 
-                  <!-- Col 3: 20% DEX LP (Emerald) -->
-                  <div class="column-3d-bar" style="height: 95px;">
-                    <div class="col-3d-val-tag" style="color: var(--accent-emerald);">20%</div>
-                    <div class="col-3d-front" style="height: 95px; background: linear-gradient(180deg, #10B981 0%, #047857 100%); box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);"></div>
-                    <div class="col-3d-top" style="background: #6EE7B7;"></div>
-                    <div class="col-3d-side" style="height: 95px; background: #064E3B;"></div>
-                  </div>
-
-                  <!-- Col 4: 10% Ecosystem (Cyan) -->
-                  <div class="column-3d-bar" style="height: 55px;">
-                    <div class="col-3d-val-tag" style="color: var(--accent-cyan);">10%</div>
-                    <div class="col-3d-front" style="height: 55px; background: linear-gradient(180deg, #06B6D4 0%, #0891B2 100%); box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);"></div>
-                    <div class="col-3d-top" style="background: #67E8F9;"></div>
-                    <div class="col-3d-side" style="height: 55px; background: #164E63;"></div>
-                  </div>
-
-                  <!-- Col 5: 10% Team (Orange) -->
-                  <div class="column-3d-bar" style="height: 55px;">
-                    <div class="col-3d-val-tag" style="color: var(--accent-orange);">10%</div>
-                    <div class="col-3d-front" style="height: 55px; background: linear-gradient(180deg, #FF7A00 0%, #C2410C 100%); box-shadow: 0 0 10px rgba(255, 122, 0, 0.4);"></div>
-                    <div class="col-3d-top" style="background: #FDBA74;"></div>
-                    <div class="col-3d-side" style="height: 55px; background: #7C2D12;"></div>
-                  </div>
-
-                </div>
-              </div>
-
-              <!-- VIEW 3: 3D ISOMETRIC LINE GRAPH -->
-              <div id="viewLine3D" style="display: none; animation: fadeIn 0.25s ease;">
-                <div class="linegraph-3d-stage">
-                  <div class="linegraph-3d-plane">
-                    <svg width="100%" height="180" viewBox="0 0 360 140" style="overflow: visible;">
+                  <!-- DIAGRAM 3: PRO 2D LINE GRAPH (6 NODES) -->
+                  <div id="diagLine2D" style="display: none; width: 100%; height: 260px; align-items: center; justify-content: center;">
+                    <svg width="100%" height="220" viewBox="0 0 380 180" style="overflow: visible;">
                       <defs>
-                        <linearGradient id="line3dGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stop-color="#F3BA2F" stop-opacity="0.45"></stop>
+                        <linearGradient id="lineGrad2DPro" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stop-color="#F3BA2F" stop-opacity="0.4"></stop>
                           <stop offset="100%" stop-color="#F3BA2F" stop-opacity="0.0"></stop>
                         </linearGradient>
                       </defs>
-
-                      <!-- 3D Perspective Grid Lines -->
-                      <line x1="20" y1="120" x2="340" y2="120" stroke="rgba(255,255,255,0.15)" stroke-dasharray="3,3"></line>
-                      <line x1="20" y1="80" x2="340" y2="80" stroke="rgba(255,255,255,0.1)" stroke-dasharray="3,3"></line>
-                      <line x1="20" y1="40" x2="340" y2="40" stroke="rgba(255,255,255,0.1)" stroke-dasharray="3,3"></line>
-
-                      <!-- 3D Area Gradient Fill -->
-                      <polygon points="30,120 30,25 105,75 180,75 255,100 330,100 330,120" fill="url(#line3dGrad)"></polygon>
-
-                      <!-- 3D Elevated Polyline Ribbon -->
-                      <polyline points="30,25 105,75 180,75 255,100 330,100" fill="none" stroke="#F3BA2F" stroke-width="4" style="filter: drop-shadow(0 6px 8px rgba(243,186,47,0.6)); stroke-linecap: round; stroke-linejoin: round;"></polyline>
-
-                      <!-- Glowing 3D Data Nodes & Drop Indicators -->
-                      <!-- Node 1: Community (400M) -->
-                      <line x1="30" y1="25" x2="30" y2="120" stroke="rgba(243,186,47,0.3)" stroke-width="1.5" stroke-dasharray="2,2"></line>
-                      <circle cx="30" cy="25" r="5.5" fill="#F3BA2F" stroke="#FFFFFF" stroke-width="2"></circle>
-                      <text x="30" y="15" fill="#F3BA2F" font-size="9" font-weight="bold" font-family="monospace" text-anchor="middle">400M</text>
-
-                      <!-- Node 2: Vault (200M) -->
-                      <line x1="105" y1="75" x2="105" y2="120" stroke="rgba(139,92,246,0.3)" stroke-width="1.5" stroke-dasharray="2,2"></line>
-                      <circle cx="105" cy="75" r="5" fill="#8B5CF6" stroke="#FFFFFF" stroke-width="1.5"></circle>
-                      <text x="105" y="65" fill="#C4B5FD" font-size="9" font-weight="bold" font-family="monospace" text-anchor="middle">200M</text>
-
-                      <!-- Node 3: LP (200M) -->
-                      <line x1="180" y1="75" x2="180" y2="120" stroke="rgba(16,185,129,0.3)" stroke-width="1.5" stroke-dasharray="2,2"></line>
-                      <circle cx="180" cy="75" r="5" fill="#10B981" stroke="#FFFFFF" stroke-width="1.5"></circle>
-                      <text x="180" y="65" fill="#6EE7B7" font-size="9" font-weight="bold" font-family="monospace" text-anchor="middle">200M</text>
-
-                      <!-- Node 4: Ecosystem (100M) -->
-                      <line x1="255" y1="100" x2="255" y2="120" stroke="rgba(6,182,212,0.3)" stroke-width="1.5" stroke-dasharray="2,2"></line>
-                      <circle cx="255" cy="100" r="4.5" fill="#06B6D4" stroke="#FFFFFF" stroke-width="1.5"></circle>
-                      <text x="255" y="90" fill="#67E8F9" font-size="9" font-weight="bold" font-family="monospace" text-anchor="middle">100M</text>
-
-                      <!-- Node 5: Team (100M) -->
-                      <line x1="330" y1="100" x2="330" y2="120" stroke="rgba(255,122,0,0.3)" stroke-width="1.5" stroke-dasharray="2,2"></line>
-                      <circle cx="330" cy="100" r="4.5" fill="#FF7A00" stroke="#FFFFFF" stroke-width="1.5"></circle>
-                      <text x="330" y="90" fill="#FDBA74" font-size="9" font-weight="bold" font-family="monospace" text-anchor="middle">100M</text>
+                      <polygon points="20,155 20,25 88,85 156,105 224,125 292,125 360,145 360,155" fill="url(#lineGrad2DPro)"></polygon>
+                      <polyline points="20,25 88,85 156,105 224,125 292,125 360,145" fill="none" stroke="#F3BA2F" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 4px 12px rgba(243, 186, 47, 0.5));"></polyline>
+                      
+                      <!-- Nodes (6 Allocations) -->
+                      <circle id="lineNode0" cx="20" cy="25" r="9" fill="#F3BA2F" stroke="#FFFFFF" stroke-width="2.5" style="cursor: pointer; filter: drop-shadow(0 0 10px #F3BA2F);" onclick="window.boobaApp.setAllocSlide(0)"></circle>
+                      <circle id="lineNode1" cx="88" cy="85" r="6" fill="#10B981" stroke="#FFFFFF" stroke-width="2" style="cursor: pointer;" onclick="window.boobaApp.setAllocSlide(1)"></circle>
+                      <circle id="lineNode2" cx="156" cy="105" r="6" fill="#8B5CF6" stroke="#FFFFFF" stroke-width="2" style="cursor: pointer;" onclick="window.boobaApp.setAllocSlide(2)"></circle>
+                      <circle id="lineNode3" cx="224" cy="125" r="5" fill="#06B6D4" stroke="#FFFFFF" stroke-width="2" style="cursor: pointer;" onclick="window.boobaApp.setAllocSlide(3)"></circle>
+                      <circle id="lineNode4" cx="292" cy="125" r="5" fill="#3B82F6" stroke="#FFFFFF" stroke-width="2" style="cursor: pointer;" onclick="window.boobaApp.setAllocSlide(4)"></circle>
+                      <circle id="lineNode5" cx="360" cy="145" r="5" fill="#FF7A00" stroke="#FFFFFF" stroke-width="2" style="cursor: pointer;" onclick="window.boobaApp.setAllocSlide(5)"></circle>
                     </svg>
                   </div>
-                </div>
-              </div>
 
-              <!-- Common Legend (Single-line on mobile) -->
-              <div class="token-common-legend">
-                <span class="legend-item"><span style="width: 8px; height: 8px; border-radius: 50%; background: #F3BA2F; flex-shrink: 0;"></span> 40% Community</span>
-                <span class="legend-item"><span style="width: 8px; height: 8px; border-radius: 50%; background: #8B5CF6; flex-shrink: 0;"></span> 20% Vault</span>
-                <span class="legend-item"><span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; flex-shrink: 0;"></span> 20% LP</span>
-                <span class="legend-item"><span style="width: 8px; height: 8px; border-radius: 50%; background: #06B6D4; flex-shrink: 0;"></span> 10% Growth</span>
-                <span class="legend-item"><span style="width: 8px; height: 8px; border-radius: 50%; background: #FF7A00; flex-shrink: 0;"></span> 10% Team</span>
-              </div>
-            </div>
+                </div>
 
-            <!-- ALLOCATION DETAILED CARDS -->
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-              
-              <!-- 1. Community Quests -->
-              <div class="glass-panel" style="padding: 1.15rem 1.5rem; border-radius: 16px; border-left: 4px solid var(--brand-yellow); display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <div style="font-weight: 800; color: #FFFFFF; font-size: 0.95rem;">Community Quests & Airdrops</div>
-                  <div style="font-size: 0.78rem; color: var(--text-secondary);">Earned via daily check-in streaks, bounties, and referrals</div>
-                </div>
-                <div style="text-align: right;">
-                  <div style="font-weight: 800; color: var(--brand-yellow); font-size: 1.1rem; font-family: var(--font-mono);">40%</div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted);">400,000,000 $BOOBA</div>
-                </div>
-              </div>
+                <!-- UNBOXED BOTTOM CONTROLS & POOL INDICATOR (BELOW CHART, NO PILL) -->
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 480px; margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.08); z-index: 10; flex-wrap: wrap; gap: 1rem;">
+                  
+                  <!-- UNBOXED TEXT TABS -->
+                  <div class="unboxed-chart-switcher" style="display: flex; align-items: center; gap: 1.4rem;">
+                    <button type="button" id="repTabPie" class="chart-tab-link active" onclick="window.boobaApp.switch2DDiagram('pie2d')" title="2D Pie Chart">
+                      2D Pie
+                    </button>
+                    <button type="button" id="repTabColumn" class="chart-tab-link" onclick="window.boobaApp.switch2DDiagram('bar2d')" title="2D Bar Chart">
+                      2D Bar
+                    </button>
+                    <button type="button" id="repTabLine" class="chart-tab-link" onclick="window.boobaApp.switch2DDiagram('line2d')" title="2D Line Graph">
+                      2D Line
+                    </button>
+                  </div>
 
-              <!-- 2. Staking Vault Reserves -->
-              <div class="glass-panel" style="padding: 1.15rem 1.5rem; border-radius: 16px; border-left: 4px solid var(--accent-purple); display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <div style="font-weight: 800; color: #FFFFFF; font-size: 0.95rem;">Staking Vault & Yield Reserves</div>
-                  <div style="font-size: 0.78rem; color: var(--text-secondary);">Yield rewards & multiplier bonuses for staking $BOOBA / LP</div>
-                </div>
-                <div style="text-align: right;">
-                  <div style="font-weight: 800; color: var(--accent-purple); font-size: 1.1rem; font-family: var(--font-mono);">20%</div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted);">200,000,000 $BOOBA</div>
-                </div>
-              </div>
+                  <!-- POOL COUNTER -->
+                  <div style="font-size: 0.82rem; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase;">
+                    POOL <span id="allocCurrentIdxNum" style="color: var(--brand-yellow); font-weight: 900;">01</span> / 06
+                  </div>
 
-              <!-- 3. DEX Liquidity Pool -->
-              <div class="glass-panel" style="padding: 1.15rem 1.5rem; border-radius: 16px; border-left: 4px solid var(--accent-emerald); display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <div style="font-weight: 800; color: #FFFFFF; font-size: 0.95rem;">PancakeSwap DEX Liquidity</div>
-                  <div style="font-size: 0.78rem; color: var(--text-secondary);">Locked liquidity pair for seamless decentralized trading</div>
                 </div>
-                <div style="text-align: right;">
-                  <div style="font-weight: 800; color: var(--accent-emerald); font-size: 1.1rem; font-family: var(--font-mono);">20%</div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted);">200,000,000 $BOOBA</div>
-                </div>
-              </div>
 
-              <!-- 4. Ecosystem Growth -->
-              <div class="glass-panel" style="padding: 1.15rem 1.5rem; border-radius: 16px; border-left: 4px solid var(--accent-cyan); display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <div style="font-weight: 800; color: #FFFFFF; font-size: 0.95rem;">Ecosystem Growth & Exchange Listings</div>
-                  <div style="font-size: 0.78rem; color: var(--text-secondary);">Strategic marketing, CEX market making, and ecosystem grants</div>
-                </div>
-                <div style="text-align: right;">
-                  <div style="font-weight: 800; color: var(--accent-cyan); font-size: 1.1rem; font-family: var(--font-mono);">10%</div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted);">100,000,000 $BOOBA</div>
-                </div>
               </div>
-
-              <!-- 5. Core Team & Dev -->
-              <div class="glass-panel" style="padding: 1.15rem 1.5rem; border-radius: 16px; border-left: 4px solid var(--accent-orange); display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <div style="font-weight: 800; color: #FFFFFF; font-size: 0.95rem;">Core Team & Protocol Development</div>
-                  <div style="font-size: 0.78rem; color: var(--text-secondary);">Subject to a 12-month linear smart contract vesting schedule</div>
-                </div>
-                <div style="text-align: right;">
-                  <div style="font-weight: 800; color: var(--accent-orange); font-size: 1.1rem; font-family: var(--font-mono);">10%</div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted);">100,000,000 $BOOBA</div>
-                </div>
-              </div>
-
             </div>
 
           </div>
@@ -3023,85 +3600,287 @@ HOW TO RECOVER YOUR ACCOUNT:
         </div>
       </section>
 
-      <!-- 5. STRATEGIC ECOSYSTEM ROADMAP (PHASES 1-4) -->
-      <section class="section-container" style="background: var(--bg-surface); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); padding: 5rem 0;">
-        <div class="container">
+      <!-- 5. CRYPTO EXPEDITION & PROTOCOL TRAJECTORY MAP -->
+      <section class="crypto-expedition-map-section" id="roadmapMapSection">
+        
+        <!-- Ambient Grid & Radial Glow -->
+        <div class="map-ambient-grid"></div>
+        <div class="map-ambient-radial"></div>
+
+        <div class="container" style="position: relative; z-index: 10;">
           
-          <div class="section-header text-center" style="margin-bottom: 3.5rem;">
-            <h2 class="section-title" style="font-size: clamp(2rem, 3.8vw, 3rem); color: #FFFFFF;">The Booba Strategic Roadmap</h2>
-            <p class="section-subtitle" style="font-size: 1.1rem; color: var(--text-secondary); max-width: 650px; margin: 0.75rem auto 0 auto;">
-              Clear milestones guiding our expansion from genesis digital identity into a multi-chain decentralized kingdom.
-            </p>
+          <!-- SECTION HEADER (BOLD GOLD HEADER TEXT) -->
+          <div style="text-align: center; width: 100%; margin-bottom: 3.5rem;">
+            <h3 style="font-size: clamp(1.4rem, 2.8vw, 2.1rem); font-weight: 900; color: var(--brand-yellow); text-transform: uppercase; letter-spacing: 0.08em; margin: 0; text-shadow: 0 0 25px rgba(243, 186, 47, 0.3);">
+              The Ecosystem Expedition Map
+            </h3>
           </div>
 
-          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+          <!-- WINDING EXPEDITION TRAJECTORY MAP TRACK -->
+          <div class="map-trajectory-container">
             
-            <!-- Phase 1 -->
-            <div class="glass-panel" style="padding: 1.75rem; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.4); position: relative;">
-              <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 1rem; white-space: nowrap;">
-                <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-size: 0.76rem; padding: 0.25rem 0.65rem; margin: 0; display: inline-flex; align-items: center; gap: 0.35rem;">
-                  <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg> Completed
-                </span>
-                <span style="font-weight: 800; font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 0.04em;">PHASE 01</span>
+            <!-- Continuous Glowing Trajectory Spine -->
+            <div class="map-trajectory-spine"></div>
+
+            <!-- LOCATION 01: GENESIS BASECAMP -->
+            <div class="map-waypoint-row">
+              
+              <!-- Left: Location Card -->
+              <div class="map-waypoint-card-col">
+                <div class="map-location-card card-achieved">
+                  <div class="map-location-top">
+                    <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-size: 0.76rem; padding: 0.25rem 0.65rem; margin: 0; display: inline-flex; align-items: center; gap: 0.35rem;">
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg> Reached & Secured
+                    </span>
+                    <span class="map-location-coord">SECTOR 01 // 12.04°N 45.19°E</span>
+                  </div>
+
+                  <h3 class="map-location-title">Genesis Basecamp</h3>
+                  <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0;">
+                    Foundation deployment establishing verifiable decentralized identity, non-custodial cryptography, and immutable smart contracts on BNB Smart Chain.
+                  </p>
+
+                  <ul class="map-location-milestones">
+                    <li>
+                      <div class="map-milestone-icon achieved">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </div>
+                      <span>Verified BEP-20 Smart Contract & Genesis Mint</span>
+                    </li>
+                    <li>
+                      <div class="map-milestone-icon achieved">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </div>
+                      <span>12-Word Non-Custodial BIP-39 Vault Architecture</span>
+                    </li>
+                    <li>
+                      <div class="map-milestone-icon achieved">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </div>
+                      <span>3% Tax Standard & Multi-Wallet EVM Integration</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <h3 style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Genesis & Identity</h3>
-              <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem; color: var(--text-secondary);">
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> 3D Booba Passport Architecture</li>
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> BIP-39 Non-Custodial Keys</li>
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Multi-Wallet Web3 Connect</li>
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Google & Apple OAuth Portal</li>
-              </ul>
+
+              <!-- Center: Beacon Node -->
+              <div class="map-waypoint-beacon-col">
+                <div class="map-beacon-anchor achieved" title="Location 01: Reached">
+                  <span>01</span>
+                </div>
+              </div>
+
+              <!-- Right: Spacer -->
+              <div class="map-waypoint-spacer-col"></div>
             </div>
 
-            <!-- Phase 2 -->
-            <div class="glass-panel" style="padding: 1.75rem; border-radius: 20px; border: 1.5px solid var(--brand-yellow); position: relative; box-shadow: 0 0 25px rgba(243, 186, 47, 0.12);">
-              <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 1rem; white-space: nowrap;">
-                <span class="badge-tag" style="background: var(--brand-yellow); color: #000; font-weight: 800; font-size: 0.76rem; padding: 0.25rem 0.65rem; margin: 0; display: inline-flex; align-items: center; gap: 0.35rem;">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Live & In Progress
-                </span>
-                <span style="font-weight: 800; font-size: 0.85rem; color: var(--brand-yellow); font-family: var(--font-mono); letter-spacing: 0.04em;">PHASE 02</span>
+            <!-- LOCATION 02: THE EXPEDITION FRONTIER (CURRENT ACTIVE MISSION) -->
+            <div class="map-waypoint-row even">
+              
+              <!-- Right: Location Card -->
+              <div class="map-waypoint-card-col">
+                <div class="map-location-card card-active">
+                  <div class="map-location-top">
+                    <span class="badge-tag" style="background: var(--brand-yellow); color: #000; font-weight: 800; font-size: 0.76rem; padding: 0.25rem 0.65rem; margin: 0; display: inline-flex; align-items: center; gap: 0.35rem;">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Active Expedition
+                    </span>
+                    <span class="map-location-coord" style="color: var(--brand-yellow);">SECTOR 02 // 28.75°N 77.20°E</span>
+                  </div>
+
+                  <h3 class="map-location-title" style="color: #FFFFFF;">The Expedition Frontier</h3>
+                  <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0;">
+                    Unleashing community incentives, viral meme bounties, anti-sybil validation, and daily quest streaks to scale active on-chain citizens.
+                  </p>
+
+                  <ul class="map-location-milestones">
+                    <li>
+                      <div class="map-milestone-icon active">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </div>
+                      <span>Daily Check-in Streak Multipliers & Quests</span>
+                    </li>
+                    <li>
+                      <div class="map-milestone-icon active">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </div>
+                      <span>Anti-Sybil Proof Verification Matrix</span>
+                    </li>
+                    <li>
+                      <div class="map-milestone-icon active">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </div>
+                      <span>Community Referral Network & Admin Moderation</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <h3 style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Quest Engine & Growth</h3>
-              <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem; color: var(--text-secondary);">
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Daily Check-in Streak Multipliers</li>
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Bounty & Meme Submissions</li>
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Admin Moderation Dashboard</li>
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Anti-Sybil Referral Tracking</li>
-              </ul>
+
+              <!-- Center: Beacon Node with Radar Ping -->
+              <div class="map-waypoint-beacon-col">
+                <div class="map-beacon-anchor active-expedition" title="Location 02: Current Expedition">
+                  <div class="map-radar-pulse"></div>
+                  <span>02</span>
+                </div>
+              </div>
+
+              <!-- Left: Spacer -->
+              <div class="map-waypoint-spacer-col"></div>
             </div>
 
-            <!-- Phase 3 -->
-            <div class="glass-panel" style="padding: 1.75rem; border-radius: 20px; border: 1px solid var(--border-medium); position: relative;">
-              <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 1rem; white-space: nowrap;">
-                <span class="badge-tag" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.4); font-size: 0.76rem; padding: 0.25rem 0.65rem; margin: 0;">
-                  Upcoming Q3 2026
-                </span>
-                <span style="font-weight: 800; font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 0.04em;">PHASE 03</span>
+            <!-- LOCATION 03: THE AUTONOMOUS CITADEL -->
+            <div class="map-waypoint-row">
+              
+              <!-- Left: Location Card -->
+              <div class="map-waypoint-card-col">
+                <div class="map-location-card card-upcoming">
+                  <div class="map-location-top">
+                    <span class="badge-tag" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.4); font-size: 0.76rem; padding: 0.25rem 0.65rem; margin: 0;">
+                      Approaching Waypoint
+                    </span>
+                    <span class="map-location-coord">SECTOR 03 // 41.90°N 12.49°E</span>
+                  </div>
+
+                  <h3 class="map-location-title">The Autonomous Citadel</h3>
+                  <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0;">
+                    Integrating decentralized token utilities, automated social raid infrastructure, community governance voting, and gamified arcade mechanics.
+                  </p>
+
+                  <ul class="map-location-milestones">
+                    <li>
+                      <div class="map-milestone-icon pending">
+                        <svg width="6" height="6" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg>
+                      </div>
+                      <span>On-Chain Rewards Vault & Dynamic APY Multipliers</span>
+                    </li>
+                    <li>
+                      <div class="map-milestone-icon pending">
+                        <svg width="6" height="6" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg>
+                      </div>
+                      <span>Decentralized Community Bounty & Raid Protocol</span>
+                    </li>
+                    <li>
+                      <div class="map-milestone-icon pending">
+                        <svg width="6" height="6" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg>
+                      </div>
+                      <span>Automated Telegram & Social Raid Engine</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <h3 style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Vault Staking & Arcade</h3>
-              <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem; color: var(--text-secondary);">
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-purple)"><circle cx="4" cy="4" r="3.5"></circle></svg> On-Chain $BOOBA Staking Vault</li>
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-purple)"><circle cx="4" cy="4" r="3.5"></circle></svg> Up to 3.5x Multiplier Boosters</li>
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-purple)"><circle cx="4" cy="4" r="3.5"></circle></svg> Spin-to-Earn Lucky Wheel Arcade</li>
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-purple)"><circle cx="4" cy="4" r="3.5"></circle></svg> Automated Telegram Social Raid Bot</li>
-              </ul>
+
+              <!-- Center: Beacon Node -->
+              <div class="map-waypoint-beacon-col">
+                <div class="map-beacon-anchor upcoming" title="Location 03: Approaching">
+                  <span>03</span>
+                </div>
+              </div>
+
+              <!-- Right: Spacer -->
+              <div class="map-waypoint-spacer-col"></div>
             </div>
 
-            <!-- Phase 4 -->
-            <div class="glass-panel" style="padding: 1.75rem; border-radius: 20px; border: 1px solid var(--border-medium); position: relative;">
-              <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 1rem; white-space: nowrap;">
-                <span class="badge-tag" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.4); font-size: 0.76rem; padding: 0.25rem 0.65rem; margin: 0;">
-                  Upcoming Q4 2026
-                </span>
-                <span style="font-weight: 800; font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 0.04em;">PHASE 04</span>
+            <!-- LOCATION 04: THE SOVEREIGN METROPOLIS -->
+            <div class="map-waypoint-row even">
+              
+              <!-- Right: Location Card -->
+              <div class="map-waypoint-card-col">
+                <div class="map-location-card card-target">
+                  <div class="map-location-top">
+                    <span class="badge-tag" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.4); font-size: 0.76rem; padding: 0.25rem 0.65rem; margin: 0;">
+                      Target Horizon
+                    </span>
+                    <span class="map-location-coord">SECTOR 04 // 35.68°N 139.76°E</span>
+                  </div>
+
+                  <h3 class="map-location-title">The Sovereign Metropolis</h3>
+                  <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0;">
+                    Expanding institutional reach with Soulbound NFT Passport credentials, decentralized DAO community voting, and Tier-1 liquidity listings.
+                  </p>
+
+                  <ul class="map-location-milestones">
+                    <li>
+                      <div class="map-milestone-icon pending">
+                        <svg width="6" height="6" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg>
+                      </div>
+                      <span>On-Chain Soulbound (SBT) Passport Minting</span>
+                    </li>
+                    <li>
+                      <div class="map-milestone-icon pending">
+                        <svg width="6" height="6" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg>
+                      </div>
+                      <span>Decentralized DAO Community Treasury Governance</span>
+                    </li>
+                    <li>
+                      <div class="map-milestone-icon pending">
+                        <svg width="6" height="6" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg>
+                      </div>
+                      <span>Tier-1 Global Centralized Exchange Listings</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <h3 style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Soulbound NFTs & DAO</h3>
-              <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem; color: var(--text-secondary);">
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-cyan)"><circle cx="4" cy="4" r="3.5"></circle></svg> On-Chain SBT Passport Minting</li>
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-cyan)"><circle cx="4" cy="4" r="3.5"></circle></svg> PancakeSwap Syrup Pool Synergy</li>
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-cyan)"><circle cx="4" cy="4" r="3.5"></circle></svg> Decentralized DAO Community Voting</li>
-                <li style="display: flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="var(--accent-cyan)"><circle cx="4" cy="4" r="3.5"></circle></svg> Tier-1 Centralized Exchange Listings</li>
-              </ul>
+
+              <!-- Center: Beacon Node -->
+              <div class="map-waypoint-beacon-col">
+                <div class="map-beacon-anchor target" title="Location 04: Target Horizon">
+                  <span>04</span>
+                </div>
+              </div>
+
+              <!-- Left: Spacer -->
+              <div class="map-waypoint-spacer-col"></div>
+            </div>
+
+            <!-- LOCATION 05: THE INTERGALACTIC NEXUS -->
+            <div class="map-waypoint-row">
+              
+              <!-- Left: Location Card -->
+              <div class="map-waypoint-card-col">
+                <div class="map-location-card card-summit">
+                  <div class="map-location-top">
+                    <span class="badge-tag" style="background: rgba(255, 111, 216, 0.15); color: #FF6FD8; border-color: rgba(255, 111, 216, 0.4); font-size: 0.76rem; padding: 0.25rem 0.65rem; margin: 0;">
+                      Ultimate Summit
+                    </span>
+                    <span class="map-location-coord">SECTOR 05 // 00.00°N 00.00°E (ORBITAL)</span>
+                  </div>
+
+                  <h3 class="map-location-title">The Intergalactic Nexus</h3>
+                  <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0;">
+                    Realizing full decentralization, multi-chain bridge interoperability, and continuous developer innovation grants across the Web3 sphere.
+                  </p>
+
+                  <ul class="map-location-milestones">
+                    <li>
+                      <div class="map-milestone-icon pending">
+                        <svg width="6" height="6" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg>
+                      </div>
+                      <span>Cross-Chain Interoperability Standard & Bridges</span>
+                    </li>
+                    <li>
+                      <div class="map-milestone-icon pending">
+                        <svg width="6" height="6" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg>
+                      </div>
+                      <span>Community Ecosystem Grant & Innovation Fund</span>
+                    </li>
+                    <li>
+                      <div class="map-milestone-icon pending">
+                        <svg width="6" height="6" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg>
+                      </div>
+                      <span>Global Web3 Decentralized Mass Adoption</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Center: Beacon Node -->
+              <div class="map-waypoint-beacon-col">
+                <div class="map-beacon-anchor summit" title="Location 05: Ultimate Summit">
+                  <span>05</span>
+                </div>
+              </div>
+
+              <!-- Right: Spacer -->
+              <div class="map-waypoint-spacer-col"></div>
             </div>
 
           </div>
@@ -3113,11 +3892,8 @@ HOW TO RECOVER YOUR ACCOUNT:
       <section class="section-container" style="padding: 5rem 0;">
         <div class="container" style="max-width: 860px;">
           
-          <div class="section-header text-center" style="margin-bottom: 3.5rem;">
-            <h2 class="section-title" style="font-size: clamp(2rem, 3.8vw, 3rem); color: #FFFFFF;">Frequently Asked Questions</h2>
-            <p class="section-subtitle" style="font-size: 1.05rem; color: var(--text-secondary); margin: 0.75rem auto 0 auto;">
-              Technical details and answers regarding the $BOOBA coin and ecosystem.
-            </p>
+          <div class="section-header showcase-section-header" style="margin-bottom: 3rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+            <h2 class="section-title showcase-main-heading">Frequently Asked <span class="text-gradient-gold">Questions</span></h2>
           </div>
 
           <div id="aboutFaqContainer">
@@ -3130,7 +3906,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                 </span>
               </button>
               <div class="faq-answer-panel" style="display: block;">
-                $BOOBA is the utility and governance token powering the BNB Baby community ecosystem on BNB Smart Chain. It is used to reward quest conquerors, boost staking multiplier yields, spin the arcade wheel, and upgrade digital Passport reputation tiers.
+                $BOOBA is the utility and governance token powering the BNB Baby community ecosystem on BNB Smart Chain. It is used to reward quest conquerors, boost citizen rank multipliers, spin the arcade wheel, and upgrade digital Passport reputation tiers.
               </div>
             </div>
 
@@ -3148,13 +3924,13 @@ HOW TO RECOVER YOUR ACCOUNT:
 
             <div class="faq-item-card" id="faqItem2">
               <button type="button" class="faq-question-btn" onclick="window.boobaApp.toggleAboutFaq(2)">
-                <span>How do the Staking Vault Multipliers work?</span>
+                <span>How do the Citizen Rank Multipliers work?</span>
                 <span class="faq-chevron-icon">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </span>
               </button>
               <div class="faq-answer-panel">
-                When you deposit $BOOBA or $BOOBA/BNB LP tokens into the Booba Vault, the smart contract algorithm calculates a multiplier ranging from 1.5x up to 3.5x based on your lock tier. This multiplier automatically boosts all points and $BOOBA rewards you earn across daily check-ins and bounties.
+                As you complete quests and level up your Booba Passport tier from Level 1 to Level 10, your citizen rank multiplier increases up to 3.5x. This multiplier automatically boosts all points and $BOOBA rewards you earn across daily check-ins and bounties.
               </div>
             </div>
 
@@ -3166,7 +3942,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                 </span>
               </button>
               <div class="faq-answer-panel">
-                Yes. 20% of the total supply (200,000,000 $BOOBA) allocated for the decentralized exchange liquidity pool is locked for 24 months via verifiable smart contract timelocks on BNB Smart Chain.
+                Yes. 40% of the total supply (400,000,000 $BOOBA) allocated for the PancakeSwap decentralized exchange liquidity pool is locked for 24 months via verifiable smart contract timelocks on BNB Smart Chain.
               </div>
             </div>
 
@@ -3178,7 +3954,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                 </span>
               </button>
               <div class="faq-answer-panel">
-                $BOOBA features a strict 0% Buy and 0% Sell tax standard. There are no hidden developer fees, honeypots, or transfer fees, ensuring complete compliance with standard BEP-20 protocols.
+                $BOOBA operates with a transparent 3% Buy and 3% Sell tax on decentralized exchange transactions. The 3% tax is systematically allocated to strengthen PancakeSwap liquidity reserves, fund staking rewards, and accelerate global ecosystem marketing.
               </div>
             </div>
 
@@ -3237,7 +4013,7 @@ HOW TO RECOVER YOUR ACCOUNT:
     const badges = [
       `<span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); display: inline-flex; align-items: center; gap: 0.45rem;"><span class="pulse-dot"></span> BNB Smart Chain Mainnet</span>`,
       `<span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); display: inline-flex; align-items: center; gap: 0.45rem;"><svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"></circle></svg> BEP-20 Standard</span>`,
-      `<span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3); display: inline-flex; align-items: center; gap: 0.45rem;"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> 0% Buy / 0% Sell Tax</span>`
+      `<span class="badge-tag" style="padding: 0.35rem 0.95rem; font-size: 0.82rem; background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3); display: inline-flex; align-items: center; gap: 0.45rem;"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> 3% Buy / 3% Sell Tax</span>`
     ];
 
     let bIdx = 0;
@@ -3325,37 +4101,114 @@ HOW TO RECOVER YOUR ACCOUNT:
     if (this._aboutTvTimer) {
       clearInterval(this._aboutTvTimer);
     }
+    if (this._dexPollTimer) {
+      clearInterval(this._dexPollTimer);
+    }
     this._aboutTvCurrentIndex = 0;
+    this.fetchLiveDexData(); // Immediate live fetch on page load
+    
+    // Auto-refresh DEX on-chain metrics every 20 seconds while page is open
+    this._dexPollTimer = setInterval(() => {
+      this.fetchLiveDexData();
+    }, 20000);
+
     this._aboutTvTimer = setInterval(() => {
       this.nextTvStatSlide();
-    }, 2000); // 2 seconds per slide
+    }, 3500); // 3.5 seconds per slide for comfortable reading
+  }
+
+  async fetchLiveDexData() {
+    const tokenAddress = '0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B';
+    try {
+      const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data && data.pairs && data.pairs.length > 0) {
+        const pair = data.pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+        const price = Number(pair.priceUsd || 0);
+        const vol = Number(pair.volume?.h24 || 0);
+        const liq = Number(pair.liquidity?.usd || 0);
+        const mcap = Number(pair.fdv || (price * 1000000000) || 0);
+
+        this._liveDexData = {
+          title: 'BOOBA Live',
+          pair: `${pair.baseToken?.symbol || 'BOOBA'} / ${pair.quoteToken?.symbol || 'WBNB'} • ${pair.dexId || 'PancakeSwap'}`,
+          price: price < 0.0001 ? `$${price.toFixed(8)}` : `$${price.toFixed(4)}`,
+          volume24h: `$${vol.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+          liquidity: `$${liq.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+          marketCap: `$${mcap.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+        };
+
+        const pEl = document.getElementById('tvLivePrice');
+        const vEl = document.getElementById('tvLiveVol');
+        const lEl = document.getElementById('tvLiveLiq');
+        const mEl = document.getElementById('tvLiveMcap');
+        if (pEl) pEl.textContent = this._liveDexData.price;
+        if (vEl) vEl.textContent = this._liveDexData.volume24h;
+        if (lEl) lEl.textContent = this._liveDexData.liquidity;
+        if (mEl) mEl.textContent = this._liveDexData.marketCap;
+      }
+    } catch (e) {
+      // Gracefully handled if pool is pending initialization
+    }
   }
 
   setTvStatSlide(idx) {
+    const defaultMarket = this._liveDexData || {
+      title: 'BOOBA Live',
+      pair: 'BOOBA / WBNB • PancakeSwap',
+      price: '$0.00',
+      volume24h: '$0.00',
+      liquidity: '$0.00',
+      marketCap: '$0.00'
+    };
+
     const slides = [
       {
-        num: '1,000,000,000',
+        isMarket: true,
+        ...defaultMarket
+      },
+      {
+        num: 'BOOBA COIN',
         color: 'var(--brand-yellow)',
-        label: 'Fixed Total Supply',
-        desc: 'Strictly capped BEP-20 supply natively minted on BNB Smart Chain with zero inflation risk.'
+        label: 'Token Name',
+        desc: 'Official registered token name on the BNB Smart Chain block explorer (BscScan).'
       },
       {
-        num: '0% / 0%',
-        color: 'var(--accent-emerald)',
-        label: 'Tax Structure',
-        desc: 'Zero buy and zero sell transaction taxes for frictionless decentralized trading and micro-transactions.'
+        num: 'BOOBA',
+        color: 'var(--brand-yellow)',
+        label: 'Token Symbol',
+        desc: 'The official BEP-20 native token symbol on BNB Smart Chain.'
       },
       {
-        num: 'Up to 3.5x',
-        color: 'var(--accent-purple)',
-        label: 'Vault Multiplier',
-        desc: 'Dynamic multiplier algorithm boosting daily check-in and bounty earnings for staking $BOOBA and LP tokens.'
-      },
-      {
-        num: 'BIP-39 Non-Custodial',
+        num: 'BNB Baby',
         color: 'var(--accent-cyan)',
-        label: 'Security Standard',
-        desc: 'True client-side 12-word cryptographic seed key generation. Full sovereign ownership from day one.'
+        label: 'Token Nickname',
+        desc: 'The official mascot moniker and community identity of the Booba ecosystem.'
+      },
+      {
+        num: defaultMarket.price,
+        color: '#FFFFFF',
+        label: 'Live DEX Price',
+        desc: 'Real-time market price on PancakeSwap decentralized exchange (BNB Smart Chain).'
+      },
+      {
+        num: defaultMarket.volume24h,
+        color: 'var(--accent-emerald)',
+        label: 'Live 24h Volume',
+        desc: 'Rolling 24-hour decentralized trading volume on PancakeSwap liquidity pools.'
+      },
+      {
+        num: defaultMarket.liquidity,
+        color: 'var(--brand-yellow)',
+        label: 'Total Liquidity',
+        desc: 'Total decentralized pool liquidity depth paired with BNB on PancakeSwap.'
+      },
+      {
+        num: defaultMarket.marketCap,
+        color: '#FFFFFF',
+        label: 'Live Market Cap',
+        desc: 'Current on-chain market capitalization based on circulating valuation.'
       }
     ];
 
@@ -3365,22 +4218,52 @@ HOW TO RECOVER YOUR ACCOUNT:
 
     const frame = document.getElementById('tvStatFrame');
     const chNum = document.getElementById('tvChannelNum');
-    const numEl = document.getElementById('tvStatNumber');
-    const labelEl = document.getElementById('tvStatLabel');
-    const descEl = document.getElementById('tvStatDesc');
+    const chNumMob = document.getElementById('tvChannelNumMob');
 
-    if (frame && numEl && labelEl && descEl) {
+    if (frame) {
       frame.style.opacity = '0';
       frame.style.transform = 'translateY(6px)';
       
       setTimeout(() => {
         if (chNum) chNum.textContent = String(targetIdx + 1);
-        const chNumMob = document.getElementById('tvChannelNumMob');
         if (chNumMob) chNumMob.textContent = String(targetIdx + 1);
-        numEl.textContent = slide.num;
-        numEl.style.color = slide.color;
-        labelEl.textContent = slide.label;
-        descEl.textContent = slide.desc;
+
+        if (slide.isMarket) {
+          frame.innerHTML = `
+            <div class="tv-market-telemetry-widget" style="width: 100%; max-width: 640px; margin: 0 auto;">
+              <div style="text-align: center; margin-bottom: 1rem;">
+                <div style="font-size: 1.4rem; font-weight: 900; color: #FFFFFF; font-family: var(--font-heading);">
+                  ${slide.title}
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; width: 100%; text-align: left;">
+                <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 0.8rem 1rem;">
+                  <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Price</div>
+                  <div style="font-size: 1.18rem; font-weight: 900; color: #FFFFFF; font-family: var(--font-mono);" id="tvLivePrice">${slide.price}</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 0.8rem 1rem;">
+                  <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">24h Volume</div>
+                  <div style="font-size: 1.18rem; font-weight: 900; color: var(--accent-emerald); font-family: var(--font-mono);" id="tvLiveVol">${slide.volume24h}</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 0.8rem 1rem;">
+                  <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Liquidity</div>
+                  <div style="font-size: 1.18rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono);" id="tvLiveLiq">${slide.liquidity}</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 0.8rem 1rem;">
+                  <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Market Cap</div>
+                  <div style="font-size: 1.18rem; font-weight: 900; color: #FFFFFF; font-family: var(--font-mono);" id="tvLiveMcap">${slide.marketCap}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          frame.innerHTML = `
+            <div class="tv-stat-number" id="tvStatNumber" style="color: ${slide.color};">${slide.num}</div>
+            <div class="tv-stat-label" id="tvStatLabel">${slide.label}</div>
+            <div class="tv-stat-desc" id="tvStatDesc">${slide.desc}</div>
+          `;
+        }
         
         frame.style.opacity = '1';
         frame.style.transform = 'translateY(0)';
@@ -3404,6 +4287,151 @@ HOW TO RECOVER YOUR ACCOUNT:
     const cur = typeof this._aboutTvCurrentIndex === 'number' ? this._aboutTvCurrentIndex : 0;
     this.setTvStatSlide(cur - 1);
   }
+
+  
+  // --------------------------------------------------------------------------
+  // COINBASE-STYLE 2D TOKEN ALLOCATION CONTROLLER
+  // --------------------------------------------------------------------------
+  initAllocAutoRotation() {
+    if (this._allocTimer) clearInterval(this._allocTimer);
+    this._currentAllocIdx = 0;
+  }
+
+  setAllocSlide(idx) {
+    const total = 6;
+    const targetIdx = (idx + total) % total;
+    this._currentAllocIdx = targetIdx;
+
+    const data = [
+      { color: '#F3BA2F', percent: '40%', amount: '400,000,000 $BOOBA', label: 'PancakeSwap Liquidity (40%)' },
+      { color: '#10B981', percent: '20%', amount: '200,000,000 $BOOBA', label: 'Staking & Yield (20%)' },
+      { color: '#8B5CF6', percent: '15%', amount: '150,000,000 $BOOBA', label: 'Global Marketing (15%)' },
+      { color: '#06B6D4', percent: '10%', amount: '100,000,000 $BOOBA', label: 'Strategic Partners (10%)' },
+      { color: '#3B82F6', percent: '10%', amount: '100,000,000 $BOOBA', label: 'Community Development (10%)' },
+      { color: '#FF7A00', percent: '5%', amount: '50,000,000 $BOOBA', label: 'Core Team (5%)' }
+    ];
+    const cur = data[targetIdx];
+
+    // 1. Update Left Text Slides
+    for (let i = 0; i < total; i++) {
+      const s = document.getElementById(`allocSlide${i}`);
+      const t = document.querySelectorAll('.alloc-tab-btn')[i];
+      if (s) {
+        if (i === targetIdx) s.classList.add('active');
+        else s.classList.remove('active');
+      }
+      if (t) {
+        if (i === targetIdx) t.classList.add('active');
+        else t.classList.remove('active');
+      }
+    }
+
+    // 2. Update HUD Badge & Center Readout
+    const hudDot = document.getElementById('allocHudDot');
+    const hudLbl = document.getElementById('allocHudLabel');
+    const idxNum = document.getElementById('allocCurrentIdxNum');
+    const centerVal = document.getElementById('pieCenterVal');
+    const centerLbl = document.getElementById('pieCenterLbl');
+
+    if (hudDot) {
+      hudDot.style.background = cur.color;
+      hudDot.style.boxShadow = `0 0 10px ${cur.color}`;
+    }
+    if (hudLbl) hudLbl.textContent = cur.label.toUpperCase();
+    if (idxNum) idxNum.textContent = `0${targetIdx + 1}`;
+    if (centerVal) {
+      centerVal.textContent = cur.percent;
+      centerVal.style.color = cur.color;
+    }
+    if (centerLbl) centerLbl.textContent = cur.amount;
+
+    // 3. Highlight 2D Pie Slices
+    for (let i = 0; i < total; i++) {
+      const slice = document.getElementById(`pieSlice${i}`);
+      if (slice) {
+        if (i === targetIdx) {
+          slice.setAttribute('stroke-width', '42');
+          slice.style.filter = `drop-shadow(0 0 16px ${data[i].color})`;
+          slice.style.opacity = '1';
+        } else {
+          slice.setAttribute('stroke-width', '34');
+          slice.style.filter = 'none';
+          slice.style.opacity = '0.55';
+        }
+      }
+    }
+
+    // 4. Highlight 2D Bar Columns
+    for (let i = 0; i < total; i++) {
+      const col = document.getElementById(`barCol${i}`);
+      const val = document.getElementById(`barVal${i}`);
+      if (col && val) {
+        if (i === targetIdx) {
+          col.style.opacity = '1';
+          col.style.boxShadow = `0 0 20px ${data[i].color}`;
+          val.style.transform = 'scale(1.15)';
+        } else {
+          col.style.opacity = '0.45';
+          col.style.boxShadow = 'none';
+          val.style.transform = 'scale(1)';
+        }
+      }
+    }
+
+    // 5. Highlight 2D Line Nodes
+    for (let i = 0; i < total; i++) {
+      const node = document.getElementById(`lineNode${i}`);
+      if (node) {
+        if (i === targetIdx) {
+          node.setAttribute('r', '9');
+          node.style.filter = `drop-shadow(0 0 10px ${data[i].color})`;
+        } else {
+          node.setAttribute('r', '5');
+          node.style.filter = 'none';
+        }
+      }
+    }
+  }
+
+  nextAllocSlide() {
+    const cur = typeof this._currentAllocIdx === 'number' ? this._currentAllocIdx : 0;
+    this.setAllocSlide(cur + 1);
+  }
+
+  prevAllocSlide() {
+    const cur = typeof this._currentAllocIdx === 'number' ? this._currentAllocIdx : 0;
+    this.setAllocSlide(cur - 1);
+  }
+
+  switch2DDiagram(mode) {
+    const dPie = document.getElementById('diagPie2D');
+    const dBar = document.getElementById('diagBar2D');
+    const dLine = document.getElementById('diagLine2D');
+
+    const tabPie = document.getElementById('repTabPie');
+    const tabBar = document.getElementById('repTabColumn');
+    const tabLine = document.getElementById('repTabLine');
+
+    if (dPie) dPie.style.setProperty('display', 'none', 'important');
+    if (dBar) dBar.style.setProperty('display', 'none', 'important');
+    if (dLine) dLine.style.setProperty('display', 'none', 'important');
+
+    if (tabPie) tabPie.classList.remove('active');
+    if (tabBar) tabBar.classList.remove('active');
+    if (tabLine) tabLine.classList.remove('active');
+
+    if (mode === 'bar2d') {
+      if (dBar) dBar.style.setProperty('display', 'flex', 'important');
+      if (tabBar) tabBar.classList.add('active');
+    } else if (mode === 'line2d') {
+      if (dLine) dLine.style.setProperty('display', 'flex', 'important');
+      if (tabLine) tabLine.classList.add('active');
+    } else {
+      if (dPie) dPie.style.setProperty('display', 'flex', 'important');
+      if (tabPie) tabPie.classList.add('active');
+    }
+  }
+
 
   switchTokenomicsView(mode) {
     const vPie = document.getElementById('viewPie3D');
@@ -3450,8 +4478,42 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
   }
 
-  copyContractAddress() {
-    const addr = document.getElementById('tokenContractAddr')?.textContent || '0x712B00BA99E74f8812cCdA15D5881a7a1c92F3a1';
+
+  // --------------------------------------------------------------------------
+  // SPAROPAY 8-STEP TOKEN SHOWCASE CONTROLLER
+  // --------------------------------------------------------------------------
+  setSparoStep(idx) {
+    this.currentSparoStep = idx;
+    const total = 8;
+    for (let i = 0; i < total; i++) {
+      const slide = document.getElementById(`sparoSlide${i}`);
+      const pill = document.querySelectorAll('.sparo-nav-pill-btn')[i];
+
+      if (i === idx) {
+        if (slide) slide.classList.add('active');
+        if (pill) pill.classList.add('active');
+      } else {
+        if (slide) slide.classList.remove('active');
+        if (pill) pill.classList.remove('active');
+      }
+    }
+  }
+
+  nextSparoStep() {
+    const current = this.currentSparoStep || 0;
+    const next = (current + 1) % 8;
+    this.setSparoStep(next);
+  }
+
+  prevSparoStep() {
+    const current = this.currentSparoStep || 0;
+    const prev = (current - 1 + 8) % 8;
+    this.setSparoStep(prev);
+  }
+
+  copyContractAddress(elementId = 'tokenContractAddr') {
+    const targetEl = document.getElementById(elementId) || document.getElementById('tokenContractAddr') || document.getElementById('homeTokenContractAddr');
+    const addr = targetEl?.textContent?.trim() || '0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B';
     if (navigator && navigator.clipboard) {
       navigator.clipboard.writeText(addr).then(() => {
         const btnText = document.getElementById('copyContractBtnText');
@@ -3459,9 +4521,11 @@ HOW TO RECOVER YOUR ACCOUNT:
           const original = btnText.textContent;
           btnText.textContent = 'Copied!';
           setTimeout(() => { btnText.textContent = original; }, 2000);
+        } else {
+          alert('Official BEP-20 Contract Address copied to clipboard!\n' + addr);
         }
       }).catch(() => {
-        alert(`Contract Address: ${addr}`);
+        prompt('Copy BOOBA BEP-20 Contract Address:', addr);
       });
     } else {
       prompt('Copy BOOBA BEP-20 Contract Address:', addr);
@@ -3520,7 +4584,7 @@ HOW TO RECOVER YOUR ACCOUNT:
               
               <div class="dashboard-user-info" style="display: flex; align-items: center; gap: 1rem;">
                 <div style="position: relative; flex-shrink: 0;">
-                  <img src="${user.avatar || 'assets/mascot.jpg'}" class="dashboard-user-avatar" style="width: 62px; height: 62px; border-radius: 16px; border: 2px solid ${levelInfo.accentColor}; object-fit: cover; box-shadow: 0 0 18px ${levelInfo.glowColor};">
+                  <img src="${levelInfo.mascotImage || 'assets/mascot_level1.png'}" class="dashboard-user-avatar" style="width: 62px; height: 62px; border-radius: 16px; border: 2px solid ${levelInfo.accentColor}; object-fit: contain; background: rgba(0,0,0,0.5); box-shadow: 0 0 18px ${levelInfo.glowColor};">
                   <div style="position: absolute; bottom: -3px; right: -3px; background: ${levelInfo.accentColor}; color: #000000; font-size: 0.65rem; font-weight: 900; padding: 0.1rem 0.4rem; border-radius: 999px; border: 1.5px solid #000000;">
                     Lv.${levelInfo.level}
                   </div>
@@ -3674,14 +4738,14 @@ HOW TO RECOVER YOUR ACCOUNT:
 
           <div class="card card-hover" style="padding: 1.75rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Reputation Trust</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-emerald);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Referral Network</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-cyan);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             </div>
-            <div style="font-size: 2rem; font-weight: 800; color: var(--accent-emerald); line-height: 1.1;">
-              ${Number(user.reputation || 75)}/100
+            <div style="font-size: 2rem; font-weight: 800; color: var(--accent-cyan); line-height: 1.1;">
+              ${Number(user.referralCount || 0)} Citizens
             </div>
-            <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.4rem;">
-              Verified Human Identity
+            <div style="font-size: 0.78rem; color: var(--brand-yellow); margin-top: 0.4rem;">
+              <a href="referrals.html" style="color: var(--brand-yellow); font-weight: 700; text-decoration: none;">Invite & Earn 20% →</a>
             </div>
           </div>
 
@@ -4023,14 +5087,11 @@ HOW TO RECOVER YOUR ACCOUNT:
     container.innerHTML = `
       <div class="container page-content" style="max-width: 1060px;">
         
-        <!-- PAGE HEADER -->
-        <div style="margin-bottom: 2.25rem; text-align: center;">
-          <h1 style="font-size: clamp(2rem, 3.5vw, 2.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin-bottom: 0.5rem;">
-            Account & Security Settings
+        <!-- SETTINGS PAGE HEADER -->
+        <div style="text-align: center; max-width: 860px; margin: 0 auto 3.5rem auto; position: relative; z-index: 10;">
+          <h1 style="font-size: clamp(1.8rem, 4.5vw, 3.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.03em; line-height: 1.12; font-family: var(--font-heading); margin-bottom: 0; white-space: nowrap;">
+            <span class="text-gradient-gold">Account & Security</span>
           </h1>
-          <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0 auto; max-width: 600px;">
-            Update your public profile handle, connect your self-custody Web3 wallet, and manage your level passport credentials.
-          </p>
         </div>
 
         <!-- 2 CLEAN SETTINGS CARDS -->
@@ -4188,225 +5249,1122 @@ HOW TO RECOVER YOUR ACCOUNT:
           </a>
         </div>
 
-        <!-- Apple Vision Pro Style Interactive Passport Carousel -->
-        <div class="passport-carousel-wrapper">
-          
-          <!-- Level Selection Quick Navigation Tabs -->
-          <div class="passport-tier-nav" id="passportTierNav">
-            ${TIERS_CONFIG.map((t, idx) => {
-              const isUnlocked = user.boobaPoints >= t.min;
-              const isCurrent = levelInfo.level === t.level;
-              return `
-                <button type="button" class="passport-tier-pill ${isCurrent ? 'active' : ''}" id="tierPill-${t.level}" onclick="window.boobaApp.selectPassportTier(${t.level})">
-                  <span>Lv.${t.level}</span>
-                  <span style="font-weight: 400; opacity: 0.85;">${t.title}</span>
-                  ${isUnlocked ? `
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="color: var(--accent-emerald);"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  ` : `
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.6;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                  `}
-                </button>
-              `;
-            }).join('')}
-          </div>
+        <!-- PASSPORT PAGE HEADER -->
+        <div style="text-align: center; max-width: 860px; margin: 0 auto 3.5rem auto; position: relative; z-index: 10;">
+          <h1 style="font-size: clamp(1.8rem, 4.5vw, 3.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.03em; line-height: 1.12; font-family: var(--font-heading); margin-bottom: 0; white-space: nowrap;">
+            <span class="text-gradient-gold">Mascots and Passports</span>
+          </h1>
+        </div>
 
-          <!-- Carousel Viewport & Slides -->
-          <div class="passport-carousel-viewport">
+        <!-- Vertical Scrolling Passport Feed (Level 1 to 10 - Pure Transparent Floating) -->
+        <div class="passport-vertical-showcase-feed">
+          ${TIERS_CONFIG.map((t) => {
+            const isUnlocked = user.boobaPoints >= t.min;
+            const isCurrent = levelInfo.level === t.level;
             
-            <!-- Left & Right Floating Navigation Controls -->
-            <button type="button" class="carousel-nav-btn prev-btn" onclick="window.boobaApp.scrollPassportCarousel(-1)" aria-label="Previous Level Card">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-            </button>
+            // Format passport ID to 16-digit card style: 8008 XXXX XXXX XXXX
+            const rawId = (user.passportId || 'BOOBA2026').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            const paddedId = (rawId + '000000000000').slice(0, 12);
+            const cardNumber = `8008 ${paddedId.slice(0,4)} ${paddedId.slice(4,8)} ${paddedId.slice(8,12)}`;
 
-            <button type="button" class="carousel-nav-btn next-btn" onclick="window.boobaApp.scrollPassportCarousel(1)" aria-label="Next Level Card">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </button>
+            // Metallic gradient color stops per tier
+            const palettes = {
+              1: ['#E0A96D', '#CD7F32', '#8C501E', '#3D1700'], // Bronze Metallic
+              2: ['#A7F3D0', '#10B981', '#059669', '#022C19'], // Cyber Emerald
+              3: ['#BFDBFE', '#3B82F6', '#1D4ED8', '#0B1D3A'], // Royal Sapphire
+              4: ['#FDE68A', '#F59E0B', '#D97706', '#3D1700'], // Neon Amber
+              5: ['#A78BFA', '#8B5CF6', '#6D28D9', '#2E1065'], // Obsidian Violet Nebula
+              6: ['#FECDD3', '#F43F5E', '#E11D48', '#4C0519'], // Crimson Ruby Titanium
+              7: ['#FFFFFF', '#E2E8F0', '#94A3B8', '#1E293B'], // Frosted Platinum Mirror
+              8: ['#FFF59D', '#F3BA2F', '#D4AF37', '#543603'], // 24K Imperial Gold
+              9: ['#FDE047', '#1E293B', '#0F172A', '#020617'], // Prismatic Liquid Chrome
+              10: ['#FFFFFF', '#FF6FD8', '#3813C2', '#00F2FE'] // Celestial Quantum Prism
+            };
+            const p = palettes[t.level] || palettes[5];
 
-            <div class="passport-carousel-track" id="passportCarouselTrack">
-              ${TIERS_CONFIG.map((t) => {
-                const isUnlocked = user.boobaPoints >= t.min;
-                const isCurrent = levelInfo.level === t.level;
+            return `
+              <div class="passport-level-section" id="passportSection-${t.level}" data-level="${t.level}">
+                
+                <!-- Background Level Watermark Identification -->
+                <div class="passport-level-backdrop-text">LEVEL ${t.level}</div>
 
-                return `
-                  <div class="passport-slide" id="passportSlide-${t.level}" data-level="${t.level}">
-                    
-                    <!-- 3D Interactive Flip Passport Card -->
+                <!-- Dual Column Stage: Mascot Left, Passport Card Right (Floating Directly on Animated Background) -->
+                <div class="passport-dual-hero-stage">
+                  
+                  <!-- LEFT COLUMN: 3D Living Mascot -->
+                  <div class="passport-hero-mascot-col">
+                    <div class="passport-mascot-glow" style="background: ${t.glowColor};"></div>
+                    <img src="${t.mascotImage || 'assets/mascot_level1.png'}" class="passport-hero-mascot-img mascot-anim-${t.level}" alt="Lv.${t.level} ${t.title}">
+                  </div>
+
+                  <!-- RIGHT COLUMN: Luxury 3D Flip Passport Card -->
+                  <div class="passport-hero-card-col">
                     <div class="passport-card-3d-wrapper" id="cardWrapper-${t.level}" onclick="window.boobaApp.togglePassportCardFlip(${t.level})">
                       <div class="passport-card-inner">
                         
-                        <!-- CARD FRONT: Luxury Identity Card -->
+                        <!-- CARD FRONT: Luxury Metallic Sovereign Card -->
                         <div class="passport-card-face passport-card-front ${t.themeClass}">
                           
-                          <!-- Holographic Watermark -->
-                          <div style="position: absolute; right: -25px; bottom: -25px; opacity: 0.09; pointer-events: none;">
-                            <img src="assets/mascot.jpg" style="width: 260px; height: 260px; border-radius: 50%;">
-                          </div>
+                          <!-- Dynamic Metallic Wave Texture (SVG Layer) -->
+                          <svg class="passport-metallic-bg-svg" viewBox="0 0 480 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                              <linearGradient id="metalGrad-${t.level}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="${p[0]}"/>
+                                <stop offset="35%" stop-color="${p[1]}"/>
+                                <stop offset="70%" stop-color="${p[2]}"/>
+                                <stop offset="100%" stop-color="${p[3]}"/>
+                              </linearGradient>
 
-                          <!-- Card Header Row -->
-                          <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: nowrap; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.85rem;">
-                            <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0; flex: 1;">
-                              <img src="assets/mascot.jpg" style="width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid ${t.accentColor}; flex-shrink: 0;">
-                              <div style="min-width: 0;">
-                                <div style="font-weight: 800; font-size: 0.95rem; letter-spacing: 0.05em; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">BOOBA PASSPORT</div>
-                                <div style="font-size: 0.68rem; color: ${t.accentColor}; font-weight: 700; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">BNB Smart Chain • ${t.material}</div>
+                              <linearGradient id="ribbon1-${t.level}" x1="0%" y1="100%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="${p[3]}" stop-opacity="0.85"/>
+                                <stop offset="50%" stop-color="${p[1]}" stop-opacity="0.95"/>
+                                <stop offset="100%" stop-color="${p[0]}" stop-opacity="0.5"/>
+                              </linearGradient>
+
+                              <linearGradient id="ribbon2-${t.level}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="${p[2]}" stop-opacity="0.9"/>
+                                <stop offset="50%" stop-color="${p[0]}" stop-opacity="0.95"/>
+                                <stop offset="100%" stop-color="${p[3]}" stop-opacity="0.7"/>
+                              </linearGradient>
+
+                              <linearGradient id="specularGlow-${t.level}" x1="0%" y1="0%" x2="100%" y2="80%">
+                                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45"/>
+                                <stop offset="35%" stop-color="#ffffff" stop-opacity="0.1"/>
+                                <stop offset="45%" stop-color="#ffffff" stop-opacity="0.0"/>
+                                <stop offset="75%" stop-color="#ffffff" stop-opacity="0.25"/>
+                                <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0"/>
+                              </linearGradient>
+                            </defs>
+
+                            <!-- Base Metallic Plate -->
+                            <rect width="480" height="300" rx="22" fill="url(#metalGrad-${t.level})"/>
+
+                            <!-- Fine Harmonic Micro-Curved Lines -->
+                            <g stroke="${p[0]}" stroke-width="0.8" stroke-opacity="0.4" fill="none">
+                              <path d="M0,50 Q240,5 480,70"/>
+                              <path d="M0,65 Q240,20 480,85"/>
+                              <path d="M0,80 Q240,35 480,100"/>
+                              <path d="M0,95 Q240,50 480,115"/>
+                              <path d="M0,110 Q240,65 480,130"/>
+                              <path d="M0,125 Q240,80 480,145"/>
+                              <path d="M0,140 Q240,95 480,160"/>
+                            </g>
+
+                            <!-- Dynamic Flowing Ribbon Wave 1 (Deep Bottom-Right) -->
+                            <path d="M0,150 C140,100 260,210 480,120 L480,300 L0,300 Z" fill="url(#ribbon1-${t.level})"/>
+
+                            <!-- Dynamic Flowing Ribbon Wave 2 (Middle Smooth Sine) -->
+                            <path d="M0,210 C160,260 300,140 480,200 L480,300 L0,300 Z" fill="url(#ribbon2-${t.level})"/>
+
+                            <!-- Dynamic Highlight Ridge Line -->
+                            <path d="M0,150 C140,100 260,210 480,120" fill="none" stroke="#FFFFFF" stroke-width="1.2" stroke-opacity="0.55"/>
+
+                            <!-- Specular Light Sheen Overlay -->
+                            <rect width="480" height="300" rx="22" fill="url(#specularGlow-${t.level})"/>
+                          </svg>
+
+                          <!-- Top Row: Mascot Emblem + Brand and Chain Info -->
+                          <div class="passport-card-row-top" style="display: flex; justify-content: space-between; align-items: flex-start; z-index: 5;">
+                            
+                            <!-- Left: Level Mascot Emblem + Citizen Title -->
+                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                              <div class="passport-mascot-emblem-badge" style="border-color: ${t.borderColor}; background: rgba(0,0,0,0.6); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1.5px solid ${t.borderColor};">
+                                <img src="${t.mascotImage || 'assets/mascot_level1.png'}" alt="Lv.${t.level} Mascot" style="width: 100%; height: 100%; object-fit: contain;">
+                              </div>
+                              <div>
+                                <div class="passport-card-title-main" style="font-size: 0.95rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #FFFFFF; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
+                                  BOOBA CITIZEN
+                                </div>
+                                <div class="passport-card-subtitle" style="font-size: 0.68rem; color: rgba(255, 255, 255, 0.75); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
+                                  PASSPORT CARD
+                                </div>
                               </div>
                             </div>
 
-                            <span class="badge-tag theme-badge" style="font-size: 0.76rem; padding: 0.35rem 0.85rem; font-weight: 800; white-space: nowrap; flex-shrink: 0;">
-                              Lv.${t.level} ${t.title}
-                            </span>
+                            <!-- Right: Chain + Material Tag -->
+                            <div style="text-align: right;">
+                              <div class="passport-card-chain-name" style="font-size: 0.82rem; font-weight: 800; color: #FFFFFF; letter-spacing: 0.05em; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
+                                BNB SMART CHAIN
+                              </div>
+                              <div class="passport-card-chain-sub" style="font-size: 0.65rem; color: rgba(255, 255, 255, 0.75); font-weight: 600;">
+                                BEP-20 • ${t.material}
+                              </div>
+                            </div>
                           </div>
 
-                          <!-- EMV Chip & Contactless Symbol -->
-                          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                          <!-- Middle Row: EMV Chip + Contactless Wave -->
+                          <div class="passport-card-row-chip" style="display: flex; align-items: center; gap: 0.85rem; margin-top: 1rem; margin-bottom: 0.5rem; z-index: 5;">
+                            <!-- Gold EMV Chip -->
                             <div class="crypto-emv-chip"></div>
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+
+                            <!-- Contactless NFC Wave Icon -->
+                            <svg class="contactless-wave-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M8.5 16.5a5 5 0 0 1 0-7"/>
+                              <path d="M12 19a9 9 0 0 0 0-14"/>
+                              <path d="M15.5 21.5a13 13 0 0 0 0-19"/>
+                            </svg>
+                          </div>
+
+                          <!-- 16-Digit Embossed Card Number -->
+                          <div class="passport-card-row-number" style="z-index: 5; margin: 0.5rem 0 1.25rem 0;">
+                            <div class="card-number-embossed" style="font-size: clamp(1.2rem, 2.5vw, 1.6rem); letter-spacing: 0.18em;">
+                              ${cardNumber}
                             </div>
                           </div>
 
-                          <!-- Card User Identity Block -->
-                          <div style="display: flex; gap: 1.25rem; align-items: center; margin-bottom: 1.25rem;">
-                            <img src="${user.avatar || 'assets/mascot.jpg'}" style="width: 74px; height: 74px; border-radius: 16px; border: 2.5px solid ${t.accentColor}; object-fit: cover; box-shadow: 0 0 20px ${t.accentColor}40; flex-shrink: 0;">
-                            <div style="min-width: 0; flex: 1;">
-                              <div style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.username}</div>
-                              <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                Passport ID: <span class="text-mono" style="color: ${t.accentColor}; font-weight: 700;">${user.passportId}</span>
+                          <!-- Bottom Row: Cardholder Name, Member Since, Sovereign Tier Tag -->
+                          <div class="passport-card-row-bottom" style="display: flex; justify-content: space-between; align-items: flex-end; z-index: 5;">
+                            
+                            <!-- Cardholder -->
+                            <div>
+                              <div class="passport-card-label" style="font-size: 0.62rem; color: rgba(255, 255, 255, 0.7); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">
+                                CARD HOLDER
                               </div>
-                              <div style="font-size: 0.74rem; margin-top: 0.3rem; font-weight: 700; display: flex; align-items: center; gap: 0.35rem; white-space: nowrap;">
-                                ${isUnlocked ? `
-                                  <span style="color: var(--accent-emerald); display: inline-flex; align-items: center; gap: 0.25rem;">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                    Unlocked • ${isCurrent ? 'Active Tier' : 'Tier Unlocked'}
-                                  </span>
-                                ` : `
-                                  <span style="color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.25rem;">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                    Locked (${t.min.toLocaleString()} BOOBA)
-                                  </span>
-                                `}
+                              <div class="card-embossed-text card-embossed-holder" style="font-size: 0.95rem; font-weight: 800; color: #FFFFFF; letter-spacing: 0.05em; text-transform: uppercase;">
+                                ${user.username || 'BOOBA CITIZEN'}
                               </div>
                             </div>
-                          </div>
 
-                          <!-- Card Footer Info & Flip Prompt -->
-                          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 0.85rem; margin-top: auto; gap: 0.5rem; flex-wrap: nowrap;">
-                            <div style="font-size: 0.74rem; color: var(--text-muted); white-space: nowrap;">
-                              Issued: ${user.memberSince}
+                            <!-- Member Since -->
+                            <div>
+                              <div class="passport-card-label" style="font-size: 0.62rem; color: rgba(255, 255, 255, 0.7); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">
+                                MEMBER SINCE
+                              </div>
+                              <div class="card-embossed-text card-embossed-date" style="font-size: 0.88rem; font-weight: 800; color: #FFFFFF;">
+                                ${new Date(user.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                              </div>
                             </div>
-                            <div class="flip-hint-pill">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                              <span>Click to view criteria</span>
+
+                            <!-- Sovereign Tier Pill -->
+                            <div style="text-align: right;">
+                              <div class="passport-card-label" style="font-size: 0.62rem; color: rgba(255, 255, 255, 0.7); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">
+                                SOVEREIGN TIER
+                              </div>
+                              <div class="passport-tier-badge-pill" style="background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(255, 255, 255, 0.25); color: #FFFFFF; font-size: 0.78rem; font-weight: 800; padding: 0.25rem 0.65rem; border-radius: 8px;">
+                                LV.${t.level} ${t.title.toUpperCase()}
+                              </div>
                             </div>
+
                           </div>
 
                         </div>
 
-                        <!-- CARD BACK: Criteria & Unlocked Perks -->
+                        <!-- CARD BACK: Magnetic Strip, Hologram & Signature -->
                         <div class="passport-card-face passport-card-back ${t.themeClass}">
                           
-                          <!-- Back Header -->
-                          <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: nowrap; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.85rem;">
-                            <div style="min-width: 0; flex: 1;">
-                              <div style="font-size: 0.7rem; color: ${t.accentColor}; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">LEVEL ${t.level} CRITERIA</div>
-                              <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0.15rem 0 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${t.title}</h3>
-                            </div>
-                            <button type="button" class="flip-hint-pill" onclick="event.stopPropagation(); window.boobaApp.togglePassportCardFlip(${t.level})">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                              <span>Flip Front</span>
-                            </button>
-                          </div>
+                          <!-- Magnetic Strip -->
+                          <div class="card-magnetic-strip"></div>
 
-                          <!-- Criteria Breakdown Box -->
-                          <div style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.15rem; margin-bottom: 1rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                              <span style="font-size: 0.74rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Required Points</span>
-                              <strong style="font-size: 1.05rem; color: ${t.accentColor};" class="text-mono">${t.min.toLocaleString()}+ BOOBA</strong>
+                          <div style="padding: 0 0.5rem; display: flex; flex-direction: column; justify-content: space-between; height: calc(100% - 60px); z-index: 5;">
+                            
+                            <!-- Signature Panel & CVV -->
+                            <div style="margin-top: 1rem;">
+                              <div class="card-signature-strip">
+                                <span class="signature-text">${user.username || 'Authorized Citizen'}</span>
+                                <span class="cvv-box">${cardNumber.slice(-3)}</span>
+                              </div>
                             </div>
 
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                              <span style="font-size: 0.74rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Your Status</span>
-                              ${isUnlocked ? `
-                                <span style="color: var(--accent-emerald); font-size: 0.8rem; font-weight: 800; display: inline-flex; align-items: center; gap: 0.25rem;">
-                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                  Unlocked & Active
-                                </span>
-                              ` : `
-                                <span style="color: var(--accent-orange); font-size: 0.8rem; font-weight: 700;">
-                                  Need ${(t.min - user.boobaPoints).toLocaleString()} more BOOBA
-                                </span>
-                              `}
-                            </div>
-                          </div>
+                            <!-- Holographic Authenticity Seal & QR -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0;">
+                              <div class="hologram-security-seal">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                </svg>
+                                <span>SECURE</span>
+                              </div>
 
-                          <!-- Unlocked Privilege Details -->
-                          <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 16px; padding: 1.15rem; margin-bottom: 1.25rem;">
-                            <div style="font-size: 0.7rem; color: ${t.accentColor}; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">
-                              Unlocked Privileges & Perks
-                            </div>
-                            <div style="font-size: 0.95rem; font-weight: 700; color: #FFFFFF; line-height: 1.45;">
-                              ${t.unlock}
-                            </div>
-                          </div>
-
-                          <!-- Action Row inside Card Back -->
-                          <div style="margin-top: auto;">
-                            ${isUnlocked ? `
-                              ${user.seedPhrase ? `
-                                <button type="button" class="btn btn-outline btn-block btn-sm" onclick="event.stopPropagation(); window.boobaApp.showSeedPhraseModal(db.currentUser.seedPhrase, db.currentUser)" style="font-size: 0.82rem; border-color: rgba(255,255,255,0.25);">
-                                  Backup 12-Word Master Key
-                                </button>
-                              ` : `
-                                <div style="text-align: center; font-size: 0.8rem; color: var(--accent-emerald); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
-                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                  <span>Tier Requirements Verified</span>
+                              <div style="text-align: right;">
+                                <div style="font-size: 0.68rem; color: var(--text-secondary); font-family: var(--font-mono);">
+                                  PASSPORT HASH: ${cardNumber.replace(/\s/g, '')}
                                 </div>
-                              `}
-                            ` : `
-                              <a href="quests.html" class="btn btn-primary btn-block btn-sm" onclick="event.stopPropagation();" style="font-size: 0.84rem; text-decoration: none;">
-                                Conquer Quests to Earn ${t.min.toLocaleString()} BOOBA →
-                              </a>
-                            `}
+                                <div style="font-size: 0.68rem; color: ${t.accentColor}; font-weight: 700;">
+                                  ${t.unlock}
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Flip Front Button -->
+                            <div style="display: flex; justify-content: flex-end;">
+                              <button type="button" class="flip-hint-pill" onclick="event.stopPropagation(); window.boobaApp.togglePassportCardFlip(${t.level})" style="padding: 0.25rem 0.75rem; font-size: 0.72rem;">
+                                <span>↺ Flip to Front</span>
+                              </button>
+                            </div>
+
                           </div>
 
                         </div>
 
                       </div>
                     </div>
+                  </div>
+
+                </div>
+
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+
+    this.attachPassportCarouselListeners(levelInfo.level);
+  }
+
+
+  // --------------------------------------------------------------------------
+  // 2. DASHBOARD OVERVIEW VIEW
+  // --------------------------------------------------------------------------
+
+  renderDashboardView(container) {
+    const user = db.currentUser;
+    const stats = db.getStats();
+
+    if (!user) {
+      container.innerHTML = `
+        <div class="container page-content">
+          <div class="card text-center" style="max-width: 540px; margin: 4rem auto; padding: 3.5rem 2.5rem; background: rgba(14, 18, 27, 0.85); backdrop-filter: blur(20px); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 40px rgba(243, 186, 47, 0.15);">
+            <div style="position: relative; width: 88px; height: 88px; margin: 0 auto 1.5rem auto;">
+              <img src="assets/mascot.jpg" style="width: 88px; height: 88px; border-radius: 50%; border: 2.5px solid var(--brand-yellow); box-shadow: 0 0 25px var(--brand-yellow-glow); object-fit: cover;">
+            </div>
+            <h2 style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Access Your Dashboard</h2>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">
+              Sign in with your secret credentials or mint your cryptographic Booba Passport on BNB Smart Chain to view your stats.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+              <a href="signin.html#signin" class="btn btn-primary btn-block btn-lg">Sign In to Account</a>
+              <a href="signin.html#signup" class="btn btn-secondary btn-block">Mint New Passport (+100 BOOBA)</a>
+            </div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const levelInfo = calculateLevel(user.boobaPoints);
+    const isWalletUser = user.authProvider === 'wallet' || (user.email && user.email.includes('@wallet.booba.crypto')) || (user.username && user.username.startsWith('BNB_'));
+    const isWalletConnected = Boolean(user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
+    const formattedWallet = isWalletConnected ? `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}` : '';
+    const isDefaultWalletName = isWalletUser && (user.username || '').startsWith('BNB_');
+    const isAdmin = user.role === 'admin' || user.isAdmin === true || user.username === 'BoobaBoss';
+
+    // Format passport ID to 16-digit card style: 8008 XXXX XXXX XXXX
+    const rawId = (user.passportId || 'BOOBA2026').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    const paddedId = (rawId + '000000000000').slice(0, 12);
+    const cardNumber = `8008 ${paddedId.slice(0,4)} ${paddedId.slice(4,8)} ${paddedId.slice(8,12)}`;
+
+    // Metallic gradient color stops per tier
+    const palettes = {
+      1: ['#E0A96D', '#CD7F32', '#8C501E', '#3D1700'], // Bronze Metallic
+      2: ['#A7F3D0', '#10B981', '#059669', '#022C19'], // Cyber Emerald
+      3: ['#BFDBFE', '#3B82F6', '#1D4ED8', '#0B1D3A'], // Royal Sapphire
+      4: ['#FDE68A', '#F59E0B', '#D97706', '#3D1700'], // Neon Amber
+      5: ['#A78BFA', '#8B5CF6', '#6D28D9', '#2E1065'], // Obsidian Violet Nebula
+      6: ['#FECDD3', '#F43F5E', '#E11D48', '#4C0519'], // Crimson Ruby Titanium
+      7: ['#FFFFFF', '#E2E8F0', '#94A3B8', '#1E293B'], // Frosted Platinum Mirror
+      8: ['#FFF59D', '#F3BA2F', '#D4AF37', '#543603'], // 24K Imperial Gold
+      9: ['#FDE047', '#1E293B', '#0F172A', '#020617'], // Prismatic Liquid Chrome
+      10: ['#FFFFFF', '#FF6FD8', '#3813C2', '#00F2FE'] // Celestial Quantum Prism
+    };
+    const p = palettes[levelInfo.level] || palettes[5];
+    const hasCustomUsername = user.username && !user.username.startsWith('BNB_');
+    const welcomeName = hasCustomUsername ? user.username : (user.passportId || 'Citizen');
+
+    container.innerHTML = `
+      <div class="container page-content">
+        
+        <!-- DASHBOARD WELCOME HEADER -->
+        <div style="text-align: center; margin: 0 auto 2.5rem auto; position: relative; z-index: 10;">
+          <h1 style="font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.03em; line-height: 1.15; font-family: var(--font-heading); margin-bottom: 0;">
+            Welcome, <span class="text-gradient-gold">${welcomeName}</span>
+          </h1>
+        </div>
+
+        <!-- UNBOXED LIVING MASCOT & PASSPORT STAGE (MATCHING PASSPORT.HTML) -->
+        <div class="passport-level-section" id="passportSection-user" data-level="${levelInfo.level}" style="margin-bottom: 2.5rem; padding: 1.5rem 0;">
+          
+          <!-- Background Level Watermark Identification -->
+          <div class="passport-level-backdrop-text">LEVEL ${levelInfo.level}</div>
+
+          <!-- Dual Column Stage: Mascot Left, Passport Card Right (Floating Directly on Animated Background) -->
+          <div class="passport-dual-hero-stage">
+            
+            <!-- LEFT COLUMN: 3D Living Mascot -->
+            <div class="passport-hero-mascot-col">
+              <div class="passport-mascot-glow" style="background: ${levelInfo.glowColor};"></div>
+              <img src="${levelInfo.mascotImage || 'assets/mascot_level1.png'}" class="passport-hero-mascot-img mascot-anim-${levelInfo.level}" alt="Lv.${levelInfo.level} ${levelInfo.title}">
+            </div>
+
+            <!-- RIGHT COLUMN: Luxury 3D Flip Passport Card -->
+            <div class="passport-hero-card-col">
+              <div class="passport-card-3d-wrapper" id="cardWrapper-user" onclick="window.boobaApp.togglePassportCardFlip('user')">
+                <div class="passport-card-inner">
+                  
+                  <!-- CARD FRONT: Luxury Metallic Sovereign Card -->
+                  <div class="passport-card-face passport-card-front ${levelInfo.themeClass}">
+                    
+                    <!-- Dynamic Metallic Wave Texture (SVG Layer) -->
+                    <svg class="passport-metallic-bg-svg" viewBox="0 0 480 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <linearGradient id="dashMetalGrad-${levelInfo.level}" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="${p[0]}"/>
+                          <stop offset="35%" stop-color="${p[1]}"/>
+                          <stop offset="70%" stop-color="${p[2]}"/>
+                          <stop offset="100%" stop-color="${p[3]}"/>
+                        </linearGradient>
+
+                        <linearGradient id="dashRibbon1-${levelInfo.level}" x1="0%" y1="100%" x2="100%" y2="0%">
+                          <stop offset="0%" stop-color="${p[3]}" stop-opacity="0.85"/>
+                          <stop offset="50%" stop-color="${p[1]}" stop-opacity="0.95"/>
+                          <stop offset="100%" stop-color="${p[0]}" stop-opacity="0.5"/>
+                        </linearGradient>
+
+                        <linearGradient id="dashRibbon2-${levelInfo.level}" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="${p[2]}" stop-opacity="0.9"/>
+                          <stop offset="50%" stop-color="${p[0]}" stop-opacity="0.95"/>
+                          <stop offset="100%" stop-color="${p[3]}" stop-opacity="0.7"/>
+                        </linearGradient>
+
+                        <linearGradient id="dashSpecular-${levelInfo.level}" x1="0%" y1="0%" x2="100%" y2="80%">
+                          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45"/>
+                          <stop offset="35%" stop-color="#ffffff" stop-opacity="0.1"/>
+                          <stop offset="45%" stop-color="#ffffff" stop-opacity="0.0"/>
+                          <stop offset="75%" stop-color="#ffffff" stop-opacity="0.25"/>
+                          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0"/>
+                        </linearGradient>
+                      </defs>
+
+                      <!-- Base Metallic Plate -->
+                      <rect width="480" height="300" rx="22" fill="url(#dashMetalGrad-${levelInfo.level})"/>
+
+                      <!-- Fine Harmonic Micro-Curved Lines -->
+                      <g stroke="${p[0]}" stroke-width="0.8" stroke-opacity="0.4" fill="none">
+                        <path d="M0,50 Q240,5 480,70"/>
+                        <path d="M0,65 Q240,20 480,85"/>
+                        <path d="M0,80 Q240,35 480,100"/>
+                        <path d="M0,95 Q240,50 480,115"/>
+                        <path d="M0,110 Q240,65 480,130"/>
+                        <path d="M0,125 Q240,80 480,145"/>
+                        <path d="M0,140 Q240,95 480,160"/>
+                      </g>
+
+                      <!-- Dynamic Flowing Ribbon Wave 1 -->
+                      <path d="M0,150 C140,100 260,210 480,120 L480,300 L0,300 Z" fill="url(#dashRibbon1-${levelInfo.level})"/>
+
+                      <!-- Dynamic Flowing Ribbon Wave 2 -->
+                      <path d="M0,210 C160,260 300,140 480,200 L480,300 L0,300 Z" fill="url(#dashRibbon2-${levelInfo.level})"/>
+
+                      <!-- Dynamic Highlight Ridge Line -->
+                      <path d="M0,150 C140,100 260,210 480,120" fill="none" stroke="#FFFFFF" stroke-width="1.2" stroke-opacity="0.55"/>
+
+                      <!-- Specular Light Sheen Overlay -->
+                      <rect width="480" height="300" rx="22" fill="url(#dashSpecular-${levelInfo.level})"/>
+                    </svg>
+
+                    <!-- Top Row: Mascot Emblem + Brand and Chain Info -->
+                    <div class="passport-card-row-top" style="display: flex; justify-content: space-between; align-items: flex-start; z-index: 5;">
+                      
+                      <!-- Left: Level Mascot Emblem + Citizen Title -->
+                      <div style="display: flex; align-items: center; gap: 0.65rem;">
+                        <div class="passport-mascot-emblem-badge" style="border-color: ${levelInfo.borderColor}; background: rgba(0,0,0,0.6); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1.5px solid ${levelInfo.borderColor};">
+                          <img src="${levelInfo.mascotImage || 'assets/mascot_level1.png'}" alt="Lv.${levelInfo.level} Mascot" style="width: 100%; height: 100%; object-fit: contain;">
+                        </div>
+                        <div>
+                          <div class="passport-card-title-main" style="font-size: 0.95rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #FFFFFF; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
+                            BOOBA CITIZEN
+                          </div>
+                          <div class="passport-card-subtitle" style="font-size: 0.68rem; color: rgba(255, 255, 255, 0.75); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
+                            PASSPORT CARD
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Right: Chain + Material Tag -->
+                      <div style="text-align: right;">
+                        <div class="passport-card-chain-name" style="font-size: 0.82rem; font-weight: 800; color: #FFFFFF; letter-spacing: 0.05em; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
+                          BNB SMART CHAIN
+                        </div>
+                        <div class="passport-card-chain-sub" style="font-size: 0.65rem; color: rgba(255, 255, 255, 0.75); font-weight: 600;">
+                          BEP-20 • ${levelInfo.material}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Middle Row: EMV Chip + Contactless Wave -->
+                    <div class="passport-card-row-chip" style="display: flex; align-items: center; gap: 0.85rem; margin-top: 1rem; margin-bottom: 0.5rem; z-index: 5;">
+                      <!-- Gold EMV Chip -->
+                      <div class="crypto-emv-chip"></div>
+
+                      <!-- Contactless NFC Wave Icon -->
+                      <svg class="contactless-wave-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8.5 16.5a5 5 0 0 1 0-7"/>
+                        <path d="M12 19a9 9 0 0 0 0-14"/>
+                        <path d="M15.5 21.5a13 13 0 0 0 0-19"/>
+                      </svg>
+                    </div>
+
+                    <!-- 16-Digit Embossed Card Number -->
+                    <div class="passport-card-row-number" style="z-index: 5; margin: 0.5rem 0 1.25rem 0;">
+                      <div class="card-number-embossed" style="font-size: clamp(1.2rem, 2.5vw, 1.6rem); letter-spacing: 0.18em;">
+                        ${cardNumber}
+                      </div>
+                    </div>
+
+                    <!-- Bottom Row: Cardholder Name, Member Since, Sovereign Tier Tag -->
+                    <div class="passport-card-row-bottom" style="display: flex; justify-content: space-between; align-items: flex-end; z-index: 5;">
+                      
+                      <!-- Cardholder -->
+                      <div>
+                        <div class="passport-card-label" style="font-size: 0.62rem; color: rgba(255, 255, 255, 0.7); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">
+                          CARD HOLDER
+                        </div>
+                        <div class="card-embossed-text card-embossed-holder" style="font-size: 0.95rem; font-weight: 800; color: #FFFFFF; letter-spacing: 0.05em; text-transform: uppercase;">
+                          ${user.username || 'BOOBA CITIZEN'}
+                        </div>
+                      </div>
+
+                      <!-- Member Since -->
+                      <div>
+                        <div class="passport-card-label" style="font-size: 0.62rem; color: rgba(255, 255, 255, 0.7); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">
+                          MEMBER SINCE
+                        </div>
+                        <div class="card-embossed-text card-embossed-date" style="font-size: 0.88rem; font-weight: 800; color: #FFFFFF;">
+                          ${new Date(user.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                        </div>
+                      </div>
+
+                      <!-- Sovereign Tier Pill -->
+                      <div style="text-align: right;">
+                        <div class="passport-card-label" style="font-size: 0.62rem; color: rgba(255, 255, 255, 0.7); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">
+                          SOVEREIGN TIER
+                        </div>
+                        <div class="passport-tier-badge-pill" style="background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(255, 255, 255, 0.25); color: #FFFFFF; font-size: 0.78rem; font-weight: 800; padding: 0.25rem 0.65rem; border-radius: 8px;">
+                          LV.${levelInfo.level} ${levelInfo.title.toUpperCase()}
+                        </div>
+                      </div>
+
+                    </div>
 
                   </div>
-                `;
-              }).join('')}
+
+                  <!-- CARD BACK: Magnetic Strip, Hologram & Signature -->
+                  <div class="passport-card-face passport-card-back ${levelInfo.themeClass}">
+                    
+                    <!-- Magnetic Strip -->
+                    <div class="card-magnetic-strip"></div>
+
+                    <div style="padding: 0 0.5rem; display: flex; flex-direction: column; justify-content: space-between; height: calc(100% - 60px); z-index: 5;">
+                      
+                      <!-- Signature Panel & CVV -->
+                      <div style="margin-top: 1rem;">
+                        <div class="card-signature-strip">
+                          <span class="signature-text">${user.username || 'Authorized Citizen'}</span>
+                          <span class="cvv-box">${cardNumber.slice(-3)}</span>
+                        </div>
+                      </div>
+
+                      <!-- Holographic Authenticity Seal & QR -->
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0;">
+                        <div class="hologram-security-seal">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                          </svg>
+                          <span>SECURE</span>
+                        </div>
+
+                        <div style="text-align: right;">
+                          <div style="font-size: 0.68rem; color: var(--text-secondary); font-family: var(--font-mono);">
+                            PASSPORT HASH: ${cardNumber.replace(/\s/g, '')}
+                          </div>
+                          <div style="font-size: 0.68rem; color: ${levelInfo.accentColor}; font-weight: 700;">
+                            ${levelInfo.unlock || 'Sovereign Verified'}
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Flip Front Button -->
+                      <div style="display: flex; justify-content: flex-end;">
+                        <button type="button" class="flip-hint-pill" onclick="event.stopPropagation(); window.boobaApp.togglePassportCardFlip('user')" style="padding: 0.25rem 0.75rem; font-size: 0.72rem;">
+                          <span>↺ Flip to Front</span>
+                        </button>
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+
             </div>
+
+          </div>
+
+          <!-- PROFESSIONAL UNBOXED ACTION BUTTONS ROW (BELOW BOTH MASCOT AND CARD) -->
+          <div class="dashboard-hero-actions" style="display: flex; gap: 0.75rem; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem; width: 100%;">
+            
+            ${isAdmin ? `
+              <a href="teamadmin.html" class="btn" style="display: inline-flex; align-items: center; gap: 0.45rem; background: rgba(243, 186, 47, 0.15); border: 1.5px solid var(--brand-yellow); color: var(--brand-yellow); font-weight: 800; font-size: 0.85rem; padding: 0.65rem 1.25rem; border-radius: 12px; text-decoration: none; box-shadow: 0 0 16px rgba(243, 186, 47, 0.25);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>Admin Console</span>
+              </a>
+            ` : ''}
+
+            ${!isWalletConnected ? `
+              <button type="button" class="btn" onclick="window.boobaApp.openAddWalletModal()" style="display: inline-flex; align-items: center; gap: 0.45rem; background: var(--brand-yellow); color: #000000; font-weight: 900; font-size: 0.85rem; border: none; border-radius: 12px; padding: 0.65rem 1.25rem; box-shadow: 0 0 20px rgba(243, 186, 47, 0.4);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+                <span>+ Add Wallet</span>
+              </button>
+            ` : `
+              <button type="button" class="btn btn-secondary" onclick="window.boobaApp.openAddWalletModal()" style="display: inline-flex; align-items: center; gap: 0.45rem; background: rgba(255,255,255,0.06); border: 1.5px solid var(--border-medium); color: #FFFFFF; font-size: 0.85rem; font-weight: 700; border-radius: 12px; padding: 0.65rem 1.15rem;">
+                <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--accent-emerald);"></span>
+                <span class="text-mono">${formattedWallet}</span>
+              </button>
+            `}
+
+            ${isDefaultWalletName ? `
+              <button type="button" class="btn btn-secondary" onclick="window.boobaApp.openAddUsernameModal()" style="display: inline-flex; align-items: center; gap: 0.45rem; background: rgba(255,255,255,0.06); border: 1.5px solid var(--border-medium); color: #FFFFFF; font-weight: 700; font-size: 0.85rem; border-radius: 12px; padding: 0.65rem 1.15rem;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span>+ Add Username</span>
+              </button>
+            ` : ''}
+
+            <a href="withdraw.html" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.45rem; text-decoration: none; border: 1.5px solid var(--border-medium); background: rgba(255,255,255,0.06); color: #FFFFFF; font-size: 0.85rem; font-weight: 700; border-radius: 12px; padding: 0.65rem 1.25rem;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+              <span>Withdraw</span>
+            </a>
+
+          </div>
+
+        </div>
+
+        <!-- 4 BENTO STATS METRICS -->
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+          
+          <div class="card card-hover" style="padding: 1.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Token Balance</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: ${levelInfo.accentColor};"><circle cx="12" cy="12" r="8"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            </div>
+            <div style="font-size: 2rem; font-weight: 800; color: ${levelInfo.accentColor}; line-height: 1.1;" data-counter-target="${user.boobaPoints}">
+              ${Number(user.boobaPoints).toLocaleString()}
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+              <div style="font-size: 0.78rem; color: var(--accent-emerald); font-weight: 600; display: flex; align-items: center; gap: 0.3rem;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Verified
+              </div>
+              <a href="withdraw.html" style="font-size: 0.8rem; color: var(--brand-yellow); font-weight: 800; text-decoration: none;">Withdraw →</a>
+            </div>
+          </div>
+
+          <div class="card card-hover" style="padding: 1.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Daily Streak</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-orange);"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"></path></svg>
+            </div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--accent-orange); line-height: 1.1;">
+              ${Number(user.streakDays || 1)} Days
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.4rem;">
+              Boost multiplier active (1.5x)
+            </div>
+          </div>
+
+          <div class="card card-hover" style="padding: 1.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Completed Quests</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: ${levelInfo.accentColor};"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+            </div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--text-primary); line-height: 1.1;">
+              ${Number(user.completedQuestsCount || 0)}
+            </div>
+            <div style="font-size: 0.78rem; color: var(--brand-yellow); margin-top: 0.4rem;">
+              <a href="quests.html" style="color: var(--brand-yellow); font-weight: 600;">Earn more bounties →</a>
+            </div>
+          </div>
+
+          <div class="card card-hover" style="padding: 1.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Referral Network</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-cyan);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--accent-cyan); line-height: 1.1;">
+              ${Number(user.referralCount || 0)} Citizens
+            </div>
+            <div style="font-size: 0.78rem; color: var(--brand-yellow); margin-top: 0.4rem;">
+              <a href="referrals.html" style="color: var(--brand-yellow); font-weight: 700; text-decoration: none;">Invite & Earn 20% →</a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 3 ACTION HUBS -->
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.75rem; margin-bottom: 2.5rem;">
+          
+          <div class="card card-hover" style="padding: 2.25rem; display: flex; flex-direction: column; justify-content: space-between; border-color: ${levelInfo.borderColor}; background: linear-gradient(180deg, ${levelInfo.glowColor} 0%, rgba(14, 18, 27, 0.9) 100%);">
+            <div>
+              <div class="bento-icon-badge" style="background: ${levelInfo.glowColor}; color: ${levelInfo.accentColor}; border-color: ${levelInfo.borderColor}; margin-bottom: 1.25rem;">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.4rem;">
+                <h3 style="font-size: 1.3rem; margin: 0; color: #FFFFFF;">Digital Booba Passport</h3>
+                <span class="badge-tag" style="background: ${levelInfo.accentColor}; color: #000000; font-weight: 900; font-size: 0.72rem;">Lv.${levelInfo.level}</span>
+              </div>
+              <div style="font-size: 0.75rem; color: ${levelInfo.accentColor}; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.85rem;">
+                ${levelInfo.material} • ${levelInfo.tierBadge}
+              </div>
+              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1.5rem;">
+                Your ${levelInfo.title} card is live on BNB Smart Chain. View your 3D interactive holographic card, cryptographic chip, and tier unlock criteria.
+              </p>
+            </div>
+            <a href="passport.html" class="btn btn-secondary btn-block" style="border-color: ${levelInfo.borderColor};">Open My Passport (${levelInfo.title}) →</a>
+          </div>
+
+          <div class="card card-hover" style="padding: 2.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div class="bento-icon-badge" style="background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); margin-bottom: 1.25rem;">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              </div>
+              <h3 style="font-size: 1.3rem; margin-bottom: 0.6rem; color: #FFFFFF;">Quests & Rewards Vault</h3>
+              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1.5rem;">
+                Complete daily check-ins, social tasks, and bounties to earn instant token rewards and unlock airdrop multipliers.
+              </p>
+            </div>
+            <a href="quests.html" class="btn btn-primary btn-block">Explore Quests & Rewards →</a>
+          </div>
+
+          <div class="card card-hover" style="padding: 2.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div class="bento-icon-badge" style="background: rgba(255, 122, 0, 0.12); color: var(--accent-orange); border-color: rgba(255, 122, 0, 0.3); margin-bottom: 1.25rem;">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              </div>
+              <h3 style="font-size: 1.3rem; margin-bottom: 0.6rem; color: #FFFFFF;">Referrals</h3>
+              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1.5rem;">
+                Invite other crypto community members with your unique referral code <strong class="text-mono" style="color: var(--brand-yellow);">${user.referralCode}</strong> to earn +300 $BOOBA per invite.
+              </p>
+            </div>
+            <a href="referrals.html" class="btn btn-secondary btn-block">Referral Center →</a>
+          </div>
+
+        </div>
+
+        <!-- CRYPTOGRAPHIC SECURITY CENTER -->
+        ${user.seedPhrase ? `
+          <div class="card" style="padding: 2rem; background: rgba(14, 18, 27, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(243, 186, 47, 0.1); border: 1px solid rgba(243, 186, 47, 0.3); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </div>
+              <div>
+                <h4 style="color: #FFFFFF; font-size: 1.1rem; margin-bottom: 0.25rem;">12-Word Non-Custodial Recovery Key</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Your master recovery phrase is stored locally and securely. Never share these words with anyone.</p>
+              </div>
+            </div>
+            <div>
+              <button type="button" class="btn btn-outline btn-sm" onclick="window.boobaApp.showSeedPhraseModal(db.currentUser.seedPhrase, db.currentUser)">
+                Backup & View Phrase
+              </button>
+            </div>
+          </div>
+        ` : ''}
+
+      </div>
+    `;
+  }
+
+  // --------------------------------------------------------------------------
+  // 2B. WITHDRAWAL BRIDGE VIEW (withdraw.html)
+  // --------------------------------------------------------------------------
+
+  renderWithdrawalView(container) {
+    const user = db.currentUser;
+
+    if (!user) {
+      container.innerHTML = `
+        <div class="container page-content">
+          <div class="card text-center" style="max-width: 500px; margin: 4rem auto; padding: 3.5rem 2.5rem; background: rgba(14, 18, 27, 0.85); backdrop-filter: blur(20px); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px;">
+            <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 1.5rem auto;">
+              <img src="assets/mascot.jpg" style="width: 80px; height: 80px; border-radius: 50%; border: 2.5px solid var(--brand-yellow); box-shadow: 0 0 25px var(--brand-yellow-glow); object-fit: cover;">
+            </div>
+            <h2 style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Access Token Withdrawal</h2>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">
+              Sign in with your credentials or connect your Web3 wallet to manage $BOOBA withdrawals to BNB Smart Chain.
+            </p>
+            <a href="signin.html#signin" class="btn btn-primary btn-block btn-lg">Sign In to Account</a>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const isWalletConnected = Boolean(user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
+
+    container.innerHTML = `
+      <div class="container page-content">
+        
+        <!-- Back Navigation -->
+        <div style="margin-bottom: 2rem;">
+          <a href="dashboard.html" class="back-dashboard-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back to Dashboard</span>
+          </a>
+        </div>
+
+        <!-- HERO HEADER -->
+        <div class="card" style="background: linear-gradient(135deg, rgba(243, 186, 47, 0.12) 0%, rgba(14, 18, 27, 0.9) 60%, rgba(7, 9, 14, 0.98) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px; padding: 2.5rem; margin-bottom: 2.5rem; position: relative; overflow: hidden;">
+          <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.1; pointer-events: none;">
+            <img src="assets/mascot.jpg" style="width: 240px; height: 240px; border-radius: 50%;">
+          </div>
+          <div style="position: relative; z-index: 1; max-width: 700px;">
+            <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+              <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); font-weight: 800; font-size: 0.8rem;">
+                <span class="pulse-dot" style="width: 6px; height: 6px;"></span> BEP-20 TOKEN BRIDGE
+              </span>
+              <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-weight: 800; font-size: 0.8rem;">
+                BNB SMART CHAIN MAINNET
+              </span>
+            </div>
+            <h1 style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin-bottom: 0.75rem;">
+              $BOOBA Token Withdrawal Bridge
+            </h1>
+            <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; margin: 0;">
+              Transfer your earned $BOOBA tokens, daily check-in rewards, and bounty distributions directly to your self-custody Web3 wallet.
+            </p>
+          </div>
+        </div>
+
+        <!-- 2-COLUMN MAIN WITHDRAWAL INTERFACE -->
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+          
+          <!-- Column 1: Withdrawal Form Terminal -->
+          <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.75rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 0;">Withdrawal Terminal</h3>
+              <span style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700; display: flex; align-items: center; gap: 0.35rem;">
+                <span class="pulse-dot" style="width: 6px; height: 6px;"></span> 0% Fee Tier
+              </span>
+            </div>
+
+            <!-- Balance Display -->
+            <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(243, 186, 47, 0.25); border-radius: 18px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 0.25rem;">Available $BOOBA Balance</div>
+              <div style="font-size: 2.2rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); line-height: 1.1;">
+                ${Number(user.boobaPoints).toLocaleString()} <span style="font-size: 1.1rem;">$BOOBA</span>
+              </div>
+              <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.4rem;">
+                100% Non-Custodial Snapshot Verified
+              </div>
+            </div>
+
+            <!-- Destination Web3 Wallet Selection -->
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <label class="form-label" style="margin: 0;">Destination Web3 Wallet Address</label>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.openWalletModal()" style="font-size: 0.75rem; color: var(--brand-yellow); padding: 0.15rem 0.5rem;">
+                  ${isWalletConnected ? 'Switch Wallet' : 'Connect Wallet'}
+                </button>
+              </div>
+              <div style="position: relative;">
+                <input type="text" id="withdrawWalletInput" class="form-input text-mono" value="${isWalletConnected ? user.walletAddress : ''}" placeholder="0x... Connect BEP-20 Wallet" style="padding-left: 2.5rem;" ${isWalletConnected ? 'readonly' : ''}>
+                <div style="position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: ${isWalletConnected ? 'var(--accent-emerald)' : 'var(--text-muted)'};">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Network Selection -->
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label class="form-label">Transfer Network</label>
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.15rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <div style="width: 26px; height: 26px; border-radius: 50%; background: #F3BA2F; color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.72rem;">
+                    BNB
+                  </div>
+                  <div>
+                    <div style="font-weight: 800; color: #FFFFFF; font-size: 0.9rem;">BNB Smart Chain (BEP-20)</div>
+                    <div style="font-size: 0.74rem; color: var(--text-muted);">Mainnet Chain ID: 56 (0x38)</div>
+                  </div>
+                </div>
+                <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); font-size: 0.68rem; padding: 0.15rem 0.45rem;">Fast (3s)</span>
+              </div>
+            </div>
+
+            <!-- Amount Input with Percentage Quick Buttons -->
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <label class="form-label" style="margin: 0;">Amount to Withdraw</label>
+                <div style="display: flex; gap: 0.35rem;">
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.floor(${user.boobaPoints} * 0.25)" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">25%</button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.floor(${user.boobaPoints} * 0.50)" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">50%</button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.floor(${user.boobaPoints} * 0.75)" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">75%</button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = ${user.boobaPoints}" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(243,186,47,0.15); color: var(--brand-yellow); font-weight: 800;">MAX</button>
+                </div>
+              </div>
+              <input type="number" id="withdrawAmountInput" class="form-input text-mono" placeholder="0" min="1" max="${user.boobaPoints}" value="${user.boobaPoints}">
+            </div>
+
+            <!-- Bridge Fee & Net Receive Info -->
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; padding: 0.85rem 1.15rem; margin-bottom: 1.75rem;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
+                <span style="color: var(--text-secondary);">Platform Fee:</span>
+                <span style="color: var(--accent-emerald); font-weight: 700;">0% (Free)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
+                <span style="color: var(--text-secondary);">Estimated Gas:</span>
+                <span style="color: #FFFFFF; font-family: var(--font-mono);">0.0005 BNB (~$0.15)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 800; padding-top: 0.4rem; border-top: 1px solid rgba(255,255,255,0.06);">
+                <span style="color: #FFFFFF;">You Will Receive:</span>
+                <span style="color: var(--brand-yellow); font-family: var(--font-mono);">1:1 $BOOBA On-Chain</span>
+              </div>
+            </div>
+
+            <!-- Action Button -->
+            <button type="button" class="btn btn-primary btn-lg btn-block" onclick="window.boobaApp.showTgeWithdrawModal()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 900;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span>Submit Withdrawal Request</span>
+            </button>
+          </div>
+
+          <!-- Column 2: Smart Contract Protocol Notice & Roadmap Box -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            
+            <div class="card" style="padding: 2.25rem; border-radius: 24px; background: linear-gradient(180deg, rgba(243, 186, 47, 0.08) 0%, rgba(14, 18, 27, 0.85) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35);">
+              <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(243, 186, 47, 0.2); border: 1px solid rgba(243, 186, 47, 0.4); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                </div>
+                <div>
+                  <h4 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Mainnet TGE Bridge Protocol</h4>
+                  <div style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Smart Contract Timelock Active</div>
+                </div>
+              </div>
+
+              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1.5rem;">
+                In accordance with BNB Smart Chain decentralized fair-launch protocols, direct on-chain liquidity withdrawals will open concurrently with the official <strong>$BOOBA Token Generation Event (TGE)</strong> and PancakeSwap liquidity lock.
+              </p>
+
+              <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.15rem; margin-bottom: 1.5rem;">
+                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 0.85rem;">TGE Deployment Phasing</div>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                  <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
+                    <span style="width: 20px; height: 20px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 0.1rem;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
+                    <div>
+                      <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF;">Phase 1: Proof-of-Engagement Distribution</div>
+                      <div style="font-size: 0.76rem; color: var(--text-secondary);">400M $BOOBA pool allocated to early bounties and daily streaks. [ACTIVE]</div>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
+                    <span style="width: 20px; height: 20px; border-radius: 50%; background: rgba(243, 186, 47, 0.2); color: var(--brand-yellow); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; flex-shrink: 0; margin-top: 0.1rem;">●</span>
+                    <div>
+                      <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF;">Phase 2: Timelock & Security Audit Verification</div>
+                      <div style="font-size: 0.76rem; color: var(--text-secondary);">24-month DEX liquidity lock contract certification. [IN PROGRESS]</div>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
+                    <span style="width: 20px; height: 20px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; flex-shrink: 0; margin-top: 0.1rem;">3</span>
+                    <div>
+                      <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF;">Phase 3: Official TGE & Live DEX Bridge</div>
+                      <div style="font-size: 0.76rem; color: var(--text-secondary);">Instant 1:1 token minting unlocked for all connected BEP-20 wallets. [UPCOMING]</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.8rem; color: var(--accent-emerald);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Your accumulated balance is 100% snapshot-protected.</span>
+              </div>
+            </div>
+
+            <!-- Quick Access Bento -->
+            <div class="card" style="padding: 1.75rem; border-radius: 20px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h4 style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.25rem;">Need to update your wallet?</h4>
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">Manage your connected Web3 address in Account Settings.</p>
+              </div>
+              <a href="settings.html" class="btn btn-outline btn-sm">Settings →</a>
+            </div>
+
           </div>
 
         </div>
 
       </div>
     `;
-
-    // Initialize carousel active scroll listeners
-    setTimeout(() => {
-      this.attachPassportCarouselListeners(levelInfo.level);
-    }, 50);
   }
 
-  togglePassportCardFlip(level) {
-    const cardWrapper = document.getElementById(`cardWrapper-${level}`);
+  // --------------------------------------------------------------------------
+  // 2C. ACCOUNT, SECURITY & WEB3 SETTINGS VIEW (settings.html)
+  // --------------------------------------------------------------------------
+
+  renderSettingsView(container) {
+    const user = db.currentUser;
+
+    if (!user) {
+      container.innerHTML = `
+        <div class="container page-content">
+          <div class="card text-center" style="max-width: 500px; margin: 4rem auto; padding: 3.5rem 2.5rem; background: rgba(14, 18, 27, 0.85); backdrop-filter: blur(20px); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px;">
+            <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 1.5rem auto;">
+              <img src="assets/mascot.jpg" style="width: 80px; height: 80px; border-radius: 50%; border: 2.5px solid var(--brand-yellow); box-shadow: 0 0 25px var(--brand-yellow-glow); object-fit: cover;">
+            </div>
+            <h2 style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Account Settings</h2>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">
+              Sign in to manage your profile details, connected Web3 wallets, and non-custodial cryptographic keys.
+            </p>
+            <a href="signin.html#signin" class="btn btn-primary btn-block btn-lg">Sign In to Account</a>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const isWalletConnected = Boolean(user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
+    const levelInfo = calculateLevel(user.boobaPoints);
+    const currentAvatar = user.avatar || 'assets/mascot.jpg';
+
+    container.innerHTML = `
+      <div class="container page-content" style="max-width: 1060px;">
+        
+        <!-- SETTINGS PAGE HEADER -->
+        <div style="text-align: center; max-width: 860px; margin: 0 auto 3.5rem auto; position: relative; z-index: 10;">
+          <h1 style="font-size: clamp(1.8rem, 4.5vw, 3.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.03em; line-height: 1.12; font-family: var(--font-heading); margin-bottom: 0; white-space: nowrap;">
+            <span class="text-gradient-gold">Account & Security</span>
+          </h1>
+        </div>
+
+        <!-- 2 CLEAN SETTINGS CARDS -->
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+          
+          <!-- CARD 1: PROFILE & WALLET -->
+          <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.1);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: ${levelInfo.glowColor}; display: flex; align-items: center; justify-content: center; color: ${levelInfo.accentColor}; border: 1px solid ${levelInfo.borderColor};">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </div>
+              <div>
+                <h3 style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin: 0;">Profile & Wallet</h3>
+                <div style="font-size: 0.75rem; color: ${levelInfo.accentColor}; font-weight: 700;">Lv.${levelInfo.level} ${levelInfo.title} • ${levelInfo.material}</div>
+              </div>
+            </div>
+
+            <form id="settingsProfileForm" onsubmit="window.boobaApp.handleSaveProfileSettings(event)">
+              
+              <!-- Avatar Preview & Selection -->
+              <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1.25rem;">
+                <img id="settingsAvatarPreview" src="${currentAvatar}" style="width: 56px; height: 56px; border-radius: 16px; border: 2px solid ${levelInfo.accentColor}; object-fit: cover; box-shadow: 0 0 15px ${levelInfo.glowColor};">
+                <div>
+                  <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.25rem;">Mascot Avatar</div>
+                  <div style="display: flex; gap: 0.35rem;">
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.handleAvatarSelect('assets/mascot.jpg')" style="font-size: 0.7rem; padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.05);">Classic</button>
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.handleAvatarSelect('assets/chart-3d-rings.png')" style="font-size: 0.7rem; padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.05);">Gold 3D</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Username Field -->
+              <div class="form-group" style="margin-bottom: 1.15rem;">
+                <label class="form-label" for="settingsUsernameInput">Username</label>
+                <input type="text" id="settingsUsernameInput" class="form-input" value="${user.username}" placeholder="Enter new username" required>
+                <div id="usernameFeedback" style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.3rem;">
+                  Unique citizen username.
+                </div>
+              </div>
+
+              <!-- Gmail / Email Field -->
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label class="form-label" for="settingsEmailInput">Email / Gmail Address</label>
+                <input type="email" id="settingsEmailInput" class="form-input" value="${user.email}" placeholder="yourname@gmail.com" required>
+              </div>
+
+              <!-- Web3 Wallet Connection -->
+              <div class="form-group" style="margin-bottom: 1.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                  <label class="form-label" style="margin: 0;">Connected Web3 Wallet</label>
+                  <span style="font-size: 0.72rem; color: ${isWalletConnected ? 'var(--accent-emerald)' : 'var(--text-muted)'}; font-weight: 700;">
+                    ${isWalletConnected ? '● Connected' : '○ Not Connected'}
+                  </span>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                  <input type="text" class="form-input text-mono" value="${isWalletConnected ? user.walletAddress : ''}" placeholder="No wallet connected" readonly style="font-size: 0.82rem; background: rgba(0,0,0,0.3);">
+                  <button type="button" class="btn ${isWalletConnected ? 'btn-outline' : 'btn-primary'} btn-sm" onclick="window.boobaApp.openWalletModal()" style="white-space: nowrap;">
+                    ${isWalletConnected ? 'Manage' : 'Connect'}
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" id="saveProfileBtn" class="btn btn-primary btn-block">
+                Save Profile Changes
+              </button>
+            </form>
+          </div>
+
+          <!-- CARD 2: PASSWORD & SECURITY -->
+          <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(243, 186, 47, 0.35);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(243, 186, 47, 0.15); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </div>
+              <div>
+                <h3 style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF; margin: 0;">Change Password</h3>
+                <div style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">12-Word Seed Verification Required</div>
+              </div>
+            </div>
+
+            <form id="settingsPasswordForm" onsubmit="window.boobaApp.handleChangePasswordSettings(event)">
+              
+              <!-- 12-Word Seed Phrase Input -->
+              <div class="form-group" style="margin-bottom: 1.15rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                  <label class="form-label" for="settingsSeedInput" style="margin: 0;">12-Word Seed Phrase</label>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.showSeedPhraseModal(db.currentUser.seedPhrase, db.currentUser)" style="font-size: 0.7rem; padding: 0; color: var(--brand-yellow);">View My Phrase</button>
+                </div>
+                <textarea id="settingsSeedInput" class="form-input text-mono" rows="2" placeholder="word1 word2 word3 ... word12" style="font-size: 0.82rem; resize: none;" required></textarea>
+              </div>
+
+              <!-- New Password -->
+              <div class="form-group" style="margin-bottom: 1.15rem;">
+                <label class="form-label" for="settingsNewPassInput">New Password</label>
+                <input type="password" id="settingsNewPassInput" class="form-input" placeholder="Min 6 characters" required autocomplete="new-password">
+              </div>
+
+              <!-- Confirm New Password -->
+              <div class="form-group" style="margin-bottom: 1.75rem;">
+                <label class="form-label" for="settingsConfirmPassInput">Confirm New Password</label>
+                <input type="password" id="settingsConfirmPassInput" class="form-input" placeholder="Re-enter new password" required autocomplete="new-password">
+              </div>
+
+              <button type="submit" id="savePasswordBtn" class="btn btn-primary btn-block">
+                Verify Seed & Update Password
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+    `;
+  }
+
+  togglePassportCardFlip(levelOrId) {
+    const cardWrapper = document.getElementById(`cardWrapper-${levelOrId}`) || document.getElementById(levelOrId);
     if (cardWrapper) {
       cardWrapper.classList.toggle('is-flipped');
     }
   }
 
-  selectPassportTier(level) {
-    const slide = document.getElementById(`passportSlide-${level}`);
-    const track = document.getElementById('passportCarouselTrack');
-    if (slide && track) {
-      slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  scrollToPassportLevel(level) {
+    const section = document.getElementById(`passportSection-${level}`);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
       document.querySelectorAll('.passport-tier-pill').forEach(p => p.classList.remove('active'));
       const activePill = document.getElementById(`tierPill-${level}`);
       if (activePill) {
@@ -4416,71 +6374,44 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
   }
 
+  selectPassportTier(level) {
+    this.scrollToPassportLevel(level);
+  }
+
   scrollPassportCarousel(direction) {
-    const track = document.getElementById('passportCarouselTrack');
-    if (!track) return;
-    const slides = Array.from(track.querySelectorAll('.passport-slide'));
-    if (slides.length === 0) return;
-
-    const trackCenter = track.scrollLeft + track.clientWidth / 2;
-    let currentIdx = 0;
-    let minDistance = Infinity;
-
-    slides.forEach((slide, idx) => {
-      const slideCenter = slide.offsetLeft + slide.clientWidth / 2;
-      const dist = Math.abs(slideCenter - trackCenter);
-      if (dist < minDistance) {
-        minDistance = dist;
-        currentIdx = idx;
-      }
-    });
-
-    let targetIdx = currentIdx + direction;
-    if (targetIdx < 0) targetIdx = 0;
-    if (targetIdx >= slides.length) targetIdx = slides.length - 1;
-
-    const targetLevel = Number(slides[targetIdx].dataset.level);
-    this.selectPassportTier(targetLevel);
+    // Legacy helper - redirects to next/prev section
+    const currentActive = document.querySelector('.passport-tier-pill.active');
+    let currentLvl = 1;
+    if (currentActive && currentActive.id) {
+      currentLvl = Number(currentActive.id.replace('tierPill-', '')) || 1;
+    }
+    let target = currentLvl + direction;
+    if (target < 1) target = 1;
+    if (target > 10) target = 10;
+    this.scrollToPassportLevel(target);
   }
 
   attachPassportCarouselListeners(defaultLevel) {
-    const track = document.getElementById('passportCarouselTrack');
-    if (!track) return;
-
-    // Scroll to initial user level
-    if (defaultLevel) {
-      const initialSlide = document.getElementById(`passportSlide-${defaultLevel}`);
-      if (initialSlide) {
-        initialSlide.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
-      }
-    }
-
-    let scrollTimeout;
-    track.addEventListener('scroll', () => {
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        const slides = Array.from(track.querySelectorAll('.passport-slide'));
-        const trackCenter = track.scrollLeft + track.clientWidth / 2;
-        let closestLevel = 1;
-        let minDistance = Infinity;
-
-        slides.forEach(slide => {
-          const slideCenter = slide.offsetLeft + slide.clientWidth / 2;
-          const dist = Math.abs(slideCenter - trackCenter);
-          if (dist < minDistance) {
-            minDistance = dist;
-            closestLevel = Number(slide.dataset.level);
+    // Initialize active state observer for vertical scrolling
+    if (typeof IntersectionObserver !== 'undefined') {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const level = entry.target.getAttribute('data-level');
+            if (level) {
+              document.querySelectorAll('.passport-tier-pill').forEach(p => p.classList.remove('active'));
+              const activePill = document.getElementById(`tierPill-${level}`);
+              if (activePill) {
+                activePill.classList.add('active');
+                activePill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+              }
+            }
           }
         });
+      }, { rootMargin: '-20% 0px -60% 0px', threshold: 0.1 });
 
-        document.querySelectorAll('.passport-tier-pill').forEach(p => p.classList.remove('active'));
-        const activePill = document.getElementById(`tierPill-${closestLevel}`);
-        if (activePill) {
-          activePill.classList.add('active');
-          activePill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        }
-      }, 60);
-    });
+      document.querySelectorAll('.passport-level-section').forEach(sec => observer.observe(sec));
+    }
   }
 
   // --------------------------------------------------------------------------
@@ -4526,13 +6457,17 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
 
     const totalBountyPool = quests.reduce((acc, q) => acc + (Number(q.rewardBooba) || 0), 0);
-    const userLevel = user ? calculateLevel(user.boobaPoints) : { level: 1, title: 'Booba Baby' };
+    const userLevel = user ? calculateLevel(user.boobaPoints) : { level: 1, title: 'Booba Builder' };
+
+    const communityCount = quests.filter(q => normalizeCategory(q.category) === 'community').length;
+    const engagementCount = quests.filter(q => normalizeCategory(q.category) === 'engagement').length;
+    const contentCount = quests.filter(q => normalizeCategory(q.category) === 'content').length;
 
     container.innerHTML = `
       <div class="container page-content">
         
         <!-- Top Action & Navigation Row -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.25rem; flex-wrap: wrap; gap: 1rem;">
+        <div style="margin-bottom: 2.25rem;">
           <a href="dashboard.html" class="back-dashboard-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -4540,53 +6475,50 @@ HOW TO RECOVER YOUR ACCOUNT:
             </svg>
             <span>Back to Dashboard</span>
           </a>
-
-          ${user ? `
-            <div style="display: flex; align-items: center; gap: 0.85rem;">
-              <span class="badge-tag" style="background: ${userLevel.glowColor}; color: ${userLevel.accentColor}; border: 1.5px solid ${userLevel.borderColor}; font-size: 0.82rem; padding: 0.4rem 0.95rem; font-weight: 800;">
-                <span class="pulse-dot" style="width: 6px; height: 6px; background: ${userLevel.accentColor};"></span>
-                <span>Lv.${userLevel.level} ${userLevel.title}</span>
-              </span>
-              <a href="passport.html" class="btn btn-outline btn-sm" style="white-space: nowrap; border-color: ${userLevel.borderColor}; color: #FFFFFF;">
-                View Passport →
-              </a>
-            </div>
-          ` : ''}
         </div>
 
-        <!-- LIVE QUESTS SUMMARY HUD BANNER -->
-        <div class="card" style="background: linear-gradient(135deg, rgba(243, 186, 47, 0.12) 0%, rgba(14, 18, 27, 0.85) 60%, rgba(7, 9, 14, 0.95) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px; padding: 2.25rem 2.5rem; margin-bottom: 3rem; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(243, 186, 47, 0.1);">
+        <!-- QUESTS PAGE HEADER -->
+        <div style="text-align: center; max-width: 860px; margin: 0 auto 3.5rem auto; position: relative; z-index: 10;">
+          <h1 style="font-size: clamp(1.8rem, 4.5vw, 3.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.03em; line-height: 1.12; font-family: var(--font-heading); margin-bottom: 0; white-space: nowrap;">
+            <span class="text-gradient-gold">Ecosystem Bounties</span>
+          </h1>
+        </div>
+
+        <!-- 4-METRIC EXECUTIVE HUD BENTO -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.25rem; margin-bottom: 3.5rem;">
           
-          <div style="position: absolute; right: -25px; bottom: -25px; opacity: 0.1; pointer-events: none;">
-            <img src="assets/mascot.jpg" style="width: 260px; height: 260px; border-radius: 50%;">
+          <div class="card card-hover" style="padding: 1.75rem 1.5rem; border-radius: 22px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(243, 186, 47, 0.35); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(243, 186, 47, 0.1);">
+            <div style="font-size: 0.74rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; font-family: var(--font-mono); margin-bottom: 0.4rem;">Total Bounty Pool</div>
+            <div style="font-size: 1.85rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono);">+${totalBountyPool.toLocaleString()} <span style="font-size: 0.95rem; color: var(--text-secondary); font-weight: 700;">$BOOBA</span></div>
+            <div style="font-size: 0.78rem; color: var(--accent-emerald); font-weight: 700; margin-top: 0.35rem; display: flex; align-items: center; gap: 0.35rem;">
+              <span class="pulse-dot" style="width: 5px; height: 5px;"></span> Live Community Yield
+            </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.75rem; position: relative; z-index: 1;">
-            <div>
-              <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Total Bounty Pool</div>
-              <div style="font-size: 2rem; font-weight: 900; color: var(--brand-yellow);" class="text-mono">+${totalBountyPool.toLocaleString()} <span style="font-size: 1.1rem;">BOOBA</span></div>
-              <div style="font-size: 0.78rem; color: var(--accent-emerald); margin-top: 0.25rem; font-weight: 700;">Live Community Rewards</div>
+          <div class="card card-hover" style="padding: 1.75rem 1.5rem; border-radius: 22px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(6, 182, 212, 0.3); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
+            <div style="font-size: 0.74rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; font-family: var(--font-mono); margin-bottom: 0.4rem;">Active Missions</div>
+            <div style="font-size: 1.85rem; font-weight: 900; color: #FFFFFF; font-family: var(--font-mono);">${quests.length} <span style="font-size: 0.95rem; color: var(--text-secondary); font-weight: 700;">Tracks</span></div>
+            <div style="font-size: 0.78rem; color: var(--accent-cyan); font-weight: 700; margin-top: 0.35rem;">
+              Updated Continuously
             </div>
+          </div>
 
-            <div>
-              <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Active Quests</div>
-              <div style="font-size: 2rem; font-weight: 900; color: #FFFFFF;" class="text-mono">${quests.length} <span style="font-size: 1.1rem; color: var(--text-secondary);">Bounties</span></div>
-              <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.25rem;">Updated Regularly</div>
+          <div class="card card-hover" style="padding: 1.75rem 1.5rem; border-radius: 22px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(139, 92, 246, 0.3); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
+            <div style="font-size: 0.74rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; font-family: var(--font-mono); margin-bottom: 0.4rem;">Your Earned Balance</div>
+            <div style="font-size: 1.85rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono);">${user ? Number(user.boobaPoints).toLocaleString() : '0'} <span style="font-size: 0.95rem; color: var(--text-secondary); font-weight: 700;">$BOOBA</span></div>
+            <div style="font-size: 0.78rem; color: var(--accent-purple); font-weight: 700; margin-top: 0.35rem;">
+              ${user ? `${user.completedQuestsCount || 0} missions completed` : 'Sign in to claim'}
             </div>
+          </div>
 
-            <div>
-              <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Your Balance</div>
-              <div style="font-size: 2rem; font-weight: 900; color: var(--brand-yellow);" class="text-mono">${user ? Number(user.boobaPoints).toLocaleString() : '0'} <span style="font-size: 1.1rem;">BOOBA</span></div>
-              <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.25rem;">${user ? `${user.completedQuestsCount || 0} completed` : 'Sign in to track'}</div>
+          <div class="card card-hover" style="padding: 1.75rem 1.5rem; border-radius: 22px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 122, 0, 0.35); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
+            <div style="font-size: 0.74rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; font-family: var(--font-mono); margin-bottom: 0.4rem;">Daily Check-In Streak</div>
+            <div style="font-size: 1.85rem; font-weight: 900; color: var(--accent-orange); font-family: var(--font-mono); display: flex; align-items: center; gap: 0.4rem;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"></path></svg>
+              <span>${user ? user.streakDays || 1 : 1} Days</span>
             </div>
-
-            <div>
-              <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Daily Streak Status</div>
-              <div style="font-size: 2rem; font-weight: 900; color: var(--accent-orange); display: flex; align-items: center; gap: 0.4rem;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"></path></svg>
-                <span class="text-mono">${user ? user.streakDays || 1 : 1} Days</span>
-              </div>
-              <div style="font-size: 0.78rem; color: var(--accent-orange); margin-top: 0.25rem; font-weight: 700;">Multiplier Active</div>
+            <div style="font-size: 0.78rem; color: var(--accent-orange); font-weight: 700; margin-top: 0.35rem;">
+              ${user && (user.streakDays || 1) >= 100 ? 'Apex NFT Conquered' : `${100 - (user ? user.streakDays || 1 : 1)}d to Day 100 1/1 NFT`}
             </div>
           </div>
 
@@ -4595,291 +6527,182 @@ HOW TO RECOVER YOUR ACCOUNT:
         <!-- 1. LIVE BOUNTY QUESTS SECTION -->
         <div style="margin-bottom: 4.5rem;">
           
-          <div class="quest-top-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem; margin-bottom: 2rem;">
-            <div>
-              <h2 style="font-size: 1.6rem; font-weight: 800; color: #FFFFFF; margin: 0;">Community Bounties & Missions</h2>
-              <p class="quest-header-desc" style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.25rem 0 0 0;">Complete active tasks below to earn cryptographic $BOOBA tokens and rank up.</p>
+          <div class="quest-top-bar" style="margin-bottom: 3rem;">
+            <!-- Header on Top Above Line -->
+            <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); text-align: center;">
+              <h2 class="section-title pipeline-main-heading" style="text-align: center; margin: 0; white-space: nowrap;">
+                Available <span class="text-gradient-gold">Mission Tracks</span>
+              </h2>
             </div>
 
-            <!-- Filter Pills in Horizontal Scroller -->
-            <div class="quest-filter-bar">
-              <button type="button" class="passport-tier-pill ${this.activeQuestFilter === 'all' ? 'active' : ''}" onclick="window.boobaApp.setQuestFilter('all')">
-                All Quests (${quests.length})
-              </button>
-              <button type="button" class="passport-tier-pill ${this.activeQuestFilter === 'daily' ? 'active' : ''}" onclick="window.boobaApp.setQuestFilter('daily')">
-                Daily Check-In
-              </button>
-              <button type="button" class="passport-tier-pill ${this.activeQuestFilter === 'community' ? 'active' : ''}" onclick="window.boobaApp.setQuestFilter('community')">
-                Community
-              </button>
-              <button type="button" class="passport-tier-pill ${this.activeQuestFilter === 'engagement' ? 'active' : ''}" onclick="window.boobaApp.setQuestFilter('engagement')">
-                Engagement
-              </button>
-              <button type="button" class="passport-tier-pill ${this.activeQuestFilter === 'content' ? 'active' : ''}" onclick="window.boobaApp.setQuestFilter('content')">
-                Content
-              </button>
+            <!-- Centered Sector Switcher Tabs Below the Line -->
+            <div style="display: flex; justify-content: center; align-items: center; width: 100%; overflow: hidden;">
+              <div class="unboxed-chart-switcher quest-track-switcher" style="gap: 1.75rem; flex-wrap: wrap; justify-content: center;">
+                <button type="button" class="chart-tab-link ${this.activeQuestFilter === 'all' ? 'active' : ''}" onclick="window.boobaApp.setQuestFilter('all')">
+                  All Tracks (${quests.length})
+                </button>
+                <button type="button" class="chart-tab-link ${this.activeQuestFilter === 'daily' ? 'active' : ''}" onclick="window.boobaApp.setQuestFilter('daily')">
+                  Daily Check-In (100D)
+                </button>
+                <button type="button" class="chart-tab-link ${this.activeQuestFilter === 'community' ? 'active' : ''}" onclick="window.boobaApp.setQuestFilter('community')">
+                  Community (${communityCount})
+                </button>
+                <button type="button" class="chart-tab-link ${this.activeQuestFilter === 'engagement' ? 'active' : ''}" onclick="window.boobaApp.setQuestFilter('engagement')">
+                  Engagement (${engagementCount})
+                </button>
+                <button type="button" class="chart-tab-link ${this.activeQuestFilter === 'content' ? 'active' : ''}" onclick="window.boobaApp.setQuestFilter('content')">
+                  Content (${contentCount})
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Quests Grid OR 10-Card Apple Vision Pro Daily Carousel -->
+          <!-- 10-EPOCH 100-DAY EXPEDITION TRAJECTORY MAP -->
           ${this.activeQuestFilter === 'daily' ? `
-            <!-- 10-CARD APPLE VISION PRO DAILY CHECK-IN CAROUSEL -->
-            <div style="margin-bottom: 3.5rem;">
+            <div class="daily-expedition-map-container" style="margin-bottom: 4.5rem; position: relative;">
               
-              <!-- Desktop Streak Header -->
-              <div class="daily-streak-header-desktop">
-                <div>
-                  <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem;">
-                    <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); font-size: 0.82rem; padding: 0.35rem 0.9rem;">
-                      <span class="pulse-dot" style="width: 6px; height: 6px;"></span>
-                      <span>10-CARD 100-DAY EXPEDITION</span>
-                    </span>
-                  </div>
-                  <h2 style="font-size: 2rem; font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin: 0 0 0.5rem 0;">
-                    Daily Streak Reward Matrix
-                  </h2>
-                  <p style="color: var(--text-secondary); max-width: 620px; margin: 0; font-size: 0.92rem; line-height: 1.6;">
-                    Each card holds 10 consecutive days of rewards. <strong>Click any card to flip and reveal its 10-day matrix</strong>, claim active bonuses, and conquer all 10 epochs for the <strong>Day 100 Genesis NFT</strong>.
-                  </p>
-                </div>
+              <!-- Map Ambient Grid & Radial Glow -->
+              <div class="map-ambient-grid" style="border-radius: 30px;"></div>
+              <div class="map-ambient-radial"></div>
 
-                <div style="background: rgba(0, 0, 0, 0.4); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 20px; padding: 1.25rem 1.75rem; text-align: center; min-width: 220px;">
-                  <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Active Streak</div>
-                  <div style="font-size: 2.2rem; font-weight: 900; color: var(--accent-orange); display: flex; align-items: center; justify-content: center; gap: 0.35rem;" class="text-mono">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"></path></svg>
-                    <span>${user ? user.streakDays || 1 : 1} / 100</span>
-                  </div>
-                  <div style="font-size: 0.78rem; color: var(--accent-emerald); font-weight: 700; margin-top: 0.25rem;">
-                    ${user && (user.streakDays || 1) >= 100 ? 'Expedition Conquered!' : `${100 - (user ? user.streakDays || 1 : 1)} Days to Genesis NFT`}
-                  </div>
+              <!-- Cyber Expedition HUD Header -->
+              <div class="map-hud-bar" style="margin-bottom: 3.5rem;">
+                <div class="map-hud-item">
+                  <span class="pulse-dot"></span>
+                  <span>100-DAY EXPEDITION ROUTE</span>
+                </div>
+                <div class="map-hud-item">
+                  <span>ACTIVE STREAK:</span>
+                  <span class="map-hud-highlight">${user ? user.streakDays || 1 : 1} / 100 DAYS</span>
+                </div>
+                <div class="map-hud-item">
+                  <span>APEX HORIZON:</span>
+                  <span style="color: var(--brand-yellow); font-weight: 800;">DAY 100 GENESIS 1/1 NFT</span>
                 </div>
               </div>
 
-              <!-- Mobile Compact Streak HUD -->
-              <div class="daily-streak-hud-mobile">
-                <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
-                  <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(255, 122, 0, 0.15); border: 1px solid rgba(255, 122, 0, 0.35); display: flex; align-items: center; justify-content: center; color: var(--accent-orange); flex-shrink: 0;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"></path></svg>
-                  </div>
-                  <div style="min-width: 0;">
-                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800;">Active Streak</div>
-                    <div style="font-size: 1.15rem; font-weight: 900; color: #FFFFFF;" class="text-mono">
-                      <span style="color: var(--accent-orange);">${user ? user.streakDays || 1 : 1}</span> / 100 Days
-                    </div>
-                  </div>
-                </div>
-                <div style="text-align: right; flex-shrink: 0;">
-                  <span class="badge-tag" style="background: rgba(147, 51, 234, 0.15); color: #C084FC; border-color: rgba(147, 51, 234, 0.4); font-size: 0.68rem; padding: 0.2rem 0.55rem; font-weight: 800;">
-                    ${user && (user.streakDays || 1) >= 100 ? 'Conquered' : `${100 - (user ? user.streakDays || 1 : 1)}d to NFT`}
-                  </span>
-                </div>
-              </div>
+              <!-- Trajectory Spine & Waypoint Rows -->
+              <div class="map-trajectory-container">
+                <!-- Vertical Curving Spine -->
+                <div class="map-trajectory-spine"></div>
 
-              <!-- 10 Epoch Quick Pill Selector Navigation -->
-              <div class="passport-tier-nav" style="margin-bottom: 1.5rem;">
-                ${[
-                  'Days 1–10', 'Days 11–20', 'Days 21–30', 'Days 31–40', 'Days 41–50',
-                  'Days 51–60', 'Days 61–70', 'Days 71–80', 'Days 81–90', 'Days 91–100'
-                ].map((range, idx) => `
-                  <button type="button" class="passport-tier-pill" onclick="window.boobaApp.scrollToDailyEpoch(${idx})" id="dailyEpochPill_${idx}">
-                    ${range}
-                  </button>
-                `).join('')}
-              </div>
+                ${(() => {
+                  const allRewards = this.get100DaysRewardData();
+                  const currentStreak = user ? Number(user.streakDays || 1) : 1;
 
-              <!-- Full-Bleed 10-Card Carousel -->
-              <div class="daily-carousel-wrapper">
-                <div class="daily-carousel-viewport">
-                  
-                  <!-- Nav Arrow Left -->
-                  <button type="button" class="carousel-nav-btn prev-btn" onclick="window.boobaApp.scrollDailyEpochCarousel(-1)" aria-label="Previous Epoch">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                  </button>
+                  const epochs = [
+                    { index: 0, num: '01', title: 'Rookie Expedition', startDay: 1, endDay: 10, perk: '+1,400 BOOBA + 1.2x Boost', desc: 'Base Camp Genesis initialization. Establish your daily check-in cadence.' },
+                    { index: 1, num: '02', title: 'Novice Challenger', startDay: 11, endDay: 20, perk: '+3,200 BOOBA + Alpha Pass', desc: 'Ascending through low-gravity foothills with compounding point velocity.' },
+                    { index: 2, num: '03', title: 'Alpha Scout', startDay: 21, endDay: 30, perk: '+5,400 BOOBA + OG Discord Role', desc: 'Traversing the Lunar Plateau with unlocked citizen community privileges.' },
+                    { index: 3, num: '04', title: 'Ecosystem Warrior', startDay: 31, endDay: 40, perk: '+7,600 BOOBA + VIP AMA Pass', desc: 'Frontier mission tracks with priority allocation in special community events.' },
+                    { index: 4, num: '05', title: 'Gold Grinder', startDay: 41, endDay: 50, perk: '+10,500 BOOBA + 1.5x Boost', desc: 'Halfway summit milestone. Dynamic 1.5x APY multiplier unlocked on-chain.' },
+                    { index: 5, num: '06', title: 'Syndicate Elite', startDay: 51, endDay: 60, perk: '+13,200 BOOBA + Core Alpha Briefings', desc: 'High-altitude stratosphere navigation with exclusive governance briefs.' },
+                    { index: 6, num: '07', title: 'Mainnet Vanguard', startDay: 61, endDay: 70, perk: '+16,400 BOOBA + Airdrop Priority', desc: 'Elite mainnet trajectory with tier-1 snapshot weighting on future drops.' },
+                    { index: 7, num: '08', title: 'Treasury Ambassador', startDay: 71, endDay: 80, perk: '+20,500 BOOBA + Ambassador Crest', desc: 'Sovereign tier privileges and official on-chain badge recognition.' },
+                    { index: 8, num: '09', title: 'Senator Champion', startDay: 81, endDay: 90, perk: '+26,000 BOOBA + Governance Weight', desc: 'The Orbital Ridge. High-conviction governance proposal creation status.' },
+                    { index: 9, num: '10', title: 'Genesis NFT Realm', startDay: 91, endDay: 100, perk: 'GENESIS 1/1 NFT + 50,000 BOOBA', desc: 'The Ultimate Summit. Permanent 2.5x multiplier and 1/1 BEP-721 non-fungible trophy.' }
+                  ];
 
-                  <!-- Nav Arrow Right -->
-                  <button type="button" class="carousel-nav-btn next-btn" onclick="window.boobaApp.scrollDailyEpochCarousel(1)" aria-label="Next Epoch">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                  </button>
+                  return epochs.map((ep, eIdx) => {
+                    const epochRewards = allRewards.filter(r => r.day >= ep.startDay && r.day <= ep.endDay);
+                    const isEpochActive = currentStreak >= ep.startDay && currentStreak <= ep.endDay;
+                    const isEpochCompleted = currentStreak > ep.endDay;
+                    const daysClaimed = Math.max(0, Math.min(10, currentStreak - ep.startDay));
 
-                  <!-- Carousel Track -->
-                  <div class="daily-carousel-track" id="dailyEpochTrack">
-                    ${(() => {
-                      const allRewards = this.get100DaysRewardData();
-                      const currentStreak = user ? Number(user.streakDays || 1) : 1;
+                    let beaconClass = 'upcoming';
+                    if (isEpochCompleted) beaconClass = 'achieved';
+                    else if (isEpochActive) beaconClass = 'active-expedition';
+                    else if (ep.index === 9) beaconClass = 'summit';
+                    else if (ep.index >= 7) beaconClass = 'target';
 
-                      const epochs = [
-                        { index: 0, title: 'Rookie Expedition', startDay: 1, endDay: 10, theme: 'card-theme-lv1', perk: '+1,400 BOOBA + 1.2x Multiplier' },
-                        { index: 1, title: 'Novice Challenger', startDay: 11, endDay: 20, theme: 'card-theme-lv2', perk: '+3,200 BOOBA + Alpha Pass' },
-                        { index: 2, title: 'Alpha Scout', startDay: 21, endDay: 30, theme: 'card-theme-lv3', perk: '+5,400 BOOBA + OG Discord Role' },
-                        { index: 3, title: 'Ecosystem Warrior', startDay: 31, endDay: 40, theme: 'card-theme-lv4', perk: '+7,600 BOOBA + VIP AMA Pass' },
-                        { index: 4, title: 'Gold Grinder', startDay: 41, endDay: 50, theme: 'card-theme-lv5', perk: '+10,500 BOOBA + 1.5x Multiplier' },
-                        { index: 5, title: 'Syndicate Elite', startDay: 51, endDay: 60, theme: 'card-theme-lv6', perk: '+13,200 BOOBA + Core Alpha Briefings' },
-                        { index: 6, title: 'Mainnet Vanguard', startDay: 61, endDay: 70, theme: 'card-theme-lv7', perk: '+16,400 BOOBA + Airdrop Priority' },
-                        { index: 7, title: 'Treasury Ambassador', startDay: 71, endDay: 80, theme: 'card-theme-lv8', perk: '+20,500 BOOBA + Ambassador Crest' },
-                        { index: 8, title: 'Senator Champion', startDay: 81, endDay: 90, theme: 'card-theme-lv9', perk: '+26,000 BOOBA + Governance Voting' },
-                        { index: 9, title: 'Genesis NFT Realm', startDay: 91, endDay: 100, theme: 'card-theme-lv10', perk: 'GENESIS 1/1 NFT + 50,000 BOOBA' }
-                      ];
+                    const isEven = eIdx % 2 === 1;
 
-                      return epochs.map(ep => {
-                        const epochRewards = allRewards.filter(r => r.day >= ep.startDay && r.day <= ep.endDay);
-                        const isEpochActive = currentStreak >= ep.startDay && currentStreak <= ep.endDay;
-                        const isEpochCompleted = currentStreak > ep.endDay;
-                        const isEpochLocked = currentStreak < ep.startDay;
-                        const daysClaimedInEpoch = Math.max(0, Math.min(10, currentStreak - ep.startDay));
-
-                        return `
-                          <div class="daily-carousel-slide" id="dailySlide_${ep.index}">
+                    return `
+                      <div class="map-waypoint-row ${isEven ? 'even' : ''}" id="waypointRow_${ep.index}">
+                        
+                        <!-- Waypoint Card Column -->
+                        <div class="map-waypoint-card-col">
+                          <div class="card card-hover" style="padding: 2rem; border-radius: 26px; background: rgba(14, 18, 27, 0.9); border: 1.5px solid ${isEpochActive ? 'var(--brand-yellow)' : isEpochCompleted ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.08)'}; box-shadow: ${isEpochActive ? '0 10px 40px rgba(243, 186, 47, 0.25)' : '0 10px 30px rgba(0,0,0,0.5)'}; position: relative; overflow: hidden;">
                             
-                            <!-- 3D Flip Compact GameFi Capsule for 10 Days -->
-                            <div class="daily-epoch-card-3d-wrapper" id="dailyEpochWrapper_${ep.index}" onclick="window.boobaApp.toggleDailyCardFlip(${ep.index})">
-                              <div class="daily-epoch-card-inner">
-                                
-                                <!-- FRONT FACE: Compact Daily Reward Capsule -->
-                                <div class="daily-epoch-card-face daily-epoch-card-front">
-                                  
-                                  <div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                                      <span class="badge-tag" style="background: rgba(243, 186, 47, 0.12); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.3); font-size: 0.7rem; padding: 0.2rem 0.65rem; font-weight: 800;">
-                                        EPOCH 0${ep.index + 1}
-                                      </span>
-                                      <span style="font-size: 0.75rem; color: ${isEpochCompleted ? 'var(--accent-emerald)' : isEpochActive ? 'var(--brand-yellow)' : 'var(--text-muted)'}; font-weight: 700;">
-                                        ${isEpochCompleted ? 'Conquered' : isEpochActive ? 'Active Today' : 'Locked'}
-                                      </span>
-                                    </div>
+                            <!-- Header Row -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                              <div style="font-size: 0.75rem; font-weight: 800; font-family: var(--font-mono); color: ${isEpochCompleted ? 'var(--accent-emerald)' : isEpochActive ? 'var(--brand-yellow)' : 'var(--text-muted)'}; text-transform: uppercase; letter-spacing: 0.06em;">
+                                EPOCH ${ep.num} • DAYS ${ep.startDay}–${ep.endDay}
+                              </div>
+                              <span class="badge-tag" style="font-size: 0.7rem; padding: 0.2rem 0.65rem; background: ${isEpochCompleted ? 'rgba(16, 185, 129, 0.15)' : isEpochActive ? 'rgba(243, 186, 47, 0.15)' : 'rgba(255, 255, 255, 0.05)'}; color: ${isEpochCompleted ? 'var(--accent-emerald)' : isEpochActive ? 'var(--brand-yellow)' : 'var(--text-muted)'}; border-color: ${isEpochCompleted ? 'rgba(16, 185, 129, 0.3)' : isEpochActive ? 'rgba(243, 186, 47, 0.4)' : 'rgba(255, 255, 255, 0.1)'};">
+                                ${isEpochCompleted ? '✓ Conquered' : isEpochActive ? '● Active Expedition' : '🔒 Locked'}
+                              </span>
+                            </div>
 
-                                    <!-- Glowing Capsule Badge Icon -->
-                                    <div class="capsule-badge-icon ${ep.index === 9 ? 'nft-apex' : ''}">
-                                      ${ep.index === 9 ? `
-                                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                      ` : `
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                      `}
-                                    </div>
+                            <h3 style="font-size: 1.4rem; font-weight: 900; color: #FFFFFF; letter-spacing: -0.01em; margin: 0 0 0.4rem 0;">
+                              ${ep.title}
+                            </h3>
 
-                                    <h3 style="font-size: 1.35rem; font-weight: 900; color: #FFFFFF; letter-spacing: -0.01em; margin: 0 0 0.25rem 0;">
-                                      Days ${ep.startDay}–${ep.endDay}
-                                    </h3>
-                                    <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1rem; font-weight: 600;">
-                                      ${ep.title}
-                                    </div>
+                            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55; margin: 0 0 1.25rem 0;">
+                              ${ep.desc}
+                            </p>
 
-                                    <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 0.75rem 0.85rem; margin-bottom: 0.75rem;">
-                                      <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 0.2rem;">Epoch Target</div>
-                                      <div style="font-size: 0.92rem; font-weight: 800; color: ${ep.index === 9 ? '#FFD700' : 'var(--brand-yellow)'};" class="text-mono">
-                                        ${ep.perk}
-                                      </div>
-                                    </div>
+                            <!-- Target Perk Chip -->
+                            <div style="background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 0.65rem 0.95rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                              <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-family: var(--font-mono);">Milestone Target:</span>
+                              <span style="font-size: 0.86rem; font-weight: 800; color: ${ep.index === 9 ? '#FFD700' : 'var(--brand-yellow)'}; font-family: var(--font-mono);">${ep.perk}</span>
+                            </div>
+
+                            <!-- 10 Interactive Subday Slots -->
+                            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.45rem; margin-bottom: 1.25rem;">
+                              ${epochRewards.map(r => {
+                                const isClaimed = user && r.day < currentStreak;
+                                const isActiveToday = user && r.day === currentStreak;
+                                const isNft = r.day === 100;
+
+                                return `
+                                  <div style="background: ${isClaimed ? 'rgba(16, 185, 129, 0.12)' : isActiveToday ? 'rgba(243, 186, 47, 0.18)' : 'rgba(255, 255, 255, 0.03)'}; border: 1px solid ${isClaimed ? 'rgba(16, 185, 129, 0.35)' : isActiveToday ? 'var(--brand-yellow)' : 'rgba(255, 255, 255, 0.06)'}; border-radius: 10px; padding: 0.5rem 0.3rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 58px; transition: all 0.2s ease;">
+                                    <span style="font-size: 0.62rem; font-weight: 800; color: var(--text-muted); font-family: var(--font-mono);">${isNft ? 'NFT' : `D${r.day}`}</span>
+                                    <span style="font-size: 0.72rem; font-weight: 900; color: ${isNft ? '#FFD700' : isClaimed ? 'var(--accent-emerald)' : isActiveToday ? '#FFFFFF' : 'var(--text-secondary)'}; font-family: var(--font-mono); margin: 0.15rem 0;">+${r.rewardVal}</span>
+                                    ${isClaimed ? `
+                                      <span style="font-size: 0.58rem; color: var(--accent-emerald); font-weight: 800;">✓ Done</span>
+                                    ` : isActiveToday ? `
+                                      <button type="button" onclick="window.boobaApp.handleClaimDailyStreak(${r.day})" style="background: var(--brand-yellow); color: #000; font-weight: 900; font-size: 0.58rem; padding: 0.15rem 0.35rem; border-radius: 999px; border: none; cursor: pointer; box-shadow: 0 0 8px rgba(243, 186, 47, 0.6); line-height: 1;">
+                                        Claim
+                                      </button>
+                                    ` : `
+                                      <span style="font-size: 0.58rem; color: var(--text-muted);">🔒</span>
+                                    `}
                                   </div>
+                                `;
+                              }).join('')}
+                            </div>
 
-                                  <div>
-                                    <!-- 10-Dot Progress Indicator -->
-                                    <div style="margin-bottom: 0.85rem;">
-                                      <div style="display: flex; justify-content: space-between; font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.35rem;">
-                                        <span>Progress</span>
-                                        <span style="color: ${isEpochCompleted ? 'var(--accent-emerald)' : 'var(--brand-yellow)'}; font-weight: 800;">
-                                          ${isEpochCompleted ? '10/10' : `${daysClaimedInEpoch}/10`}
-                                        </span>
-                                      </div>
-                                      <div style="display: flex; gap: 0.25rem;">
-                                        ${epochRewards.map(r => {
-                                          const claimed = currentStreak > r.day;
-                                          const active = currentStreak === r.day;
-                                          return `
-                                            <div style="flex: 1; height: 5px; border-radius: 999px; background: ${claimed ? 'var(--accent-emerald)' : active ? 'var(--brand-yellow)' : 'rgba(255,255,255,0.1)'}; box-shadow: ${active ? '0 0 6px var(--brand-yellow)' : 'none'};"></div>
-                                          `;
-                                        }).join('')}
-                                      </div>
-                                    </div>
-
-                                    <!-- Action Button -->
-                                    <div class="flip-hint-pill" style="width: 100%; justify-content: center; font-size: 0.75rem; font-weight: 800; color: #FFFFFF; display: flex; align-items: center; gap: 0.35rem; background: rgba(255,255,255,0.06); padding: 0.45rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.15);">
-                                      <span>Tap to View 10 Days</span>
-                                      <span style="color: var(--brand-yellow);">⟳</span>
-                                    </div>
-                                  </div>
-
-                                </div>
-
-                                <!-- BACK FACE: 10 Revealed Daily Reward Slots -->
-                                <div class="daily-epoch-card-face daily-epoch-card-back" onclick="event.stopPropagation()">
-                                  
-                                  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; margin-bottom: 0.35rem;">
-                                    <div>
-                                      <div style="font-size: 0.68rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800;">
-                                        EPOCH 0${ep.index + 1} BREAKDOWN
-                                      </div>
-                                      <div style="font-size: 1rem; font-weight: 900; color: #FFFFFF;">
-                                        Days ${ep.startDay}–${ep.endDay}
-                                      </div>
-                                    </div>
-
-                                    <button type="button" class="btn btn-outline btn-sm" onclick="window.boobaApp.toggleDailyCardFlip(${ep.index})" style="font-size: 0.7rem; padding: 0.25rem 0.6rem; border-radius: 999px;">
-                                      <span>Back ⟳</span>
-                                    </button>
-                                  </div>
-
-                                  <!-- 10 Sub-Days Grid -->
-                                  <div class="epoch-subdays-grid">
-                                    ${epochRewards.map(r => {
-                                      const isClaimed = user && r.day < currentStreak;
-                                      const isActiveToday = user && r.day === currentStreak;
-                                      const isNft = r.day === 100;
-
-                                      let itemClass = 'subday-item';
-                                      if (isNft) itemClass += ' day-100-nft';
-                                      else if (isClaimed) itemClass += ' claimed';
-                                      else if (isActiveToday) itemClass += ' active-today';
-
-                                      return `
-                                        <div class="${itemClass}">
-                                          <div style="font-size: 0.62rem; font-weight: 800; color: var(--text-muted); margin-bottom: 0.15rem;">
-                                            ${isNft ? 'NFT' : `D${r.day}`}
-                                          </div>
-
-                                          <div style="font-family: var(--font-mono); font-size: 0.74rem; font-weight: 900; color: ${isNft ? '#FFD700' : 'var(--brand-yellow)'}; margin-bottom: 0.25rem; white-space: nowrap;">
-                                            ${isNft ? '1/1 NFT' : `+${r.rewardVal}B`}
-                                          </div>
-
-                                          <div style="width: 100%;">
-                                            ${isClaimed ? `
-                                              <span class="day-status-btn" style="background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.4); font-size: 0.58rem; padding: 0.15rem 0.25rem;">
-                                                Done
-                                              </span>
-                                            ` : isActiveToday ? `
-                                              <button type="button" class="day-status-btn" onclick="window.boobaApp.handleClaimDailyStreak(${r.day})" style="background: var(--brand-yellow); color: #000000; font-weight: 900; font-size: 0.58rem; padding: 0.2rem 0.25rem; box-shadow: 0 0 8px rgba(243,186,47,0.6);">
-                                                Claim
-                                              </button>
-                                            ` : `
-                                              <span class="day-status-btn" style="background: rgba(255, 255, 255, 0.04); color: var(--text-muted); border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.58rem; padding: 0.15rem 0.25rem;">
-                                                Lock
-                                              </span>
-                                            `}
-                                          </div>
-                                        </div>
-                                      `;
-                                    }).join('')}
-                                  </div>
-
-                                  <div style="font-size: 0.72rem; color: var(--text-muted); text-align: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.35rem;">
-                                    ${isEpochActive ? 'Active Epoch' : isEpochCompleted ? 'All 10 Days Conquered' : 'Complete preceding days'}
-                                  </div>
-
-                                </div>
-
+                            <!-- Progress Track -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.74rem; font-weight: 700; color: var(--text-muted); font-family: var(--font-mono);">
+                              <span>Epoch Progress: ${isEpochCompleted ? '10/10 Conquered' : `${daysClaimed}/10 Days`}</span>
+                              <div style="width: 45%; height: 4px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden;">
+                                <div style="width: ${isEpochCompleted ? 100 : (daysClaimed / 10) * 100}%; height: 100%; background: ${isEpochCompleted ? 'var(--accent-emerald)' : 'var(--brand-yellow)'};"></div>
                               </div>
                             </div>
 
                           </div>
-                        `;
-                      }).join('');
-                    })()}
-                  </div>
+                        </div>
 
-                </div>
+                        <!-- Center Beacon Node Column -->
+                        <div class="map-waypoint-beacon-col">
+                          <div class="map-beacon-anchor ${beaconClass}" title="Epoch ${ep.num}: ${ep.title}">
+                            <span>${ep.num}</span>
+                          </div>
+                        </div>
+
+                        <!-- Spacer Column -->
+                        <div class="map-waypoint-spacer-col"></div>
+
+                      </div>
+                    `;
+                  }).join('');
+                })()}
+
               </div>
 
-              <!-- Day 100 NFT Spotlight Hero -->
-              <div class="nft-grand-spotlight">
+              <!-- Day 100 Apex Summit Showcase -->
+              <div class="nft-grand-spotlight" style="margin-top: 4rem; border-radius: 28px; border: 2px solid #FFD700; background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(14, 18, 27, 0.95) 100%); box-shadow: 0 0 50px rgba(255, 215, 0, 0.25);">
                 <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
                   <div style="width: 80px; height: 80px; border-radius: 22px; background: linear-gradient(135deg, #FFD700, #F3BA2F); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 35px rgba(255, 215, 0, 0.5); flex-shrink: 0;">
                     <svg width="42" height="42" viewBox="0 0 24 24" fill="#000000"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
@@ -4887,7 +6710,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                   <div>
                     <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
                       <span class="badge-tag" style="background: #FFD700; color: #000; font-weight: 900; font-size: 0.72rem; padding: 0.2rem 0.65rem;">
-                        DAY 100 APEX REWARD
+                        DAY 100 APEX SUMMIT REWARD
                       </span>
                       <span class="badge-tag" style="background: rgba(255, 255, 255, 0.08); color: #FFFFFF; font-size: 0.72rem;">
                         BEP-721 NON-FUNGIBLE ASSET
@@ -4897,7 +6720,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                       Genesis Booba Master 1/1 NFT
                     </h3>
                     <p style="font-size: 0.88rem; color: var(--text-secondary); max-width: 620px; margin: 0; line-height: 1.6;">
-                      The pinnacle on-chain achievement. Unlocks permanent 2.5x ecosystem multiplier, private DAO advisory council seat, BNB Baby Treasury profit allocation, and VIP merchandise delivery.
+                      The pinnacle achievement of the 100-day expedition. Grants permanent 2.5x multiplier, private DAO advisory council seat, and direct BNB Baby Treasury revenue sharing.
                     </p>
                   </div>
                 </div>
@@ -4948,26 +6771,28 @@ HOW TO RECOVER YOUR ACCOUNT:
                 const isDailyInstant = q.type === 'instant' || q.category === 'daily';
 
                 return `
-                <div class="card card-hover" style="display: flex; flex-direction: column; justify-content: space-between; padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.75); border: 1px solid ${userStatus.completed ? 'rgba(16, 185, 129, 0.4)' : (userStatus.status === 'pending_review' ? 'rgba(243, 186, 47, 0.4)' : 'rgba(255, 255, 255, 0.08)')}; position: relative; overflow: hidden;">
+                <div class="card card-hover" style="display: flex; flex-direction: column; justify-content: space-between; padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid ${userStatus.completed ? 'rgba(16, 185, 129, 0.4)' : (userStatus.status === 'pending_review' ? 'rgba(243, 186, 47, 0.4)' : 'rgba(255, 255, 255, 0.08)')}; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; overflow: hidden;">
                   
                   <div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-                      <span class="badge-tag" style="text-transform: uppercase; font-size: 0.72rem; padding: 0.3rem 0.75rem; letter-spacing: 0.04em;">
-                        ${getCategoryLabel(q.category)}
-                      </span>
-                      <div style="font-size: 0.88rem; font-weight: 900; color: ${userStatus.completed ? 'var(--accent-emerald)' : 'var(--brand-yellow)'}; background: ${userStatus.completed ? 'rgba(16, 185, 129, 0.14)' : 'rgba(243, 186, 47, 0.14)'}; border: 1px solid ${userStatus.completed ? 'rgba(16, 185, 129, 0.35)' : 'rgba(243, 186, 47, 0.35)'}; padding: 0.35rem 0.85rem; border-radius: 999px;" class="text-mono">
-                        +${Number(q.rewardBooba).toLocaleString()} BOOBA
+                    <!-- Unboxed Header: Category & Reward -->
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 0.85rem;">
+                      <div style="font-size: 0.76rem; font-weight: 800; color: var(--accent-cyan); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 0.4rem;">
+                        <span>// ${getCategoryLabel(q.category)}</span>
+                      </div>
+                      <div style="font-size: 1.2rem; font-weight: 900; color: ${userStatus.completed ? 'var(--accent-emerald)' : 'var(--brand-yellow)'}; font-family: var(--font-mono); letter-spacing: -0.01em;">
+                        +${Number(q.rewardBooba).toLocaleString()} <span style="font-size: 0.85rem; color: var(--text-secondary);">BOOBA</span>
                       </div>
                     </div>
 
-                    <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 0.65rem; color: #FFFFFF; line-height: 1.35;">${q.title}</h3>
+                    <h3 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 0.65rem; color: #FFFFFF; line-height: 1.35;">${q.title}</h3>
                     <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1.5rem;">
                       ${q.description}
                     </p>
 
-                    <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.75rem; background: rgba(0,0,0,0.4); padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 0.5rem;">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="${isProofMode ? 'var(--accent-violet)' : 'var(--brand-yellow)'}" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-                      <span style="color: var(--text-secondary);">${isProofMode ? (q.requirements || 'Submit content link for admin verification & approval') : (q.requirements || 'Click action link to receive allocated coins immediately')}</span>
+                    <!-- Unboxed Instructions Box -->
+                    <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1.75rem; background: rgba(0,0,0,0.35); padding: 0.85rem 1rem; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: flex-start; gap: 0.6rem;">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${isProofMode ? 'var(--accent-violet)' : 'var(--brand-yellow)'}" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                      <span style="line-height: 1.5;">${isProofMode ? (q.requirements || 'Submit content proof link for admin verification.') : (q.requirements || 'Click action link to receive allocated coins immediately.')}</span>
                     </div>
                   </div>
 
@@ -4997,7 +6822,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                         ${q.targetUrl ? `
                           <a href="${q.targetUrl}" target="_blank" class="btn btn-outline btn-block" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem;">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                            <span>Visit Mission Site ↗</span>
+                            <span>Visit Mission Site</span>
                           </a>
                         ` : ''}
                         <button class="btn btn-primary btn-block" onclick="window.boobaApp.openProofModal('${q.id}')" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 800; font-size: 0.88rem;">
@@ -5008,7 +6833,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                     ` : `
                       <button class="btn btn-primary btn-block" onclick="window.boobaApp.handleSocialLinkAction('${q.id}')" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 800;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                        <span>${q.targetUrl ? 'Open Link & Receive Coins →' : (q.actionText || 'Claim Bounty')}</span>
+                        <span>${q.targetUrl ? 'Open Link & Receive Coins' : (q.actionText || 'Claim Bounty')}</span>
                       </button>
                     `}
                   </div>
@@ -5018,66 +6843,6 @@ HOW TO RECOVER YOUR ACCOUNT:
               }).join('')}
             </div>
           `}
-        </div>
-
-        <!-- 2. REWARDS VAULT PERKS SECTION -->
-        <div style="margin-bottom: 4rem;">
-          
-          <div style="margin-bottom: 2rem;">
-            <h2 style="font-size: 1.6rem; font-weight: 800; color: #FFFFFF; margin: 0;">Treasury & Airdrop Rewards Vault</h2>
-            <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.25rem 0 0 0;">Unlock ecosystem multipliers, private founder alpha, and community governance voting weight.</p>
-          </div>
-
-          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.75rem;">
-            
-            <div class="card card-hover" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.75);">
-              <div class="bento-icon-badge" style="margin-bottom: 1.25rem;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
-              </div>
-              <h3 style="font-size: 1.25rem; color: #FFFFFF; font-weight: 800; margin-bottom: 0.6rem;">Airdrop Multiplier</h3>
-              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1.25rem;">
-                Maintain your daily check-in streak to receive up to a 2.5x point multiplier on future BNB Baby ecosystem snapshot distributions.
-              </p>
-              <div style="font-size: 0.82rem; color: var(--accent-emerald); font-weight: 700; display: flex; align-items: center; gap: 0.35rem;">
-                <span class="pulse-dot" style="width: 6px; height: 6px;"></span>
-                <span>Active on Mainnet</span>
-              </div>
-            </div>
-
-            <div class="card card-hover" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.75);">
-              <div class="bento-icon-badge" style="background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); margin-bottom: 1.25rem;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-              </div>
-              <h3 style="font-size: 1.25rem; color: #FFFFFF; font-weight: 800; margin-bottom: 0.6rem;">Private Alpha Channels</h3>
-              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1.25rem;">
-                Reach Level 5 (Booba Grinder) to gain automatic access to private community alpha chats and core team briefings.
-              </p>
-              <div style="font-size: 0.82rem; color: var(--text-muted);">Requires Lv.5+</div>
-            </div>
-
-            <div class="card card-hover" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.75);">
-              <div class="bento-icon-badge" style="background: rgba(255, 122, 0, 0.12); color: var(--accent-orange); border-color: rgba(255, 122, 0, 0.3); margin-bottom: 1.25rem;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16"></path><path d="M4 18h16"></path><path d="M7 18V9"></path><path d="M12 18V9"></path><path d="M17 18V9"></path><path d="M2 9l10-7 10 7H2z"></path></svg>
-              </div>
-              <h3 style="font-size: 1.25rem; color: #FFFFFF; font-weight: 800; margin-bottom: 0.6rem;">Governance Voting</h3>
-              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1.25rem;">
-                Top tier passport holders participate in community grant proposals, marketing allocations, and new quest bounties.
-              </p>
-              <div style="font-size: 0.82rem; color: var(--text-muted);">Requires Lv.8+</div>
-            </div>
-
-            <div class="card card-hover" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.75);">
-              <div class="bento-icon-badge" style="background: rgba(192, 132, 252, 0.12); color: #C084FC; border-color: rgba(192, 132, 252, 0.3); margin-bottom: 1.25rem;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-              </div>
-              <h3 style="font-size: 1.25rem; color: #FFFFFF; font-weight: 800; margin-bottom: 0.6rem;">Treasury Royalty Allocation</h3>
-              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1.25rem;">
-                Level 9 & 10 holders receive priority allocations from the BNB Baby Ecosystem Treasury and advisory status.
-              </p>
-              <div style="font-size: 0.82rem; color: var(--text-muted);">Requires Lv.9+</div>
-            </div>
-
-          </div>
         </div>
 
       </div>
@@ -5116,47 +6881,72 @@ HOW TO RECOVER YOUR ACCOUNT:
           </a>
         </div>
 
+        <!-- LEADERBOARD PAGE HEADER -->
+        <div style="text-align: center; max-width: 860px; margin: 0 auto 3.5rem auto; position: relative; z-index: 10;">
+          <h1 style="font-size: clamp(1.8rem, 4.5vw, 3.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.03em; line-height: 1.12; font-family: var(--font-heading); margin-bottom: 0; white-space: nowrap;">
+            <span class="text-gradient-gold">Booba Legends</span>
+          </h1>
+        </div>
+
         <!-- 3D OLYMPIC PODIUM (Top 3 Holders) -->
         <div class="leaderboard-podium-container">
           
           <!-- DESKTOP PODIUM (Rank 2 Left, Rank 1 Center Elevated, Rank 3 Right) -->
           <div class="leaderboard-podium-desktop">
             <!-- Rank 2: Silver -->
-            <div class="card card-hover text-center" style="padding: 2.25rem 1.5rem; border-radius: 24px; border: 1.5px solid rgba(226, 232, 240, 0.4); background: linear-gradient(180deg, rgba(226, 232, 240, 0.08) 0%, rgba(14, 18, 27, 0.8) 100%);">
-              <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: rgba(226, 232, 240, 0.15); border: 2px solid #E2E8F0; color: #E2E8F0; font-weight: 800; font-size: 1.1rem; margin-bottom: 1rem;">
+            <div class="card card-hover text-center" style="padding: 2.25rem 1.5rem 2rem 1.5rem; border-radius: 26px; border: 1.5px solid rgba(226, 232, 240, 0.4); background: linear-gradient(180deg, rgba(226, 232, 240, 0.08) 0%, rgba(14, 18, 27, 0.85) 100%); display: flex; flex-direction: column; align-items: center; justify-content: space-between;">
+              <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: rgba(226, 232, 240, 0.15); border: 2px solid #E2E8F0; color: #E2E8F0; font-weight: 800; font-size: 1.1rem; margin-bottom: 0.5rem; box-shadow: 0 0 15px rgba(226, 232, 240, 0.25);">
                 #2
               </div>
-              <img src="${top2.avatar || 'assets/mascot.jpg'}" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid #E2E8F0; margin: 0 auto 0.75rem auto; object-fit: cover;">
-              <h3 style="font-size: 1.2rem; color: #FFFFFF; font-weight: 800; margin-bottom: 0.25rem;">${top2.username}</h3>
-              <span class="badge-tag" style="font-size: 0.72rem; margin-bottom: 0.85rem;">Lv.${top2Level.level} ${top2Level.title}</span>
-              <div style="font-size: 1.5rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.5rem;">
-                ${Number(top2.boobaPoints).toLocaleString()} <span style="font-size: 0.8rem; color: var(--text-secondary);">BOOBA</span>
+              
+              <!-- Giant 3D Mascot Character Stage -->
+              <div class="podium-mascot-stage" style="position: relative; width: 100%; height: 190px; display: flex; align-items: center; justify-content: center; margin: 0.5rem 0 1rem 0;">
+                <div style="position: absolute; width: 140px; height: 140px; border-radius: 50%; background: ${top2Level.glowColor}; filter: blur(30px); opacity: 0.7; pointer-events: none;"></div>
+                <img src="${top2Level.mascotImage || 'assets/mascot_level1.png'}" class="mascot-living-img mascot-anim-${top2Level.level}" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.65));" alt="${top2.username}">
+              </div>
+
+              <h3 style="font-size: 1.3rem; color: #FFFFFF; font-weight: 900; margin-bottom: 0.35rem;">${top2.username}</h3>
+              <span class="badge-tag" style="background: ${top2Level.glowColor}; color: ${top2Level.accentColor}; border: 1px solid ${top2Level.borderColor}; font-size: 0.75rem; font-weight: 800; margin-bottom: 0.85rem;">Lv.${top2Level.level} ${top2Level.title}</span>
+              <div style="font-size: 1.6rem; font-weight: 900; color: var(--brand-yellow); margin-top: 0.25rem;">
+                ${Number(top2.boobaPoints).toLocaleString()} <span style="font-size: 0.82rem; color: var(--text-secondary);">BOOBA</span>
               </div>
             </div>
 
             <!-- Rank 1: Gold (Center & Taller) -->
-            <div class="card card-hover text-center" style="padding: 3rem 1.75rem; border-radius: 28px; border: 2px solid var(--brand-yellow); background: linear-gradient(180deg, rgba(243, 186, 47, 0.15) 0%, rgba(14, 18, 27, 0.95) 100%); box-shadow: 0 0 40px rgba(243, 186, 47, 0.25); transform: translateY(-10px);">
-              <div style="display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 50%; background: var(--brand-yellow); color: #000; font-weight: 900; font-size: 1.3rem; margin-bottom: 1rem; box-shadow: 0 0 20px var(--brand-yellow-glow);">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"></path></svg>
+            <div class="card card-hover text-center" style="padding: 3rem 1.75rem 2.5rem 1.75rem; border-radius: 30px; border: 2px solid var(--brand-yellow); background: linear-gradient(180deg, rgba(243, 186, 47, 0.16) 0%, rgba(14, 18, 27, 0.95) 100%); box-shadow: 0 0 50px rgba(243, 186, 47, 0.35); transform: translateY(-14px); display: flex; flex-direction: column; align-items: center; justify-content: space-between;">
+              <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: var(--brand-yellow); color: #000; font-weight: 900; font-size: 1.4rem; margin-bottom: 0.5rem; box-shadow: 0 0 25px var(--brand-yellow-glow);">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"></path></svg>
               </div>
-              <img src="${top1.avatar || 'assets/mascot.jpg'}" style="width: 88px; height: 88px; border-radius: 50%; border: 3px solid var(--brand-yellow); margin: 0 auto 0.75rem auto; object-fit: cover; box-shadow: 0 0 25px var(--brand-yellow-glow);">
-              <h3 style="font-size: 1.4rem; color: #FFFFFF; font-weight: 800; margin-bottom: 0.25rem;">${top1.username}</h3>
-              <span class="badge-tag" style="background: var(--brand-yellow); color: #000; font-weight: 800; font-size: 0.75rem; margin-bottom: 0.85rem;">Lv.${top1Level.level} ${top1Level.title}</span>
-              <div style="font-size: 1.85rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.5rem;">
-                ${Number(top1.boobaPoints).toLocaleString()} <span style="font-size: 0.9rem; color: var(--text-secondary);">BOOBA</span>
+              
+              <!-- Giant 3D Mascot Character Stage -->
+              <div class="podium-mascot-stage" style="position: relative; width: 100%; height: 230px; display: flex; align-items: center; justify-content: center; margin: 0.5rem 0 1rem 0;">
+                <div style="position: absolute; width: 170px; height: 170px; border-radius: 50%; background: var(--brand-yellow-glow); filter: blur(35px); opacity: 0.85; pointer-events: none;"></div>
+                <img src="${top1Level.mascotImage || 'assets/mascot_level1.png'}" class="mascot-living-img mascot-anim-${top1Level.level}" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 14px 28px rgba(0,0,0,0.75)) drop-shadow(0 0 25px rgba(243,186,47,0.4));" alt="${top1.username}">
+              </div>
+
+              <h3 style="font-size: 1.5rem; color: #FFFFFF; font-weight: 900; margin-bottom: 0.35rem;">${top1.username}</h3>
+              <span class="badge-tag" style="background: var(--brand-yellow); color: #000; font-weight: 900; font-size: 0.8rem; margin-bottom: 0.85rem; padding: 0.3rem 0.8rem;">Lv.${top1Level.level} ${top1Level.title}</span>
+              <div style="font-size: 2rem; font-weight: 900; color: var(--brand-yellow); margin-top: 0.25rem;">
+                ${Number(top1.boobaPoints).toLocaleString()} <span style="font-size: 0.92rem; color: var(--text-secondary);">BOOBA</span>
               </div>
             </div>
 
             <!-- Rank 3: Bronze -->
-            <div class="card card-hover text-center" style="padding: 2.25rem 1.5rem; border-radius: 24px; border: 1.5px solid rgba(249, 115, 22, 0.4); background: linear-gradient(180deg, rgba(249, 115, 22, 0.08) 0%, rgba(14, 18, 27, 0.8) 100%);">
-              <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: rgba(249, 115, 22, 0.15); border: 2px solid #F97316; color: #F97316; font-weight: 800; font-size: 1.1rem; margin-bottom: 1rem;">
+            <div class="card card-hover text-center" style="padding: 2.25rem 1.5rem 2rem 1.5rem; border-radius: 26px; border: 1.5px solid rgba(249, 115, 22, 0.4); background: linear-gradient(180deg, rgba(249, 115, 22, 0.08) 0%, rgba(14, 18, 27, 0.85) 100%); display: flex; flex-direction: column; align-items: center; justify-content: space-between;">
+              <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: rgba(249, 115, 22, 0.15); border: 2px solid #F97316; color: #F97316; font-weight: 800; font-size: 1.1rem; margin-bottom: 0.5rem; box-shadow: 0 0 15px rgba(249, 115, 22, 0.25);">
                 #3
               </div>
-              <img src="${top3.avatar || 'assets/mascot.jpg'}" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid #F97316; margin: 0 auto 0.75rem auto; object-fit: cover;">
-              <h3 style="font-size: 1.2rem; color: #FFFFFF; font-weight: 800; margin-bottom: 0.25rem;">${top3.username}</h3>
-              <span class="badge-tag" style="font-size: 0.72rem; margin-bottom: 0.85rem;">Lv.${top3Level.level} ${top3Level.title}</span>
-              <div style="font-size: 1.5rem; font-weight: 800; color: var(--brand-yellow); margin-top: 0.5rem;">
-                ${Number(top3.boobaPoints).toLocaleString()} <span style="font-size: 0.8rem; color: var(--text-secondary);">BOOBA</span>
+              
+              <!-- Giant 3D Mascot Character Stage -->
+              <div class="podium-mascot-stage" style="position: relative; width: 100%; height: 190px; display: flex; align-items: center; justify-content: center; margin: 0.5rem 0 1rem 0;">
+                <div style="position: absolute; width: 140px; height: 140px; border-radius: 50%; background: ${top3Level.glowColor}; filter: blur(30px); opacity: 0.7; pointer-events: none;"></div>
+                <img src="${top3Level.mascotImage || 'assets/mascot_level1.png'}" class="mascot-living-img mascot-anim-${top3Level.level}" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.65));" alt="${top3.username}">
+              </div>
+
+              <h3 style="font-size: 1.3rem; color: #FFFFFF; font-weight: 900; margin-bottom: 0.35rem;">${top3.username}</h3>
+              <span class="badge-tag" style="background: ${top3Level.glowColor}; color: ${top3Level.accentColor}; border: 1px solid ${top3Level.borderColor}; font-size: 0.75rem; font-weight: 800; margin-bottom: 0.85rem;">Lv.${top3Level.level} ${top3Level.title}</span>
+              <div style="font-size: 1.6rem; font-weight: 900; color: var(--brand-yellow); margin-top: 0.25rem;">
+                ${Number(top3.boobaPoints).toLocaleString()} <span style="font-size: 0.82rem; color: var(--text-secondary);">BOOBA</span>
               </div>
             </div>
           </div>
@@ -5169,7 +6959,7 @@ HOW TO RECOVER YOUR ACCOUNT:
             <div class="mob-podium-col mob-rank-2">
               <div class="mob-avatar-wrap">
                 <div class="mob-avatar-ring mob-ring-silver">
-                  <img src="${top2.avatar || 'assets/mascot.jpg'}" class="mob-avatar" alt="${top2.username}">
+                  <img src="${top2Level.mascotImage || 'assets/mascot_level1.png'}" class="mob-avatar" alt="${top2.username}" style="object-fit: contain; background: rgba(0,0,0,0.5);">
                 </div>
                 <div class="mob-rank-badge mob-badge-silver">#2</div>
               </div>
@@ -5203,7 +6993,7 @@ HOW TO RECOVER YOUR ACCOUNT:
               <div class="mob-avatar-wrap">
                 <div class="mob-avatar-ring mob-ring-gold">
                   <div class="mob-halo-pulse"></div>
-                  <img src="${top1.avatar || 'assets/mascot.jpg'}" class="mob-avatar" alt="${top1.username}">
+                  <img src="${top1Level.mascotImage || 'assets/mascot_level1.png'}" class="mob-avatar" alt="${top1.username}" style="object-fit: contain; background: rgba(0,0,0,0.5);">
                 </div>
                 <div class="mob-rank-badge mob-badge-gold">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
@@ -5227,7 +7017,7 @@ HOW TO RECOVER YOUR ACCOUNT:
             <div class="mob-podium-col mob-rank-3">
               <div class="mob-avatar-wrap">
                 <div class="mob-avatar-ring mob-ring-bronze">
-                  <img src="${top3.avatar || 'assets/mascot.jpg'}" class="mob-avatar" alt="${top3.username}">
+                  <img src="${top3Level.mascotImage || 'assets/mascot_level1.png'}" class="mob-avatar" alt="${top3.username}" style="object-fit: contain; background: rgba(0,0,0,0.5);">
                 </div>
                 <div class="mob-rank-badge mob-badge-bronze">#3</div>
               </div>
@@ -5265,7 +7055,6 @@ HOW TO RECOVER YOUR ACCOUNT:
                   <th style="padding: 1.25rem 1.5rem;">Rank</th>
                   <th style="padding: 1.25rem 1.5rem;">Passport Holder</th>
                   <th style="padding: 1.25rem 1.5rem;">Level Tier</th>
-                  <th style="padding: 1.25rem 1.5rem;">Trust</th>
                   <th style="padding: 1.25rem 1.5rem;">Streak</th>
                   <th style="padding: 1.25rem 1.5rem; text-align: right;">Total BOOBA</th>
                 </tr>
@@ -5285,7 +7074,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                       </td>
                       <td style="padding: 1.25rem 1.5rem;">
                         <div style="display: flex; align-items: center; gap: 0.85rem;">
-                          <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid ${lvl.accentColor}; object-fit: cover; box-shadow: 0 0 10px ${lvl.glowColor};">
+                          <img src="${lvl.mascotImage || 'assets/mascot_level1.png'}" style="width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid ${lvl.accentColor}; object-fit: contain; background: rgba(0,0,0,0.5); box-shadow: 0 0 10px ${lvl.glowColor};">
                           <div>
                             <div style="font-weight: 700; color: #FFFFFF; display: flex; align-items: center; gap: 0.5rem;">
                               <span>${u.username}</span>
@@ -5297,10 +7086,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                         </div>
                       </td>
                       <td style="padding: 1.25rem 1.5rem;">
-                        <span class="badge-tag" style="font-size: 0.75rem; background: ${lvl.glowColor}; color: ${lvl.accentColor}; border: 1px solid ${lvl.borderColor}; font-weight: 700;">Lv.${lvl.level} ${lvl.title}</span>
-                      </td>
-                      <td style="padding: 1.25rem 1.5rem;">
-                        <span style="color: var(--accent-emerald); font-weight: 700; font-size: 0.88rem;">${u.reputation || 75}/100</span>
+                        <span style="font-weight: 800; font-size: 0.86rem; color: ${lvl.accentColor}; letter-spacing: 0.02em; text-transform: uppercase;">Lv.${lvl.level} ${lvl.title}</span>
                       </td>
                       <td style="padding: 1.25rem 1.5rem;">
                         <div style="display: flex; align-items: center; gap: 0.35rem; color: var(--accent-orange); font-weight: 700; font-size: 0.88rem;">
@@ -5333,7 +7119,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                 <div class="mob-rank-item ${isMe ? 'is-current-user' : ''}" style="animation-delay: ${idx * 0.035}s; border-color: ${isMe ? lvl.borderColor : 'rgba(255,255,255,0.08)'};">
                   <div class="mob-rank-left">
                     <div class="mob-rank-pill ${rankBadgeClass}">#${rank}</div>
-                    <img src="${u.avatar || 'assets/mascot.jpg'}" class="mob-item-avatar" alt="${u.username}" style="border: 1.5px solid ${lvl.accentColor};">
+                    <img src="${lvl.mascotImage || 'assets/mascot_level1.png'}" class="mob-item-avatar" alt="${u.username}" style="border: 1.5px solid ${lvl.accentColor}; object-fit: contain; background: rgba(0,0,0,0.5);">
                     <div class="mob-item-meta">
                       <div class="mob-item-name">
                         <span class="mob-item-uname">${u.username}</span>
@@ -5406,8 +7192,15 @@ HOW TO RECOVER YOUR ACCOUNT:
           </a>
         </div>
 
+        <!-- REFERRALS PAGE HEADER -->
+        <div style="text-align: center; max-width: 860px; margin: 0 auto 3.5rem auto; position: relative; z-index: 10;">
+          <h1 style="font-size: clamp(1.8rem, 4.5vw, 3.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.03em; line-height: 1.12; font-family: var(--font-heading); margin-bottom: 0; white-space: nowrap;">
+            <span class="text-gradient-gold">Referrals</span>
+          </h1>
+        </div>
+
         <div class="card" style="max-width: 700px; margin: 0 auto 3rem auto; padding: 2.5rem; border-radius: 28px; border: 1.5px solid rgba(243, 186, 47, 0.35);">
-          <h3 style="font-size: 1.3rem; font-weight: 800; color: #FFFFFF; margin-bottom: 1rem;">Your Ambassador Link</h3>
+          <h3 style="font-size: 1.3rem; font-weight: 800; color: #FFFFFF; margin-bottom: 1rem;">Your Referral Link</h3>
           <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
             <input type="text" readonly value="${refLink}" id="refLinkInput" class="form-input text-mono" style="flex: 1; min-width: 250px; background: rgba(0,0,0,0.4); font-size: 0.9rem;">
             <button class="btn btn-primary btn-lg" onclick="navigator.clipboard.writeText('${refLink}'); alert('Referral link copied to clipboard!');">
@@ -5424,7 +7217,7 @@ HOW TO RECOVER YOUR ACCOUNT:
           <h3 style="font-size: 1.3rem; font-weight: 800; color: #FFFFFF; margin-bottom: 1.25rem;">Your Verified Referrals (${myReferrals.length})</h3>
           ${myReferrals.length === 0 ? `
             <p style="color: var(--text-secondary); font-size: 0.95rem; text-align: center; padding: 3rem 1rem;">
-              No referrals yet. Share your ambassador link on Telegram or X/Twitter to start earning +300 $BOOBA rewards!
+              No referrals yet. Share your referral link on Telegram or X/Twitter to start earning +300 $BOOBA rewards!
             </p>
           ` : `
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -5755,29 +7548,10 @@ HOW TO RECOVER YOUR ACCOUNT:
   }
 
   scrollToDailyEpoch(epochIndex) {
-    const track = document.getElementById('dailyEpochTrack');
-    const slide = document.getElementById(`dailySlide_${epochIndex}`);
-    if (track && slide) {
-      const slideLeft = slide.offsetLeft - track.offsetLeft;
-      const targetScroll = slideLeft - (track.clientWidth - slide.clientWidth) / 2;
-      track.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
-
-      document.querySelectorAll('[id^="dailyEpochPill_"]').forEach((btn, i) => {
-        if (i === epochIndex) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
+    const waypoint = document.getElementById(`waypointRow_${epochIndex}`);
+    if (waypoint) {
+      waypoint.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  }
-
-  scrollDailyEpochCarousel(direction) {
-    const track = document.getElementById('dailyEpochTrack');
-    if (!track) return;
-    const slideWidth = track.querySelector('.daily-carousel-slide')?.offsetWidth || 450;
-    const scrollAmount = (slideWidth + 32) * direction;
-    track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
   }
 
 

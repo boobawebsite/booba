@@ -38,6 +38,8 @@ export class MotionEngine {
     this.initMagneticCardTilts();
     this.initScrollAnimations();
     this.initFloatingParallaxCoins();
+    this.initPipelineScaleAnimation();
+    this.initSparoScrollTracker();
 
     // Listen for resize and visibility
     window.addEventListener('resize', () => this.handleResize(), { passive: true });
@@ -506,11 +508,147 @@ export class MotionEngine {
   }
 
   /**
+   * 7. SCROLL-DRIVEN PIPELINE SHOWCASE SCALE (Closely.ng Precision Algorithm)
+   */
+  initPipelineScaleAnimation() {
+    const updateScales = () => {
+      const cards = document.querySelectorAll('.pipeline-showcase-card');
+      if (!cards || cards.length === 0) return;
+
+      const windowHeight = window.innerHeight;
+      const viewportCenter = windowHeight / 2;
+
+      cards.forEach((card) => {
+        const rect = card.getBoundingClientRect();
+        const cardCenter = rect.top + rect.height / 2;
+        const distFromCenter = Math.abs(cardCenter - viewportCenter);
+
+        // Closely.ng's exact smooth parabolic easing formula:
+        const progress = Math.max(0, 1 - Math.min(1, distFromCenter / (0.85 * windowHeight)));
+        const easedProgress = 1 - Math.pow(1 - progress, 2);
+        
+        // Closely.ng scale range: 0.70 when far away -> 1.08 when centered!
+        const scale = 0.70 + easedProgress * 0.38;
+        const opacity = 0.55 + easedProgress * 0.45;
+
+        card.style.transform = `scale(${scale.toFixed(3)})`;
+        card.style.opacity = `${opacity.toFixed(3)}`;
+      });
+    };
+
+    if (!this._hasPipelineScrollBound) {
+      this._hasPipelineScrollBound = true;
+      const tick = () => {
+        requestAnimationFrame(updateScales);
+      };
+      window.addEventListener('scroll', tick, { passive: true });
+      window.addEventListener('resize', tick, { passive: true });
+    }
+
+    // Execute immediately and in staggered micro-frames for instant application
+    updateScales();
+    requestAnimationFrame(updateScales);
+    setTimeout(updateScales, 50);
+    setTimeout(updateScales, 200);
+  }
+
+  /**
+   * 8. SPAROPAY 8-STEP STICKY SCROLL CONTROLLER
+   */
+  initSparoScrollTracker() {
+    const onScroll = () => {
+      const section = document.getElementById('sparoTokenShowcaseSection');
+      if (!section) return;
+
+      const rect = section.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      const totalScrollable = rect.height - windowHeight;
+
+      if (totalScrollable <= 0) return;
+
+      // Calculate progress from 0.0 to 1.0 as the section pins in the viewport
+      const currentScroll = -rect.top;
+      const progress = Math.max(0, Math.min(1, currentScroll / totalScrollable));
+
+      // Calculate step index from 0 to 7 (8 steps)
+      const stepIndex = Math.min(7, Math.floor(progress * 8));
+
+      if (window.boobaApp && typeof window.boobaApp.setSparoStep === 'function') {
+        if (window.boobaApp.currentSparoStep !== stepIndex) {
+          window.boobaApp.setSparoStep(stepIndex);
+        }
+      }
+    };
+
+    if (!this._hasSparoScrollBound) {
+      this._hasSparoScrollBound = true;
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
+    }
+
+    onScroll();
+  }
+
+  /**
+   * 9. HOMEPAGE ABOUT TOKEN 4-PILLAR STICKY SCROLL CONTROLLER (MOBILE)
+   */
+  initCoinbaseScrollTracker() {
+    const onScroll = () => {
+      const section = document.getElementById('homeAboutTokenSection');
+      if (!section) return;
+
+      const rows = section.querySelectorAll('.coinbase-showcase-row');
+      if (!rows || rows.length === 0) return;
+
+      // On desktop, ensure all rows are active and visible in normal flow
+      if (window.innerWidth > 768) {
+        rows.forEach(r => r.classList.add('active'));
+        return;
+      }
+
+      const rect = section.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      const totalScrollable = rect.height - windowHeight;
+
+      if (totalScrollable <= 0) {
+        rows[0]?.classList.add('active');
+        return;
+      }
+
+      // Calculate progress from 0.0 to 1.0
+      const currentScroll = -rect.top;
+      const progress = Math.max(0, Math.min(1, currentScroll / totalScrollable));
+
+      // Calculate active pillar index (0 to 3)
+      const activeIdx = Math.min(rows.length - 1, Math.floor(progress * rows.length));
+
+      rows.forEach((row, i) => {
+        if (i === activeIdx) {
+          row.classList.add('active');
+        } else {
+          row.classList.remove('active');
+        }
+      });
+    };
+
+    if (!this._hasCoinbaseScrollBound) {
+      this._hasCoinbaseScrollBound = true;
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
+    }
+
+    onScroll();
+  }
+
+  /**
    * Refresh dynamic elements (called on page switch or data render)
    */
   refresh() {
     this.initMagneticCardTilts();
     this.initScrollAnimations();
+    this.initPipelineScaleAnimation();
+    this.initSparoScrollTracker();
+    this.initCoinbaseScrollTracker();
   }
 }
 

@@ -6300,351 +6300,185 @@ HOW TO RECOVER YOUR ACCOUNT:
     const initialCalc = calculatePresaleTokens(defaultUsdt);
 
     container.innerHTML = `
-      <div class="container page-content">
+      <div class="container page-content" style="max-width: 600px; margin: 0 auto; padding-top: 2rem; padding-bottom: 4rem;">
         
-        <!-- Back Navigation & Quick Actions -->
-        <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          <a href="dashboard.html" class="back-dashboard-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"></line>
-              <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-            <span>Back to Dashboard</span>
+        <!-- Header & Back Navigation -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.75rem;">
+          <a href="dashboard.html" class="back-dashboard-btn" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span>Dashboard</span>
           </a>
 
-          <div style="display: flex; gap: 0.75rem; align-items: center;">
-            <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.addTokenToWallet()" style="display: flex; align-items: center; gap: 0.35rem; color: var(--brand-yellow); border: 1px solid rgba(243, 186, 47, 0.3);">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              <span>Add $BOOBA to MetaMask</span>
-            </button>
-            <a href="withdraw.html" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 0.35rem;">
-              <span>Withdraw Bridge →</span>
-            </a>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.addTokenToWallet()" style="font-size: 0.78rem; padding: 0.35rem 0.75rem; color: var(--brand-yellow); border: 1px solid rgba(243, 186, 47, 0.3); border-radius: 10px;">
+            + Add $BOOBA to Wallet
+          </button>
+        </div>
+
+        <!-- Clean Header Title & Stage Info -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <div style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.85rem; background: rgba(243, 186, 47, 0.12); border: 1px solid rgba(243, 186, 47, 0.35); border-radius: 999px; margin-bottom: 1rem;">
+            <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--brand-yellow);"></span>
+            <span style="font-size: 0.78rem; font-weight: 800; color: var(--brand-yellow); text-transform: uppercase; letter-spacing: 0.05em;">Stage 1 Live • 1 USDT = ${telemetry.baseRate} $BOOBA</span>
+          </div>
+
+          <h1 style="font-size: clamp(1.8rem, 5vw, 2.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin: 0 0 0.5rem 0; line-height: 1.2;">
+            $BOOBA Token Presale
+          </h1>
+          <p style="font-size: 0.92rem; color: var(--text-secondary); margin: 0 auto; line-height: 1.5; max-width: 480px;">
+            Deposit BEP-20 USDT to claim your allocation of $BOOBA at early-bird valuation before PancakeSwap listing.
+          </p>
+
+          <!-- Minimal Progress Bar -->
+          <div style="margin-top: 1.5rem; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1rem 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 0.82rem; margin-bottom: 0.5rem;">
+              <span style="color: var(--text-secondary); font-weight: 600;">Raised: <strong style="color: #FFFFFF; font-family: var(--font-mono);">$${telemetry.totalUsdtRaised.toLocaleString()} USDT</strong></span>
+              <span style="color: var(--accent-emerald); font-weight: 800; font-family: var(--font-mono);">${telemetry.progressPercent}% / $${telemetry.hardCapUsdt.toLocaleString()} Hard Cap</span>
+            </div>
+            <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 999px; overflow: hidden;">
+              <div style="width: ${telemetry.progressPercent}%; height: 100%; background: linear-gradient(90deg, #F3BA2F 0%, #10B981 100%); border-radius: 999px;"></div>
+            </div>
           </div>
         </div>
 
-        <!-- HERO HEADER WITH TELEMETRY -->
-        <div class="card" style="background: linear-gradient(135deg, rgba(243, 186, 47, 0.14) 0%, rgba(20, 26, 38, 0.95) 50%, rgba(7, 9, 14, 0.99) 100%); border: 1.5px solid rgba(243, 186, 47, 0.4); border-radius: 28px; padding: 2.5rem; margin-bottom: 2.5rem; position: relative; overflow: hidden;">
-          <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.12; pointer-events: none;">
-            <img src="assets/mascot.jpg" style="width: 280px; height: 280px; border-radius: 50%;">
-          </div>
-
-          <div style="position: relative; z-index: 1;">
-            <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
-              <span class="badge-tag" style="background: rgba(243, 186, 47, 0.2); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.5); font-weight: 900; font-size: 0.82rem;">
-                <span class="pulse-dot" style="width: 7px; height: 7px; background: var(--brand-yellow);"></span> ${telemetry.stageName.toUpperCase()}
-              </span>
-              <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-weight: 800; font-size: 0.8rem;">
-                1 USDT = ${telemetry.baseRate} $BOOBA
-              </span>
-              <span class="badge-tag" style="background: rgba(99, 102, 241, 0.15); color: #818CF8; border-color: rgba(99, 102, 241, 0.4); font-weight: 800; font-size: 0.8rem;">
-                BNB SMART CHAIN (BEP-20)
-              </span>
-            </div>
-
-            <h1 style="font-size: clamp(2rem, 4vw, 2.9rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin-bottom: 0.75rem;">
-              $BOOBA Official Token Presale
-            </h1>
-            <p style="font-size: 1rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 2rem; max-width: 760px;">
-              Deposit USDT to reserve your allocation of $BOOBA tokens at early-bird valuation before the official DEX launch on PancakeSwap. Includes tiered volume bonuses up to +15% and instant Passport level upgrades!
-            </p>
-
-            <!-- PRESALE PROGRESS BAR HUD -->
-            <div style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 1.5rem; max-width: 820px;">
-              <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-                <div>
-                  <div style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800;">Total USDT Raised</div>
-                  <div style="font-size: 1.7rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono);">
-                    $${telemetry.totalUsdtRaised.toLocaleString()} <span style="font-size: 0.95rem; color: var(--text-secondary); font-weight: 600;">/ $${telemetry.hardCapUsdt.toLocaleString()} USDT</span>
-                  </div>
-                </div>
-                <div style="text-align: right;">
-                  <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700;">Soft Cap: $${telemetry.softCapUsdt.toLocaleString()} USDT (PASSED)</div>
-                  <div style="font-size: 1.25rem; font-weight: 900; color: var(--accent-emerald); font-family: var(--font-mono);">${telemetry.progressPercent}% Cap Filled</div>
-                </div>
-              </div>
-
-              <!-- Progress Bar Track -->
-              <div style="width: 100%; height: 12px; background: rgba(255, 255, 255, 0.08); border-radius: 8px; overflow: hidden; position: relative;">
-                <div style="width: ${telemetry.progressPercent}%; height: 100%; background: linear-gradient(90deg, #F3BA2F 0%, #10B981 100%); border-radius: 8px; box-shadow: 0 0 15px rgba(243, 186, 47, 0.6); transition: width 0.6s ease;"></div>
-              </div>
-
-              <!-- HUD Footer Stats -->
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.06); font-size: 0.8rem;">
-                <div>
-                  <span style="color: var(--text-secondary);">Current Price:</span>
-                  <strong style="color: #FFFFFF; display: block; font-family: var(--font-mono);">$0.005 USDT</strong>
-                </div>
-                <div>
-                  <span style="color: var(--text-secondary);">Stage 2 Price:</span>
-                  <strong style="color: var(--brand-yellow); display: block; font-family: var(--font-mono);">$0.0075 (+50%)</strong>
-                </div>
-                <div>
-                  <span style="color: var(--text-secondary);">Target DEX Listing:</span>
-                  <strong style="color: var(--accent-emerald); display: block; font-family: var(--font-mono);">$0.020 (4.0x ROI)</strong>
-                </div>
-                <div>
-                  <span style="color: var(--text-secondary);">Total Participants:</span>
-                  <strong style="color: #FFFFFF; display: block; font-family: var(--font-mono);">${telemetry.totalParticipants.toLocaleString()} Backers</strong>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- 2-COLUMN MAIN PRESALE TERMINAL -->
-        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+        <!-- MAIN PRESALE TERMINAL CARD -->
+        <div class="card" style="padding: clamp(1.5rem, 4vw, 2.25rem); border-radius: 24px; background: rgba(14, 18, 27, 0.92); border: 1.5px solid rgba(243, 186, 47, 0.35); box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(243, 186, 47, 0.1); backdrop-filter: blur(20px); margin-bottom: 2rem;">
           
-          <!-- Column 1: Interactive USDT Buy Terminal -->
-          <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px);">
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-              <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 0;">Presale Swap Terminal</h3>
-              <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); font-weight: 800; font-size: 0.72rem;">
-                BEP-20 USDT
+          <!-- Method Tabs -->
+          <div class="segmented-control" style="margin-bottom: 1.5rem; background: rgba(0,0,0,0.5); padding: 4px; border-radius: 12px;">
+            <button type="button" id="presaleMethodWeb3Btn" class="segment-btn active" onclick="window.boobaApp.switchPresaleMethod('web3')" style="flex: 1; font-size: 0.84rem; font-weight: 700; padding: 0.6rem 0.5rem;">
+              Direct Web3 Wallet
+            </button>
+            <button type="button" id="presaleMethodManualBtn" class="segment-btn" onclick="window.boobaApp.switchPresaleMethod('manual')" style="flex: 1; font-size: 0.84rem; font-weight: 700; padding: 0.6rem 0.5rem;">
+              Manual Transfer
+            </button>
+          </div>
+
+          <!-- Pay Input Row -->
+          <div style="margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.5rem;">
+              <span>You Pay (USDT)</span>
+              <span>Min: $10 • Max: $10,000</span>
+            </div>
+
+            <div style="position: relative;">
+              <input type="number" id="presaleUsdtInput" class="form-input text-mono" placeholder="100" min="10" max="10000" value="${defaultUsdt}" oninput="window.boobaApp.updatePresaleCalculation(this.value)" style="padding-left: 2.75rem; font-size: 1.35rem; font-weight: 900; background: rgba(0,0,0,0.6); border: 1.5px solid var(--border-medium); border-radius: 14px; height: 56px;">
+              <div style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-weight: 900; color: #26A17B; font-size: 1.15rem;">
+                ₮
+              </div>
+            </div>
+
+            <!-- Quick Presets -->
+            <div style="display: flex; gap: 0.4rem; margin-top: 0.65rem; flex-wrap: wrap;">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(50)" style="flex: 1; min-width: 55px; font-size: 0.78rem; font-weight: 700; background: rgba(255,255,255,0.04); border-radius: 8px;">$50</button>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(100)" style="flex: 1; min-width: 55px; font-size: 0.78rem; font-weight: 700; background: rgba(255,255,255,0.04); border-radius: 8px;">$100</button>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(250)" style="flex: 1; min-width: 55px; font-size: 0.78rem; font-weight: 700; background: rgba(255,255,255,0.04); border-radius: 8px;">$250</button>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(500)" style="flex: 1; min-width: 70px; font-size: 0.78rem; font-weight: 800; background: rgba(243,186,47,0.12); color: var(--brand-yellow); border-radius: 8px;">$500 (+10%)</button>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(1000)" style="flex: 1; min-width: 75px; font-size: 0.78rem; font-weight: 800; background: rgba(243,186,47,0.18); color: var(--brand-yellow); border-radius: 8px;">$1,000 (+15%)</button>
+            </div>
+          </div>
+
+          <!-- Receive Preview Row -->
+          <div style="background: rgba(0, 0, 0, 0.45); border: 1.5px solid rgba(243, 186, 47, 0.25); border-radius: 16px; padding: 1.15rem 1.25rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
+              <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">You Receive</span>
+              <span id="presaleBonusTokensDisplay" style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 800;">
+                ${initialCalc.bonusPercent > 0 ? `+${initialCalc.bonusPercent}% Bonus Active` : 'Standard Allocation'}
               </span>
             </div>
-
-            <!-- Deposit Method Tabs -->
-            <div class="segmented-control" style="margin-bottom: 1.75rem;">
-              <button type="button" id="presaleMethodWeb3Btn" class="segment-btn active" onclick="window.boobaApp.switchPresaleMethod('web3')" style="flex: 1;">
-                Direct Web3 Wallet
-              </button>
-              <button type="button" id="presaleMethodManualBtn" class="segment-btn" onclick="window.boobaApp.switchPresaleMethod('manual')" style="flex: 1;">
-                Manual Treasury Transfer
-              </button>
+            <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+              <span id="presaleTotalTokensDisplay" style="font-size: 2rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); line-height: 1;">
+                ${initialCalc.totalTokens.toLocaleString()}
+              </span>
+              <span style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF;">$BOOBA</span>
             </div>
-
-            <!-- USDT Amount Input with Quick Preset Chips -->
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <label class="form-label" style="margin: 0;">You Deposit (USDT)</label>
-                <span style="font-size: 0.75rem; color: var(--text-muted);">Min: 10 USDT • Max: 10,000 USDT</span>
-              </div>
-
-              <div style="position: relative; margin-bottom: 0.75rem;">
-                <input type="number" id="presaleUsdtInput" class="form-input text-mono" placeholder="100" min="10" max="10000" value="${defaultUsdt}" oninput="window.boobaApp.updatePresaleCalculation(this.value)" style="padding-left: 2.75rem; font-size: 1.2rem; font-weight: 800;">
-                <div style="position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); font-weight: 900; color: #26A17B; font-size: 1rem;">
-                  ₮
-                </div>
-              </div>
-
-              <!-- Quick Presets -->
-              <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
-                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(50)" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(255,255,255,0.05);">$50</button>
-                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(100)" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(255,255,255,0.05);">$100</button>
-                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(250)" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(255,255,255,0.05);">$250</button>
-                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(500)" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(255,255,255,0.05); color: var(--brand-yellow); font-weight: 700;">$500 (+10%)</button>
-                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(1000)" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(243,186,47,0.15); color: var(--brand-yellow); font-weight: 800;">$1,000 (+15%)</button>
-              </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 0.65rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.76rem; color: var(--text-secondary);">
+              <span>Base: <span id="presaleBaseTokensDisplay" style="color: #FFFFFF;">${initialCalc.baseTokens.toLocaleString()}</span></span>
+              <span>Passport Bonus: <span id="presaleXpBonusDisplay" style="color: #818CF8; font-weight: 700;">+${Math.floor(initialCalc.totalTokens * 0.1).toLocaleString()} XP</span></span>
             </div>
-
-            <!-- Dynamic Allocation Calculation Breakdown -->
-            <div style="background: rgba(0, 0, 0, 0.4); border: 1.5px solid rgba(243, 186, 47, 0.3); border-radius: 18px; padding: 1.25rem 1.5rem; margin-bottom: 1.75rem;">
-              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; margin-bottom: 0.5rem;">You Will Receive</div>
-              
-              <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.75rem;">
-                <span id="presaleTotalTokensDisplay" style="font-size: 2.2rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); line-height: 1;">
-                  ${initialCalc.totalTokens.toLocaleString()}
-                </span>
-                <span style="font-size: 1.1rem; font-weight: 800; color: #FFFFFF;">$BOOBA</span>
-              </div>
-
-              <div style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
-                <div style="display: flex; justify-content: space-between;">
-                  <span style="color: var(--text-secondary);">Base Tokens (200 / USDT):</span>
-                  <span id="presaleBaseTokensDisplay" style="color: #FFFFFF; font-family: var(--font-mono);">${initialCalc.baseTokens.toLocaleString()} $BOOBA</span>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                  <span style="color: var(--text-secondary);">Early Bird Volume Bonus:</span>
-                  <span id="presaleBonusTokensDisplay" style="color: var(--accent-emerald); font-weight: 800; font-family: var(--font-mono);">+${initialCalc.bonusTokens.toLocaleString()} $BOOBA (${initialCalc.bonusPercent}%)</span>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                  <span style="color: var(--text-secondary);">Instant Passport XP Bonus:</span>
-                  <span id="presaleXpBonusDisplay" style="color: #818CF8; font-weight: 800;">+${Math.floor(initialCalc.totalTokens * 0.1).toLocaleString()} XP</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- TAB 1: WEB3 DIRECT DEPOSIT VIEW -->
-            <div id="presaleWeb3View">
-              <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; padding: 0.85rem 1.15rem; margin-bottom: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span style="font-size: 0.82rem; color: var(--text-secondary);">Connected Wallet:</span>
-                  <span style="font-size: 0.82rem; font-family: var(--font-mono); color: ${isWalletConnected ? 'var(--accent-emerald)' : 'var(--text-muted)'};">
-                    ${isWalletConnected ? `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}` : 'Not Connected'}
-                  </span>
-                </div>
-              </div>
-
-              <button type="button" id="presaleWeb3ActionBtn" class="btn btn-primary btn-lg btn-block" onclick="window.boobaApp.handlePresaleDepositWeb3()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 900;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                <span>Approve & Deposit USDT</span>
-              </button>
-            </div>
-
-            <!-- TAB 2: MANUAL TREASURY TRANSFER VIEW -->
-            <div id="presaleManualView" style="display: none;">
-              <div style="background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.5rem;">
-                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; margin-bottom: 0.4rem;">Official BEP-20 Presale Treasury Address</div>
-                <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.6rem 0.85rem; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08);">
-                  <span style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--brand-yellow); word-break: break-all; flex: 1;">
-                    ${telemetry.treasuryAddress}
-                  </span>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${telemetry.treasuryAddress}'); alert('Treasury address copied to clipboard!')" style="font-size: 0.72rem; padding: 0.2rem 0.5rem;">
-                    Copy
-                  </button>
-                </div>
-                <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.5rem;">
-                  Send BEP-20 USDT directly from Trust Wallet, MetaMask, Binance, or OKX to the treasury address above.
-                </div>
-              </div>
-
-              <!-- Tx Hash Input -->
-              <div class="form-group" style="margin-bottom: 1.5rem;">
-                <label class="form-label">Paste BSC Transaction Hash (TxID)</label>
-                <input type="text" id="presaleTxHashInput" class="form-input text-mono" placeholder="0x... Transaction Hash">
-              </div>
-
-              <button type="button" id="presaleManualActionBtn" class="btn btn-primary btn-lg btn-block" onclick="window.boobaApp.handlePresaleDepositManual()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 900;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Verify & Credit Presale Tokens</span>
-              </button>
-            </div>
-
           </div>
 
-          <!-- Column 2: User Allocation Dashboard & Presale Highlights -->
-          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-            
-            <!-- User Presale Portfolio Card -->
-            <div class="card" style="padding: 2.25rem; border-radius: 24px; background: linear-gradient(145deg, rgba(20, 26, 38, 0.9) 0%, rgba(10, 13, 20, 0.95) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-                <div style="display: flex; align-items: center; gap: 0.65rem;">
-                  <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(243, 186, 47, 0.15); border: 1px solid rgba(243, 186, 47, 0.35); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-                  </div>
+          <!-- TAB 1: WEB3 DIRECT DEPOSIT VIEW -->
+          <div id="presaleWeb3View">
+            <button type="button" id="presaleWeb3ActionBtn" class="btn btn-primary btn-lg btn-block" onclick="window.boobaApp.handlePresaleDepositWeb3()" style="height: 52px; font-size: 1.05rem; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: 14px; background: linear-gradient(135deg, #F3BA2F 0%, #E2A016 100%); color: #000; box-shadow: 0 0 25px rgba(243, 186, 47, 0.4);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <span>Approve & Deposit USDT</span>
+            </button>
+            <div style="text-align: center; margin-top: 0.75rem; font-size: 0.76rem; color: var(--text-muted);">
+              ${isWalletConnected ? `Connected: <span class="text-mono" style="color: var(--accent-emerald);">${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}</span>` : 'Connect your Web3 wallet (MetaMask / Trust Wallet / Binance)'}
+            </div>
+          </div>
+
+          <!-- TAB 2: MANUAL TREASURY TRANSFER VIEW -->
+          <div id="presaleManualView" style="display: none;">
+            <div style="background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 1rem; margin-bottom: 1.25rem;">
+              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; margin-bottom: 0.35rem;">Official BEP-20 Presale Treasury Address</div>
+              <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.55rem 0.75rem; border-radius: 10px;">
+                <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--brand-yellow); word-break: break-all; flex: 1;">
+                  ${telemetry.treasuryAddress}
+                </span>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${telemetry.treasuryAddress}'); alert('Treasury address copied!')" style="font-size: 0.72rem; padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.1);">
+                  Copy
+                </button>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.4rem;">
+                Send BEP-20 USDT from Trust Wallet, MetaMask, Binance, or OKX to the address above.
+              </div>
+            </div>
+
+            <!-- Tx Hash Input -->
+            <div style="margin-bottom: 1.25rem;">
+              <label class="form-label" style="font-size: 0.8rem; font-weight: 700;">Paste BSC Transaction Hash (TxID)</label>
+              <input type="text" id="presaleTxHashInput" class="form-input text-mono" placeholder="0x... Transaction Hash" style="border-radius: 12px; font-size: 0.85rem; height: 46px;">
+            </div>
+
+            <button type="button" id="presaleManualActionBtn" class="btn btn-primary btn-lg btn-block" onclick="window.boobaApp.handlePresaleDepositManual()" style="height: 50px; font-size: 0.95rem; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: 14px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Verify & Credit Tokens</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- COMPACT USER ALLOCATION PILL -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 2rem;">
+          <div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Your Reserved Tokens</div>
+            <div style="font-size: 1.3rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono);">
+              ${totalUserAllocated.toLocaleString()} <span style="font-size: 0.82rem; color: #FFFFFF;">$BOOBA</span>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total USDT Paid</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #26A17B; font-family: var(--font-mono);">
+              $${totalUserUsdt.toLocaleString()} USDT
+            </div>
+          </div>
+        </div>
+
+        <!-- RECENT USER RECEIPTS (Only shown if user made purchases) -->
+        ${userPurchases.length > 0 ? `
+          <div style="background: rgba(14, 18, 27, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 1.25rem;">
+            <h4 style="font-size: 0.92rem; font-weight: 800; color: #FFFFFF; margin: 0 0 0.85rem 0;">Your Presale Order Receipts</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              ${userPurchases.map(p => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: rgba(0,0,0,0.3); border-radius: 10px; font-size: 0.8rem;">
                   <div>
-                    <h4 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Your Presale Allocation</h4>
-                    <div style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700;">Guaranteed TGE Claim</div>
+                    <div style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">
+                      ${Number(p.totalTokens).toLocaleString()} $BOOBA
+                    </div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted);">${new Date(p.timestamp).toLocaleDateString()}</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-weight: 700; color: #26A17B; font-family: var(--font-mono);">$${Number(p.usdtAmount).toLocaleString()} USDT</div>
+                    <a href="${p.explorerUrl || `https://bscscan.com/tx/${p.txHash}`}" target="_blank" rel="noopener noreferrer" style="font-size: 0.7rem; color: var(--text-secondary); text-decoration: underline;">
+                      Tx: ${p.txHash.slice(0, 6)}... ↗
+                    </a>
                   </div>
                 </div>
-
-                <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); font-size: 0.72rem;">
-                  ${userPurchases.length} ${userPurchases.length === 1 ? 'Order' : 'Orders'}
-                </span>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
-                <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 1.15rem;">
-                  <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total USDT Contributed</div>
-                  <div style="font-size: 1.6rem; font-weight: 900; color: #FFFFFF; font-family: var(--font-mono);">
-                    $${totalUserUsdt.toLocaleString()}
-                  </div>
-                </div>
-
-                <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(243,186,47,0.25); border-radius: 16px; padding: 1.15rem;">
-                  <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">$BOOBA Tokens Reserved</div>
-                  <div style="font-size: 1.6rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono);">
-                    ${totalUserAllocated.toLocaleString()}
-                  </div>
-                </div>
-              </div>
-
-              <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; padding: 0.85rem 1.15rem; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
-                Your tokens are cryptographically locked to Passport <strong>${user ? user.passportId : 'BB-000000'}</strong> and will be airdropped 1:1 on BNB Smart Chain during the official TGE.
-              </div>
-            </div>
-
-            <!-- Volume Bonus Tiers Explainer -->
-            <div class="card" style="padding: 1.75rem; border-radius: 20px; background: rgba(14, 18, 27, 0.85); border: 1px solid rgba(255, 255, 255, 0.08);">
-              <h4 style="font-size: 1rem; font-weight: 800; color: #FFFFFF; margin-bottom: 1rem;">Early Bird Bonus Tiers</h4>
-              
-              <div style="display: flex; flex-direction: column; gap: 0.65rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: rgba(243, 186, 47, 0.1); border-radius: 10px; border: 1px solid rgba(243, 186, 47, 0.3);">
-                  <span style="font-size: 0.84rem; font-weight: 700; color: #FFFFFF;">$1,000+ Deposit</span>
-                  <span style="font-size: 0.84rem; font-weight: 900; color: var(--brand-yellow);">+15% Diamond Bonus</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: rgba(255, 255, 255, 0.03); border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.06);">
-                  <span style="font-size: 0.84rem; font-weight: 700; color: #FFFFFF;">$500 - $999 Deposit</span>
-                  <span style="font-size: 0.84rem; font-weight: 800; color: #F3BA2F;">+10% Gold Bonus</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: rgba(255, 255, 255, 0.03); border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.06);">
-                  <span style="font-size: 0.84rem; font-weight: 700; color: #FFFFFF;">$100 - $499 Deposit</span>
-                  <span style="font-size: 0.84rem; font-weight: 800; color: var(--accent-emerald);">+5% Silver Bonus</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- USER PRESALE PURCHASES TABLE -->
-        <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.08); margin-bottom: 3rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
-            <div>
-              <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 0 0 0.25rem 0;">Presale Order Receipts</h3>
-              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">Verified USDT contributions and allocated $BOOBA tokens.</p>
+              `).join('')}
             </div>
           </div>
-
-          ${userPurchases.length === 0 ? `
-            <div style="text-align: center; padding: 3rem 1.5rem; background: rgba(0,0,0,0.25); border-radius: 16px; border: 1px dashed rgba(255,255,255,0.1);">
-              <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(243,186,47,0.1); border: 1px solid rgba(243,186,47,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; color: var(--brand-yellow);">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-              </div>
-              <div style="font-weight: 700; color: #FFFFFF; font-size: 1rem; margin-bottom: 0.25rem;">No presale contributions yet</div>
-              <div style="font-size: 0.82rem; color: var(--text-secondary);">Enter a USDT amount above and complete your deposit to lock in your Stage 1 allocation.</div>
-            </div>
-          ` : `
-            <div style="overflow-x: auto;">
-              <table style="width: 100%; border-collapse: collapse; font-size: 0.86rem; text-align: left;">
-                <thead>
-                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
-                    <th style="padding: 0.75rem 1rem;">Timestamp</th>
-                    <th style="padding: 0.75rem 1rem;">USDT Deposited</th>
-                    <th style="padding: 0.75rem 1rem;">$BOOBA Allocated</th>
-                    <th style="padding: 0.75rem 1rem;">Method</th>
-                    <th style="padding: 0.75rem 1rem;">Tx Hash</th>
-                    <th style="padding: 0.75rem 1rem; text-align: right;">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${userPurchases.map(p => `
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
-                      <td style="padding: 1rem; color: var(--text-secondary); white-space: nowrap;">
-                        ${new Date(p.timestamp).toLocaleString()}
-                      </td>
-                      <td style="padding: 1rem; font-weight: 800; color: #26A17B; font-family: var(--font-mono); white-space: nowrap;">
-                        $${Number(p.usdtAmount).toLocaleString()} USDT
-                      </td>
-                      <td style="padding: 1rem; font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono); white-space: nowrap;">
-                        ${Number(p.totalTokens).toLocaleString()} $BOOBA
-                        ${p.bonusPercent > 0 ? `<span style="font-size: 0.72rem; color: var(--accent-emerald); font-weight: 700; margin-left: 4px;">(+${p.bonusPercent}%)</span>` : ''}
-                      </td>
-                      <td style="padding: 1rem; color: var(--text-secondary); text-transform: uppercase; font-size: 0.75rem;">
-                        ${p.method === 'web3' ? 'Web3 Direct' : 'Treasury Transfer'}
-                      </td>
-                      <td style="padding: 1rem; font-family: var(--font-mono); white-space: nowrap;">
-                        <a href="${p.explorerUrl || `https://bscscan.com/tx/${p.txHash}`}" target="_blank" rel="noopener noreferrer" style="color: var(--brand-yellow); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
-                          <span>${p.txHash.slice(0, 8)}...${p.txHash.slice(-6)}</span>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                        </a>
-                      </td>
-                      <td style="padding: 1rem; text-align: right; white-space: nowrap;">
-                        <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-size: 0.72rem; padding: 0.2rem 0.55rem;">
-                          <span class="pulse-dot" style="width: 5px; height: 5px; background: var(--accent-emerald);"></span> ${p.status || 'Confirmed'}
-                        </span>
-                      </td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          `}
-        </div>
+        ` : ''}
 
       </div>
     `;

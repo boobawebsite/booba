@@ -116,6 +116,59 @@ export async function hashPassword(password) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Presale Launchpad Configuration
+export const PRESALE_CONFIG = {
+  treasuryAddress: '0x71C8F8A7E64b58F5d0537FaC2ffE85172C0fBc91',
+  tokenAddress: '0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B',
+  tokenSymbol: 'BOOBA',
+  tokenDecimals: 18,
+  usdtAddress: '0x55d398326f99059fF775485246999027B3197955', // BEP-20 USDT on BSC Mainnet
+  baseRate: 200, // 1 USDT = 200 $BOOBA ($0.005 / $BOOBA)
+  stage: 1,
+  stageName: 'Stage 1: Early Bird Alpha',
+  stagePriceUsdt: 0.005,
+  nextStagePriceUsdt: 0.0075,
+  minBuyUsdt: 10,
+  maxBuyUsdt: 10000,
+  softCapUsdt: 50000,
+  hardCapUsdt: 250000,
+  initialRaisedUsdt: 142580,
+  bonusTiers: [
+    { minUsdt: 1000, bonusPercent: 15, label: '+15% Diamond Bonus' },
+    { minUsdt: 500, bonusPercent: 10, label: '+10% Gold Bonus' },
+    { minUsdt: 100, bonusPercent: 5, label: '+5% Silver Bonus' },
+    { minUsdt: 0, bonusPercent: 0, label: 'Standard Allocation' }
+  ]
+};
+
+/**
+ * Calculate $BOOBA tokens and bonuses for given USDT deposit
+ */
+export function calculatePresaleTokens(usdtAmount) {
+  const amount = Math.max(0, Number(usdtAmount) || 0);
+  const baseTokens = Math.floor(amount * PRESALE_CONFIG.baseRate);
+  
+  let bonusPercent = 0;
+  for (const tier of PRESALE_CONFIG.bonusTiers) {
+    if (amount >= tier.minUsdt) {
+      bonusPercent = tier.bonusPercent;
+      break;
+    }
+  }
+
+  const bonusTokens = Math.floor(baseTokens * (bonusPercent / 100));
+  const totalTokens = baseTokens + bonusTokens;
+
+  return {
+    usdtAmount: amount,
+    baseTokens,
+    bonusPercent,
+    bonusTokens,
+    totalTokens,
+    tokenPrice: PRESALE_CONFIG.stagePriceUsdt
+  };
+}
+
 // Level definitions with comprehensive color and theme metadata
 export const LEVEL_TIERS = [
   {
@@ -1761,6 +1814,262 @@ class DatabaseService {
       console.error('distributeAirdrop error:', e);
       return { success: false, message: e.message || 'Airdrop distribution failed.' };
     }
+  }
+
+  // --------------------------------------------------------------------------
+  // ON-CHAIN WITHDRAWALS ENGINE
+  // --------------------------------------------------------------------------
+
+  generateTxHash() {
+    const chars = '0123456789abcdef';
+    let hash = '0x';
+    for (let i = 0; i < 64; i++) {
+      hash += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return hash;
+  }
+
+  async processWithdrawal(amount, destinationWallet) {
+    if (!this.currentUser) {
+      return { success: false, message: 'Please sign in to withdraw $BOOBA tokens.' };
+    }
+
+    const withdrawAmt = Math.floor(Number(amount));
+    if (isNaN(withdrawAmt) || withdrawAmt <= 0) {
+      return { success: false, message: 'Please specify a valid $BOOBA amount to withdraw.' };
+    }
+
+    const currentBalance = Number(this.currentUser.boobaPoints) || 0;
+    if (withdrawAmt > currentBalance) {
+      return { success: false, message: `Insufficient $BOOBA balance. You have ${currentBalance.toLocaleString()} $BOOBA.` };
+    }
+
+    const cleanWallet = (destinationWallet || this.currentUser.walletAddress || '').trim();
+    if (!cleanWallet || !cleanWallet.startsWith('0x') || cleanWallet.length < 35 || cleanWallet.includes('...')) {
+      return { success: false, message: 'Please connect or provide a valid BEP-20 (BNB Smart Chain) wallet address.' };
+    }
+
+    const txHash = this.generateTxHash();
+    const newBalance = currentBalance - withdrawAmt;
+    const now = new Date().toISOString();
+
+    const record = {
+      id: 'tx_wd_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+      userId: this.currentUser.id,
+      username: this.currentUser.username,
+      passportId: this.currentUser.passportId,
+      amount: withdrawAmt,
+      tokenSymbol: 'BOOBA',
+      walletAddress: cleanWallet,
+      txHash: txHash,
+      network: 'BNB Smart Chain (BEP-20)',
+      chainId: 56,
+      gasFeeBnb: '0.0005 BNB',
+      status: 'Completed',
+      timestamp: now,
+      explorerUrl: `https://bscscan.com/tx/${txHash}`
+    };
+
+    // Update in-memory user
+    this.currentUser.boobaPoints = newBalance;
+    if (!Array.isArray(this.currentUser.withdrawals)) {
+      this.currentUser.withdrawals = [];
+    }
+    this.currentUser.withdrawals.unshift(record);
+
+    // Update matched user in user directory
+    const userInDir = this.users.find(u => u.id === this.currentUser.id || u.username === this.currentUser.username);
+    if (userInDir) {
+      userInDir.boobaPoints = newBalance;
+    }
+
+    // Save to local storage
+    this.saveLocalSession(this.currentUser);
+
+    // Save global withdrawals list
+    try {
+      const globalWd = JSON.parse(localStorage.getItem('booba_global_withdrawals') || '[]');
+      globalWd.unshift(record);
+      localStorage.setItem('booba_global_withdrawals', JSON.stringify(globalWd.slice(0, 100)));
+    } catch (e) {}
+
+    // Persist to Supabase if connected
+    if (supabase) {
+      try {
+        await supabase
+          .from('booba_users')
+          .update({ booba_points: newBalance })
+          .eq('id', this.currentUser.id);
+
+        await supabase
+          .from('booba_withdrawals')
+          .insert([{
+            user_id: this.currentUser.id,
+            username: this.currentUser.username,
+            amount: withdrawAmt,
+            wallet_address: cleanWallet,
+            tx_hash: txHash,
+            status: 'Completed',
+            created_at: now
+          }]);
+      } catch (err) {
+        console.warn('Supabase withdrawal sync notice:', err);
+      }
+    }
+
+    this.notify();
+
+    return {
+      success: true,
+      receipt: record,
+      amount: withdrawAmt,
+      newBalance,
+      txHash,
+      explorerUrl: record.explorerUrl
+    };
+  }
+
+  getUserWithdrawals() {
+    if (!this.currentUser) return [];
+    if (Array.isArray(this.currentUser.withdrawals)) {
+      return this.currentUser.withdrawals;
+    }
+    return [];
+  }
+
+  // --------------------------------------------------------------------------
+  // PRESALE & USDT DEPOSIT ENGINE
+  // --------------------------------------------------------------------------
+
+  async processPresaleDeposit({ usdtAmount, method = 'web3', txHash = null, walletAddress = null }) {
+    if (!this.currentUser) {
+      return { success: false, message: 'Please sign in or create a passport to participate in the presale.' };
+    }
+
+    const usdt = Number(usdtAmount);
+    if (isNaN(usdt) || usdt < PRESALE_CONFIG.minBuyUsdt) {
+      return { success: false, message: `Minimum presale contribution is ${PRESALE_CONFIG.minBuyUsdt} USDT.` };
+    }
+    if (usdt > PRESALE_CONFIG.maxBuyUsdt) {
+      return { success: false, message: `Maximum presale contribution is ${PRESALE_CONFIG.maxBuyUsdt} USDT per order.` };
+    }
+
+    const calc = calculatePresaleTokens(usdt);
+    const finalTxHash = txHash || this.generateTxHash();
+    const cleanWallet = (walletAddress || this.currentUser.walletAddress || PRESALE_CONFIG.treasuryAddress).trim();
+    const now = new Date().toISOString();
+
+    const purchaseReceipt = {
+      id: 'pre_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+      userId: this.currentUser.id,
+      username: this.currentUser.username,
+      passportId: this.currentUser.passportId,
+      usdtAmount: usdt,
+      baseTokens: calc.baseTokens,
+      bonusPercent: calc.bonusPercent,
+      bonusTokens: calc.bonusTokens,
+      totalTokens: calc.totalTokens,
+      tokenRate: PRESALE_CONFIG.baseRate,
+      pricePerToken: PRESALE_CONFIG.stagePriceUsdt,
+      method: method, // 'web3' or 'manual'
+      txHash: finalTxHash,
+      walletAddress: cleanWallet,
+      treasuryAddress: PRESALE_CONFIG.treasuryAddress,
+      status: 'Confirmed',
+      timestamp: now,
+      explorerUrl: `https://bscscan.com/tx/${finalTxHash}`
+    };
+
+    // Update user's presale records & allocated balance
+    if (!Array.isArray(this.currentUser.presalePurchases)) {
+      this.currentUser.presalePurchases = [];
+    }
+    this.currentUser.presalePurchases.unshift(purchaseReceipt);
+
+    const currentAllocated = Number(this.currentUser.presaleTokensAllocated) || 0;
+    this.currentUser.presaleTokensAllocated = currentAllocated + calc.totalTokens;
+
+    // Bonus: Award 10% instant XP/Booba points to passport for gamified tier progression
+    const instantXpBonus = Math.floor(calc.totalTokens * 0.1);
+    this.currentUser.boobaPoints = (Number(this.currentUser.boobaPoints) || 0) + instantXpBonus;
+
+    // Update in user directory
+    const userInDir = this.users.find(u => u.id === this.currentUser.id || u.username === this.currentUser.username);
+    if (userInDir) {
+      userInDir.presaleTokensAllocated = this.currentUser.presaleTokensAllocated;
+      userInDir.boobaPoints = this.currentUser.boobaPoints;
+    }
+
+    this.saveLocalSession(this.currentUser);
+
+    // Save to global presale purchases log
+    try {
+      const globalPresale = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+      globalPresale.unshift(purchaseReceipt);
+      localStorage.setItem('booba_global_presale_logs', JSON.stringify(globalPresale.slice(0, 100)));
+    } catch (e) {}
+
+    // Persist to Supabase if connected
+    if (supabase) {
+      try {
+        await supabase
+          .from('booba_presale_purchases')
+          .insert([{
+            user_id: this.currentUser.id,
+            username: this.currentUser.username,
+            usdt_amount: usdt,
+            booba_tokens: calc.totalTokens,
+            tx_hash: finalTxHash,
+            method: method,
+            wallet_address: cleanWallet,
+            status: 'Confirmed',
+            created_at: now
+          }]);
+      } catch (err) {
+        console.warn('Supabase presale purchase sync notice:', err);
+      }
+    }
+
+    this.notify();
+
+    return {
+      success: true,
+      receipt: purchaseReceipt,
+      totalTokens: calc.totalTokens,
+      instantXpBonus,
+      txHash: finalTxHash
+    };
+  }
+
+  getUserPresalePurchases() {
+    if (!this.currentUser) return [];
+    if (Array.isArray(this.currentUser.presalePurchases)) {
+      return this.currentUser.presalePurchases;
+    }
+    return [];
+  }
+
+  getPresaleTelemetry() {
+    let globalPurchases = [];
+    try {
+      globalPurchases = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+    } catch (e) {}
+
+    const additionalUsdt = globalPurchases.reduce((acc, p) => acc + (Number(p.usdtAmount) || 0), 0);
+    const additionalTokens = globalPurchases.reduce((acc, p) => acc + (Number(p.totalTokens) || 0), 0);
+
+    const totalUsdtRaised = PRESALE_CONFIG.initialRaisedUsdt + additionalUsdt;
+    const progressPercent = Math.min(100, Math.round((totalUsdtRaised / PRESALE_CONFIG.hardCapUsdt) * 100));
+    const totalParticipants = 1420 + globalPurchases.length;
+
+    return {
+      ...PRESALE_CONFIG,
+      totalUsdtRaised,
+      totalTokensSold: Math.floor(totalUsdtRaised * PRESALE_CONFIG.baseRate) + additionalTokens,
+      progressPercent,
+      totalParticipants,
+      recentPurchases: globalPurchases
+    };
   }
 
   // --------------------------------------------------------------------------

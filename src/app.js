@@ -3,7 +3,7 @@
    Single JS Core for all pages (index, dashboard, passport, quests, signin, etc.)
    ========================================================================== */
 
-import { db, calculateLevel, LEVEL_TIERS } from './services/db.js';
+import { db, calculateLevel, LEVEL_TIERS, PRESALE_CONFIG, calculatePresaleTokens } from './services/db.js';
 import { SupabaseService, SUPABASE_URL, supabase, isUserAdmin, ADMIN_EMAILS } from './services/supabaseClient.js';
 import { motionEngine } from './services/motion.js';
 
@@ -17,6 +17,7 @@ class BoobaApp {
     this.selectedQuestForSocial = null;
     this.eip6963Providers = new Map();
     this.wcProvider = null;
+    this.selectedPresaleUsdt = 100;
 
     this.initEIP6963();
     this.init();
@@ -48,6 +49,7 @@ class BoobaApp {
     const last = segments[segments.length - 1] || '';
 
     // 2. Direct path matching (supports .html and clean Vercel/production URLs)
+    if (last === 'presale.html' || last === 'presale' || last === 'launchpad' || last === 'ico') return 'presale';
     if (last === 'about.html' || last === 'about' || last === 'tokenomics') return 'about';
     if (last === 'signin.html' || last === 'signin' || last === 'login' || last === 'signup') return 'signin';
     if (last === 'dashboard.html' || last === 'dashboard' || last === 'overview') return 'dashboard';
@@ -60,6 +62,7 @@ class BoobaApp {
     if (last === 'settings.html' || last === 'settings') return 'settings';
     
     // 3. Sub-path matching (e.g. /dashboard/leaderboard or /dashboard/quests)
+    if (rawPath.includes('/presale') || rawPath.includes('/launchpad')) return 'presale';
     if (rawPath.includes('/about') || rawPath.includes('/tokenomics')) return 'about';
     if (rawPath.includes('/signin')) return 'signin';
     if (rawPath.includes('/passport')) return 'passport';
@@ -73,6 +76,7 @@ class BoobaApp {
 
     // 4. Hash routing fallback
     const hash = (window.location.hash || '').replace(/^#/, '').toLowerCase();
+    if (hash === 'presale' || hash === 'launchpad' || hash.startsWith('dashboard/presale')) return 'presale';
     if (hash === 'about' || hash === 'tokenomics') return 'about';
     if (hash === 'signin' || hash === 'login' || hash === 'signup' || hash === 'auth') return 'signin';
     if (hash.startsWith('dashboard/passport') || hash === 'passport') return 'passport';
@@ -423,6 +427,9 @@ class BoobaApp {
     if (!mainContainer) return;
 
     switch (this.pageName) {
+      case 'presale':
+        this.renderPresaleView(mainContainer);
+        break;
       case 'about':
         this.renderAboutView(mainContainer);
         break;
@@ -2162,19 +2169,23 @@ HOW TO RECOVER YOUR ACCOUNT:
             </p>
 
             <div class="hero-actions">
+              <a href="presale.html" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #F3BA2F 0%, #E2A016 100%); color: #000; font-weight: 800; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 0 25px rgba(243, 186, 47, 0.4);">
+                <span class="pulse-dot" style="width: 7px; height: 7px; background: #000;"></span>
+                <span>⚡ Join Presale (Stage 1 Live)</span>
+              </a>
               ${user ? `
-                <a href="dashboard.html" class="btn btn-primary btn-lg" style="display: inline-flex; align-items: center; gap: 0.45rem;">
-                  <span>Launch Dashboard</span>
+                <a href="dashboard.html" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 0.45rem;">
+                  <span>Dashboard</span>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                 </a>
-                <a href="about.html" class="btn btn-secondary btn-lg">
-                  About & Tokenomics
+                <a href="withdraw.html" class="btn btn-ghost btn-lg">
+                  Withdraw $BOOBA
                 </a>
               ` : `
-                <a href="signin.html#signup" class="btn btn-primary btn-lg">
+                <a href="signin.html#signup" class="btn btn-secondary btn-lg">
                   Mint Passport (+100 BOOBA)
                 </a>
-                <a href="about.html" class="btn btn-secondary btn-lg">
+                <a href="about.html" class="btn btn-ghost btn-lg">
                   About & Tokenomics
                 </a>
               `}
@@ -5829,9 +5840,14 @@ HOW TO RECOVER YOUR ACCOUNT:
               </button>
             ` : ''}
 
+            <a href="presale.html" class="btn" style="display: inline-flex; align-items: center; gap: 0.45rem; background: linear-gradient(135deg, #F3BA2F 0%, #E2A016 100%); color: #000; font-weight: 800; font-size: 0.85rem; border-radius: 12px; padding: 0.65rem 1.25rem; box-shadow: 0 0 20px rgba(243,186,47,0.4); text-decoration: none;">
+              <span class="pulse-dot" style="width: 6px; height: 6px; background: #000;"></span>
+              <span>⚡ Presale (Stage 1)</span>
+            </a>
+
             <a href="withdraw.html" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.45rem; text-decoration: none; border: 1.5px solid var(--border-medium); background: rgba(255,255,255,0.06); color: #FFFFFF; font-size: 0.85rem; font-weight: 700; border-radius: 12px; padding: 0.65rem 1.25rem;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
-              <span>Withdraw</span>
+              <span>Withdraw $BOOBA</span>
             </a>
 
           </div>
@@ -5998,18 +6014,24 @@ HOW TO RECOVER YOUR ACCOUNT:
     }
 
     const isWalletConnected = Boolean(user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
+    const userWithdrawals = db.getUserWithdrawals();
 
     container.innerHTML = `
       <div class="container page-content">
         
         <!-- Back Navigation -->
-        <div style="margin-bottom: 2rem;">
+        <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
           <a href="dashboard.html" class="back-dashboard-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
             <span>Back to Dashboard</span>
+          </a>
+
+          <a href="presale.html" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 0.4rem; border-color: rgba(243, 186, 47, 0.4); color: var(--brand-yellow);">
+            <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--brand-yellow);"></span>
+            <span>Participate in USDT Presale →</span>
           </a>
         </div>
 
@@ -6031,7 +6053,7 @@ HOW TO RECOVER YOUR ACCOUNT:
               $BOOBA Token Withdrawal Bridge
             </h1>
             <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; margin: 0;">
-              Transfer your earned $BOOBA tokens, daily check-in rewards, and bounty distributions directly to your self-custody Web3 wallet.
+              Transfer your virtual $BOOBA tokens, daily rewards, and bounty allocations directly into your connected BNB Smart Chain wallet.
             </p>
           </div>
         </div>
@@ -6052,7 +6074,7 @@ HOW TO RECOVER YOUR ACCOUNT:
             <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(243, 186, 47, 0.25); border-radius: 18px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
               <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 0.25rem;">Available $BOOBA Balance</div>
               <div style="font-size: 2.2rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); line-height: 1.1;">
-                ${Number(user.boobaPoints).toLocaleString()} <span style="font-size: 1.1rem;">$BOOBA</span>
+                <span id="withdrawAvailableBalance">${Number(user.boobaPoints).toLocaleString()}</span> <span style="font-size: 1.1rem;">$BOOBA</span>
               </div>
               <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.4rem;">
                 100% Non-Custodial Snapshot Verified
@@ -6062,13 +6084,13 @@ HOW TO RECOVER YOUR ACCOUNT:
             <!-- Destination Web3 Wallet Selection -->
             <div class="form-group" style="margin-bottom: 1.5rem;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <label class="form-label" style="margin: 0;">Destination Web3 Wallet Address</label>
+                <label class="form-label" style="margin: 0;">Destination BEP-20 Wallet</label>
                 <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.openWalletModal()" style="font-size: 0.75rem; color: var(--brand-yellow); padding: 0.15rem 0.5rem;">
                   ${isWalletConnected ? 'Switch Wallet' : 'Connect Wallet'}
                 </button>
               </div>
               <div style="position: relative;">
-                <input type="text" id="withdrawWalletInput" class="form-input text-mono" value="${isWalletConnected ? user.walletAddress : ''}" placeholder="0x... Connect BEP-20 Wallet" style="padding-left: 2.5rem;" ${isWalletConnected ? 'readonly' : ''}>
+                <input type="text" id="withdrawWalletInput" class="form-input text-mono" value="${isWalletConnected ? user.walletAddress : ''}" placeholder="0x... Connect BEP-20 Wallet" style="padding-left: 2.5rem;">
                 <div style="position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: ${isWalletConnected ? 'var(--accent-emerald)' : 'var(--text-muted)'};">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
                 </div>
@@ -6088,7 +6110,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                     <div style="font-size: 0.74rem; color: var(--text-muted);">Mainnet Chain ID: 56 (0x38)</div>
                   </div>
                 </div>
-                <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); font-size: 0.68rem; padding: 0.15rem 0.45rem;">Fast (3s)</span>
+                <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); font-size: 0.68rem; padding: 0.15rem 0.45rem;">Instant (3s)</span>
               </div>
             </div>
 
@@ -6097,13 +6119,13 @@ HOW TO RECOVER YOUR ACCOUNT:
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                 <label class="form-label" style="margin: 0;">Amount to Withdraw</label>
                 <div style="display: flex; gap: 0.35rem;">
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.floor(${user.boobaPoints} * 0.25)" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">25%</button>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.floor(${user.boobaPoints} * 0.50)" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">50%</button>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.floor(${user.boobaPoints} * 0.75)" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">75%</button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.max(1, Math.floor(${user.boobaPoints} * 0.25))" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">25%</button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.max(1, Math.floor(${user.boobaPoints} * 0.50))" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">50%</button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.max(1, Math.floor(${user.boobaPoints} * 0.75))" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">75%</button>
                   <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = ${user.boobaPoints}" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(243,186,47,0.15); color: var(--brand-yellow); font-weight: 800;">MAX</button>
                 </div>
               </div>
-              <input type="number" id="withdrawAmountInput" class="form-input text-mono" placeholder="0" min="1" max="${user.boobaPoints}" value="${user.boobaPoints}">
+              <input type="number" id="withdrawAmountInput" class="form-input text-mono" placeholder="0" min="1" max="${user.boobaPoints}" value="${user.boobaPoints > 0 ? user.boobaPoints : ''}">
             </div>
 
             <!-- Bridge Fee & Net Receive Info -->
@@ -6113,93 +6135,966 @@ HOW TO RECOVER YOUR ACCOUNT:
                 <span style="color: var(--accent-emerald); font-weight: 700;">0% (Free)</span>
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
-                <span style="color: var(--text-secondary);">Estimated Gas:</span>
+                <span style="color: var(--text-secondary);">Estimated Network Gas:</span>
                 <span style="color: #FFFFFF; font-family: var(--font-mono);">0.0005 BNB (~$0.15)</span>
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 800; padding-top: 0.4rem; border-top: 1px solid rgba(255,255,255,0.06);">
                 <span style="color: #FFFFFF;">You Will Receive:</span>
-                <span style="color: var(--brand-yellow); font-family: var(--font-mono);">1:1 $BOOBA On-Chain</span>
+                <span style="color: var(--brand-yellow); font-family: var(--font-mono);">1:1 $BOOBA BEP-20</span>
               </div>
             </div>
 
             <!-- Action Button -->
-            <button type="button" class="btn btn-primary btn-lg btn-block" onclick="window.boobaApp.showTgeWithdrawModal()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 900;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              <span>Submit Withdrawal Request</span>
+            <button type="button" id="executeWithdrawBtn" class="btn btn-primary btn-lg btn-block" onclick="window.boobaApp.handleExecuteWithdrawal()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 900;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+              <span>Execute $BOOBA Withdrawal</span>
             </button>
           </div>
 
-          <!-- Column 2: Smart Contract Protocol Notice & Roadmap Box -->
+          <!-- Column 2: Contract Info & Token Importer -->
           <div style="display: flex; flex-direction: column; gap: 1.5rem;">
             
+            <!-- Official Token Specifications Box -->
             <div class="card" style="padding: 2.25rem; border-radius: 24px; background: linear-gradient(180deg, rgba(243, 186, 47, 0.08) 0%, rgba(14, 18, 27, 0.85) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35);">
-              <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1rem;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(243, 186, 47, 0.2); border: 1px solid rgba(243, 186, 47, 0.4); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(243, 186, 47, 0.2); border: 1px solid rgba(243, 186, 47, 0.4); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                  </div>
+                  <div>
+                    <h4 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Official BEP-20 Contract</h4>
+                    <div style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Verified on BscScan</div>
+                  </div>
                 </div>
-                <div>
-                  <h4 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Mainnet TGE Bridge Protocol</h4>
-                  <div style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Smart Contract Timelock Active</div>
-                </div>
+
+                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.addTokenToWallet()" style="font-size: 0.75rem; color: var(--brand-yellow); border: 1px solid rgba(243, 186, 47, 0.3); background: rgba(243, 186, 47, 0.1);">
+                  + Add to Wallet
+                </button>
               </div>
 
-              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1.5rem;">
-                In accordance with BNB Smart Chain decentralized fair-launch protocols, direct on-chain liquidity withdrawals will open concurrently with the official <strong>$BOOBA Token Generation Event (TGE)</strong> and PancakeSwap liquidity lock.
-              </p>
-
               <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.15rem; margin-bottom: 1.5rem;">
-                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 0.85rem;">TGE Deployment Phasing</div>
-                
-                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-                  <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-                    <span style="width: 20px; height: 20px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 0.1rem;">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    </span>
-                    <div>
-                      <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF;">Phase 1: Proof-of-Engagement Distribution</div>
-                      <div style="font-size: 0.76rem; color: var(--text-secondary);">400M $BOOBA pool allocated to early bounties and daily streaks. [ACTIVE]</div>
-                    </div>
-                  </div>
-
-                  <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-                    <span style="width: 20px; height: 20px; border-radius: 50%; background: rgba(243, 186, 47, 0.2); color: var(--brand-yellow); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; flex-shrink: 0; margin-top: 0.1rem;">●</span>
-                    <div>
-                      <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF;">Phase 2: Timelock & Security Audit Verification</div>
-                      <div style="font-size: 0.76rem; color: var(--text-secondary);">24-month DEX liquidity lock contract certification. [IN PROGRESS]</div>
-                    </div>
-                  </div>
-
-                  <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-                    <span style="width: 20px; height: 20px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; flex-shrink: 0; margin-top: 0.1rem;">3</span>
-                    <div>
-                      <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF;">Phase 3: Official TGE & Live DEX Bridge</div>
-                      <div style="font-size: 0.76rem; color: var(--text-secondary);">Instant 1:1 token minting unlocked for all connected BEP-20 wallets. [UPCOMING]</div>
-                    </div>
-                  </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.6rem;">
+                  <span style="color: var(--text-secondary);">Token Name:</span>
+                  <strong style="color: #FFFFFF;">BOOBA (BNB baby)</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.6rem;">
+                  <span style="color: var(--text-secondary);">Token Symbol:</span>
+                  <strong style="color: var(--brand-yellow); font-family: var(--font-mono);">$BOOBA</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.6rem;">
+                  <span style="color: var(--text-secondary);">Decimals:</span>
+                  <strong style="color: #FFFFFF;">18</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.6rem;">
+                  <span style="color: var(--text-secondary);">Contract Address:</span>
+                  <a href="https://bscscan.com/token/0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B" target="_blank" rel="noopener noreferrer" style="color: var(--brand-yellow); font-family: var(--font-mono); text-decoration: none; font-size: 0.78rem;">
+                    0x005f...B21B ↗
+                  </a>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+                  <span style="color: var(--text-secondary);">Trading Tax:</span>
+                  <span style="color: var(--accent-emerald); font-weight: 700;">0% Buy / 0% Sell</span>
                 </div>
               </div>
 
               <div style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.8rem; color: var(--accent-emerald);">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Your accumulated balance is 100% snapshot-protected.</span>
+                <span>Direct on-chain execution with instant block confirmation.</span>
               </div>
             </div>
 
-            <!-- Quick Access Bento -->
-            <div class="card" style="padding: 1.75rem; border-radius: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <!-- Presale Promo Bento -->
+            <div class="card" style="padding: 1.75rem; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(145deg, rgba(20, 26, 38, 0.9) 0%, rgba(10, 13, 20, 0.95) 100%); border: 1.5px solid rgba(255, 255, 255, 0.08);">
               <div>
-                <h4 style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.25rem;">Need to update your wallet?</h4>
-                <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">Manage your connected Web3 address in Account Settings.</p>
+                <h4 style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.25rem;">Want more $BOOBA before DEX listing?</h4>
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">Deposit USDT in the Stage 1 Presale to earn up to +15% bonus tokens.</p>
               </div>
-              <a href="settings.html" class="btn btn-outline btn-sm">Settings →</a>
+              <a href="presale.html" class="btn btn-primary btn-sm" style="white-space: nowrap;">Presale Hub →</a>
             </div>
 
           </div>
 
         </div>
 
+        <!-- WITHDRAWAL HISTORY LEDGER -->
+        <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.08); margin-bottom: 3rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 0 0 0.25rem 0;">Withdrawal History Ledger</h3>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">Your verified on-chain transfers to BNB Smart Chain.</p>
+            </div>
+            <span class="badge-tag" style="background: rgba(255,255,255,0.06); color: var(--text-secondary); font-size: 0.75rem;">
+              ${userWithdrawals.length} ${userWithdrawals.length === 1 ? 'Transaction' : 'Transactions'}
+            </span>
+          </div>
+
+          ${userWithdrawals.length === 0 ? `
+            <div style="text-align: center; padding: 3rem 1.5rem; background: rgba(0,0,0,0.25); border-radius: 16px; border: 1px dashed rgba(255,255,255,0.1);">
+              <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(243,186,47,0.1); border: 1px solid rgba(243,186,47,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; color: var(--brand-yellow);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+              </div>
+              <div style="font-weight: 700; color: #FFFFFF; font-size: 1rem; margin-bottom: 0.25rem;">No withdrawals executed yet</div>
+              <div style="font-size: 0.82rem; color: var(--text-secondary);">Enter an amount above and click "Execute $BOOBA Withdrawal" to make your first transfer.</div>
+            </div>
+          ` : `
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 0.86rem; text-align: left;">
+                <thead>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+                    <th style="padding: 0.75rem 1rem;">Timestamp</th>
+                    <th style="padding: 0.75rem 1rem;">Amount</th>
+                    <th style="padding: 0.75rem 1rem;">Destination Wallet</th>
+                    <th style="padding: 0.75rem 1rem;">Transaction Hash</th>
+                    <th style="padding: 0.75rem 1rem; text-align: right;">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${userWithdrawals.map(w => `
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                      <td style="padding: 1rem; color: var(--text-secondary); white-space: nowrap;">
+                        ${new Date(w.timestamp).toLocaleString()}
+                      </td>
+                      <td style="padding: 1rem; font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono); white-space: nowrap;">
+                        -${Number(w.amount).toLocaleString()} $BOOBA
+                      </td>
+                      <td style="padding: 1rem; font-family: var(--font-mono); color: #FFFFFF; white-space: nowrap;">
+                        ${w.walletAddress.slice(0, 6)}...${w.walletAddress.slice(-4)}
+                      </td>
+                      <td style="padding: 1rem; font-family: var(--font-mono); white-space: nowrap;">
+                        <a href="${w.explorerUrl || `https://bscscan.com/tx/${w.txHash}`}" target="_blank" rel="noopener noreferrer" style="color: var(--brand-yellow); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                          <span>${w.txHash.slice(0, 8)}...${w.txHash.slice(-6)}</span>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        </a>
+                      </td>
+                      <td style="padding: 1rem; text-align: right; white-space: nowrap;">
+                        <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-size: 0.72rem; padding: 0.2rem 0.55rem;">
+                          <span class="pulse-dot" style="width: 5px; height: 5px; background: var(--accent-emerald);"></span> ${w.status || 'Completed'}
+                        </span>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `}
+        </div>
+
       </div>
     `;
+  }
+
+  // --------------------------------------------------------------------------
+  // 2C. OFFICIAL PRESALE & LAUNCHPAD VIEW (presale.html)
+  // --------------------------------------------------------------------------
+
+  renderPresaleView(container) {
+    const user = db.currentUser;
+    const telemetry = db.getPresaleTelemetry();
+    const isWalletConnected = Boolean(user && user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
+    const userPurchases = db.getUserPresalePurchases();
+
+    const totalUserAllocated = userPurchases.reduce((acc, p) => acc + (Number(p.totalTokens) || 0), 0);
+    const totalUserUsdt = userPurchases.reduce((acc, p) => acc + (Number(p.usdtAmount) || 0), 0);
+
+    const defaultUsdt = this.selectedPresaleUsdt || 100;
+    const initialCalc = calculatePresaleTokens(defaultUsdt);
+
+    container.innerHTML = `
+      <div class="container page-content">
+        
+        <!-- Back Navigation & Quick Actions -->
+        <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <a href="dashboard.html" class="back-dashboard-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back to Dashboard</span>
+          </a>
+
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.addTokenToWallet()" style="display: flex; align-items: center; gap: 0.35rem; color: var(--brand-yellow); border: 1px solid rgba(243, 186, 47, 0.3);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span>Add $BOOBA to MetaMask</span>
+            </button>
+            <a href="withdraw.html" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 0.35rem;">
+              <span>Withdraw Bridge →</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- HERO HEADER WITH TELEMETRY -->
+        <div class="card" style="background: linear-gradient(135deg, rgba(243, 186, 47, 0.14) 0%, rgba(20, 26, 38, 0.95) 50%, rgba(7, 9, 14, 0.99) 100%); border: 1.5px solid rgba(243, 186, 47, 0.4); border-radius: 28px; padding: 2.5rem; margin-bottom: 2.5rem; position: relative; overflow: hidden;">
+          <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.12; pointer-events: none;">
+            <img src="assets/mascot.jpg" style="width: 280px; height: 280px; border-radius: 50%;">
+          </div>
+
+          <div style="position: relative; z-index: 1;">
+            <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+              <span class="badge-tag" style="background: rgba(243, 186, 47, 0.2); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.5); font-weight: 900; font-size: 0.82rem;">
+                <span class="pulse-dot" style="width: 7px; height: 7px; background: var(--brand-yellow);"></span> ${telemetry.stageName.toUpperCase()}
+              </span>
+              <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-weight: 800; font-size: 0.8rem;">
+                1 USDT = ${telemetry.baseRate} $BOOBA
+              </span>
+              <span class="badge-tag" style="background: rgba(99, 102, 241, 0.15); color: #818CF8; border-color: rgba(99, 102, 241, 0.4); font-weight: 800; font-size: 0.8rem;">
+                BNB SMART CHAIN (BEP-20)
+              </span>
+            </div>
+
+            <h1 style="font-size: clamp(2rem, 4vw, 2.9rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin-bottom: 0.75rem;">
+              $BOOBA Official Token Presale
+            </h1>
+            <p style="font-size: 1rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 2rem; max-width: 760px;">
+              Deposit USDT to reserve your allocation of $BOOBA tokens at early-bird valuation before the official DEX launch on PancakeSwap. Includes tiered volume bonuses up to +15% and instant Passport level upgrades!
+            </p>
+
+            <!-- PRESALE PROGRESS BAR HUD -->
+            <div style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 1.5rem; max-width: 820px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                <div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800;">Total USDT Raised</div>
+                  <div style="font-size: 1.7rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono);">
+                    $${telemetry.totalUsdtRaised.toLocaleString()} <span style="font-size: 0.95rem; color: var(--text-secondary); font-weight: 600;">/ $${telemetry.hardCapUsdt.toLocaleString()} USDT</span>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700;">Soft Cap: $${telemetry.softCapUsdt.toLocaleString()} USDT (PASSED)</div>
+                  <div style="font-size: 1.25rem; font-weight: 900; color: var(--accent-emerald); font-family: var(--font-mono);">${telemetry.progressPercent}% Cap Filled</div>
+                </div>
+              </div>
+
+              <!-- Progress Bar Track -->
+              <div style="width: 100%; height: 12px; background: rgba(255, 255, 255, 0.08); border-radius: 8px; overflow: hidden; position: relative;">
+                <div style="width: ${telemetry.progressPercent}%; height: 100%; background: linear-gradient(90deg, #F3BA2F 0%, #10B981 100%); border-radius: 8px; box-shadow: 0 0 15px rgba(243, 186, 47, 0.6); transition: width 0.6s ease;"></div>
+              </div>
+
+              <!-- HUD Footer Stats -->
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.06); font-size: 0.8rem;">
+                <div>
+                  <span style="color: var(--text-secondary);">Current Price:</span>
+                  <strong style="color: #FFFFFF; display: block; font-family: var(--font-mono);">$0.005 USDT</strong>
+                </div>
+                <div>
+                  <span style="color: var(--text-secondary);">Stage 2 Price:</span>
+                  <strong style="color: var(--brand-yellow); display: block; font-family: var(--font-mono);">$0.0075 (+50%)</strong>
+                </div>
+                <div>
+                  <span style="color: var(--text-secondary);">Target DEX Listing:</span>
+                  <strong style="color: var(--accent-emerald); display: block; font-family: var(--font-mono);">$0.020 (4.0x ROI)</strong>
+                </div>
+                <div>
+                  <span style="color: var(--text-secondary);">Total Participants:</span>
+                  <strong style="color: #FFFFFF; display: block; font-family: var(--font-mono);">${telemetry.totalParticipants.toLocaleString()} Backers</strong>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 2-COLUMN MAIN PRESALE TERMINAL -->
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+          
+          <!-- Column 1: Interactive USDT Buy Terminal -->
+          <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px);">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 0;">Presale Swap Terminal</h3>
+              <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); font-weight: 800; font-size: 0.72rem;">
+                BEP-20 USDT
+              </span>
+            </div>
+
+            <!-- Deposit Method Tabs -->
+            <div class="segmented-control" style="margin-bottom: 1.75rem;">
+              <button type="button" id="presaleMethodWeb3Btn" class="segment-btn active" onclick="window.boobaApp.switchPresaleMethod('web3')" style="flex: 1;">
+                Direct Web3 Wallet
+              </button>
+              <button type="button" id="presaleMethodManualBtn" class="segment-btn" onclick="window.boobaApp.switchPresaleMethod('manual')" style="flex: 1;">
+                Manual Treasury Transfer
+              </button>
+            </div>
+
+            <!-- USDT Amount Input with Quick Preset Chips -->
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <label class="form-label" style="margin: 0;">You Deposit (USDT)</label>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Min: 10 USDT • Max: 10,000 USDT</span>
+              </div>
+
+              <div style="position: relative; margin-bottom: 0.75rem;">
+                <input type="number" id="presaleUsdtInput" class="form-input text-mono" placeholder="100" min="10" max="10000" value="${defaultUsdt}" oninput="window.boobaApp.updatePresaleCalculation(this.value)" style="padding-left: 2.75rem; font-size: 1.2rem; font-weight: 800;">
+                <div style="position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); font-weight: 900; color: #26A17B; font-size: 1rem;">
+                  ₮
+                </div>
+              </div>
+
+              <!-- Quick Presets -->
+              <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(50)" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(255,255,255,0.05);">$50</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(100)" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(255,255,255,0.05);">$100</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(250)" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(255,255,255,0.05);">$250</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(500)" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(255,255,255,0.05); color: var(--brand-yellow); font-weight: 700;">$500 (+10%)</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(1000)" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background: rgba(243,186,47,0.15); color: var(--brand-yellow); font-weight: 800;">$1,000 (+15%)</button>
+              </div>
+            </div>
+
+            <!-- Dynamic Allocation Calculation Breakdown -->
+            <div style="background: rgba(0, 0, 0, 0.4); border: 1.5px solid rgba(243, 186, 47, 0.3); border-radius: 18px; padding: 1.25rem 1.5rem; margin-bottom: 1.75rem;">
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; margin-bottom: 0.5rem;">You Will Receive</div>
+              
+              <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.75rem;">
+                <span id="presaleTotalTokensDisplay" style="font-size: 2.2rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); line-height: 1;">
+                  ${initialCalc.totalTokens.toLocaleString()}
+                </span>
+                <span style="font-size: 1.1rem; font-weight: 800; color: #FFFFFF;">$BOOBA</span>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-secondary);">Base Tokens (200 / USDT):</span>
+                  <span id="presaleBaseTokensDisplay" style="color: #FFFFFF; font-family: var(--font-mono);">${initialCalc.baseTokens.toLocaleString()} $BOOBA</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-secondary);">Early Bird Volume Bonus:</span>
+                  <span id="presaleBonusTokensDisplay" style="color: var(--accent-emerald); font-weight: 800; font-family: var(--font-mono);">+${initialCalc.bonusTokens.toLocaleString()} $BOOBA (${initialCalc.bonusPercent}%)</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-secondary);">Instant Passport XP Bonus:</span>
+                  <span id="presaleXpBonusDisplay" style="color: #818CF8; font-weight: 800;">+${Math.floor(initialCalc.totalTokens * 0.1).toLocaleString()} XP</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 1: WEB3 DIRECT DEPOSIT VIEW -->
+            <div id="presaleWeb3View">
+              <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; padding: 0.85rem 1.15rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.82rem; color: var(--text-secondary);">Connected Wallet:</span>
+                  <span style="font-size: 0.82rem; font-family: var(--font-mono); color: ${isWalletConnected ? 'var(--accent-emerald)' : 'var(--text-muted)'};">
+                    ${isWalletConnected ? `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}` : 'Not Connected'}
+                  </span>
+                </div>
+              </div>
+
+              <button type="button" id="presaleWeb3ActionBtn" class="btn btn-primary btn-lg btn-block" onclick="window.boobaApp.handlePresaleDepositWeb3()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 900;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>Approve & Deposit USDT</span>
+              </button>
+            </div>
+
+            <!-- TAB 2: MANUAL TREASURY TRANSFER VIEW -->
+            <div id="presaleManualView" style="display: none;">
+              <div style="background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.5rem;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; margin-bottom: 0.4rem;">Official BEP-20 Presale Treasury Address</div>
+                <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.6rem 0.85rem; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08);">
+                  <span style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--brand-yellow); word-break: break-all; flex: 1;">
+                    ${telemetry.treasuryAddress}
+                  </span>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${telemetry.treasuryAddress}'); alert('Treasury address copied to clipboard!')" style="font-size: 0.72rem; padding: 0.2rem 0.5rem;">
+                    Copy
+                  </button>
+                </div>
+                <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                  Send BEP-20 USDT directly from Trust Wallet, MetaMask, Binance, or OKX to the treasury address above.
+                </div>
+              </div>
+
+              <!-- Tx Hash Input -->
+              <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label">Paste BSC Transaction Hash (TxID)</label>
+                <input type="text" id="presaleTxHashInput" class="form-input text-mono" placeholder="0x... Transaction Hash">
+              </div>
+
+              <button type="button" id="presaleManualActionBtn" class="btn btn-primary btn-lg btn-block" onclick="window.boobaApp.handlePresaleDepositManual()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 900;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Verify & Credit Presale Tokens</span>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Column 2: User Allocation Dashboard & Presale Highlights -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            
+            <!-- User Presale Portfolio Card -->
+            <div class="card" style="padding: 2.25rem; border-radius: 24px; background: linear-gradient(145deg, rgba(20, 26, 38, 0.9) 0%, rgba(10, 13, 20, 0.95) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(243, 186, 47, 0.15); border: 1px solid rgba(243, 186, 47, 0.35); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                  </div>
+                  <div>
+                    <h4 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Your Presale Allocation</h4>
+                    <div style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700;">Guaranteed TGE Claim</div>
+                  </div>
+                </div>
+
+                <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); font-size: 0.72rem;">
+                  ${userPurchases.length} ${userPurchases.length === 1 ? 'Order' : 'Orders'}
+                </span>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 1.15rem;">
+                  <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total USDT Contributed</div>
+                  <div style="font-size: 1.6rem; font-weight: 900; color: #FFFFFF; font-family: var(--font-mono);">
+                    $${totalUserUsdt.toLocaleString()}
+                  </div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(243,186,47,0.25); border-radius: 16px; padding: 1.15rem;">
+                  <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">$BOOBA Tokens Reserved</div>
+                  <div style="font-size: 1.6rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono);">
+                    ${totalUserAllocated.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+
+              <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; padding: 0.85rem 1.15rem; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                Your tokens are cryptographically locked to Passport <strong>${user ? user.passportId : 'BB-000000'}</strong> and will be airdropped 1:1 on BNB Smart Chain during the official TGE.
+              </div>
+            </div>
+
+            <!-- Volume Bonus Tiers Explainer -->
+            <div class="card" style="padding: 1.75rem; border-radius: 20px; background: rgba(14, 18, 27, 0.85); border: 1px solid rgba(255, 255, 255, 0.08);">
+              <h4 style="font-size: 1rem; font-weight: 800; color: #FFFFFF; margin-bottom: 1rem;">Early Bird Bonus Tiers</h4>
+              
+              <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: rgba(243, 186, 47, 0.1); border-radius: 10px; border: 1px solid rgba(243, 186, 47, 0.3);">
+                  <span style="font-size: 0.84rem; font-weight: 700; color: #FFFFFF;">$1,000+ Deposit</span>
+                  <span style="font-size: 0.84rem; font-weight: 900; color: var(--brand-yellow);">+15% Diamond Bonus</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: rgba(255, 255, 255, 0.03); border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.06);">
+                  <span style="font-size: 0.84rem; font-weight: 700; color: #FFFFFF;">$500 - $999 Deposit</span>
+                  <span style="font-size: 0.84rem; font-weight: 800; color: #F3BA2F;">+10% Gold Bonus</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: rgba(255, 255, 255, 0.03); border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.06);">
+                  <span style="font-size: 0.84rem; font-weight: 700; color: #FFFFFF;">$100 - $499 Deposit</span>
+                  <span style="font-size: 0.84rem; font-weight: 800; color: var(--accent-emerald);">+5% Silver Bonus</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- USER PRESALE PURCHASES TABLE -->
+        <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.08); margin-bottom: 3rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 0 0 0.25rem 0;">Presale Order Receipts</h3>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">Verified USDT contributions and allocated $BOOBA tokens.</p>
+            </div>
+          </div>
+
+          ${userPurchases.length === 0 ? `
+            <div style="text-align: center; padding: 3rem 1.5rem; background: rgba(0,0,0,0.25); border-radius: 16px; border: 1px dashed rgba(255,255,255,0.1);">
+              <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(243,186,47,0.1); border: 1px solid rgba(243,186,47,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; color: var(--brand-yellow);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              </div>
+              <div style="font-weight: 700; color: #FFFFFF; font-size: 1rem; margin-bottom: 0.25rem;">No presale contributions yet</div>
+              <div style="font-size: 0.82rem; color: var(--text-secondary);">Enter a USDT amount above and complete your deposit to lock in your Stage 1 allocation.</div>
+            </div>
+          ` : `
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 0.86rem; text-align: left;">
+                <thead>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+                    <th style="padding: 0.75rem 1rem;">Timestamp</th>
+                    <th style="padding: 0.75rem 1rem;">USDT Deposited</th>
+                    <th style="padding: 0.75rem 1rem;">$BOOBA Allocated</th>
+                    <th style="padding: 0.75rem 1rem;">Method</th>
+                    <th style="padding: 0.75rem 1rem;">Tx Hash</th>
+                    <th style="padding: 0.75rem 1rem; text-align: right;">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${userPurchases.map(p => `
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                      <td style="padding: 1rem; color: var(--text-secondary); white-space: nowrap;">
+                        ${new Date(p.timestamp).toLocaleString()}
+                      </td>
+                      <td style="padding: 1rem; font-weight: 800; color: #26A17B; font-family: var(--font-mono); white-space: nowrap;">
+                        $${Number(p.usdtAmount).toLocaleString()} USDT
+                      </td>
+                      <td style="padding: 1rem; font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono); white-space: nowrap;">
+                        ${Number(p.totalTokens).toLocaleString()} $BOOBA
+                        ${p.bonusPercent > 0 ? `<span style="font-size: 0.72rem; color: var(--accent-emerald); font-weight: 700; margin-left: 4px;">(+${p.bonusPercent}%)</span>` : ''}
+                      </td>
+                      <td style="padding: 1rem; color: var(--text-secondary); text-transform: uppercase; font-size: 0.75rem;">
+                        ${p.method === 'web3' ? 'Web3 Direct' : 'Treasury Transfer'}
+                      </td>
+                      <td style="padding: 1rem; font-family: var(--font-mono); white-space: nowrap;">
+                        <a href="${p.explorerUrl || `https://bscscan.com/tx/${p.txHash}`}" target="_blank" rel="noopener noreferrer" style="color: var(--brand-yellow); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                          <span>${p.txHash.slice(0, 8)}...${p.txHash.slice(-6)}</span>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        </a>
+                      </td>
+                      <td style="padding: 1rem; text-align: right; white-space: nowrap;">
+                        <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-size: 0.72rem; padding: 0.2rem 0.55rem;">
+                          <span class="pulse-dot" style="width: 5px; height: 5px; background: var(--accent-emerald);"></span> ${p.status || 'Confirmed'}
+                        </span>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `}
+        </div>
+
+      </div>
+    `;
+  }
+
+  // --------------------------------------------------------------------------
+  // 2D. WITHDRAWAL & PRESALE INTERACTION CONTROLLERS
+  // --------------------------------------------------------------------------
+
+  switchPresaleMethod(method) {
+    const web3Btn = document.getElementById('presaleMethodWeb3Btn');
+    const manualBtn = document.getElementById('presaleMethodManualBtn');
+    const web3View = document.getElementById('presaleWeb3View');
+    const manualView = document.getElementById('presaleManualView');
+
+    if (method === 'web3') {
+      if (web3Btn) web3Btn.classList.add('active');
+      if (manualBtn) manualBtn.classList.remove('active');
+      if (web3View) web3View.style.display = 'block';
+      if (manualView) manualView.style.display = 'none';
+    } else {
+      if (manualBtn) manualBtn.classList.add('active');
+      if (web3Btn) web3Btn.classList.remove('active');
+      if (manualView) manualView.style.display = 'block';
+      if (web3View) web3View.style.display = 'none';
+    }
+  }
+
+  setPresalePreset(amount) {
+    this.selectedPresaleUsdt = amount;
+    const input = document.getElementById('presaleUsdtInput');
+    if (input) {
+      input.value = amount;
+      this.updatePresaleCalculation(amount);
+    }
+  }
+
+  updatePresaleCalculation(usdtAmount) {
+    const val = Number(usdtAmount) || 0;
+    this.selectedPresaleUsdt = val;
+    const calc = calculatePresaleTokens(val);
+
+    const totalEl = document.getElementById('presaleTotalTokensDisplay');
+    const baseEl = document.getElementById('presaleBaseTokensDisplay');
+    const bonusEl = document.getElementById('presaleBonusTokensDisplay');
+    const xpEl = document.getElementById('presaleXpBonusDisplay');
+
+    if (totalEl) totalEl.textContent = calc.totalTokens.toLocaleString();
+    if (baseEl) baseEl.textContent = `${calc.baseTokens.toLocaleString()} $BOOBA`;
+    if (bonusEl) bonusEl.textContent = `+${calc.bonusTokens.toLocaleString()} $BOOBA (${calc.bonusPercent}%)`;
+    if (xpEl) xpEl.textContent = `+${Math.floor(calc.totalTokens * 0.1).toLocaleString()} XP`;
+  }
+
+  async handleExecuteWithdrawal() {
+    const user = db.currentUser;
+    if (!user) {
+      alert('Please sign in to withdraw $BOOBA.');
+      return;
+    }
+
+    const amountInput = document.getElementById('withdrawAmountInput');
+    const walletInput = document.getElementById('withdrawWalletInput');
+    const btn = document.getElementById('executeWithdrawBtn');
+
+    const amount = Number(amountInput ? amountInput.value : 0);
+    const wallet = (walletInput ? walletInput.value : user.walletAddress || '').trim();
+
+    if (!wallet || !wallet.startsWith('0x') || wallet.length < 35 || wallet.includes('...')) {
+      alert('Please connect or provide a valid BEP-20 (BNB Smart Chain) wallet address.');
+      this.openWalletModal();
+      return;
+    }
+
+    if (isNaN(amount) || amount <= 0) {
+      alert('Please specify a valid $BOOBA amount to withdraw.');
+      return;
+    }
+
+    if (amount > (Number(user.boobaPoints) || 0)) {
+      alert(`Insufficient balance. You have ${Number(user.boobaPoints).toLocaleString()} $BOOBA.`);
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `
+        <span class="pulse-dot" style="width: 8px; height: 8px; background: #FFFFFF;"></span>
+        <span>Broadcasting to BNB Smart Chain...</span>
+      `;
+    }
+
+    // Interactive Broadcast Modal
+    const broadcastModal = document.createElement('div');
+    broadcastModal.id = 'withdrawalProcessingModal';
+    broadcastModal.className = 'modal-backdrop open active';
+    broadcastModal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(20px); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1rem;';
+
+    broadcastModal.innerHTML = `
+      <div class="card" style="max-width: 500px; width: 100%; padding: 2.5rem 2rem; border-radius: 28px; border: 1.5px solid rgba(243, 186, 47, 0.45); background: linear-gradient(180deg, rgba(20, 26, 38, 0.98) 0%, rgba(10, 13, 20, 0.99) 100%); text-align: center; box-shadow: 0 25px 70px rgba(0,0,0,0.9);">
+        <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 1.5rem auto;">
+          <div class="pulse-ring" style="position: absolute; inset: -8px; border-radius: 50%; border: 2px solid var(--brand-yellow); animation: pulseGlow 1.5s infinite;"></div>
+          <img src="assets/mascot.jpg" style="width: 80px; height: 80px; border-radius: 50%; border: 2.5px solid var(--brand-yellow); object-fit: cover;">
+        </div>
+
+        <h3 id="wdModalStatusTitle" style="font-size: 1.5rem; font-weight: 900; color: #FFFFFF; margin-bottom: 0.5rem;">
+          Broadcasting to BNB Smart Chain...
+        </h3>
+        <p id="wdModalStatusDesc" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
+          Connecting with BEP-20 validator nodes to dispatch ${amount.toLocaleString()} $BOOBA to ${wallet.slice(0, 6)}...${wallet.slice(-4)}.
+        </p>
+
+        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden; margin-bottom: 1rem;">
+          <div id="wdModalProgressBar" style="width: 40%; height: 100%; background: var(--brand-yellow); transition: width 0.8s ease;"></div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(broadcastModal);
+
+    // Simulate BSC block confirmation pipeline
+    setTimeout(() => {
+      const progressBar = document.getElementById('wdModalProgressBar');
+      const title = document.getElementById('wdModalStatusTitle');
+      const desc = document.getElementById('wdModalStatusDesc');
+      if (progressBar) progressBar.style.width = '75%';
+      if (title) title.textContent = 'Confirming Block on BSC Mainnet...';
+      if (desc) desc.textContent = 'Verifying cryptographic receipt and updating on-chain state.';
+    }, 900);
+
+    setTimeout(async () => {
+      const res = await db.processWithdrawal(amount, wallet);
+      broadcastModal.remove();
+
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+          <span>Execute $BOOBA Withdrawal</span>
+        `;
+      }
+
+      if (res.success) {
+        this.showWithdrawalSuccessModal(res.receipt);
+        this.renderWithdrawalView(document.getElementById('app'));
+        this.updateNavState();
+      } else {
+        alert(res.message || 'Withdrawal failed.');
+      }
+    }, 1800);
+  }
+
+  showWithdrawalSuccessModal(receipt) {
+    const existing = document.getElementById('wdSuccessModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'wdSuccessModal';
+    modal.className = 'modal-backdrop open active';
+    modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(20px); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1rem;';
+
+    modal.innerHTML = `
+      <div class="card" style="max-width: 520px; width: 100%; padding: 2.5rem 2rem; border-radius: 28px; border: 1.5px solid rgba(16, 185, 129, 0.5); background: linear-gradient(180deg, rgba(20, 26, 38, 0.98) 0%, rgba(10, 13, 20, 0.99) 100%); text-align: center; box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 50px rgba(16, 185, 129, 0.25); animation: popInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        
+        <div style="width: 70px; height: 70px; border-radius: 22px; background: rgba(16, 185, 129, 0.15); border: 1.5px solid rgba(16, 185, 129, 0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto; color: var(--accent-emerald);">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.65rem;">
+          <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-weight: 800; font-size: 0.75rem;">
+            TRANSACTION CONFIRMED
+          </span>
+        </div>
+
+        <h3 style="font-size: 1.6rem; font-weight: 900; color: #FFFFFF; margin-bottom: 0.6rem;">
+          ${Number(receipt.amount).toLocaleString()} $BOOBA Dispatched!
+        </h3>
+
+        <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.5rem;">
+          Tokens have been processed to your destination BEP-20 address on BNB Smart Chain.
+        </p>
+
+        <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.15rem; margin-bottom: 1.75rem; text-align: left; font-size: 0.84rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-secondary);">Destination Wallet:</span>
+            <strong style="color: #FFFFFF; font-family: var(--font-mono);">${receipt.walletAddress.slice(0, 6)}...${receipt.walletAddress.slice(-4)}</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-secondary);">Network:</span>
+            <strong style="color: #F3BA2F;">BNB Smart Chain (BEP-20)</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-secondary);">BSC Tx Hash:</span>
+            <a href="${receipt.explorerUrl}" target="_blank" rel="noopener noreferrer" style="color: var(--brand-yellow); font-family: var(--font-mono); text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
+              <span>${receipt.txHash.slice(0, 8)}...${receipt.txHash.slice(-6)}</span> ↗
+            </a>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; flex-direction: column;">
+          <button type="button" class="btn btn-secondary btn-block" onclick="window.boobaApp.addTokenToWallet()" style="font-weight: 800; border-color: rgba(243,186,47,0.3); color: var(--brand-yellow);">
+            + Add $BOOBA Token to MetaMask / Trust Wallet
+          </button>
+          <button type="button" class="btn btn-primary btn-block" onclick="document.getElementById('wdSuccessModal').remove()" style="font-weight: 900;">
+            Close & Return
+          </button>
+        </div>
+
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
+
+  async handlePresaleDepositWeb3() {
+    const user = db.currentUser;
+    if (!user) {
+      alert('Please sign in or create a passport to participate in the presale.');
+      window.location.href = 'signin.html#signup';
+      return;
+    }
+
+    const usdtInput = document.getElementById('presaleUsdtInput');
+    const usdtAmount = Number(usdtInput ? usdtInput.value : 0);
+    const btn = document.getElementById('presaleWeb3ActionBtn');
+
+    if (isNaN(usdtAmount) || usdtAmount < PRESALE_CONFIG.minBuyUsdt) {
+      alert(`Minimum presale deposit is ${PRESALE_CONFIG.minBuyUsdt} USDT.`);
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `
+        <span class="pulse-dot" style="width: 8px; height: 8px; background: #FFFFFF;"></span>
+        <span>Initiating Web3 USDT Transfer...</span>
+      `;
+    }
+
+    // Modal showing Web3 signature and transaction broadcast
+    const web3Modal = document.createElement('div');
+    web3Modal.id = 'presaleProcessingModal';
+    web3Modal.className = 'modal-backdrop open active';
+    web3Modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(20px); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1rem;';
+
+    web3Modal.innerHTML = `
+      <div class="card" style="max-width: 500px; width: 100%; padding: 2.5rem 2rem; border-radius: 28px; border: 1.5px solid rgba(243, 186, 47, 0.45); background: linear-gradient(180deg, rgba(20, 26, 38, 0.98) 0%, rgba(10, 13, 20, 0.99) 100%); text-align: center; box-shadow: 0 25px 70px rgba(0,0,0,0.9);">
+        <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 1.5rem auto;">
+          <div class="pulse-ring" style="position: absolute; inset: -8px; border-radius: 50%; border: 2px solid #26A17B; animation: pulseGlow 1.5s infinite;"></div>
+          <div style="width: 80px; height: 80px; border-radius: 50%; background: #26A17B; color: #FFFFFF; font-size: 2.2rem; font-weight: 900; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px rgba(38, 161, 123, 0.5);">
+            ₮
+          </div>
+        </div>
+
+        <h3 id="preModalStatusTitle" style="font-size: 1.5rem; font-weight: 900; color: #FFFFFF; margin-bottom: 0.5rem;">
+          Transferring $${usdtAmount.toLocaleString()} USDT...
+        </h3>
+        <p id="preModalStatusDesc" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
+          Please confirm the BEP-20 USDT transfer in your connected Web3 wallet.
+        </p>
+
+        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden; margin-bottom: 1rem;">
+          <div id="preModalProgressBar" style="width: 35%; height: 100%; background: #26A17B; transition: width 0.8s ease;"></div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(web3Modal);
+
+    setTimeout(() => {
+      const progressBar = document.getElementById('preModalProgressBar');
+      const title = document.getElementById('preModalStatusTitle');
+      const desc = document.getElementById('preModalStatusDesc');
+      if (progressBar) progressBar.style.width = '80%';
+      if (title) title.textContent = 'Allocating $BOOBA Tokens...';
+      if (desc) desc.textContent = 'Registering on-chain presale receipt & crediting Passport XP bonus.';
+    }, 1000);
+
+    setTimeout(async () => {
+      const res = await db.processPresaleDeposit({
+        usdtAmount,
+        method: 'web3',
+        walletAddress: user.walletAddress || PRESALE_CONFIG.treasuryAddress
+      });
+
+      web3Modal.remove();
+
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <span>Approve & Deposit USDT</span>
+        `;
+      }
+
+      if (res.success) {
+        this.showPresaleSuccessModal(res.receipt);
+        this.renderPresaleView(document.getElementById('app'));
+        this.updateNavState();
+      } else {
+        alert(res.message || 'Presale deposit failed.');
+      }
+    }, 2000);
+  }
+
+  async handlePresaleDepositManual() {
+    const user = db.currentUser;
+    if (!user) {
+      alert('Please sign in or create a passport to participate in the presale.');
+      window.location.href = 'signin.html#signup';
+      return;
+    }
+
+    const usdtInput = document.getElementById('presaleUsdtInput');
+    const txHashInput = document.getElementById('presaleTxHashInput');
+    const btn = document.getElementById('presaleManualActionBtn');
+
+    const usdtAmount = Number(usdtInput ? usdtInput.value : 0);
+    const txHash = (txHashInput ? txHashInput.value : '').trim();
+
+    if (isNaN(usdtAmount) || usdtAmount < PRESALE_CONFIG.minBuyUsdt) {
+      alert(`Minimum presale deposit is ${PRESALE_CONFIG.minBuyUsdt} USDT.`);
+      return;
+    }
+
+    if (!txHash || !txHash.startsWith('0x') || txHash.length < 20) {
+      alert('Please enter a valid BSC Transaction Hash (starts with 0x...).');
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Verifying Transaction on BSC...';
+    }
+
+    setTimeout(async () => {
+      const res = await db.processPresaleDeposit({
+        usdtAmount,
+        method: 'manual',
+        txHash,
+        walletAddress: user.walletAddress || PRESALE_CONFIG.treasuryAddress
+      });
+
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Verify & Credit Presale Tokens';
+      }
+
+      if (res.success) {
+        if (txHashInput) txHashInput.value = '';
+        this.showPresaleSuccessModal(res.receipt);
+        this.renderPresaleView(document.getElementById('app'));
+        this.updateNavState();
+      } else {
+        alert(res.message || 'Verification failed.');
+      }
+    }, 1200);
+  }
+
+  showPresaleSuccessModal(receipt) {
+    const existing = document.getElementById('presaleSuccessModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'presaleSuccessModal';
+    modal.className = 'modal-backdrop open active';
+    modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(20px); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1rem;';
+
+    modal.innerHTML = `
+      <div class="card" style="max-width: 520px; width: 100%; padding: 2.5rem 2rem; border-radius: 28px; border: 1.5px solid rgba(243, 186, 47, 0.5); background: linear-gradient(180deg, rgba(20, 26, 38, 0.98) 0%, rgba(10, 13, 20, 0.99) 100%); text-align: center; box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 50px rgba(243, 186, 47, 0.3); animation: popInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        
+        <div style="width: 70px; height: 70px; border-radius: 22px; background: rgba(243, 186, 47, 0.15); border: 1.5px solid rgba(243, 186, 47, 0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto; color: var(--brand-yellow);">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.65rem;">
+          <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); font-weight: 800; font-size: 0.75rem;">
+            PRESALE ALLOCATION CONFIRMED
+          </span>
+        </div>
+
+        <h3 style="font-size: 1.6rem; font-weight: 900; color: #FFFFFF; margin-bottom: 0.6rem;">
+          ${Number(receipt.totalTokens).toLocaleString()} $BOOBA Reserved!
+        </h3>
+
+        <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.5rem;">
+          Your deposit of <strong>$${Number(receipt.usdtAmount).toLocaleString()} USDT</strong> has been verified. ${receipt.bonusPercent > 0 ? `Includes <strong>+${receipt.bonusPercent}% Early Bird Volume Bonus</strong>.` : ''}
+        </p>
+
+        <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.15rem; margin-bottom: 1.75rem; text-align: left; font-size: 0.84rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-secondary);">Base Tokens:</span>
+            <strong style="color: #FFFFFF; font-family: var(--font-mono);">${Number(receipt.baseTokens).toLocaleString()} $BOOBA</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-secondary);">Bonus Tokens:</span>
+            <strong style="color: var(--accent-emerald); font-family: var(--font-mono);">+${Number(receipt.bonusTokens).toLocaleString()} $BOOBA</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-secondary);">Target Dex Value (4x):</span>
+            <strong style="color: var(--brand-yellow); font-family: var(--font-mono);">$${(receipt.totalTokens * 0.02).toLocaleString()} USDT</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-secondary);">BSC Tx Hash:</span>
+            <a href="${receipt.explorerUrl}" target="_blank" rel="noopener noreferrer" style="color: var(--brand-yellow); font-family: var(--font-mono); text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
+              <span>${receipt.txHash.slice(0, 8)}...${receipt.txHash.slice(-6)}</span> ↗
+            </a>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; flex-direction: column;">
+          <button type="button" class="btn btn-secondary btn-block" onclick="window.boobaApp.addTokenToWallet()" style="font-weight: 800; border-color: rgba(243,186,47,0.3); color: var(--brand-yellow);">
+            + Add $BOOBA Token to MetaMask
+          </button>
+          <button type="button" class="btn btn-primary btn-block" onclick="document.getElementById('presaleSuccessModal').remove()" style="font-weight: 900;">
+            Close & View Portfolio
+          </button>
+        </div>
+
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
+
+  async addTokenToWallet() {
+    if (typeof window !== 'undefined' && window.ethereum) {
+      try {
+        const wasAdded = await window.ethereum.request({
+          method: 'wallet_watchAsset',
+          params: {
+            type: 'ERC20',
+            options: {
+              address: '0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B',
+              symbol: 'BOOBA',
+              decimals: 18,
+              image: window.location.origin + '/assets/mascot.jpg'
+            }
+          }
+        });
+        if (wasAdded) {
+          alert('$BOOBA token successfully imported into your Web3 wallet!');
+        }
+      } catch (err) {
+        navigator.clipboard.writeText('0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B');
+        alert('Contract Address 0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B copied to clipboard! Paste into your wallet token import dialog.');
+      }
+    } else {
+      navigator.clipboard.writeText('0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B');
+      alert('Contract Address 0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B copied to clipboard! Paste into MetaMask or Trust Wallet.');
+    }
   }
 
   // --------------------------------------------------------------------------

@@ -22,7 +22,7 @@ class TeamAdminApp {
     this.airdropShowBulkPaste = false;
 
     const hashTab = (window.location.hash || '').replace('#', '');
-    if (['overview', 'quests', 'airdrop', 'submissions', 'users'].includes(hashTab)) {
+    if (['overview', 'quests', 'airdrop', 'submissions', 'users', 'presale'].includes(hashTab)) {
       this.activeTab = hashTab;
     }
     
@@ -40,7 +40,7 @@ class TeamAdminApp {
 
     window.addEventListener('hashchange', () => {
       const hashTab = (window.location.hash || '').replace('#', '');
-      if (['overview', 'quests', 'airdrop', 'submissions', 'users'].includes(hashTab) && this.activeTab !== hashTab) {
+      if (['overview', 'quests', 'airdrop', 'submissions', 'users', 'presale'].includes(hashTab) && this.activeTab !== hashTab) {
         this.switchTab(hashTab);
       }
     });
@@ -183,6 +183,9 @@ class TeamAdminApp {
     }
 
     switch (this.activeTab) {
+      case 'presale':
+        this.renderPresaleTab(mainWorkspace);
+        break;
       case 'quests':
         this.renderQuestsTab(mainWorkspace);
         break;
@@ -1521,8 +1524,201 @@ class TeamAdminApp {
     this.userSearchQuery = query.trim();
     this.renderUsersTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
   }
+
+  // --------------------------------------------------------------------------
+  // PRESALE & BRIDGE AUDIT TAB
+  // --------------------------------------------------------------------------
+
+  renderPresaleTab(container) {
+    const telemetry = db.getPresaleTelemetry();
+    let globalPurchases = [];
+    let globalWithdrawals = [];
+    try {
+      globalPurchases = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+      globalWithdrawals = JSON.parse(localStorage.getItem('booba_global_withdrawals') || '[]');
+    } catch (e) {}
+
+    container.innerHTML = `
+      <div class="admin-tab-pane active" id="pane-presale">
+        
+        <!-- Tab Header -->
+        <div class="admin-view-header">
+          <div>
+            <h1 class="admin-view-title">Presale & Bridge Audit Center</h1>
+            <p class="admin-view-subtitle">Live monitoring of all BEP-20 USDT deposits, token allocations, and on-chain withdrawals.</p>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <a href="presale.html" target="_blank" class="btn-admin btn-admin-primary btn-admin-sm">
+              <span>View Presale dApp ↗</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Telemetry Stat Grid -->
+        <div class="admin-stat-grid" style="margin-bottom: 2rem;">
+          <div class="admin-stat-card">
+            <div class="admin-stat-label">Total USDT Collected</div>
+            <div class="admin-stat-value" style="color: var(--brand-yellow); font-family: var(--font-mono);">$${telemetry.totalUsdtRaised.toLocaleString()}</div>
+            <div class="admin-stat-meta" style="color: var(--accent-emerald);">Hard Cap: $${telemetry.hardCapUsdt.toLocaleString()} (${telemetry.progressPercent}%)</div>
+          </div>
+
+          <div class="admin-stat-card">
+            <div class="admin-stat-label">Presale Rate</div>
+            <div class="admin-stat-value" style="color: #FFFFFF; font-family: var(--font-mono);">1 USDT = ${telemetry.baseRate} $BOOBA</div>
+            <div class="admin-stat-meta">Stage 1 Price: $0.005 USDT</div>
+          </div>
+
+          <div class="admin-stat-card">
+            <div class="admin-stat-label">Total Presale Orders</div>
+            <div class="admin-stat-value" style="color: #818CF8; font-family: var(--font-mono);">${telemetry.totalParticipants.toLocaleString()}</div>
+            <div class="admin-stat-meta">${globalPurchases.length} logged locally</div>
+          </div>
+
+          <div class="admin-stat-card">
+            <div class="admin-stat-label">On-Chain Withdrawals</div>
+            <div class="admin-stat-value" style="color: var(--accent-emerald); font-family: var(--font-mono);">${globalWithdrawals.length}</div>
+            <div class="admin-stat-meta">BNB Smart Chain (BEP-20)</div>
+          </div>
+        </div>
+
+        <!-- SECTION 1: PRESALE ORDERS TABLE -->
+        <div class="admin-card" style="margin-bottom: 2rem;">
+          <div class="admin-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="pulse-dot" style="width: 7px; height: 7px; background: var(--brand-yellow);"></span>
+              <h3 class="admin-card-title" style="margin: 0;">Presale USDT Deposit Transactions</h3>
+            </div>
+            <span class="badge-tag" style="background: rgba(243,186,47,0.15); color: var(--brand-yellow); font-size: 0.72rem;">
+              ${globalPurchases.length} Logged
+            </span>
+          </div>
+
+          <div style="padding: 1.25rem;">
+            ${globalPurchases.length === 0 ? `
+              <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary); font-size: 0.85rem;">
+                No presale deposit transactions recorded in this browser yet. Test depositing from <strong>presale.html</strong>.
+              </div>
+            ` : `
+              <div style="overflow-x: auto;">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th>User</th>
+                      <th>USDT Paid</th>
+                      <th>$BOOBA Tokens</th>
+                      <th>Method</th>
+                      <th>Tx Hash</th>
+                      <th style="text-align: right;">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${globalPurchases.map(p => `
+                      <tr>
+                        <td style="color: var(--text-secondary); white-space: nowrap; font-size: 0.8rem;">
+                          ${new Date(p.timestamp).toLocaleString()}
+                        </td>
+                        <td style="font-weight: 700; color: #FFFFFF;">
+                          ${p.username || 'Citizen'}
+                        </td>
+                        <td style="font-weight: 800; color: #26A17B; font-family: var(--font-mono);">
+                          $${Number(p.usdtAmount).toLocaleString()} USDT
+                        </td>
+                        <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">
+                          ${Number(p.totalTokens).toLocaleString()} $BOOBA
+                        </td>
+                        <td style="text-transform: uppercase; font-size: 0.72rem; color: var(--text-secondary);">
+                          ${p.method === 'web3' ? 'Web3 Direct' : 'Treasury'}
+                        </td>
+                        <td style="font-family: var(--font-mono); font-size: 0.78rem;">
+                          <a href="${p.explorerUrl || `https://bscscan.com/tx/${p.txHash}`}" target="_blank" rel="noopener noreferrer" style="color: var(--brand-yellow); text-decoration: none;">
+                            ${p.txHash.slice(0, 8)}...${p.txHash.slice(-6)} ↗
+                          </a>
+                        </td>
+                        <td style="text-align: right;">
+                          <span class="admin-badge-live" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 6px;">
+                            ${p.status || 'Confirmed'}
+                          </span>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            `}
+          </div>
+        </div>
+
+        <!-- SECTION 2: WITHDRAWAL BRIDGE LOGS TABLE -->
+        <div class="admin-card">
+          <div class="admin-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="pulse-dot" style="width: 7px; height: 7px; background: var(--accent-emerald);"></span>
+              <h3 class="admin-card-title" style="margin: 0;">On-Chain $BOOBA Withdrawal Bridge Logs</h3>
+            </div>
+            <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); font-size: 0.72rem;">
+              ${globalWithdrawals.length} Dispatched
+            </span>
+          </div>
+
+          <div style="padding: 1.25rem;">
+            ${globalWithdrawals.length === 0 ? `
+              <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary); font-size: 0.85rem;">
+                No user token withdrawals recorded in this browser yet. Test withdrawing from <strong>withdraw.html</strong>.
+              </div>
+            ` : `
+              <div style="overflow-x: auto;">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th>User</th>
+                      <th>Amount</th>
+                      <th>Destination BEP-20 Wallet</th>
+                      <th>Tx Hash</th>
+                      <th style="text-align: right;">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${globalWithdrawals.map(w => `
+                      <tr>
+                        <td style="color: var(--text-secondary); white-space: nowrap; font-size: 0.8rem;">
+                          ${new Date(w.timestamp).toLocaleString()}
+                        </td>
+                        <td style="font-weight: 700; color: #FFFFFF;">
+                          ${w.username || 'Citizen'}
+                        </td>
+                        <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">
+                          ${Number(w.amount).toLocaleString()} $BOOBA
+                        </td>
+                        <td style="font-family: var(--font-mono); font-size: 0.78rem; color: #FFFFFF;">
+                          ${w.walletAddress.slice(0, 6)}...${w.walletAddress.slice(-4)}
+                        </td>
+                        <td style="font-family: var(--font-mono); font-size: 0.78rem;">
+                          <a href="${w.explorerUrl || `https://bscscan.com/tx/${w.txHash}`}" target="_blank" rel="noopener noreferrer" style="color: var(--brand-yellow); text-decoration: none;">
+                            ${w.txHash.slice(0, 8)}...${w.txHash.slice(-6)} ↗
+                          </a>
+                        </td>
+                        <td style="text-align: right;">
+                          <span class="admin-badge-live" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 6px;">
+                            ${w.status || 'Completed'}
+                          </span>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            `}
+          </div>
+        </div>
+
+      </div>
+    `;
+  }
 }
 
 // Attach globally
 window.adminApp = new TeamAdminApp();
+
 

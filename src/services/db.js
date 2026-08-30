@@ -118,7 +118,7 @@ export async function hashPassword(password) {
 
 // Presale Launchpad Configuration
 export const PRESALE_CONFIG = {
-  treasuryAddress: '0x71C8F8A7E64b58F5d0537FaC2ffE85172C0fBc91',
+  treasuryAddress: '0xb46af5a653D60e8891cAd13AB8688138e6361821',
   tokenAddress: '0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B',
   tokenSymbol: 'BOOBA',
   tokenDecimals: 18,

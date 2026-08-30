@@ -116,8 +116,8 @@ export async function hashPassword(password) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Presale Launchpad Configuration
-export const PRESALE_CONFIG = {
+// Default Presale Launchpad Configuration
+const DEFAULT_PRESALE_CONFIG = {
   treasuryAddress: '0xb46af5a653D60e8891cAd13AB8688138e6361821',
   tokenAddress: '0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B',
   tokenSymbol: 'BOOBA',
@@ -139,6 +139,16 @@ export const PRESALE_CONFIG = {
     { minUsdt: 100, bonusPercent: 5, label: '+5% Silver Bonus' },
     { minUsdt: 0, bonusPercent: 0, label: 'Standard Allocation' }
   ]
+};
+
+let savedCustomConfig = {};
+try {
+  savedCustomConfig = JSON.parse(localStorage.getItem('booba_custom_presale_config') || '{}');
+} catch (e) {}
+
+export const PRESALE_CONFIG = {
+  ...DEFAULT_PRESALE_CONFIG,
+  ...savedCustomConfig
 };
 
 /**
@@ -2070,6 +2080,110 @@ class DatabaseService {
       totalParticipants,
       recentPurchases: globalPurchases
     };
+  }
+
+  // --------------------------------------------------------------------------
+  // ADMIN PRESALE RATE & TOKEN ALLOCATION MANAGEMENT
+  // --------------------------------------------------------------------------
+
+  updatePresaleConfig(newConfig) {
+    if (!newConfig || typeof newConfig !== 'object') return { success: false, message: 'Invalid configuration' };
+    
+    // Update active config in memory
+    Object.assign(PRESALE_CONFIG, newConfig);
+
+    // Save to local storage
+    try {
+      localStorage.setItem('booba_custom_presale_config', JSON.stringify(PRESALE_CONFIG));
+    } catch (e) {}
+
+    // Async sync to Supabase
+    if (supabase) {
+      supabase.from('booba_stats').upsert({
+        key: 'presale_config',
+        value: PRESALE_CONFIG,
+        updated_at: new Date().toISOString()
+      }).catch(err => console.warn('[Supabase] Presale config sync error:', err));
+    }
+
+    this.notify();
+    return { success: true, config: PRESALE_CONFIG };
+  }
+
+  adminCreditPresaleTokens({ userId, walletAddress, usdtAmount, customBoobaTokens, txHash, notes }) {
+    let targetUser = null;
+    if (userId) {
+      targetUser = this.users.find(u => u.id === userId || u.username === userId || u.passportId === userId);
+    } else if (walletAddress) {
+      targetUser = this.users.find(u => u.walletAddress && u.walletAddress.toLowerCase() === walletAddress.toLowerCase());
+    }
+
+    const calculatedTokens = calculatePresaleTokens(usdtAmount).totalTokens;
+    const tokensToCredit = (customBoobaTokens !== undefined && customBoobaTokens !== null && customBoobaTokens !== '') 
+      ? Number(customBoobaTokens) 
+      : calculatedTokens;
+
+    const receipt = {
+      id: 'presale_admin_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+      userId: targetUser ? targetUser.id : (walletAddress || 'custom_citizen'),
+      username: targetUser ? targetUser.username : (walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Manual Citizen'),
+      passportId: targetUser ? targetUser.passportId : 'BB-MANUAL',
+      usdtAmount: Number(usdtAmount) || 0,
+      baseTokens: tokensToCredit,
+      bonusPercent: 0,
+      bonusTokens: 0,
+      totalTokens: tokensToCredit,
+      method: 'admin_allocation',
+      txHash: txHash || ('0x' + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('')),
+      explorerUrl: txHash ? `https://bscscan.com/tx/${txHash}` : null,
+      status: 'confirmed',
+      notes: notes || 'Admin assigned allocation',
+      timestamp: new Date().toISOString()
+    };
+
+    if (targetUser) {
+      targetUser.presalePurchases = targetUser.presalePurchases || [];
+      targetUser.presalePurchases.unshift(receipt);
+      targetUser.presaleTokensAllocated = (targetUser.presaleTokensAllocated || 0) + tokensToCredit;
+      targetUser.boobaPoints = (targetUser.boobaPoints || 0) + tokensToCredit;
+      
+      if (this.currentUser && this.currentUser.id === targetUser.id) {
+        this.currentUser = { ...targetUser };
+      }
+      this.saveUsers();
+    }
+
+    // Save to global presale logs
+    let globalPurchases = [];
+    try {
+      globalPurchases = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+    } catch (e) {}
+    globalPurchases.unshift(receipt);
+    try {
+      localStorage.setItem('booba_global_presale_logs', JSON.stringify(globalPurchases));
+    } catch (e) {}
+
+    // Async sync to Supabase
+    if (supabase) {
+      supabase.from('booba_presale_purchases').insert({
+        id: receipt.id,
+        user_id: receipt.userId,
+        username: receipt.username,
+        passport_id: receipt.passportId,
+        usdt_amount: receipt.usdtAmount,
+        base_tokens: receipt.baseTokens,
+        bonus_percent: 0,
+        bonus_tokens: 0,
+        total_tokens: receipt.totalTokens,
+        method: 'admin_allocation',
+        tx_hash: receipt.txHash,
+        explorer_url: receipt.explorerUrl,
+        status: 'confirmed'
+      }).catch(err => console.warn('[Supabase] Presale admin insert error:', err));
+    }
+
+    this.notify();
+    return { success: true, receipt, tokensCredited: tokensToCredit };
   }
 
   // --------------------------------------------------------------------------

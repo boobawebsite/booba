@@ -1526,11 +1526,12 @@ class TeamAdminApp {
   }
 
   // --------------------------------------------------------------------------
-  // PRESALE & BRIDGE AUDIT TAB
+  // PRESALE & BRIDGE AUDIT TAB (WITH DYNAMIC RATE CONTROLLER & ALLOCATION)
   // --------------------------------------------------------------------------
 
   renderPresaleTab(container) {
     const telemetry = db.getPresaleTelemetry();
+    const users = db.users || [];
     let globalPurchases = [];
     let globalWithdrawals = [];
     try {
@@ -1544,8 +1545,8 @@ class TeamAdminApp {
         <!-- Tab Header -->
         <div class="admin-view-header">
           <div>
-            <h1 class="admin-view-title">Presale & Bridge Audit Center</h1>
-            <p class="admin-view-subtitle">Live monitoring of all BEP-20 USDT deposits, token allocations, and on-chain withdrawals.</p>
+            <h1 class="admin-view-title">Presale Rate & Allocation Center</h1>
+            <p class="admin-view-subtitle">Set how many $BOOBA tokens to give for any amount of USDT, configure live presale stages, and grant custom allocations.</p>
           </div>
           <div style="display: flex; gap: 0.5rem;">
             <a href="presale.html" target="_blank" class="btn-admin btn-admin-primary btn-admin-sm">
@@ -1557,15 +1558,17 @@ class TeamAdminApp {
         <!-- Telemetry Stat Grid -->
         <div class="admin-stat-grid" style="margin-bottom: 2rem;">
           <div class="admin-stat-card">
-            <div class="admin-stat-label">Total USDT Collected</div>
-            <div class="admin-stat-value" style="color: var(--brand-yellow); font-family: var(--font-mono);">$${telemetry.totalUsdtRaised.toLocaleString()}</div>
-            <div class="admin-stat-meta" style="color: var(--accent-emerald);">Hard Cap: $${telemetry.hardCapUsdt.toLocaleString()} (${telemetry.progressPercent}%)</div>
+            <div class="admin-stat-label">Active Presale Rate</div>
+            <div class="admin-stat-value" style="color: var(--brand-yellow); font-family: var(--font-mono);">
+              1 USDT = ${telemetry.baseRate} $BOOBA
+            </div>
+            <div class="admin-stat-meta" style="color: var(--accent-emerald);">Price: $${telemetry.stagePriceUsdt} / token</div>
           </div>
 
           <div class="admin-stat-card">
-            <div class="admin-stat-label">Presale Rate</div>
-            <div class="admin-stat-value" style="color: #FFFFFF; font-family: var(--font-mono);">1 USDT = ${telemetry.baseRate} $BOOBA</div>
-            <div class="admin-stat-meta">Stage 1 Price: $0.005 USDT</div>
+            <div class="admin-stat-label">Total USDT Collected</div>
+            <div class="admin-stat-value" style="color: #26A17B; font-family: var(--font-mono);">$${telemetry.totalUsdtRaised.toLocaleString()}</div>
+            <div class="admin-stat-meta">Hard Cap: $${telemetry.hardCapUsdt.toLocaleString()} (${telemetry.progressPercent}%)</div>
           </div>
 
           <div class="admin-stat-card">
@@ -1579,6 +1582,137 @@ class TeamAdminApp {
             <div class="admin-stat-value" style="color: var(--accent-emerald); font-family: var(--font-mono);">${globalWithdrawals.length}</div>
             <div class="admin-stat-meta">BNB Smart Chain (BEP-20)</div>
           </div>
+        </div>
+
+        <!-- 2-COLUMN ADMIN MANAGERS GRID -->
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.75rem; margin-bottom: 2.5rem;">
+          
+          <!-- CARD 1: PRESALE EXCHANGE RATE & STAGE CONFIGURATOR -->
+          <div class="admin-card" style="padding: 1.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--admin-border);">
+              <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(243,186,47,0.15); border: 1px solid rgba(243,186,47,0.35); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+              </div>
+              <div>
+                <h3 class="admin-card-title" style="margin: 0;">Presale Exchange Rate Manager</h3>
+                <div style="font-size: 0.74rem; color: var(--text-secondary);">Set token exchange ratios for all buyers</div>
+              </div>
+            </div>
+
+            <form id="adminPresaleConfigForm" onsubmit="window.adminApp.handleSavePresaleConfig(event)">
+              
+              <!-- Core Rate Input -->
+              <div class="form-field" style="margin-bottom: 1.15rem;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
+                  <label class="form-field-label" style="margin: 0; color: var(--brand-yellow); font-weight: 800;">
+                    $BOOBA Tokens Given per 1 USDT
+                  </label>
+                  <span style="font-size: 0.72rem; color: var(--text-secondary); font-family: var(--font-mono);">
+                    e.g. 200 = ($0.005 / token)
+                  </span>
+                </div>
+                <input type="number" id="adminPresaleRateInput" class="admin-input text-mono" value="${telemetry.baseRate}" min="1" required style="font-size: 1.1rem; font-weight: 800; color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4);">
+              </div>
+
+              <!-- Stage Title & Price per Token -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1.15rem;">
+                <div class="form-field">
+                  <label class="form-field-label">Stage Name</label>
+                  <input type="text" id="adminPresaleStageNameInput" class="admin-input" value="${telemetry.stageName || 'Stage 1: Early Bird Alpha'}" required>
+                </div>
+                <div class="form-field">
+                  <label class="form-field-label">Price / Token (USDT)</label>
+                  <input type="number" step="0.0001" id="adminPresalePriceInput" class="admin-input text-mono" value="${telemetry.stagePriceUsdt || 0.005}" required>
+                </div>
+              </div>
+
+              <!-- Min / Max Limits & Hard Cap -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.65rem; margin-bottom: 1.15rem;">
+                <div class="form-field">
+                  <label class="form-field-label">Min Buy (USDT)</label>
+                  <input type="number" id="adminPresaleMinBuyInput" class="admin-input text-mono" value="${telemetry.minBuyUsdt || 10}" required>
+                </div>
+                <div class="form-field">
+                  <label class="form-field-label">Max Buy (USDT)</label>
+                  <input type="number" id="adminPresaleMaxBuyInput" class="admin-input text-mono" value="${telemetry.maxBuyUsdt || 10000}" required>
+                </div>
+                <div class="form-field">
+                  <label class="form-field-label">Hard Cap (USDT)</label>
+                  <input type="number" id="adminPresaleHardCapInput" class="admin-input text-mono" value="${telemetry.hardCapUsdt || 250000}" required>
+                </div>
+              </div>
+
+              <!-- Treasury Receiving Wallet -->
+              <div class="form-field" style="margin-bottom: 1.5rem;">
+                <label class="form-field-label">Presale Treasury Receiving Address (BEP-20)</label>
+                <input type="text" id="adminPresaleTreasuryInput" class="admin-input text-mono" value="${telemetry.treasuryAddress}" required style="font-size: 0.8rem;">
+              </div>
+
+              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; justify-content: center; font-weight: 800; padding: 0.75rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Save & Apply Presale Settings</span>
+              </button>
+
+            </form>
+          </div>
+
+          <!-- CARD 2: DIRECT USER ALLOCATION BY USDT CALCULATOR -->
+          <div class="admin-card" style="padding: 1.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--admin-border);">
+              <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); display: flex; align-items: center; justify-content: center; color: var(--accent-emerald);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line></svg>
+              </div>
+              <div>
+                <h3 class="admin-card-title" style="margin: 0;">Direct $BOOBA Allocation Tool</h3>
+                <div style="font-size: 0.74rem; color: var(--text-secondary);">Give any amount of $BOOBA for any amount of USDT</div>
+              </div>
+            </div>
+
+            <form id="adminCreditPresaleForm" onsubmit="window.adminApp.handleAdminCreditPresaleTokens(event)">
+              
+              <!-- Select Target User -->
+              <div class="form-field" style="margin-bottom: 1.15rem;">
+                <label class="form-field-label">Select Recipient Citizen / Passport</label>
+                <select id="adminAllocUserSelect" class="admin-input" style="font-size: 0.85rem;">
+                  <option value="">-- Choose Registered Citizen --</option>
+                  ${users.map(u => `
+                    <option value="${u.id}">${u.username} (${u.passportId}) — ${u.walletAddress ? u.walletAddress.slice(0, 8) + '...' : 'No Wallet'}</option>
+                  `).join('')}
+                </select>
+              </div>
+
+              <!-- Or Custom Wallet Address -->
+              <div class="form-field" style="margin-bottom: 1.15rem;">
+                <label class="form-field-label">Or Enter Destination BEP-20 Wallet Address</label>
+                <input type="text" id="adminAllocWalletInput" class="admin-input text-mono" placeholder="0x... Recipient Wallet (if not chosen from list)">
+              </div>
+
+              <!-- USDT Paid + Calculated $BOOBA Allocation (Editable) -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1.15rem;">
+                <div class="form-field">
+                  <label class="form-field-label">USDT Paid ($)</label>
+                  <input type="number" id="adminAllocUsdtInput" class="admin-input text-mono" placeholder="100" min="0" oninput="window.adminApp.handlePresaleAdminUsdtInput(this.value)" required>
+                </div>
+                <div class="form-field">
+                  <label class="form-field-label" style="color: var(--brand-yellow); font-weight: 800;">$BOOBA to Give</label>
+                  <input type="number" id="adminAllocTokensInput" class="admin-input text-mono" placeholder="20000" min="1" required style="font-weight: 800; color: var(--brand-yellow);">
+                </div>
+              </div>
+
+              <!-- Optional Tx Hash -->
+              <div class="form-field" style="margin-bottom: 1.5rem;">
+                <label class="form-field-label">BSC Transaction Hash (Optional)</label>
+                <input type="text" id="adminAllocTxHashInput" class="admin-input text-mono" placeholder="0x... BSC TxID">
+              </div>
+
+              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; justify-content: center; font-weight: 800; padding: 0.75rem; background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Credit $BOOBA Tokens to User</span>
+              </button>
+
+            </form>
+          </div>
+
         </div>
 
         <!-- SECTION 1: PRESALE ORDERS TABLE -->
@@ -1596,7 +1730,7 @@ class TeamAdminApp {
           <div style="padding: 1.25rem;">
             ${globalPurchases.length === 0 ? `
               <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary); font-size: 0.85rem;">
-                No presale deposit transactions recorded in this browser yet. Test depositing from <strong>presale.html</strong>.
+                No presale deposit transactions recorded yet.
               </div>
             ` : `
               <div style="overflow-x: auto;">
@@ -1604,7 +1738,7 @@ class TeamAdminApp {
                   <thead>
                     <tr>
                       <th>Time</th>
-                      <th>User</th>
+                      <th>User / Passport</th>
                       <th>USDT Paid</th>
                       <th>$BOOBA Tokens</th>
                       <th>Method</th>
@@ -1619,7 +1753,7 @@ class TeamAdminApp {
                           ${new Date(p.timestamp).toLocaleString()}
                         </td>
                         <td style="font-weight: 700; color: #FFFFFF;">
-                          ${p.username || 'Citizen'}
+                          ${p.username || 'Citizen'} ${p.passportId ? `<span style="font-size: 0.72rem; color: var(--text-muted);">(${p.passportId})</span>` : ''}
                         </td>
                         <td style="font-weight: 800; color: #26A17B; font-family: var(--font-mono);">
                           $${Number(p.usdtAmount).toLocaleString()} USDT
@@ -1628,7 +1762,7 @@ class TeamAdminApp {
                           ${Number(p.totalTokens).toLocaleString()} $BOOBA
                         </td>
                         <td style="text-transform: uppercase; font-size: 0.72rem; color: var(--text-secondary);">
-                          ${p.method === 'web3' ? 'Web3 Direct' : 'Treasury'}
+                          ${p.method === 'web3' ? 'Web3 Direct' : (p.method === 'admin_allocation' ? 'Admin Grant' : 'Treasury')}
                         </td>
                         <td style="font-family: var(--font-mono); font-size: 0.78rem;">
                           <a href="${p.explorerUrl || `https://bscscan.com/tx/${p.txHash}`}" target="_blank" rel="noopener noreferrer" style="color: var(--brand-yellow); text-decoration: none;">
@@ -1664,7 +1798,7 @@ class TeamAdminApp {
           <div style="padding: 1.25rem;">
             ${globalWithdrawals.length === 0 ? `
               <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary); font-size: 0.85rem;">
-                No user token withdrawals recorded in this browser yet. Test withdrawing from <strong>withdraw.html</strong>.
+                No user token withdrawals recorded yet.
               </div>
             ` : `
               <div style="overflow-x: auto;">
@@ -1715,6 +1849,74 @@ class TeamAdminApp {
 
       </div>
     `;
+  }
+
+  handlePresaleAdminUsdtInput(usdtAmount) {
+    const rateInput = document.getElementById('adminPresaleRateInput');
+    const rate = rateInput ? Number(rateInput.value) || 200 : 200;
+    const tokensInput = document.getElementById('adminAllocTokensInput');
+    if (tokensInput && usdtAmount) {
+      tokensInput.value = Math.floor(Number(usdtAmount) * rate);
+    }
+  }
+
+  handleSavePresaleConfig(e) {
+    if (e) e.preventDefault();
+    const baseRate = Number(document.getElementById('adminPresaleRateInput')?.value) || 200;
+    const stageName = document.getElementById('adminPresaleStageNameInput')?.value || 'Stage 1: Early Bird Alpha';
+    const stagePriceUsdt = Number(document.getElementById('adminPresalePriceInput')?.value) || 0.005;
+    const minBuyUsdt = Number(document.getElementById('adminPresaleMinBuyInput')?.value) || 10;
+    const maxBuyUsdt = Number(document.getElementById('adminPresaleMaxBuyInput')?.value) || 10000;
+    const hardCapUsdt = Number(document.getElementById('adminPresaleHardCapInput')?.value) || 250000;
+    const treasuryAddress = document.getElementById('adminPresaleTreasuryInput')?.value || '0xb46af5a653D60e8891cAd13AB8688138e6361821';
+
+    const res = db.updatePresaleConfig({
+      baseRate,
+      stageName,
+      stagePriceUsdt,
+      minBuyUsdt,
+      maxBuyUsdt,
+      hardCapUsdt,
+      treasuryAddress
+    });
+
+    if (res.success) {
+      this.showToast(`Presale Settings Saved! Rate is now 1 USDT = ${baseRate} $BOOBA`);
+      this.render();
+    }
+  }
+
+  handleAdminCreditPresaleTokens(e) {
+    if (e) e.preventDefault();
+    const userId = document.getElementById('adminAllocUserSelect')?.value || null;
+    const walletAddress = document.getElementById('adminAllocWalletInput')?.value?.trim() || null;
+    const usdtAmount = Number(document.getElementById('adminAllocUsdtInput')?.value) || 0;
+    const customBoobaTokens = Number(document.getElementById('adminAllocTokensInput')?.value) || 0;
+    const txHash = document.getElementById('adminAllocTxHashInput')?.value?.trim() || null;
+
+    if (!userId && !walletAddress) {
+      this.showToast('Please select a citizen or enter a wallet address', 'error');
+      return;
+    }
+
+    if (!customBoobaTokens || customBoobaTokens <= 0) {
+      this.showToast('Please enter a valid amount of $BOOBA tokens', 'error');
+      return;
+    }
+
+    const res = db.adminCreditPresaleTokens({
+      userId,
+      walletAddress,
+      usdtAmount,
+      customBoobaTokens,
+      txHash,
+      notes: 'Admin manual allocation'
+    });
+
+    if (res.success) {
+      this.showToast(`Successfully credited ${customBoobaTokens.toLocaleString()} $BOOBA!`);
+      this.render();
+    }
   }
 }
 

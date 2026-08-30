@@ -4836,235 +4836,7 @@ HOW TO RECOVER YOUR ACCOUNT:
     `;
   }
 
-  // --------------------------------------------------------------------------
-  // 2B. WITHDRAWAL BRIDGE VIEW (withdraw.html)
-  // --------------------------------------------------------------------------
 
-  renderWithdrawalView(container) {
-    const user = db.currentUser;
-
-    if (!user) {
-      container.innerHTML = `
-        <div class="container page-content">
-          <div class="card text-center" style="max-width: 500px; margin: 4rem auto; padding: 3.5rem 2.5rem; background: rgba(14, 18, 27, 0.85); backdrop-filter: blur(20px); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px;">
-            <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 1.5rem auto;">
-              <img src="assets/mascot.jpg" style="width: 80px; height: 80px; border-radius: 50%; border: 2.5px solid var(--brand-yellow); box-shadow: 0 0 25px var(--brand-yellow-glow); object-fit: cover;">
-            </div>
-            <h2 style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Access Token Withdrawal</h2>
-            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">
-              Sign in with your credentials or connect your Web3 wallet to manage $BOOBA withdrawals to BNB Smart Chain.
-            </p>
-            <a href="signin.html#signin" class="btn btn-primary btn-block btn-lg">Sign In to Account</a>
-          </div>
-        </div>
-      `;
-      return;
-    }
-
-    const isWalletConnected = Boolean(user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
-
-    container.innerHTML = `
-      <div class="container page-content">
-        
-        <!-- Back Navigation -->
-        <div style="margin-bottom: 2rem;">
-          <a href="dashboard.html" class="back-dashboard-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"></line>
-              <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-            <span>Back to Dashboard</span>
-          </a>
-        </div>
-
-        <!-- HERO HEADER -->
-        <div class="card" style="background: linear-gradient(135deg, rgba(243, 186, 47, 0.12) 0%, rgba(14, 18, 27, 0.9) 60%, rgba(7, 9, 14, 0.98) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px; padding: 2.5rem; margin-bottom: 2.5rem; position: relative; overflow: hidden;">
-          <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.1; pointer-events: none;">
-            <img src="assets/mascot.jpg" style="width: 240px; height: 240px; border-radius: 50%;">
-          </div>
-          <div style="position: relative; z-index: 1; max-width: 700px;">
-            <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
-              <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); font-weight: 800; font-size: 0.8rem;">
-                <span class="pulse-dot" style="width: 6px; height: 6px;"></span> BEP-20 TOKEN BRIDGE
-              </span>
-              <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-weight: 800; font-size: 0.8rem;">
-                BNB SMART CHAIN MAINNET
-              </span>
-            </div>
-            <h1 style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin-bottom: 0.75rem;">
-              $BOOBA Token Withdrawal Bridge
-            </h1>
-            <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; margin: 0;">
-              Transfer your earned $BOOBA tokens, daily check-in rewards, and bounty distributions directly to your self-custody Web3 wallet.
-            </p>
-          </div>
-        </div>
-
-        <!-- 2-COLUMN MAIN WITHDRAWAL INTERFACE -->
-        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
-          
-          <!-- Column 1: Withdrawal Form Terminal -->
-          <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.75rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-              <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 0;">Withdrawal Terminal</h3>
-              <span style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700; display: flex; align-items: center; gap: 0.35rem;">
-                <span class="pulse-dot" style="width: 6px; height: 6px;"></span> 0% Fee Tier
-              </span>
-            </div>
-
-            <!-- Balance Display -->
-            <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(243, 186, 47, 0.25); border-radius: 18px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
-              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 0.25rem;">Available $BOOBA Balance</div>
-              <div style="font-size: 2.2rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); line-height: 1.1;">
-                ${Number(user.boobaPoints).toLocaleString()} <span style="font-size: 1.1rem;">$BOOBA</span>
-              </div>
-              <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.4rem;">
-                100% Non-Custodial Snapshot Verified
-              </div>
-            </div>
-
-            <!-- Destination Web3 Wallet Selection -->
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <label class="form-label" style="margin: 0;">Destination Web3 Wallet Address</label>
-                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.openWalletModal()" style="font-size: 0.75rem; color: var(--brand-yellow); padding: 0.15rem 0.5rem;">
-                  ${isWalletConnected ? 'Switch Wallet' : 'Connect Wallet'}
-                </button>
-              </div>
-              <div style="position: relative;">
-                <input type="text" id="withdrawWalletInput" class="form-input text-mono" value="${isWalletConnected ? user.walletAddress : ''}" placeholder="0x... Connect BEP-20 Wallet" style="padding-left: 2.5rem;" ${isWalletConnected ? 'readonly' : ''}>
-                <div style="position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: ${isWalletConnected ? 'var(--accent-emerald)' : 'var(--text-muted)'};">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
-                </div>
-              </div>
-            </div>
-
-            <!-- Network Selection -->
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-              <label class="form-label">Transfer Network</label>
-              <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.15rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px;">
-                <div style="display: flex; align-items: center; gap: 0.65rem;">
-                  <div style="width: 26px; height: 26px; border-radius: 50%; background: #F3BA2F; color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.72rem;">
-                    BNB
-                  </div>
-                  <div>
-                    <div style="font-weight: 800; color: #FFFFFF; font-size: 0.9rem;">BNB Smart Chain (BEP-20)</div>
-                    <div style="font-size: 0.74rem; color: var(--text-muted);">Mainnet Chain ID: 56 (0x38)</div>
-                  </div>
-                </div>
-                <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); font-size: 0.68rem; padding: 0.15rem 0.45rem;">Fast (3s)</span>
-              </div>
-            </div>
-
-            <!-- Amount Input with Percentage Quick Buttons -->
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <label class="form-label" style="margin: 0;">Amount to Withdraw</label>
-                <div style="display: flex; gap: 0.35rem;">
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.floor(${user.boobaPoints} * 0.25)" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">25%</button>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.floor(${user.boobaPoints} * 0.50)" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">50%</button>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.floor(${user.boobaPoints} * 0.75)" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">75%</button>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = ${user.boobaPoints}" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(243,186,47,0.15); color: var(--brand-yellow); font-weight: 800;">MAX</button>
-                </div>
-              </div>
-              <input type="number" id="withdrawAmountInput" class="form-input text-mono" placeholder="0" min="1" max="${user.boobaPoints}" value="${user.boobaPoints}">
-            </div>
-
-            <!-- Bridge Fee & Net Receive Info -->
-            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; padding: 0.85rem 1.15rem; margin-bottom: 1.75rem;">
-              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
-                <span style="color: var(--text-secondary);">Platform Fee:</span>
-                <span style="color: var(--accent-emerald); font-weight: 700;">0% (Free)</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
-                <span style="color: var(--text-secondary);">Estimated Gas:</span>
-                <span style="color: #FFFFFF; font-family: var(--font-mono);">0.0005 BNB (~$0.15)</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 800; padding-top: 0.4rem; border-top: 1px solid rgba(255,255,255,0.06);">
-                <span style="color: #FFFFFF;">You Will Receive:</span>
-                <span style="color: var(--brand-yellow); font-family: var(--font-mono);">1:1 $BOOBA On-Chain</span>
-              </div>
-            </div>
-
-            <!-- Action Button -->
-            <button type="button" class="btn btn-primary btn-lg btn-block" onclick="window.boobaApp.showTgeWithdrawModal()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 900;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              <span>Submit Withdrawal Request</span>
-            </button>
-          </div>
-
-          <!-- Column 2: Smart Contract Protocol Notice & Roadmap Box -->
-          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-            
-            <div class="card" style="padding: 2.25rem; border-radius: 24px; background: linear-gradient(180deg, rgba(243, 186, 47, 0.08) 0%, rgba(14, 18, 27, 0.85) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35);">
-              <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1rem;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(243, 186, 47, 0.2); border: 1px solid rgba(243, 186, 47, 0.4); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                </div>
-                <div>
-                  <h4 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Mainnet TGE Bridge Protocol</h4>
-                  <div style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Smart Contract Timelock Active</div>
-                </div>
-              </div>
-
-              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1.5rem;">
-                In accordance with BNB Smart Chain decentralized fair-launch protocols, direct on-chain liquidity withdrawals will open concurrently with the official <strong>$BOOBA Token Generation Event (TGE)</strong> and PancakeSwap liquidity lock.
-              </p>
-
-              <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.15rem; margin-bottom: 1.5rem;">
-                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 0.85rem;">TGE Deployment Phasing</div>
-                
-                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-                  <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-                    <span style="width: 20px; height: 20px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 0.1rem;">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    </span>
-                    <div>
-                      <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF;">Phase 1: Proof-of-Engagement Distribution</div>
-                      <div style="font-size: 0.76rem; color: var(--text-secondary);">400M $BOOBA pool allocated to early bounties and daily streaks. [ACTIVE]</div>
-                    </div>
-                  </div>
-
-                  <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-                    <span style="width: 20px; height: 20px; border-radius: 50%; background: rgba(243, 186, 47, 0.2); color: var(--brand-yellow); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; flex-shrink: 0; margin-top: 0.1rem;">●</span>
-                    <div>
-                      <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF;">Phase 2: Timelock & Security Audit Verification</div>
-                      <div style="font-size: 0.76rem; color: var(--text-secondary);">24-month DEX liquidity lock contract certification. [IN PROGRESS]</div>
-                    </div>
-                  </div>
-
-                  <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-                    <span style="width: 20px; height: 20px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; flex-shrink: 0; margin-top: 0.1rem;">3</span>
-                    <div>
-                      <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF;">Phase 3: Official TGE & Live DEX Bridge</div>
-                      <div style="font-size: 0.76rem; color: var(--text-secondary);">Instant 1:1 token minting unlocked for all connected BEP-20 wallets. [UPCOMING]</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.8rem; color: var(--accent-emerald);">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Your accumulated balance is 100% snapshot-protected.</span>
-              </div>
-            </div>
-
-            <!-- Quick Access Bento -->
-            <div class="card" style="padding: 1.75rem; border-radius: 20px; display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <h4 style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.25rem;">Need to update your wallet?</h4>
-                <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">Manage your connected Web3 address in Account Settings.</p>
-              </div>
-              <a href="settings.html" class="btn btn-outline btn-sm">Settings →</a>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-    `;
-  }
 
   // --------------------------------------------------------------------------
   // 2C. ACCOUNT, SECURITY & WEB3 SETTINGS VIEW (settings.html)
@@ -5997,16 +5769,16 @@ HOW TO RECOVER YOUR ACCOUNT:
 
     if (!user) {
       container.innerHTML = `
-        <div class="container page-content">
-          <div class="card text-center" style="max-width: 500px; margin: 4rem auto; padding: 3.5rem 2.5rem; background: rgba(14, 18, 27, 0.85); backdrop-filter: blur(20px); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px;">
-            <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 1.5rem auto;">
-              <img src="assets/mascot.jpg" style="width: 80px; height: 80px; border-radius: 50%; border: 2.5px solid var(--brand-yellow); box-shadow: 0 0 25px var(--brand-yellow-glow); object-fit: cover;">
+        <div class="container page-content" style="max-width: 520px; margin: 0 auto; padding-top: 2rem;">
+          <div class="card text-center" style="padding: 3rem 2rem; background: rgba(14, 18, 27, 0.9); backdrop-filter: blur(20px); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px;">
+            <div style="position: relative; width: 72px; height: 72px; margin: 0 auto 1.25rem auto;">
+              <img src="assets/mascot.jpg" style="width: 72px; height: 72px; border-radius: 50%; border: 2.5px solid var(--brand-yellow); box-shadow: 0 0 25px var(--brand-yellow-glow); object-fit: cover;">
             </div>
-            <h2 style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem;">Access Token Withdrawal</h2>
-            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">
-              Sign in with your credentials or connect your Web3 wallet to manage $BOOBA withdrawals to BNB Smart Chain.
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem;">Access $BOOBA Withdrawal</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.75rem;">
+              Sign in with your credentials to withdraw your earned tokens to your BNB Smart Chain wallet.
             </p>
-            <a href="signin.html#signin" class="btn btn-primary btn-block btn-lg">Sign In to Account</a>
+            <a href="signin.html#signin" class="btn btn-primary btn-block btn-lg" style="font-weight: 800; justify-content: center;">Sign In to Account</a>
           </div>
         </div>
       `;
@@ -6017,264 +5789,147 @@ HOW TO RECOVER YOUR ACCOUNT:
     const userWithdrawals = db.getUserWithdrawals();
 
     container.innerHTML = `
-      <div class="container page-content">
+      <div class="container page-content" style="max-width: 620px; margin: 0 auto; padding-top: 1rem;">
         
-        <!-- Back Navigation -->
-        <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          <a href="dashboard.html" class="back-dashboard-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Back & Quick Navigation Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+          <a href="dashboard.html" class="back-dashboard-btn" style="padding: 0.45rem 0.85rem; font-size: 0.82rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-            <span>Back to Dashboard</span>
+            <span>Dashboard</span>
           </a>
 
-          <a href="presale.html" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 0.4rem; border-color: rgba(243, 186, 47, 0.4); color: var(--brand-yellow);">
-            <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--brand-yellow);"></span>
-            <span>Participate in USDT Presale →</span>
-          </a>
-        </div>
-
-        <!-- HERO HEADER -->
-        <div class="card" style="background: linear-gradient(135deg, rgba(243, 186, 47, 0.12) 0%, rgba(14, 18, 27, 0.9) 60%, rgba(7, 9, 14, 0.98) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 28px; padding: 2.5rem; margin-bottom: 2.5rem; position: relative; overflow: hidden;">
-          <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.1; pointer-events: none;">
-            <img src="assets/mascot.jpg" style="width: 240px; height: 240px; border-radius: 50%;">
-          </div>
-          <div style="position: relative; z-index: 1; max-width: 700px;">
-            <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
-              <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); font-weight: 800; font-size: 0.8rem;">
-                <span class="pulse-dot" style="width: 6px; height: 6px;"></span> BEP-20 TOKEN BRIDGE
-              </span>
-              <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-weight: 800; font-size: 0.8rem;">
-                BNB SMART CHAIN MAINNET
-              </span>
-            </div>
-            <h1 style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin-bottom: 0.75rem;">
-              $BOOBA Token Withdrawal Bridge
-            </h1>
-            <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; margin: 0;">
-              Transfer your virtual $BOOBA tokens, daily rewards, and bounty allocations directly into your connected BNB Smart Chain wallet.
-            </p>
-          </div>
-        </div>
-
-        <!-- 2-COLUMN MAIN WITHDRAWAL INTERFACE -->
-        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
-          
-          <!-- Column 1: Withdrawal Form Terminal -->
-          <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.75rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-              <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 0;">Withdrawal Terminal</h3>
-              <span style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700; display: flex; align-items: center; gap: 0.35rem;">
-                <span class="pulse-dot" style="width: 6px; height: 6px;"></span> 0% Fee Tier
-              </span>
-            </div>
-
-            <!-- Balance Display -->
-            <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(243, 186, 47, 0.25); border-radius: 18px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
-              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 0.25rem;">Available $BOOBA Balance</div>
-              <div style="font-size: 2.2rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); line-height: 1.1;">
-                <span id="withdrawAvailableBalance">${Number(user.boobaPoints).toLocaleString()}</span> <span style="font-size: 1.1rem;">$BOOBA</span>
-              </div>
-              <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.4rem;">
-                100% Non-Custodial Snapshot Verified
-              </div>
-            </div>
-
-            <!-- Destination Web3 Wallet Selection -->
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <label class="form-label" style="margin: 0;">Destination BEP-20 Wallet</label>
-                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.openWalletModal()" style="font-size: 0.75rem; color: var(--brand-yellow); padding: 0.15rem 0.5rem;">
-                  ${isWalletConnected ? 'Switch Wallet' : 'Connect Wallet'}
-                </button>
-              </div>
-              <div style="position: relative;">
-                <input type="text" id="withdrawWalletInput" class="form-input text-mono" value="${isWalletConnected ? user.walletAddress : ''}" placeholder="0x... Connect BEP-20 Wallet" style="padding-left: 2.5rem;">
-                <div style="position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: ${isWalletConnected ? 'var(--accent-emerald)' : 'var(--text-muted)'};">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
-                </div>
-              </div>
-            </div>
-
-            <!-- Network Selection -->
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-              <label class="form-label">Transfer Network</label>
-              <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.15rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px;">
-                <div style="display: flex; align-items: center; gap: 0.65rem;">
-                  <div style="width: 26px; height: 26px; border-radius: 50%; background: #F3BA2F; color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.72rem;">
-                    BNB
-                  </div>
-                  <div>
-                    <div style="font-weight: 800; color: #FFFFFF; font-size: 0.9rem;">BNB Smart Chain (BEP-20)</div>
-                    <div style="font-size: 0.74rem; color: var(--text-muted);">Mainnet Chain ID: 56 (0x38)</div>
-                  </div>
-                </div>
-                <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); font-size: 0.68rem; padding: 0.15rem 0.45rem;">Instant (3s)</span>
-              </div>
-            </div>
-
-            <!-- Amount Input with Percentage Quick Buttons -->
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <label class="form-label" style="margin: 0;">Amount to Withdraw</label>
-                <div style="display: flex; gap: 0.35rem;">
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.max(1, Math.floor(${user.boobaPoints} * 0.25))" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">25%</button>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.max(1, Math.floor(${user.boobaPoints} * 0.50))" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">50%</button>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.max(1, Math.floor(${user.boobaPoints} * 0.75))" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05);">75%</button>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = ${user.boobaPoints}" style="font-size: 0.7rem; padding: 0.15rem 0.45rem; background: rgba(243,186,47,0.15); color: var(--brand-yellow); font-weight: 800;">MAX</button>
-                </div>
-              </div>
-              <input type="number" id="withdrawAmountInput" class="form-input text-mono" placeholder="0" min="1" max="${user.boobaPoints}" value="${user.boobaPoints > 0 ? user.boobaPoints : ''}">
-            </div>
-
-            <!-- Bridge Fee & Net Receive Info -->
-            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; padding: 0.85rem 1.15rem; margin-bottom: 1.75rem;">
-              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
-                <span style="color: var(--text-secondary);">Platform Fee:</span>
-                <span style="color: var(--accent-emerald); font-weight: 700;">0% (Free)</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
-                <span style="color: var(--text-secondary);">Estimated Network Gas:</span>
-                <span style="color: #FFFFFF; font-family: var(--font-mono);">0.0005 BNB (~$0.15)</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 800; padding-top: 0.4rem; border-top: 1px solid rgba(255,255,255,0.06);">
-                <span style="color: #FFFFFF;">You Will Receive:</span>
-                <span style="color: var(--brand-yellow); font-family: var(--font-mono);">1:1 $BOOBA BEP-20</span>
-              </div>
-            </div>
-
-            <!-- Action Button -->
-            <button type="button" id="executeWithdrawBtn" class="btn btn-primary btn-lg btn-block" onclick="window.boobaApp.handleExecuteWithdrawal()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 900;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
-              <span>Execute $BOOBA Withdrawal</span>
+          <div style="display: flex; gap: 0.5rem;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.boobaApp.addTokenToWallet()" style="font-size: 0.75rem; border-color: rgba(243, 186, 47, 0.35); color: var(--brand-yellow); padding: 0.35rem 0.75rem;">
+              + Add to Wallet
             </button>
+            <a href="presale.html" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding: 0.35rem 0.75rem;">
+              Presale Hub →
+            </a>
           </div>
-
-          <!-- Column 2: Contract Info & Token Importer -->
-          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-            
-            <!-- Official Token Specifications Box -->
-            <div class="card" style="padding: 2.25rem; border-radius: 24px; background: linear-gradient(180deg, rgba(243, 186, 47, 0.08) 0%, rgba(14, 18, 27, 0.85) 100%); border: 1.5px solid rgba(243, 186, 47, 0.35);">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
-                <div style="display: flex; align-items: center; gap: 0.65rem;">
-                  <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(243, 186, 47, 0.2); border: 1px solid rgba(243, 186, 47, 0.4); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                  </div>
-                  <div>
-                    <h4 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; margin: 0;">Official BEP-20 Contract</h4>
-                    <div style="font-size: 0.75rem; color: var(--brand-yellow); font-weight: 700;">Verified on BscScan</div>
-                  </div>
-                </div>
-
-                <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.addTokenToWallet()" style="font-size: 0.75rem; color: var(--brand-yellow); border: 1px solid rgba(243, 186, 47, 0.3); background: rgba(243, 186, 47, 0.1);">
-                  + Add to Wallet
-                </button>
-              </div>
-
-              <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.15rem; margin-bottom: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.6rem;">
-                  <span style="color: var(--text-secondary);">Token Name:</span>
-                  <strong style="color: #FFFFFF;">BOOBA (BNB baby)</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.6rem;">
-                  <span style="color: var(--text-secondary);">Token Symbol:</span>
-                  <strong style="color: var(--brand-yellow); font-family: var(--font-mono);">$BOOBA</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.6rem;">
-                  <span style="color: var(--text-secondary);">Decimals:</span>
-                  <strong style="color: #FFFFFF;">18</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.6rem;">
-                  <span style="color: var(--text-secondary);">Contract Address:</span>
-                  <a href="https://bscscan.com/token/0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B" target="_blank" rel="noopener noreferrer" style="color: var(--brand-yellow); font-family: var(--font-mono); text-decoration: none; font-size: 0.78rem;">
-                    0x005f...B21B ↗
-                  </a>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
-                  <span style="color: var(--text-secondary);">Trading Tax:</span>
-                  <span style="color: var(--accent-emerald); font-weight: 700;">0% Buy / 0% Sell</span>
-                </div>
-              </div>
-
-              <div style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.8rem; color: var(--accent-emerald);">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Direct on-chain execution with instant block confirmation.</span>
-              </div>
-            </div>
-
-            <!-- Presale Promo Bento -->
-            <div class="card" style="padding: 1.75rem; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(145deg, rgba(20, 26, 38, 0.9) 0%, rgba(10, 13, 20, 0.95) 100%); border: 1.5px solid rgba(255, 255, 255, 0.08);">
-              <div>
-                <h4 style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.25rem;">Want more $BOOBA before DEX listing?</h4>
-                <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">Deposit USDT in the Stage 1 Presale to earn up to +15% bonus tokens.</p>
-              </div>
-              <a href="presale.html" class="btn btn-primary btn-sm" style="white-space: nowrap;">Presale Hub →</a>
-            </div>
-
-          </div>
-
         </div>
 
-        <!-- WITHDRAWAL HISTORY LEDGER -->
-        <div class="card" style="padding: 2.25rem; border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.08); margin-bottom: 3rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+        <!-- Sleek Minimalist Hero Header -->
+        <div style="text-align: center; margin-bottom: 1.75rem;">
+          <div style="display: inline-flex; align-items: center; gap: 0.45rem; background: rgba(243, 186, 47, 0.12); border: 1px solid rgba(243, 186, 47, 0.3); border-radius: 999px; padding: 0.25rem 0.85rem; margin-bottom: 0.75rem;">
+            <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--brand-yellow);"></span>
+            <span style="font-size: 0.75rem; font-weight: 800; color: var(--brand-yellow); letter-spacing: 0.04em;">BNB SMART CHAIN (BEP-20)</span>
+          </div>
+          <h1 style="font-size: clamp(1.8rem, 4vw, 2.3rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin-bottom: 0.4rem;">
+            Withdraw $BOOBA
+          </h1>
+          <p style="font-size: 0.88rem; color: var(--text-secondary); max-width: 480px; margin: 0 auto; line-height: 1.5;">
+            Transfer your earned tokens directly to your self-custody BEP-20 wallet with zero platform bridge fees.
+          </p>
+        </div>
+
+        <!-- SINGLE UNIFIED WITHDRAWAL TERMINAL CARD -->
+        <div class="card" style="padding: clamp(1.25rem, 3.5vw, 2rem); border-radius: 24px; background: linear-gradient(180deg, rgba(18, 24, 38, 0.95) 0%, rgba(10, 13, 20, 0.98) 100%); border: 1.5px solid rgba(243, 186, 47, 0.3); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(243, 186, 47, 0.08); margin-bottom: 2rem;">
+          
+          <!-- Available Balance Strip -->
+          <div style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(243, 186, 47, 0.2); border-radius: 16px; padding: 1.15rem 1.35rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
             <div>
-              <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; margin: 0 0 0.25rem 0;">Withdrawal History Ledger</h3>
-              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">Your verified on-chain transfers to BNB Smart Chain.</p>
+              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.04em;">Available to Withdraw</div>
+              <div style="font-size: 1.85rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); line-height: 1.15;">
+                <span id="withdrawAvailableBalance">${Number(user.boobaPoints).toLocaleString()}</span> <span style="font-size: 0.95rem; color: #FFFFFF;">$BOOBA</span>
+              </div>
             </div>
-            <span class="badge-tag" style="background: rgba(255,255,255,0.06); color: var(--text-secondary); font-size: 0.75rem;">
-              ${userWithdrawals.length} ${userWithdrawals.length === 1 ? 'Transaction' : 'Transactions'}
+            <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); font-size: 0.7rem; font-weight: 700; padding: 0.25rem 0.6rem;">
+              0% Platform Fee
+            </span>
+          </div>
+
+          <!-- Destination Wallet Input -->
+          <div style="margin-bottom: 1.35rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+              <label style="font-size: 0.8rem; font-weight: 700; color: #FFFFFF; margin: 0;">Destination BEP-20 Wallet</label>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.openWalletModal()" style="font-size: 0.72rem; color: var(--brand-yellow); padding: 0.15rem 0.5rem;">
+                ${isWalletConnected ? 'Switch Wallet' : 'Connect Wallet'}
+              </button>
+            </div>
+            <div style="position: relative;">
+              <input type="text" id="withdrawWalletInput" class="form-input text-mono" value="${isWalletConnected ? user.walletAddress : ''}" placeholder="0x... Connect or paste BSC address" style="padding-left: 2.35rem; font-size: 0.84rem; border-radius: 12px; background: rgba(0, 0, 0, 0.4); border-color: rgba(255, 255, 255, 0.1);">
+              <div style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: ${isWalletConnected ? 'var(--accent-emerald)' : 'var(--text-muted)'}; display: flex;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Amount to Withdraw Input & Percentage Chips -->
+          <div style="margin-bottom: 1.35rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+              <label style="font-size: 0.8rem; font-weight: 700; color: #FFFFFF; margin: 0;">Amount to Withdraw</label>
+              <div style="display: flex; gap: 0.35rem;">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.max(1, Math.floor(${user.boobaPoints} * 0.25))" style="font-size: 0.68rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05); border-radius: 6px;">25%</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.max(1, Math.floor(${user.boobaPoints} * 0.50))" style="font-size: 0.68rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05); border-radius: 6px;">50%</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = Math.max(1, Math.floor(${user.boobaPoints} * 0.75))" style="font-size: 0.68rem; padding: 0.15rem 0.45rem; background: rgba(255,255,255,0.05); border-radius: 6px;">75%</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('withdrawAmountInput').value = ${user.boobaPoints}" style="font-size: 0.68rem; padding: 0.15rem 0.45rem; background: rgba(243,186,47,0.15); color: var(--brand-yellow); font-weight: 800; border-radius: 6px;">MAX</button>
+              </div>
+            </div>
+            <input type="number" id="withdrawAmountInput" class="form-input text-mono" placeholder="0" min="1" max="${user.boobaPoints}" value="${user.boobaPoints > 0 ? user.boobaPoints : ''}" style="font-size: 1.15rem; font-weight: 800; color: var(--brand-yellow); border-radius: 12px; background: rgba(0, 0, 0, 0.4); border-color: rgba(243, 186, 47, 0.35);">
+          </div>
+
+          <!-- Clean Settlement Info Strip -->
+          <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 0.35rem;">
+              <span style="color: var(--text-secondary);">Network:</span>
+              <span style="color: #FFFFFF; font-weight: 600;">BNB Smart Chain (BEP-20)</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 0.35rem;">
+              <span style="color: var(--text-secondary);">Estimated Gas:</span>
+              <span style="color: #FFFFFF; font-family: var(--font-mono);">0.0005 BNB (~$0.15)</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 800; padding-top: 0.35rem; border-top: 1px solid rgba(255,255,255,0.06);">
+              <span style="color: #FFFFFF;">You Receive:</span>
+              <span style="color: var(--brand-yellow); font-family: var(--font-mono);">1:1 $BOOBA On-Chain</span>
+            </div>
+          </div>
+
+          <!-- Big Gold CTA Button -->
+          <button type="button" id="executeWithdrawBtn" class="btn btn-primary btn-lg btn-block" onclick="window.boobaApp.handleExecuteWithdrawal()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 900; font-size: 1.05rem; padding: 0.95rem 1.5rem; border-radius: 14px; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.35);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+            <span>Withdraw $BOOBA to Wallet</span>
+          </button>
+        </div>
+
+        <!-- MINIMALIST WITHDRAWAL HISTORY LEDGER -->
+        <div class="card" style="padding: clamp(1.25rem, 3vw, 1.75rem); border-radius: 20px; background: rgba(14, 18, 27, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 3rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF; margin: 0;">Withdrawal History</h3>
+            <span class="badge-tag" style="background: rgba(255,255,255,0.06); color: var(--text-secondary); font-size: 0.72rem;">
+              ${userWithdrawals.length} ${userWithdrawals.length === 1 ? 'Record' : 'Records'}
             </span>
           </div>
 
           ${userWithdrawals.length === 0 ? `
-            <div style="text-align: center; padding: 3rem 1.5rem; background: rgba(0,0,0,0.25); border-radius: 16px; border: 1px dashed rgba(255,255,255,0.1);">
-              <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(243,186,47,0.1); border: 1px solid rgba(243,186,47,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; color: var(--brand-yellow);">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
-              </div>
-              <div style="font-weight: 700; color: #FFFFFF; font-size: 1rem; margin-bottom: 0.25rem;">No withdrawals executed yet</div>
-              <div style="font-size: 0.82rem; color: var(--text-secondary);">Enter an amount above and click "Execute $BOOBA Withdrawal" to make your first transfer.</div>
+            <div style="text-align: center; padding: 2rem 1rem; color: var(--text-secondary); font-size: 0.82rem;">
+              No withdrawals executed yet. Your withdrawal records will appear here.
             </div>
           ` : `
-            <div style="overflow-x: auto;">
-              <table style="width: 100%; border-collapse: collapse; font-size: 0.86rem; text-align: left;">
-                <thead>
-                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
-                    <th style="padding: 0.75rem 1rem;">Timestamp</th>
-                    <th style="padding: 0.75rem 1rem;">Amount</th>
-                    <th style="padding: 0.75rem 1rem;">Destination Wallet</th>
-                    <th style="padding: 0.75rem 1rem;">Transaction Hash</th>
-                    <th style="padding: 0.75rem 1rem; text-align: right;">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${userWithdrawals.map(w => `
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
-                      <td style="padding: 1rem; color: var(--text-secondary); white-space: nowrap;">
-                        ${new Date(w.timestamp).toLocaleString()}
-                      </td>
-                      <td style="padding: 1rem; font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono); white-space: nowrap;">
-                        -${Number(w.amount).toLocaleString()} $BOOBA
-                      </td>
-                      <td style="padding: 1rem; font-family: var(--font-mono); color: #FFFFFF; white-space: nowrap;">
-                        ${w.walletAddress.slice(0, 6)}...${w.walletAddress.slice(-4)}
-                      </td>
-                      <td style="padding: 1rem; font-family: var(--font-mono); white-space: nowrap;">
-                        <a href="${w.explorerUrl || `https://bscscan.com/tx/${w.txHash}`}" target="_blank" rel="noopener noreferrer" style="color: var(--brand-yellow); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
-                          <span>${w.txHash.slice(0, 8)}...${w.txHash.slice(-6)}</span>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                        </a>
-                      </td>
-                      <td style="padding: 1rem; text-align: right; white-space: nowrap;">
-                        <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); font-size: 0.72rem; padding: 0.2rem 0.55rem;">
-                          <span class="pulse-dot" style="width: 5px; height: 5px; background: var(--accent-emerald);"></span> ${w.status || 'Completed'}
-                        </span>
-                      </td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
+            <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+              ${userWithdrawals.map(w => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; flex-wrap: wrap; gap: 0.5rem;">
+                  <div>
+                    <div style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono); font-size: 0.95rem;">
+                      -${Number(w.amount).toLocaleString()} $BOOBA
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-secondary);">
+                      ${new Date(w.timestamp).toLocaleDateString()} • ${w.walletAddress ? w.walletAddress.slice(0, 6) + '...' + w.walletAddress.slice(-4) : 'BSC Wallet'}
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 0.6rem;">
+                    <a href="${w.explorerUrl || `https://bscscan.com/tx/${w.txHash}`}" target="_blank" rel="noopener noreferrer" style="color: var(--brand-yellow); text-decoration: none; font-size: 0.75rem; font-family: var(--font-mono); display: inline-flex; align-items: center; gap: 0.25rem;">
+                      <span>${w.txHash ? w.txHash.slice(0, 6) + '...' : 'TxID'}</span>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </a>
+                    <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); font-size: 0.68rem; padding: 0.15rem 0.45rem;">
+                      ${w.status || 'Confirmed'}
+                    </span>
+                  </div>
+                </div>
+              `).join('')}
             </div>
           `}
         </div>

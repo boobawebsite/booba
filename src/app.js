@@ -2182,9 +2182,6 @@ HOW TO RECOVER YOUR ACCOUNT:
                 <a href="signin.html#signup" class="btn btn-secondary btn-lg">
                   Mint Passport (+100 BOOBA)
                 </a>
-                <a href="about.html" class="btn btn-ghost btn-lg">
-                  About & Tokenomics
-                </a>
               `}
             </div>
 

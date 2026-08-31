@@ -209,66 +209,18 @@ export class MotionEngine {
   }
 
   /**
-   * 4. 3D MAGNETIC CARD TILTS & SPECULAR GLARE (Apple Vision Pro)
+   * 4. 2D STATIC CARD PRESENTATION (Card tilting completely disabled per design requirements)
    */
   initMagneticCardTilts() {
-    if (this.isReducedMotion) return;
-
-    // Attach to all major interactive cards
+    // 3D card tilt & perspective bending disabled: all cards remain 2D flat elements
     const tiltCards = document.querySelectorAll(
       '.card, .passport-card, .x-auth-layout, .quest-item-card, .stat-badge, .feature-card, .hero-mascot-card, .bento-card, .pipeline-card, .cta-banner-card, .mascot-hologram-wrapper'
     );
-
     tiltCards.forEach((card) => {
-      if (card.dataset.hasTiltListener) return;
-      card.dataset.hasTiltListener = 'true';
-
-      // Insert specular glare overlay if missing
-      let glare = card.querySelector('.card-specular-glare');
-      if (!glare) {
-        glare = document.createElement('div');
-        glare.className = 'card-specular-glare';
-        card.appendChild(glare);
-      }
-
-      let isHovered = false;
-
-      card.addEventListener('mouseenter', () => {
-        isHovered = true;
-        card.style.transition = 'transform 0.1s ease-out, box-shadow 0.25s ease';
-      });
-
-      card.addEventListener('mousemove', (e) => {
-        if (!isHovered) return;
-        const rect = card.getBoundingClientRect();
-        const cardX = e.clientX - rect.left;
-        const cardY = e.clientY - rect.top;
-
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-
-        const rotateX = ((cardY - centerY) / centerY) * -7; // Max tilt 7deg
-        const rotateY = ((cardX - centerX) / centerX) * 7;
-
-        card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translate3d(0, -4px, 10px)`;
-
-        // Position specular glare
-        if (glare) {
-          const glareX = (cardX / rect.width) * 100;
-          const glareY = (cardY / rect.height) * 100;
-          glare.style.opacity = '1';
-          glare.style.background = `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255, 255, 255, 0.15) 0%, rgba(243, 186, 47, 0.05) 40%, transparent 80%)`;
-        }
-      });
-
-      card.addEventListener('mouseleave', () => {
-        isHovered = false;
-        card.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.6s ease';
-        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translate3d(0, 0, 0)';
-        if (glare) {
-          glare.style.opacity = '0';
-        }
-      });
+      card.style.transform = 'none';
+      card.style.perspective = 'none';
+      const glare = card.querySelector('.card-specular-glare');
+      if (glare) glare.remove();
     });
   }
 

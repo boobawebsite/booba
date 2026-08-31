@@ -513,25 +513,15 @@ a {
   }
 }
 
-/* 3D Magnetic Tilt Specular Reflection */
+/* 2D Clean Cards */
 .card, .passport-card, .x-auth-layout, .quest-item-card, .stat-badge, .feature-card, .hero-mascot-card {
   position: relative;
-  transform-style: preserve-3d;
   will-change: transform, box-shadow;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card-specular-glare {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 2;
+  display: none !important;
 }
 
 /* Floating 3D Coin Dust Layers (Firewatch Parallax) */

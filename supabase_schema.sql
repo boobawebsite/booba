@@ -68,27 +68,39 @@ CREATE TABLE IF NOT EXISTS public.booba_withdrawals (
   passport_id TEXT,
   amount NUMERIC NOT NULL,
   wallet_address TEXT NOT NULL,
-  tx_hash TEXT NOT NULL,
+  tx_hash TEXT,
+  sent_tx_hash TEXT,
+  delivery_proof_screenshot TEXT, -- Admin screenshot of sent tokens receipt from Trust Wallet/MetaMask
+  admin_notes TEXT,
+  sent_at TIMESTAMPTZ,
   explorer_url TEXT,
-  status TEXT DEFAULT 'completed',
+  status TEXT DEFAULT 'pending', -- 'pending' | 'completed' | 'rejected'
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 6. PRESALE PURCHASES TABLE (USDT DEPOSITS & $BOOBA ALLOCATIONS)
 CREATE TABLE IF NOT EXISTS public.booba_presale_purchases (
   id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
+  user_id TEXT,
   username TEXT NOT NULL,
   passport_id TEXT,
+  sender_wallet TEXT,
+  receiving_wallet TEXT,
   usdt_amount NUMERIC NOT NULL,
   base_tokens NUMERIC NOT NULL,
   bonus_percent NUMERIC DEFAULT 0,
   bonus_tokens NUMERIC DEFAULT 0,
   total_tokens NUMERIC NOT NULL,
-  method TEXT DEFAULT 'web3', -- 'web3' | 'manual'
-  tx_hash TEXT NOT NULL,
+  proof_screenshot TEXT, -- Buyer payment proof receipt
+  delivery_proof_screenshot TEXT, -- Admin token delivery proof receipt
+  method TEXT DEFAULT 'manual_proof', -- 'manual_proof' | 'web3' | 'admin_allocation'
+  tx_hash TEXT,
   explorer_url TEXT,
-  status TEXT DEFAULT 'confirmed',
+  notes TEXT,
+  sent_tx_hash TEXT,
+  admin_notes TEXT,
+  sent_at TIMESTAMPTZ,
+  status TEXT DEFAULT 'pending', -- 'pending' | 'completed' | 'rejected'
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -122,9 +134,13 @@ CREATE POLICY "Allow public update submissions" ON public.booba_submissions FOR 
 
 CREATE POLICY "Allow public read withdrawals" ON public.booba_withdrawals FOR SELECT USING (true);
 CREATE POLICY "Allow public insert withdrawals" ON public.booba_withdrawals FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public update withdrawals" ON public.booba_withdrawals FOR UPDATE USING (true);
+CREATE POLICY "Allow public delete withdrawals" ON public.booba_withdrawals FOR DELETE USING (true);
 
 CREATE POLICY "Allow public read presale" ON public.booba_presale_purchases FOR SELECT USING (true);
 CREATE POLICY "Allow public insert presale" ON public.booba_presale_purchases FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public update presale" ON public.booba_presale_purchases FOR UPDATE USING (true);
+CREATE POLICY "Allow public delete presale" ON public.booba_presale_purchases FOR DELETE USING (true);
 
 CREATE POLICY "Allow public stats" ON public.booba_stats FOR ALL USING (true);
 

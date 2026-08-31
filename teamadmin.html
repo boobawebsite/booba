@@ -13,8 +13,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
 
   <!-- Master Stylesheet & Admin Stylesheet -->
-  <link rel="stylesheet" href="src/styles/main.css?v=3.1">
-  <link rel="stylesheet" href="teamadmin.css?v=3.1">
+  <link rel="stylesheet" href="src/styles/main.css?v=3.2">
+  <link rel="stylesheet" href="teamadmin.css?v=3.2">
 </head>
 <body>
 
@@ -60,7 +60,13 @@
         </a>
         <a href="#presale" class="admin-nav-item" data-tab="presale">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-          <span>Presale & Bridge Logs</span>
+          <span>Presale Orders</span>
+          <span class="admin-nav-badge" id="pendingPresaleBadge" style="display: none;">0</span>
+        </a>
+        <a href="#withdrawals" class="admin-nav-item" data-tab="withdrawals">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="12" y1="11" x2="12" y2="17"></line><polyline points="9 14 12 11 15 14"></polyline></svg>
+          <span>Token Withdrawals</span>
+          <span class="admin-nav-badge" id="pendingWithdrawalsBadge" style="display: none;">0</span>
         </a>
       </nav>
 

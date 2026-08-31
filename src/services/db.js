@@ -363,6 +363,8 @@ class DatabaseService {
     this.submissions = [];
     this.referrals = [];
     this.airdropLogs = [];
+    this.presalePurchases = [];
+    this.withdrawals = [];
     this.listeners = [];
     this.isInitialized = false;
 
@@ -426,6 +428,8 @@ class DatabaseService {
       submissions: this.submissions,
       referrals: this.referrals,
       airdropLogs: this.airdropLogs,
+      presalePurchases: this.presalePurchases,
+      withdrawals: this.withdrawals,
       stats: this.getStats()
     };
   }
@@ -439,11 +443,14 @@ class DatabaseService {
 
   async refreshAll() {
     await Promise.all([
+      this.fetchPresaleConfig(),
       this.fetchUsers(),
       this.fetchQuests(),
       this.fetchSubmissions(),
       this.fetchReferrals(),
-      this.fetchAirdropLogs()
+      this.fetchAirdropLogs(),
+      this.fetchPresalePurchases(),
+      this.fetchWithdrawals()
     ]);
 
     if (this.currentUser && this.currentUser.id) {
@@ -469,9 +476,34 @@ class DatabaseService {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_users' }, () => this.fetchUsers())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_submissions' }, () => this.fetchSubmissions())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_airdrop_logs' }, () => this.fetchAirdropLogs())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_presale_purchases' }, () => this.fetchPresalePurchases())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_withdrawals' }, () => this.fetchWithdrawals())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_stats' }, () => this.fetchPresaleConfig())
         .subscribe();
     } catch (e) {
       console.warn('Realtime subscription skipped:', e);
+    }
+  }
+
+  async fetchPresaleConfig() {
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('booba_stats')
+          .select('value')
+          .eq('key', 'presale_config')
+          .maybeSingle();
+
+        if (!error && data && data.value) {
+          Object.assign(PRESALE_CONFIG, data.value);
+          try {
+            localStorage.setItem('booba_custom_presale_config', JSON.stringify(PRESALE_CONFIG));
+          } catch (e) {}
+          this.notify();
+        }
+      } catch (e) {
+        console.warn('fetchPresaleConfig notice:', e);
+      }
     }
   }
 
@@ -1827,7 +1859,7 @@ class DatabaseService {
   }
 
   // --------------------------------------------------------------------------
-  // ON-CHAIN WITHDRAWALS ENGINE
+  // ON-CHAIN WITHDRAWALS & BRIDGE ENGINE (WITH ADMIN DISPATCH FULFILLMENT)
   // --------------------------------------------------------------------------
 
   generateTxHash() {
@@ -1837,6 +1869,72 @@ class DatabaseService {
       hash += chars[Math.floor(Math.random() * chars.length)];
     }
     return hash;
+  }
+
+  async fetchWithdrawals() {
+    let list = [];
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('booba_withdrawals')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && data) {
+          list = data.map(w => ({
+            id: w.id,
+            userId: w.user_id,
+            username: w.username,
+            passportId: w.passport_id || '',
+            amount: Number(w.amount) || 0,
+            tokenSymbol: 'BOOBA',
+            walletAddress: w.wallet_address || '',
+            txHash: w.tx_hash || '',
+            sentTxHash: w.sent_tx_hash || w.tx_hash || '',
+            deliveryProofScreenshot: w.delivery_proof_screenshot || '',
+            adminNotes: w.admin_notes || '',
+            sentAt: w.sent_at || null,
+            network: 'BNB Smart Chain (BEP-20)',
+            chainId: 56,
+            gasFeeBnb: '0.0005 BNB',
+            status: w.status || 'pending', // 'pending' | 'completed' | 'rejected'
+            notes: w.notes || '',
+            timestamp: w.created_at || new Date().toISOString(),
+            explorerUrl: w.tx_hash ? `https://bscscan.com/tx/${w.tx_hash}` : (w.sent_tx_hash ? `https://bscscan.com/tx/${w.sent_tx_hash}` : '')
+          }));
+        }
+      } catch (e) {
+        console.warn('fetchWithdrawals Supabase error:', e);
+      }
+    }
+
+    // Merge with local storage logs without duplicates
+    let localLogs = [];
+    try {
+      localLogs = JSON.parse(localStorage.getItem('booba_global_withdrawals') || '[]');
+    } catch (e) {}
+
+    const combined = [...list];
+    localLogs.forEach(loc => {
+      const existing = combined.find(w => w.id === loc.id || (loc.txHash && loc.txHash === w.txHash));
+      if (!existing) {
+        combined.push(loc);
+      }
+    });
+
+    this.withdrawals = combined;
+
+    // Sync current user's personal withdrawal list
+    if (this.currentUser) {
+      this.currentUser.withdrawals = this.withdrawals.filter(w => 
+        w.userId === this.currentUser.id || 
+        w.username === this.currentUser.username ||
+        (this.currentUser.walletAddress && w.walletAddress && w.walletAddress.toLowerCase() === this.currentUser.walletAddress.toLowerCase())
+      );
+      this.saveLocalSession(this.currentUser);
+    }
+
+    return this.withdrawals;
   }
 
   async processWithdrawal(amount, destinationWallet) {
@@ -1859,25 +1957,30 @@ class DatabaseService {
       return { success: false, message: 'Please connect or provide a valid BEP-20 (BNB Smart Chain) wallet address.' };
     }
 
-    const txHash = this.generateTxHash();
     const newBalance = currentBalance - withdrawAmt;
     const now = new Date().toISOString();
+    const withdrawalId = 'tx_wd_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
 
     const record = {
-      id: 'tx_wd_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+      id: withdrawalId,
       userId: this.currentUser.id,
       username: this.currentUser.username,
       passportId: this.currentUser.passportId,
       amount: withdrawAmt,
       tokenSymbol: 'BOOBA',
       walletAddress: cleanWallet,
-      txHash: txHash,
+      txHash: '',
+      sentTxHash: '',
+      deliveryProofScreenshot: '',
+      adminNotes: '',
+      sentAt: null,
       network: 'BNB Smart Chain (BEP-20)',
       chainId: 56,
       gasFeeBnb: '0.0005 BNB',
-      status: 'Completed',
+      status: 'pending', // 'pending' | 'completed' | 'rejected'
+      notes: 'Pending admin on-chain token delivery',
       timestamp: now,
-      explorerUrl: `https://bscscan.com/tx/${txHash}`
+      explorerUrl: ''
     };
 
     // Update in-memory user
@@ -1893,6 +1996,9 @@ class DatabaseService {
       userInDir.boobaPoints = newBalance;
     }
 
+    // Update in-memory withdrawals array
+    this.withdrawals.unshift(record);
+
     // Save to local storage
     this.saveLocalSession(this.currentUser);
 
@@ -1900,7 +2006,7 @@ class DatabaseService {
     try {
       const globalWd = JSON.parse(localStorage.getItem('booba_global_withdrawals') || '[]');
       globalWd.unshift(record);
-      localStorage.setItem('booba_global_withdrawals', JSON.stringify(globalWd.slice(0, 100)));
+      localStorage.setItem('booba_global_withdrawals', JSON.stringify(globalWd.slice(0, 200)));
     } catch (e) {}
 
     // Persist to Supabase if connected
@@ -1914,16 +2020,21 @@ class DatabaseService {
         await supabase
           .from('booba_withdrawals')
           .insert([{
+            id: withdrawalId,
             user_id: this.currentUser.id,
             username: this.currentUser.username,
+            passport_id: this.currentUser.passportId,
             amount: withdrawAmt,
             wallet_address: cleanWallet,
-            tx_hash: txHash,
-            status: 'Completed',
+            tx_hash: '',
+            sent_tx_hash: '',
+            delivery_proof_screenshot: null,
+            admin_notes: null,
+            status: 'pending',
             created_at: now
           }]);
       } catch (err) {
-        console.warn('Supabase withdrawal sync notice:', err);
+        console.warn('Supabase withdrawal insert notice:', err);
       }
     }
 
@@ -1934,13 +2045,178 @@ class DatabaseService {
       receipt: record,
       amount: withdrawAmt,
       newBalance,
-      txHash,
-      explorerUrl: record.explorerUrl
+      message: 'Withdrawal request logged! The admin team will transfer tokens to your wallet and upload proof.'
     };
+  }
+
+  /**
+   * Admin Delivers $BOOBA Tokens, Uploads Verification Screenshot Proof, & Fulfills Withdrawal
+   */
+  async adminFulfillWithdrawal(withdrawalId, { sentTxHash = '', adminNotes = '', deliveryProofScreenshot = '' }) {
+    let wd = this.withdrawals.find(w => w.id === withdrawalId);
+    if (!wd) {
+      let localLogs = JSON.parse(localStorage.getItem('booba_global_withdrawals') || '[]');
+      wd = localLogs.find(w => w.id === withdrawalId);
+    }
+
+    if (!wd) return { success: false, message: 'Withdrawal request not found.' };
+
+    const dispatchTx = sentTxHash.trim();
+    const nowIso = new Date().toISOString();
+
+    wd.status = 'completed';
+    wd.sentTxHash = dispatchTx;
+    wd.txHash = dispatchTx;
+    wd.sentAt = nowIso;
+    if (deliveryProofScreenshot) wd.deliveryProofScreenshot = deliveryProofScreenshot;
+    if (adminNotes) wd.adminNotes = adminNotes;
+    wd.explorerUrl = dispatchTx ? `https://bscscan.com/tx/${dispatchTx}` : '';
+
+    // Update global local storage
+    try {
+      const globalWd = JSON.parse(localStorage.getItem('booba_global_withdrawals') || '[]');
+      const idx = globalWd.findIndex(w => w.id === withdrawalId);
+      if (idx !== -1) {
+        globalWd[idx] = { ...globalWd[idx], ...wd };
+      }
+      localStorage.setItem('booba_global_withdrawals', JSON.stringify(globalWd));
+    } catch (e) {}
+
+    // Update target user session if present
+    const targetUser = this.users.find(u => u.id === wd.userId || u.username === wd.username);
+    if (targetUser && Array.isArray(targetUser.withdrawals)) {
+      const uWdIdx = targetUser.withdrawals.findIndex(w => w.id === withdrawalId);
+      if (uWdIdx !== -1) {
+        targetUser.withdrawals[uWdIdx] = { ...targetUser.withdrawals[uWdIdx], ...wd };
+      }
+    }
+
+    if (this.currentUser && (this.currentUser.id === wd.userId || this.currentUser.username === wd.username)) {
+      if (Array.isArray(this.currentUser.withdrawals)) {
+        const cIdx = this.currentUser.withdrawals.findIndex(w => w.id === withdrawalId);
+        if (cIdx !== -1) {
+          this.currentUser.withdrawals[cIdx] = { ...this.currentUser.withdrawals[cIdx], ...wd };
+          this.saveLocalSession(this.currentUser);
+        }
+      }
+    }
+
+    // Persist to Supabase
+    if (supabase) {
+      try {
+        await supabase
+          .from('booba_withdrawals')
+          .update({
+            status: 'completed',
+            tx_hash: dispatchTx || null,
+            sent_tx_hash: dispatchTx || null,
+            delivery_proof_screenshot: deliveryProofScreenshot || wd.deliveryProofScreenshot || null,
+            admin_notes: adminNotes || wd.adminNotes || null,
+            sent_at: nowIso
+          })
+          .eq('id', withdrawalId);
+      } catch (err) {
+        console.warn('Supabase withdrawal fulfillment sync notice:', err);
+      }
+    }
+
+    this.notify();
+    return { success: true, withdrawal: wd, sentTxHash: dispatchTx };
+  }
+
+  /**
+   * Admin Rejects Withdrawal & Refunds Points to Citizen
+   */
+  async adminRejectWithdrawal(withdrawalId, { reason = 'Invalid wallet or rejected by admin' }) {
+    let wd = this.withdrawals.find(w => w.id === withdrawalId);
+    if (!wd) return { success: false, message: 'Withdrawal request not found.' };
+
+    wd.status = 'rejected';
+    wd.notes = (wd.notes ? wd.notes + ' | ' : '') + 'Rejected: ' + reason;
+
+    // Refund points back to citizen
+    const targetUser = this.users.find(u => u.id === wd.userId || u.username === wd.username);
+    if (targetUser) {
+      targetUser.boobaPoints = (Number(targetUser.boobaPoints) || 0) + Number(wd.amount);
+    }
+
+    if (this.currentUser && (this.currentUser.id === wd.userId || this.currentUser.username === wd.username)) {
+      this.currentUser.boobaPoints = (Number(this.currentUser.boobaPoints) || 0) + Number(wd.amount);
+      this.saveLocalSession(this.currentUser);
+    }
+
+    // Update global local storage
+    try {
+      const globalWd = JSON.parse(localStorage.getItem('booba_global_withdrawals') || '[]');
+      const idx = globalWd.findIndex(w => w.id === withdrawalId);
+      if (idx !== -1) {
+        globalWd[idx] = { ...globalWd[idx], ...wd };
+      }
+      localStorage.setItem('booba_global_withdrawals', JSON.stringify(globalWd));
+    } catch (e) {}
+
+    // Persist to Supabase
+    if (supabase) {
+      try {
+        if (targetUser) {
+          await supabase
+            .from('booba_users')
+            .update({ booba_points: targetUser.boobaPoints })
+            .eq('id', targetUser.id);
+        }
+
+        await supabase
+          .from('booba_withdrawals')
+          .update({
+            status: 'rejected'
+          })
+          .eq('id', withdrawalId);
+      } catch (err) {
+        console.warn('Supabase withdrawal reject sync notice:', err);
+      }
+    }
+
+    this.notify();
+    return { success: true, withdrawal: wd };
+  }
+
+  /**
+   * Admin Deletes Withdrawal Record
+   */
+  async adminDeleteWithdrawal(withdrawalId) {
+    this.withdrawals = this.withdrawals.filter(w => w.id !== withdrawalId);
+
+    try {
+      let globalWd = JSON.parse(localStorage.getItem('booba_global_withdrawals') || '[]');
+      globalWd = globalWd.filter(w => w.id !== withdrawalId);
+      localStorage.setItem('booba_global_withdrawals', JSON.stringify(globalWd));
+    } catch (e) {}
+
+    if (supabase) {
+      try {
+        await supabase
+          .from('booba_withdrawals')
+          .delete()
+          .eq('id', withdrawalId);
+      } catch (err) {
+        console.warn('Supabase withdrawal delete notice:', err);
+      }
+    }
+
+    this.notify();
+    return { success: true };
   }
 
   getUserWithdrawals() {
     if (!this.currentUser) return [];
+    if (this.withdrawals && this.withdrawals.length > 0) {
+      const userList = this.withdrawals.filter(w => 
+        w.userId === this.currentUser.id || 
+        w.username === this.currentUser.username ||
+        (this.currentUser.walletAddress && w.walletAddress && w.walletAddress.toLowerCase() === this.currentUser.walletAddress.toLowerCase())
+      );
+      if (userList.length > 0) return userList;
+    }
     if (Array.isArray(this.currentUser.withdrawals)) {
       return this.currentUser.withdrawals;
     }
@@ -1951,12 +2227,83 @@ class DatabaseService {
   // PRESALE & USDT DEPOSIT ENGINE
   // --------------------------------------------------------------------------
 
-  async processPresaleDeposit({ usdtAmount, method = 'web3', txHash = null, walletAddress = null }) {
-    if (!this.currentUser) {
-      return { success: false, message: 'Please sign in or create a passport to participate in the presale.' };
+  // --------------------------------------------------------------------------
+  // PRESALE & USDT DEPOSIT ENGINE (WITH DEX RECEIVING WALLET & SCREENSHOT PROOF)
+  // --------------------------------------------------------------------------
+
+  async fetchPresalePurchases() {
+    let list = [];
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('booba_presale_purchases')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && data) {
+          list = data.map(p => ({
+            id: p.id,
+            userId: p.user_id,
+            username: p.username,
+            passportId: p.passport_id,
+            senderWallet: p.sender_wallet || p.wallet_address || '',
+            receivingWallet: p.receiving_wallet || p.wallet_address || '',
+            usdtAmount: Number(p.usdt_amount) || 0,
+            baseTokens: Number(p.base_tokens) || 0,
+            bonusPercent: Number(p.bonus_percent) || 0,
+            bonusTokens: Number(p.bonus_tokens) || 0,
+            totalTokens: Number(p.total_tokens || p.booba_tokens) || 0,
+            proofScreenshot: p.proof_screenshot || '',
+            deliveryProofScreenshot: p.delivery_proof_screenshot || '',
+            adminNotes: p.admin_notes || '',
+            method: p.method || 'manual_proof',
+            txHash: p.tx_hash || '',
+            explorerUrl: p.explorer_url || (p.tx_hash ? `https://bscscan.com/tx/${p.tx_hash}` : ''),
+            notes: p.notes || '',
+            sentTxHash: p.sent_tx_hash || '',
+            sentAt: p.sent_at || null,
+            status: p.status || 'pending',
+            timestamp: p.created_at || new Date().toISOString()
+          }));
+        }
+      } catch (e) {
+        console.warn('fetchPresalePurchases Supabase error:', e);
+      }
     }
 
+    // Merge with local storage logs without duplicates
+    let localLogs = [];
+    try {
+      localLogs = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+    } catch (e) {}
+
+    const combined = [...list];
+    localLogs.forEach(loc => {
+      const existing = combined.find(p => p.id === loc.id || (loc.txHash && loc.txHash === p.txHash));
+      if (!existing) {
+        combined.push(loc);
+      } else {
+        // Prefer more updated status
+        if (loc.status && loc.status !== 'pending' && existing.status === 'pending') {
+          existing.status = loc.status;
+          existing.sentTxHash = loc.sentTxHash || existing.sentTxHash;
+          existing.sentAt = loc.sentAt || existing.sentAt;
+          existing.deliveryProofScreenshot = loc.deliveryProofScreenshot || existing.deliveryProofScreenshot;
+        }
+      }
+    });
+
+    this.presalePurchases = combined.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    return this.presalePurchases;
+  }
+
+  /**
+   * User Submits Presale Payment Form with Sender Wallet, DEX Receiving Wallet, and Screenshot Proof
+   */
+  async submitPresalePaymentForm({ senderWallet, receivingWallet, usdtAmount, proofScreenshot = '', txHash = '', notes = '' }) {
+    const user = this.currentUser;
     const usdt = Number(usdtAmount);
+
     if (isNaN(usdt) || usdt < PRESALE_CONFIG.minBuyUsdt) {
       return { success: false, message: `Minimum presale contribution is ${PRESALE_CONFIG.minBuyUsdt} USDT.` };
     }
@@ -1964,16 +2311,28 @@ class DatabaseService {
       return { success: false, message: `Maximum presale contribution is ${PRESALE_CONFIG.maxBuyUsdt} USDT per order.` };
     }
 
-    const calc = calculatePresaleTokens(usdt);
-    const finalTxHash = txHash || this.generateTxHash();
-    const cleanWallet = (walletAddress || this.currentUser.walletAddress || PRESALE_CONFIG.treasuryAddress).trim();
-    const now = new Date().toISOString();
+    const cleanSender = (senderWallet || user?.walletAddress || '').trim();
+    if (!cleanSender || cleanSender.length < 15) {
+      return { success: false, message: 'Please provide the valid wallet address that sent the USDT payment.' };
+    }
 
-    const purchaseReceipt = {
-      id: 'pre_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-      userId: this.currentUser.id,
-      username: this.currentUser.username,
-      passportId: this.currentUser.passportId,
+    const cleanReceiver = (receivingWallet || cleanSender).trim();
+    if (!cleanReceiver || cleanReceiver.length < 15) {
+      return { success: false, message: 'Please provide your DEX token receiving wallet address (e.g. Trust Wallet, MetaMask).' };
+    }
+
+    const calc = calculatePresaleTokens(usdt);
+    const orderId = 'pre_ord_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+    const now = new Date().toISOString();
+    const cleanTxHash = (txHash || '').trim();
+
+    const orderReceipt = {
+      id: orderId,
+      userId: user ? user.id : 'guest_' + cleanSender.slice(-6),
+      username: user ? user.username : ('Citizen_' + cleanReceiver.slice(-4)),
+      passportId: user ? user.passportId : ('BB-' + Math.floor(100000 + Math.random() * 900000)),
+      senderWallet: cleanSender,
+      receivingWallet: cleanReceiver,
       usdtAmount: usdt,
       baseTokens: calc.baseTokens,
       bonusPercent: calc.bonusPercent,
@@ -1981,62 +2340,67 @@ class DatabaseService {
       totalTokens: calc.totalTokens,
       tokenRate: PRESALE_CONFIG.baseRate,
       pricePerToken: PRESALE_CONFIG.stagePriceUsdt,
-      method: method, // 'web3' or 'manual'
-      txHash: finalTxHash,
-      walletAddress: cleanWallet,
-      treasuryAddress: PRESALE_CONFIG.treasuryAddress,
-      status: 'Confirmed',
-      timestamp: now,
-      explorerUrl: `https://bscscan.com/tx/${finalTxHash}`
+      proofScreenshot: proofScreenshot || '',
+      deliveryProofScreenshot: '',
+      adminNotes: '',
+      method: 'manual_proof',
+      txHash: cleanTxHash,
+      explorerUrl: cleanTxHash ? `https://bscscan.com/tx/${cleanTxHash}` : '',
+      notes: notes.trim(),
+      sentTxHash: '',
+      sentAt: null,
+      status: 'pending', // 'pending' | 'completed' | 'rejected'
+      timestamp: now
     };
 
-    // Update user's presale records & allocated balance
-    if (!Array.isArray(this.currentUser.presalePurchases)) {
-      this.currentUser.presalePurchases = [];
-    }
-    this.currentUser.presalePurchases.unshift(purchaseReceipt);
+    // Update in-memory presale purchases
+    this.presalePurchases.unshift(orderReceipt);
 
-    const currentAllocated = Number(this.currentUser.presaleTokensAllocated) || 0;
-    this.currentUser.presaleTokensAllocated = currentAllocated + calc.totalTokens;
-
-    // Bonus: Award 10% instant XP/Booba points to passport for gamified tier progression
-    const instantXpBonus = Math.floor(calc.totalTokens * 0.1);
-    this.currentUser.boobaPoints = (Number(this.currentUser.boobaPoints) || 0) + instantXpBonus;
-
-    // Update in user directory
-    const userInDir = this.users.find(u => u.id === this.currentUser.id || u.username === this.currentUser.username);
-    if (userInDir) {
-      userInDir.presaleTokensAllocated = this.currentUser.presaleTokensAllocated;
-      userInDir.boobaPoints = this.currentUser.boobaPoints;
-    }
-
-    this.saveLocalSession(this.currentUser);
-
-    // Save to global presale purchases log
+    // Save to local storage
     try {
       const globalPresale = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
-      globalPresale.unshift(purchaseReceipt);
-      localStorage.setItem('booba_global_presale_logs', JSON.stringify(globalPresale.slice(0, 100)));
+      globalPresale.unshift(orderReceipt);
+      localStorage.setItem('booba_global_presale_logs', JSON.stringify(globalPresale.slice(0, 200)));
     } catch (e) {}
 
-    // Persist to Supabase if connected
+    // Update current user session
+    if (this.currentUser) {
+      if (!Array.isArray(this.currentUser.presalePurchases)) {
+        this.currentUser.presalePurchases = [];
+      }
+      this.currentUser.presalePurchases.unshift(orderReceipt);
+      this.saveLocalSession(this.currentUser);
+    }
+
+    // Persist to Supabase
     if (supabase) {
       try {
         await supabase
           .from('booba_presale_purchases')
           .insert([{
-            user_id: this.currentUser.id,
-            username: this.currentUser.username,
+            id: orderId,
+            user_id: orderReceipt.userId,
+            username: orderReceipt.username,
+            passport_id: orderReceipt.passportId,
+            sender_wallet: cleanSender,
+            receiving_wallet: cleanReceiver,
             usdt_amount: usdt,
-            booba_tokens: calc.totalTokens,
-            tx_hash: finalTxHash,
-            method: method,
-            wallet_address: cleanWallet,
-            status: 'Confirmed',
+            base_tokens: calc.baseTokens,
+            bonus_percent: calc.bonusPercent,
+            bonus_tokens: calc.bonusTokens,
+            total_tokens: calc.totalTokens,
+            proof_screenshot: proofScreenshot || null,
+            delivery_proof_screenshot: null,
+            admin_notes: null,
+            method: 'manual_proof',
+            tx_hash: cleanTxHash || null,
+            explorer_url: cleanTxHash ? `https://bscscan.com/tx/${cleanTxHash}` : null,
+            notes: notes || null,
+            status: 'pending',
             created_at: now
           }]);
       } catch (err) {
-        console.warn('Supabase presale purchase sync notice:', err);
+        console.warn('Supabase presale payment insert notice:', err);
       }
     }
 
@@ -2044,33 +2408,189 @@ class DatabaseService {
 
     return {
       success: true,
-      receipt: purchaseReceipt,
+      order: orderReceipt,
       totalTokens: calc.totalTokens,
-      instantXpBonus,
-      txHash: finalTxHash
+      message: 'Presale payment proof submitted successfully!'
     };
   }
 
-  getUserPresalePurchases() {
-    if (!this.currentUser) return [];
-    if (Array.isArray(this.currentUser.presalePurchases)) {
-      return this.currentUser.presalePurchases;
+  /**
+   * Admin Dispatches Tokens, Uploads Verification Screenshot Proof, & Fulfills Presale Order
+   */
+  async adminFulfillPresaleOrder(orderId, { sentTxHash = '', adminNotes = '', deliveryProofScreenshot = '' }) {
+    let order = this.presalePurchases.find(p => p.id === orderId);
+    if (!order) {
+      let localLogs = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+      order = localLogs.find(p => p.id === orderId);
     }
-    return [];
+
+    if (!order) return { success: false, message: 'Order not found.' };
+
+    const dispatchTx = sentTxHash.trim();
+    const nowIso = new Date().toISOString();
+
+    order.status = 'completed';
+    order.sentTxHash = dispatchTx;
+    order.sentAt = nowIso;
+    if (deliveryProofScreenshot) order.deliveryProofScreenshot = deliveryProofScreenshot;
+    if (adminNotes) {
+      order.adminNotes = adminNotes;
+      order.notes = (order.notes ? order.notes + ' | ' : '') + 'Admin: ' + adminNotes;
+    }
+
+    // Update target user allocation & points if registered
+    const targetUser = this.users.find(u => u.id === order.userId || u.username === order.username || (u.walletAddress && u.walletAddress.toLowerCase() === order.receivingWallet.toLowerCase()));
+    if (targetUser) {
+      targetUser.presaleTokensAllocated = (Number(targetUser.presaleTokensAllocated) || 0) + order.totalTokens;
+      targetUser.boobaPoints = (Number(targetUser.boobaPoints) || 0) + order.totalTokens;
+      
+      if (this.currentUser && this.currentUser.id === targetUser.id) {
+        this.currentUser = { ...targetUser };
+        this.saveLocalSession(this.currentUser);
+      }
+    }
+
+    // Update global local storage
+    try {
+      const globalPresale = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+      const idx = globalPresale.findIndex(p => p.id === orderId);
+      if (idx !== -1) {
+        globalPresale[idx] = { ...globalPresale[idx], ...order };
+      } else {
+        globalPresale.unshift(order);
+      }
+      localStorage.setItem('booba_global_presale_logs', JSON.stringify(globalPresale));
+    } catch (e) {}
+
+    // Persist to Supabase
+    if (supabase) {
+      try {
+        await supabase
+          .from('booba_presale_purchases')
+          .update({
+            status: 'completed',
+            sent_tx_hash: dispatchTx || null,
+            sent_at: nowIso,
+            delivery_proof_screenshot: deliveryProofScreenshot || order.deliveryProofScreenshot || null,
+            admin_notes: adminNotes || order.adminNotes || null,
+            notes: order.notes
+          })
+          .eq('id', orderId);
+
+        if (targetUser && targetUser.id && !targetUser.id.startsWith('guest_')) {
+          await supabase
+            .from('booba_users')
+            .update({
+              booba_points: targetUser.boobaPoints
+            })
+            .eq('id', targetUser.id);
+        }
+      } catch (err) {
+        console.warn('Supabase presale fulfillment sync notice:', err);
+      }
+    }
+
+    this.notify();
+    return { success: true, order, sentTxHash: dispatchTx };
+  }
+
+  /**
+   * Admin Rejects Invalid Presale Submission
+   */
+  async adminRejectPresaleOrder(orderId, { reason = 'Invalid payment proof or unconfirmed transaction' }) {
+    const order = this.presalePurchases.find(p => p.id === orderId);
+    if (!order) return { success: false, message: 'Order not found.' };
+
+    order.status = 'rejected';
+    order.notes = (order.notes ? order.notes + ' | ' : '') + 'Rejected: ' + reason;
+
+    // Update global local storage
+    try {
+      const globalPresale = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+      const idx = globalPresale.findIndex(p => p.id === orderId);
+      if (idx !== -1) {
+        globalPresale[idx] = { ...globalPresale[idx], ...order };
+      }
+      localStorage.setItem('booba_global_presale_logs', JSON.stringify(globalPresale));
+    } catch (e) {}
+
+    // Persist to Supabase
+    if (supabase) {
+      try {
+        await supabase
+          .from('booba_presale_purchases')
+          .update({
+            status: 'rejected',
+            notes: order.notes
+          })
+          .eq('id', orderId);
+      } catch (err) {
+        console.warn('Supabase presale reject sync notice:', err);
+      }
+    }
+
+    this.notify();
+    return { success: true, order };
+  }
+
+  /**
+   * Admin Deletes Presale Order Record
+   */
+  async adminDeletePresaleOrder(orderId) {
+    this.presalePurchases = this.presalePurchases.filter(p => p.id !== orderId);
+
+    try {
+      let globalPresale = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+      globalPresale = globalPresale.filter(p => p.id !== orderId);
+      localStorage.setItem('booba_global_presale_logs', JSON.stringify(globalPresale));
+    } catch (e) {}
+
+    if (supabase) {
+      try {
+        await supabase.from('booba_presale_purchases').delete().eq('id', orderId);
+      } catch (err) {
+        console.warn('Supabase presale delete sync notice:', err);
+      }
+    }
+
+    this.notify();
+    return { success: true };
+  }
+
+  getUserPresalePurchases() {
+    if (!this.currentUser) {
+      // Return any purchases submitted in this browser session
+      try {
+        return JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    const uid = this.currentUser.id;
+    const uname = this.currentUser.username?.toLowerCase();
+    const uwallet = this.currentUser.walletAddress?.toLowerCase();
+
+    return this.presalePurchases.filter(p => 
+      (uid && p.userId === uid) ||
+      (uname && p.username?.toLowerCase() === uname) ||
+      (uwallet && p.receivingWallet && p.receivingWallet.toLowerCase() === uwallet) ||
+      (uwallet && p.senderWallet && p.senderWallet.toLowerCase() === uwallet)
+    );
   }
 
   getPresaleTelemetry() {
-    let globalPurchases = [];
-    try {
-      globalPurchases = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
-    } catch (e) {}
+    const list = this.presalePurchases || [];
+    const validPurchases = list.filter(p => p.status !== 'rejected');
 
-    const additionalUsdt = globalPurchases.reduce((acc, p) => acc + (Number(p.usdtAmount) || 0), 0);
-    const additionalTokens = globalPurchases.reduce((acc, p) => acc + (Number(p.totalTokens) || 0), 0);
+    const additionalUsdt = validPurchases.reduce((acc, p) => acc + (Number(p.usdtAmount) || 0), 0);
+    const additionalTokens = validPurchases.reduce((acc, p) => acc + (Number(p.totalTokens) || 0), 0);
 
     const totalUsdtRaised = PRESALE_CONFIG.initialRaisedUsdt + additionalUsdt;
     const progressPercent = Math.min(100, Math.round((totalUsdtRaised / PRESALE_CONFIG.hardCapUsdt) * 100));
-    const totalParticipants = 1420 + globalPurchases.length;
+    const totalParticipants = 1420 + validPurchases.length;
+    const pendingOrdersCount = list.filter(p => p.status === 'pending').length;
+    const completedOrdersCount = list.filter(p => p.status === 'completed').length;
 
     return {
       ...PRESALE_CONFIG,
@@ -2078,7 +2598,9 @@ class DatabaseService {
       totalTokensSold: Math.floor(totalUsdtRaised * PRESALE_CONFIG.baseRate) + additionalTokens,
       progressPercent,
       totalParticipants,
-      recentPurchases: globalPurchases
+      pendingOrdersCount,
+      completedOrdersCount,
+      recentPurchases: list
     };
   }
 
@@ -2128,15 +2650,20 @@ class DatabaseService {
       userId: targetUser ? targetUser.id : (walletAddress || 'custom_citizen'),
       username: targetUser ? targetUser.username : (walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Manual Citizen'),
       passportId: targetUser ? targetUser.passportId : 'BB-MANUAL',
+      senderWallet: 'Admin Allocation',
+      receivingWallet: walletAddress || (targetUser ? targetUser.walletAddress : '') || 'DEX Wallet',
       usdtAmount: Number(usdtAmount) || 0,
       baseTokens: tokensToCredit,
       bonusPercent: 0,
       bonusTokens: 0,
       totalTokens: tokensToCredit,
+      proofScreenshot: '',
       method: 'admin_allocation',
       txHash: txHash || ('0x' + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('')),
       explorerUrl: txHash ? `https://bscscan.com/tx/${txHash}` : null,
-      status: 'confirmed',
+      sentTxHash: txHash || '',
+      sentAt: new Date().toISOString(),
+      status: 'completed',
       notes: notes || 'Admin assigned allocation',
       timestamp: new Date().toISOString()
     };
@@ -2149,9 +2676,11 @@ class DatabaseService {
       
       if (this.currentUser && this.currentUser.id === targetUser.id) {
         this.currentUser = { ...targetUser };
+        this.saveLocalSession(this.currentUser);
       }
-      this.saveUsers();
     }
+
+    this.presalePurchases.unshift(receipt);
 
     // Save to global presale logs
     let globalPurchases = [];
@@ -2170,6 +2699,8 @@ class DatabaseService {
         user_id: receipt.userId,
         username: receipt.username,
         passport_id: receipt.passportId,
+        sender_wallet: receipt.senderWallet,
+        receiving_wallet: receipt.receivingWallet,
         usdt_amount: receipt.usdtAmount,
         base_tokens: receipt.baseTokens,
         bonus_percent: 0,
@@ -2178,7 +2709,9 @@ class DatabaseService {
         method: 'admin_allocation',
         tx_hash: receipt.txHash,
         explorer_url: receipt.explorerUrl,
-        status: 'confirmed'
+        sent_tx_hash: receipt.sentTxHash,
+        sent_at: receipt.sentAt,
+        status: 'completed'
       }).catch(err => console.warn('[Supabase] Presale admin insert error:', err));
     }
 

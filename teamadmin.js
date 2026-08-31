@@ -174,17 +174,35 @@ class TeamAdminApp {
       }
     });
 
-    // Update pending submissions badge in sidebar
-    const pendingCount = db.submissions.filter(s => s.status === 'pending').length;
-    const badge = document.getElementById('pendingSubmissionsBadge');
-    if (badge) {
-      badge.textContent = pendingCount;
-      badge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
+    // Update pending badges in sidebar
+    const pendingSubmissionsCount = (db.submissions || []).filter(s => s.status === 'pending').length;
+    const badgeSub = document.getElementById('pendingSubmissionsBadge');
+    if (badgeSub) {
+      badgeSub.textContent = pendingSubmissionsCount;
+      badgeSub.style.display = pendingSubmissionsCount > 0 ? 'inline-block' : 'none';
+    }
+
+    const pendingPresaleCount = (db.presalePurchases || []).filter(p => p.status === 'pending').length;
+    const badgePre = document.getElementById('pendingPresaleBadge');
+    if (badgePre) {
+      badgePre.textContent = pendingPresaleCount;
+      badgePre.style.display = pendingPresaleCount > 0 ? 'inline-block' : 'none';
+    }
+
+    const pendingWdCount = (db.withdrawals || []).filter(w => w.status === 'pending').length;
+    const badgeWd = document.getElementById('pendingWithdrawalsBadge');
+    if (badgeWd) {
+      badgeWd.textContent = pendingWdCount;
+      badgeWd.style.display = pendingWdCount > 0 ? 'inline-block' : 'none';
     }
 
     switch (this.activeTab) {
       case 'presale':
         this.renderPresaleTab(mainWorkspace);
+        break;
+      case 'withdrawals':
+      case 'withdraw':
+        this.renderWithdrawalsTab(mainWorkspace);
         break;
       case 'quests':
         this.renderQuestsTab(mainWorkspace);
@@ -361,6 +379,31 @@ class TeamAdminApp {
             <div class="metric-tile-sub">$BOOBA Points Total</div>
           </div>
 
+        </div>
+
+        <!-- Quick Navigation Panels: Presale & Withdrawals -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-bottom: 1.75rem;">
+          <div class="clean-panel" style="padding: 1.25rem; border: 1.5px solid rgba(243, 186, 47, 0.35); background: linear-gradient(135deg, rgba(243, 186, 47, 0.05) 0%, rgba(14, 18, 27, 0.9) 100%); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <div style="font-size: 0.72rem; color: var(--brand-yellow); font-weight: 800; text-transform: uppercase; margin-bottom: 0.2rem;">⚡ Presale Terminal</div>
+              <div style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF;">${(db.presalePurchases || []).filter(p => p.status === 'pending').length} Orders Pending Delivery</div>
+              <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.15rem;">$${db.getPresaleTelemetry().totalUsdtRaised.toLocaleString()} USDT Raised</div>
+            </div>
+            <button type="button" class="btn-admin btn-admin-primary btn-sm" onclick="window.adminApp.switchTab('presale')" style="font-weight: 800;">
+              Manage Presale →
+            </button>
+          </div>
+
+          <div class="clean-panel" style="padding: 1.25rem; border: 1.5px solid rgba(16, 185, 129, 0.35); background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(14, 18, 27, 0.9) 100%); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <div style="font-size: 0.72rem; color: var(--accent-emerald); font-weight: 800; text-transform: uppercase; margin-bottom: 0.2rem;">🏦 Token Withdrawals Bridge</div>
+              <div style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF;">${(db.withdrawals || []).filter(w => w.status === 'pending').length} Withdrawals Pending Delivery</div>
+              <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.15rem;">${(db.withdrawals || []).length} Total Requests</div>
+            </div>
+            <button type="button" class="btn-admin btn-admin-primary btn-sm" onclick="window.adminApp.switchTab('withdrawals')" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); font-weight: 800;">
+              Manage Withdrawals →
+            </button>
+          </div>
         </div>
 
         <!-- 2 Clean Side-by-Side Tables -->
@@ -1526,329 +1569,1085 @@ class TeamAdminApp {
   }
 
   // --------------------------------------------------------------------------
-  // PRESALE & BRIDGE AUDIT TAB (WITH DYNAMIC RATE CONTROLLER & ALLOCATION)
+  // PRESALE OPERATIONS & TREASURY TAB
   // --------------------------------------------------------------------------
 
   renderPresaleTab(container) {
     const telemetry = db.getPresaleTelemetry();
     const users = db.users || [];
-    let globalPurchases = [];
-    let globalWithdrawals = [];
-    try {
-      globalPurchases = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
-      globalWithdrawals = JSON.parse(localStorage.getItem('booba_global_withdrawals') || '[]');
-    } catch (e) {}
+    let presaleOrders = db.presalePurchases || [];
+
+    // Initialize presale filter if unset
+    if (!this.presaleFilter) this.presaleFilter = 'all';
+    if (!this.presaleSearchQuery) this.presaleSearchQuery = '';
+
+    // Apply Filter & Search
+    let filteredOrders = [...presaleOrders];
+    if (this.presaleFilter === 'pending') {
+      filteredOrders = filteredOrders.filter(p => p.status === 'pending');
+    } else if (this.presaleFilter === 'completed') {
+      filteredOrders = filteredOrders.filter(p => p.status === 'completed');
+    } else if (this.presaleFilter === 'rejected') {
+      filteredOrders = filteredOrders.filter(p => p.status === 'rejected');
+    }
+
+    if (this.presaleSearchQuery) {
+      const q = this.presaleSearchQuery.toLowerCase();
+      filteredOrders = filteredOrders.filter(p => 
+        (p.username && p.username.toLowerCase().includes(q)) ||
+        (p.passportId && p.passportId.toLowerCase().includes(q)) ||
+        (p.receivingWallet && p.receivingWallet.toLowerCase().includes(q)) ||
+        (p.senderWallet && p.senderWallet.toLowerCase().includes(q)) ||
+        (p.txHash && p.txHash.toLowerCase().includes(q))
+      );
+    }
+
+    const pendingCount = presaleOrders.filter(p => p.status === 'pending').length;
+    const completedCount = presaleOrders.filter(p => p.status === 'completed').length;
+    const rejectedCount = presaleOrders.filter(p => p.status === 'rejected').length;
 
     container.innerHTML = `
       <div class="admin-tab-pane active" id="pane-presale">
         
-        <!-- Tab Header -->
-        <div class="admin-view-header">
+        <!-- Header -->
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
           <div>
-            <h1 class="admin-view-title">Presale Rate & Allocation Center</h1>
-            <p class="admin-view-subtitle">Set how many $BOOBA tokens to give for any amount of USDT, configure live presale stages, and grant custom allocations.</p>
+            <h1 class="page-title" style="display: flex; align-items: center; gap: 0.6rem;">
+              <span>⚡ Presale Orders & Treasury</span>
+            </h1>
+            <p class="page-desc">Verify USDT payment receipts, 1-click copy buyer DEX receiving wallets (Trust Wallet / MetaMask), dispatch $BOOBA tokens, and manage treasury settings.</p>
           </div>
-          <div style="display: flex; gap: 0.5rem;">
-            <a href="presale.html" target="_blank" class="btn-admin btn-admin-primary btn-admin-sm">
+          <div style="display: flex; gap: 0.6rem; align-items: center;">
+            <a href="presale.html" target="_blank" class="btn-admin btn-admin-primary btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 800;">
               <span>View Presale dApp ↗</span>
             </a>
           </div>
         </div>
 
-        <!-- Telemetry Stat Grid -->
-        <div class="admin-stat-grid" style="margin-bottom: 2rem;">
-          <div class="admin-stat-card">
-            <div class="admin-stat-label">Active Presale Rate</div>
-            <div class="admin-stat-value" style="color: var(--brand-yellow); font-family: var(--font-mono);">
-              1 USDT = ${telemetry.baseRate} $BOOBA
+        <!-- 4 KPI Metric Cards -->
+        <div class="metrics-row" style="margin-bottom: 1.75rem;">
+          <div class="metric-tile">
+            <div class="metric-tile-header">
+              <span class="metric-tile-label">Pending Token Orders</span>
+              <div class="metric-tile-icon" style="color: var(--brand-yellow);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </div>
             </div>
-            <div class="admin-stat-meta" style="color: var(--accent-emerald);">Price: $${telemetry.stagePriceUsdt} / token</div>
+            <div class="metric-tile-value" style="color: var(--brand-yellow); font-weight: 900;">${pendingCount}</div>
+            <div class="metric-tile-sub" style="color: ${pendingCount > 0 ? 'var(--brand-yellow)' : 'var(--accent-emerald)'}; font-weight: 600;">
+              <span class="pulse-dot" style="width: 5px; height: 5px; background: ${pendingCount > 0 ? 'var(--brand-yellow)' : 'var(--accent-emerald)'};"></span>
+              ${pendingCount > 0 ? 'Requires Token Delivery' : 'All Orders Delivered'}
+            </div>
           </div>
 
-          <div class="admin-stat-card">
-            <div class="admin-stat-label">Total USDT Collected</div>
-            <div class="admin-stat-value" style="color: #26A17B; font-family: var(--font-mono);">$${telemetry.totalUsdtRaised.toLocaleString()}</div>
-            <div class="admin-stat-meta">Hard Cap: $${telemetry.hardCapUsdt.toLocaleString()} (${telemetry.progressPercent}%)</div>
+
+          <div class="metric-tile">
+            <div class="metric-tile-header">
+              <span class="metric-tile-label">Presale Exchange Rate</span>
+              <div class="metric-tile-icon" style="color: #818CF8;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+              </div>
+            </div>
+            <div class="metric-tile-value" style="color: #818CF8; font-size: 1.45rem; font-weight: 900;">1 USDT = ${telemetry.baseRate}</div>
+            <div class="metric-tile-sub" style="color: var(--text-secondary);">
+              Price: $${telemetry.stagePriceUsdt} / token
+            </div>
           </div>
 
-          <div class="admin-stat-card">
-            <div class="admin-stat-label">Total Presale Orders</div>
-            <div class="admin-stat-value" style="color: #818CF8; font-family: var(--font-mono);">${telemetry.totalParticipants.toLocaleString()}</div>
-            <div class="admin-stat-meta">${globalPurchases.length} logged locally</div>
-          </div>
-
-          <div class="admin-stat-card">
-            <div class="admin-stat-label">On-Chain Withdrawals</div>
-            <div class="admin-stat-value" style="color: var(--accent-emerald); font-family: var(--font-mono);">${globalWithdrawals.length}</div>
-            <div class="admin-stat-meta">BNB Smart Chain (BEP-20)</div>
+          <div class="metric-tile">
+            <div class="metric-tile-header">
+              <span class="metric-tile-label">Total Presale Orders</span>
+              <div class="metric-tile-icon" style="color: var(--accent-emerald);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+              </div>
+            </div>
+            <div class="metric-tile-value" style="color: #FFFFFF; font-weight: 900;">${presaleOrders.length}</div>
+            <div class="metric-tile-sub" style="color: var(--text-secondary);">
+              ${completedCount} Delivered • ${rejectedCount} Rejected
+            </div>
           </div>
         </div>
 
-        <!-- 2-COLUMN ADMIN MANAGERS GRID -->
-        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.75rem; margin-bottom: 2.5rem;">
+        <!-- 1. PRESALE TREASURY WALLET CONTROLLER -->
+        <div style="background: rgba(20, 26, 38, 0.95); border: 1.5px solid rgba(243, 186, 47, 0.35); border-radius: 16px; padding: 1.15rem 1.35rem; margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+          <div style="display: flex; align-items: center; gap: 0.85rem; min-width: 0;">
+            <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(243,186,47,0.15); border: 1.5px solid rgba(243,186,47,0.4); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow); flex-shrink: 0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M7 15h0M2 9.5h20"></path></svg>
+            </div>
+            <div style="min-width: 0;">
+              <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.15rem;">
+                Official Presale USDT Treasury Wallet:
+              </div>
+              <div class="text-mono" style="font-size: 0.95rem; font-weight: 800; color: var(--brand-yellow); word-break: break-all;">
+                ${telemetry.treasuryAddress || '<span style="color: var(--accent-ruby);">No Treasury Wallet Added</span>'}
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            ${telemetry.treasuryAddress ? `
+              <button type="button" class="btn-admin btn-admin-secondary btn-sm" onclick="window.adminApp.copyToClipboard('${telemetry.treasuryAddress}', 'Treasury Wallet')" style="font-weight: 800; padding: 0.5rem 0.85rem;">
+                📋 Copy
+              </button>
+              <button type="button" class="btn-admin btn-admin-primary btn-sm" onclick="window.adminApp.openTreasuryWalletModal()" style="font-weight: 900; background: linear-gradient(135deg, #F3BA2F 0%, #E2A016 100%); color: #000; padding: 0.5rem 1.15rem;">
+                ✏️ Change Wallet
+              </button>
+            ` : `
+              <button type="button" class="btn-admin btn-admin-primary btn-sm" onclick="window.adminApp.openTreasuryWalletModal()" style="font-weight: 900; background: linear-gradient(135deg, #F3BA2F 0%, #E2A016 100%); color: #000; padding: 0.5rem 1.25rem;">
+                ➕ Add Treasury Wallet
+              </button>
+            `}
+          </div>
+        </div>
+
+        <!-- 2. PRIMARY PRESALE ORDERS & FULFILLMENT TABLE -->
+        <div class="clean-panel" style="margin-bottom: 1.75rem;">
           
-          <!-- CARD 1: PRESALE EXCHANGE RATE & STAGE CONFIGURATOR -->
-          <div class="admin-card" style="padding: 1.75rem;">
-            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--admin-border);">
-              <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(243,186,47,0.15); border: 1px solid rgba(243,186,47,0.35); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-              </div>
-              <div>
-                <h3 class="admin-card-title" style="margin: 0;">Presale Exchange Rate Manager</h3>
-                <div style="font-size: 0.74rem; color: var(--text-secondary);">Set token exchange ratios for all buyers</div>
-              </div>
-            </div>
-
-            <form id="adminPresaleConfigForm" onsubmit="window.adminApp.handleSavePresaleConfig(event)">
-              
-              <!-- Core Rate Input -->
-              <div class="form-field" style="margin-bottom: 1.15rem;">
-                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
-                  <label class="form-field-label" style="margin: 0; color: var(--brand-yellow); font-weight: 800;">
-                    $BOOBA Tokens Given per 1 USDT
-                  </label>
-                  <span style="font-size: 0.72rem; color: var(--text-secondary); font-family: var(--font-mono);">
-                    e.g. 200 = ($0.005 / token)
-                  </span>
-                </div>
-                <input type="number" id="adminPresaleRateInput" class="admin-input text-mono" value="${telemetry.baseRate}" min="1" required style="font-size: 1.1rem; font-weight: 800; color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4);">
-              </div>
-
-              <!-- Stage Title & Price per Token -->
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1.15rem;">
-                <div class="form-field">
-                  <label class="form-field-label">Stage Name</label>
-                  <input type="text" id="adminPresaleStageNameInput" class="admin-input" value="${telemetry.stageName || 'Stage 1: Early Bird Alpha'}" required>
-                </div>
-                <div class="form-field">
-                  <label class="form-field-label">Price / Token (USDT)</label>
-                  <input type="number" step="0.0001" id="adminPresalePriceInput" class="admin-input text-mono" value="${telemetry.stagePriceUsdt || 0.005}" required>
-                </div>
-              </div>
-
-              <!-- Min / Max Limits & Hard Cap -->
-              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.65rem; margin-bottom: 1.15rem;">
-                <div class="form-field">
-                  <label class="form-field-label">Min Buy (USDT)</label>
-                  <input type="number" id="adminPresaleMinBuyInput" class="admin-input text-mono" value="${telemetry.minBuyUsdt || 10}" required>
-                </div>
-                <div class="form-field">
-                  <label class="form-field-label">Max Buy (USDT)</label>
-                  <input type="number" id="adminPresaleMaxBuyInput" class="admin-input text-mono" value="${telemetry.maxBuyUsdt || 10000}" required>
-                </div>
-                <div class="form-field">
-                  <label class="form-field-label">Hard Cap (USDT)</label>
-                  <input type="number" id="adminPresaleHardCapInput" class="admin-input text-mono" value="${telemetry.hardCapUsdt || 250000}" required>
-                </div>
-              </div>
-
-              <!-- Treasury Receiving Wallet -->
-              <div class="form-field" style="margin-bottom: 1.5rem;">
-                <label class="form-field-label">Presale Treasury Receiving Address (BEP-20)</label>
-                <input type="text" id="adminPresaleTreasuryInput" class="admin-input text-mono" value="${telemetry.treasuryAddress}" required style="font-size: 0.8rem;">
-              </div>
-
-              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; justify-content: center; font-weight: 800; padding: 0.75rem;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Save & Apply Presale Settings</span>
-              </button>
-
-            </form>
-          </div>
-
-          <!-- CARD 2: DIRECT USER ALLOCATION BY USDT CALCULATOR -->
-          <div class="admin-card" style="padding: 1.75rem;">
-            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--admin-border);">
-              <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); display: flex; align-items: center; justify-content: center; color: var(--accent-emerald);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line></svg>
-              </div>
-              <div>
-                <h3 class="admin-card-title" style="margin: 0;">Direct $BOOBA Allocation Tool</h3>
-                <div style="font-size: 0.74rem; color: var(--text-secondary);">Give any amount of $BOOBA for any amount of USDT</div>
-              </div>
-            </div>
-
-            <form id="adminCreditPresaleForm" onsubmit="window.adminApp.handleAdminCreditPresaleTokens(event)">
-              
-              <!-- Select Target User -->
-              <div class="form-field" style="margin-bottom: 1.15rem;">
-                <label class="form-field-label">Select Recipient Citizen / Passport</label>
-                <select id="adminAllocUserSelect" class="admin-input" style="font-size: 0.85rem;">
-                  <option value="">-- Choose Registered Citizen --</option>
-                  ${users.map(u => `
-                    <option value="${u.id}">${u.username} (${u.passportId}) — ${u.walletAddress ? u.walletAddress.slice(0, 8) + '...' : 'No Wallet'}</option>
-                  `).join('')}
-                </select>
-              </div>
-
-              <!-- Or Custom Wallet Address -->
-              <div class="form-field" style="margin-bottom: 1.15rem;">
-                <label class="form-field-label">Or Enter Destination BEP-20 Wallet Address</label>
-                <input type="text" id="adminAllocWalletInput" class="admin-input text-mono" placeholder="0x... Recipient Wallet (if not chosen from list)">
-              </div>
-
-              <!-- USDT Paid + Calculated $BOOBA Allocation (Editable) -->
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1.15rem;">
-                <div class="form-field">
-                  <label class="form-field-label">USDT Paid ($)</label>
-                  <input type="number" id="adminAllocUsdtInput" class="admin-input text-mono" placeholder="100" min="0" oninput="window.adminApp.handlePresaleAdminUsdtInput(this.value)" required>
-                </div>
-                <div class="form-field">
-                  <label class="form-field-label" style="color: var(--brand-yellow); font-weight: 800;">$BOOBA to Give</label>
-                  <input type="number" id="adminAllocTokensInput" class="admin-input text-mono" placeholder="20000" min="1" required style="font-weight: 800; color: var(--brand-yellow);">
-                </div>
-              </div>
-
-              <!-- Optional Tx Hash -->
-              <div class="form-field" style="margin-bottom: 1.5rem;">
-                <label class="form-field-label">BSC Transaction Hash (Optional)</label>
-                <input type="text" id="adminAllocTxHashInput" class="admin-input text-mono" placeholder="0x... BSC TxID">
-              </div>
-
-              <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; justify-content: center; font-weight: 800; padding: 0.75rem; background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Credit $BOOBA Tokens to User</span>
-              </button>
-
-            </form>
-          </div>
-
-        </div>
-
-        <!-- SECTION 1: PRESALE ORDERS TABLE -->
-        <div class="admin-card" style="margin-bottom: 2rem;">
-          <div class="admin-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="clean-panel-header" style="flex-wrap: wrap; gap: 0.85rem; padding: 1.15rem 1.25rem;">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
               <span class="pulse-dot" style="width: 7px; height: 7px; background: var(--brand-yellow);"></span>
-              <h3 class="admin-card-title" style="margin: 0;">Presale USDT Deposit Transactions</h3>
+              <h3 class="clean-panel-title" style="margin: 0; font-size: 1.05rem;">
+                Presale Payment Orders & Token Dispatch
+              </h3>
             </div>
-            <span class="badge-tag" style="background: rgba(243,186,47,0.15); color: var(--brand-yellow); font-size: 0.72rem;">
-              ${globalPurchases.length} Logged
-            </span>
+
+            <!-- Segmented Filter Controls -->
+            <div class="segmented-nav" style="margin-bottom: 0;">
+              <button type="button" class="segmented-btn ${this.presaleFilter === 'all' ? 'active' : ''}" onclick="window.adminApp.handlePresaleFilterChange('all')">
+                All (${presaleOrders.length})
+              </button>
+              <button type="button" class="segmented-btn ${this.presaleFilter === 'pending' ? 'active' : ''}" onclick="window.adminApp.handlePresaleFilterChange('pending')" style="${pendingCount > 0 ? 'color: var(--brand-yellow); font-weight: 800;' : ''}">
+                Pending (${pendingCount})
+              </button>
+              <button type="button" class="segmented-btn ${this.presaleFilter === 'completed' ? 'active' : ''}" onclick="window.adminApp.handlePresaleFilterChange('completed')">
+                Delivered (${completedCount})
+              </button>
+              <button type="button" class="segmented-btn ${this.presaleFilter === 'rejected' ? 'active' : ''}" onclick="window.adminApp.handlePresaleFilterChange('rejected')">
+                Rejected (${rejectedCount})
+              </button>
+            </div>
           </div>
 
-          <div style="padding: 1.25rem;">
-            ${globalPurchases.length === 0 ? `
-              <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary); font-size: 0.85rem;">
-                No presale deposit transactions recorded yet.
+          <!-- Search Bar -->
+          <div style="padding: 0.85rem 1.25rem 0.4rem 1.25rem;">
+            <div style="position: relative;">
+              <input type="text" class="admin-input" placeholder="Search citizen, passport, DEX wallet, or TxID..." value="${this.presaleSearchQuery}" oninput="window.adminApp.handlePresaleSearch(this.value)" style="border-radius: 8px; font-size: 0.82rem; height: 38px; padding-left: 2.2rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+          </div>
+
+          <!-- Desktop Table View -->
+          <div class="table-scroll-container admin-desktop-only" style="padding: 0 0.5rem 0.85rem 0.5rem;">
+            ${filteredOrders.length === 0 ? `
+              <div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary); font-size: 0.85rem;">
+                No presale orders match your filter.
               </div>
             ` : `
-              <div style="overflow-x: auto;">
-                <table class="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>User / Passport</th>
-                      <th>USDT Paid</th>
-                      <th>$BOOBA Tokens</th>
-                      <th>Method</th>
-                      <th>Tx Hash</th>
-                      <th style="text-align: right;">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${globalPurchases.map(p => `
-                      <tr>
-                        <td style="color: var(--text-secondary); white-space: nowrap; font-size: 0.8rem;">
-                          ${new Date(p.timestamp).toLocaleString()}
-                        </td>
-                        <td style="font-weight: 700; color: #FFFFFF;">
-                          ${p.username || 'Citizen'} ${p.passportId ? `<span style="font-size: 0.72rem; color: var(--text-muted);">(${p.passportId})</span>` : ''}
-                        </td>
-                        <td style="font-weight: 800; color: #26A17B; font-family: var(--font-mono);">
-                          $${Number(p.usdtAmount).toLocaleString()} USDT
-                        </td>
-                        <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">
-                          ${Number(p.totalTokens).toLocaleString()} $BOOBA
-                        </td>
-                        <td style="text-transform: uppercase; font-size: 0.72rem; color: var(--text-secondary);">
-                          ${p.method === 'web3' ? 'Web3 Direct' : (p.method === 'admin_allocation' ? 'Admin Grant' : 'Treasury')}
-                        </td>
-                        <td style="font-family: var(--font-mono); font-size: 0.78rem;">
-                          <a href="${p.explorerUrl || `https://bscscan.com/tx/${p.txHash}`}" target="_blank" rel="noopener noreferrer" style="color: var(--brand-yellow); text-decoration: none;">
-                            ${p.txHash.slice(0, 8)}...${p.txHash.slice(-6)} ↗
-                          </a>
-                        </td>
-                        <td style="text-align: right;">
-                          <span class="admin-badge-live" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 6px;">
-                            ${p.status || 'Confirmed'}
+              <table class="clean-table">
+                <thead>
+                  <tr>
+                    <th>Time & Citizen</th>
+                    <th>USDT Paid</th>
+                    <th>$BOOBA to Send</th>
+                    <th style="min-width: 230px;">DEX Receiving Wallet (Trust Wallet)</th>
+                    <th style="text-align: center;">Proof Receipts</th>
+                    <th>Status</th>
+                    <th style="text-align: right; min-width: 130px;">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${filteredOrders.map(p => `
+                    <tr style="${p.status === 'pending' ? 'background: rgba(243, 186, 47, 0.025);' : ''}">
+                      
+                      <!-- Time & Citizen -->
+                      <td>
+                        <div style="font-weight: 800; color: #FFFFFF; font-size: 0.85rem;">
+                          ${p.username || 'Citizen'}
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                          ${p.passportId ? `<span class="text-mono" style="color: var(--brand-yellow); font-weight: 700;">${p.passportId}</span> • ` : ''}${new Date(p.timestamp).toLocaleDateString()}
+                        </div>
+                      </td>
+
+                      <!-- USDT Paid -->
+                      <td>
+                        <div style="font-weight: 900; color: #26A17B; font-family: var(--font-mono); font-size: 0.95rem;">
+                          $${Number(p.usdtAmount).toLocaleString()}
+                        </div>
+                        <div style="font-size: 0.68rem; color: var(--text-muted);">USDT</div>
+                      </td>
+
+                      <!-- $BOOBA to Send -->
+                      <td>
+                        <div style="font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); font-size: 1.05rem;">
+                          ${Number(p.totalTokens).toLocaleString()}
+                        </div>
+                        <div style="font-size: 0.68rem; color: var(--text-muted);">$BOOBA</div>
+                      </td>
+
+                      <!-- DEX Receiving Wallet with 1-Click Copy -->
+                      <td>
+                        <div class="dex-wallet-pill">
+                          <span class="text-mono" style="color: var(--brand-yellow); font-size: 0.76rem; font-weight: 700; flex: 1; word-break: break-all;">
+                            ${p.receivingWallet || p.walletAddress || 'No Address'}
                           </span>
-                        </td>
-                      </tr>
-                    `).join('')}
-                  </tbody>
-                </table>
-              </div>
+                          <button type="button" class="btn-admin btn-admin-primary btn-admin-xs" onclick="window.adminApp.copyToClipboard('${p.receivingWallet || p.walletAddress}', 'DEX Wallet')" style="font-size: 0.7rem; padding: 0.25rem 0.55rem; white-space: nowrap; font-weight: 800;" title="Copy DEX wallet address">
+                            📋 Copy
+                          </button>
+                        </div>
+                      </td>
+
+                      <!-- Payment Screenshot & Delivery Proof -->
+                      <td style="text-align: center;">
+                        <div style="display: inline-flex; gap: 0.35rem; align-items: center; justify-content: center;">
+                          ${p.proofScreenshot ? `
+                            <button type="button" class="proof-thumbnail-btn" onclick="window.adminApp.openProofLightbox('${p.proofScreenshot}', 'Buyer Payment Receipt', 'Paid by ${p.username} • $${Number(p.usdtAmount).toLocaleString()} USDT')" title="View buyer's payment receipt">
+                              <img src="${p.proofScreenshot}" alt="Payment Proof" class="proof-thumbnail-img">
+                              <span style="font-size: 0.65rem; color: var(--brand-yellow); font-weight: 700;">Buyer</span>
+                            </button>
+                          ` : `
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">No Receipt</span>
+                          `}
+
+                          ${p.deliveryProofScreenshot ? `
+                            <button type="button" class="proof-thumbnail-btn" onclick="window.adminApp.openProofLightbox('${p.deliveryProofScreenshot}', 'Admin Delivery Verification Proof', 'Tokens sent to ${p.receivingWallet}')" style="border-color: rgba(16, 185, 129, 0.5);" title="View admin's delivery proof">
+                              <img src="${p.deliveryProofScreenshot}" alt="Delivery Proof" class="proof-thumbnail-img" style="border-color: var(--accent-emerald);">
+                              <span style="font-size: 0.65rem; color: var(--accent-emerald); font-weight: 800;">Admin</span>
+                            </button>
+                          ` : ''}
+                        </div>
+                      </td>
+
+                      <!-- Status Badge -->
+                      <td>
+                        ${p.status === 'completed' ? `
+                          <span class="badge-clean badge-clean-green" style="font-size: 0.72rem; padding: 0.25rem 0.55rem;">
+                            ✓ Delivered
+                          </span>
+                        ` : p.status === 'rejected' ? `
+                          <span class="badge-clean badge-clean-red" style="font-size: 0.72rem; padding: 0.25rem 0.55rem;">
+                            ✕ Rejected
+                          </span>
+                        ` : `
+                          <span class="badge-clean badge-clean-yellow" style="font-size: 0.72rem; padding: 0.25rem 0.55rem;">
+                            <span class="pulse-dot" style="width: 5px; height: 5px; background: var(--brand-yellow);"></span>
+                            Pending
+                          </span>
+                        `}
+                      </td>
+
+                      <!-- Admin Actions -->
+                      <td style="text-align: right;">
+                        <div style="display: flex; gap: 0.35rem; justify-content: flex-end;">
+                          ${p.status === 'pending' ? `
+                            <button type="button" class="btn-admin btn-admin-primary btn-admin-xs" onclick="window.adminApp.openFulfillPresaleModal('${p.id}')" style="font-weight: 900; background: linear-gradient(135deg, #10B981 0%, #059669 100%); padding: 0.35rem 0.65rem;" title="Send tokens, upload screenshot proof, and fulfill">
+                              🚀 Deliver & Proof
+                            </button>
+                            <button type="button" class="btn-admin btn-admin-secondary btn-admin-xs" onclick="window.adminApp.handleRejectPresaleOrder('${p.id}')" style="color: var(--accent-ruby); padding: 0.35rem 0.5rem;" title="Reject submission">
+                              ✕
+                            </button>
+                          ` : `
+                            <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="window.adminApp.openFulfillPresaleModal('${p.id}')" style="font-size: 0.72rem; padding: 0.25rem 0.5rem;">
+                              Edit
+                            </button>
+                            <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="window.adminApp.handleDeletePresaleOrder('${p.id}')" style="color: var(--text-muted); font-size: 0.72rem; padding: 0.25rem 0.4rem;" title="Delete record">
+                              🗑
+                            </button>
+                          `}
+                        </div>
+                      </td>
+
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
             `}
           </div>
+
+          <!-- Mobile Cards View -->
+          <div class="mobile-card-list admin-mobile-only" style="padding: 0.75rem;">
+            ${filteredOrders.length === 0 ? `
+              <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary); font-size: 0.85rem;">
+                No presale submissions found.
+              </div>
+            ` : filteredOrders.map(p => `
+              <div class="mobile-submission-card" style="${p.status === 'pending' ? 'border-color: rgba(243,186,47,0.35); background: rgba(243,186,47,0.02);' : ''}">
+                <div class="mobile-card-header">
+                  <div>
+                    <div class="mobile-card-title">${p.username || 'Citizen'}</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                      ${p.passportId ? `<span class="text-mono" style="color: var(--brand-yellow); font-weight: 700;">${p.passportId}</span> • ` : ''}${new Date(p.timestamp).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <div>
+                    ${p.status === 'completed' ? `
+                      <span class="badge-clean badge-clean-green">✓ Delivered</span>
+                    ` : p.status === 'rejected' ? `
+                      <span class="badge-clean badge-clean-red">✕ Rejected</span>
+                    ` : `
+                      <span class="badge-clean badge-clean-yellow">🟡 Pending</span>
+                    `}
+                  </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: baseline; background: rgba(0,0,0,0.35); border-radius: 8px; padding: 0.55rem 0.75rem;">
+                  <div>
+                    <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">USDT Paid</div>
+                    <div style="font-weight: 900; color: #26A17B; font-family: var(--font-mono); font-size: 1.05rem;">
+                      $${Number(p.usdtAmount).toLocaleString()}
+                    </div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Tokens to Send</div>
+                    <div style="font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); font-size: 1.1rem;">
+                      ${Number(p.totalTokens).toLocaleString()} <span style="font-size: 0.72rem;">$BOOBA</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- DEX Receiving Wallet Box -->
+                <div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(243,186,47,0.25); border-radius: 8px; padding: 0.55rem 0.75rem;">
+                  <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 0.2rem;">
+                    DEX Receiving Wallet (Trust Wallet):
+                  </div>
+                  <div class="text-mono" style="font-size: 0.78rem; font-weight: 800; color: var(--brand-yellow); word-break: break-all; margin-bottom: 0.35rem;">
+                    ${p.receivingWallet || p.walletAddress || 'No Address'}
+                  </div>
+                  <button type="button" class="btn-admin btn-admin-primary btn-admin-xs" onclick="window.adminApp.copyToClipboard('${p.receivingWallet || p.walletAddress}', 'DEX Wallet')" style="width: 100%; font-weight: 800; justify-content: center;">
+                    📋 Copy DEX Wallet
+                  </button>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.35rem; border-top: 1px solid var(--admin-border-subtle); flex-wrap: wrap; gap: 0.4rem;">
+                  <div style="display: flex; gap: 0.35rem;">
+                    ${p.proofScreenshot ? `
+                      <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="window.adminApp.openProofLightbox('${p.proofScreenshot}', 'Buyer Receipt', '${p.username}')" style="color: var(--brand-yellow); font-weight: 700;">
+                        📷 Buyer Proof
+                      </button>
+                    ` : ''}
+                    ${p.deliveryProofScreenshot ? `
+                      <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="window.adminApp.openProofLightbox('${p.deliveryProofScreenshot}', 'Delivery Proof', 'Sent to ${p.receivingWallet}')" style="color: var(--accent-emerald); font-weight: 700;">
+                        ✓ Sent Proof
+                      </button>
+                    ` : ''}
+                  </div>
+
+                  <div style="display: flex; gap: 0.35rem;">
+                    ${p.status === 'pending' ? `
+                      <button type="button" class="btn-admin btn-admin-primary btn-admin-xs" onclick="window.adminApp.openFulfillPresaleModal('${p.id}')" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); font-weight: 800;">
+                        🚀 Deliver & Proof
+                      </button>
+                      <button type="button" class="btn-admin btn-admin-secondary btn-admin-xs" onclick="window.adminApp.handleRejectPresaleOrder('${p.id}')" style="color: var(--accent-ruby);">
+                        ✕
+                      </button>
+                    ` : `
+                      <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="window.adminApp.openFulfillPresaleModal('${p.id}')">
+                        Edit
+                      </button>
+                    `}
+                  </div>
+                </div>
+
+              </div>
+            `).join('')}
+          </div>
+
         </div>
 
-        <!-- SECTION 2: WITHDRAWAL BRIDGE LOGS TABLE -->
-        <div class="admin-card">
-          <div class="admin-card-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span class="pulse-dot" style="width: 7px; height: 7px; background: var(--accent-emerald);"></span>
-              <h3 class="admin-card-title" style="margin: 0;">On-Chain $BOOBA Withdrawal Bridge Logs</h3>
+        <!-- 3. COMPACT PRESALE EXCHANGE RATE & LIMITS CONFIGURATOR -->
+        <div class="clean-panel" style="padding: 1.5rem; margin-bottom: 2rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.15rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--admin-border-subtle);">
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(243,186,47,0.15); border: 1px solid rgba(243,186,47,0.35); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
             </div>
-            <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); font-size: 0.72rem;">
-              ${globalWithdrawals.length} Dispatched
-            </span>
+            <div>
+              <h3 class="clean-panel-title" style="margin: 0;">Presale Pricing & Limit Settings</h3>
+              <div style="font-size: 0.72rem; color: var(--text-secondary);">Set token exchange ratios and hard caps for presale rounds</div>
+            </div>
           </div>
 
-          <div style="padding: 1.25rem;">
-            ${globalWithdrawals.length === 0 ? `
-              <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary); font-size: 0.85rem;">
-                No user token withdrawals recorded yet.
+          <form id="adminPresaleConfigForm" onsubmit="window.adminApp.handleSavePresaleConfig(event)">
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+              
+              <div class="form-field">
+                <label class="form-field-label" style="color: var(--brand-yellow); font-weight: 800;">
+                  Tokens / 1 USDT ($BOOBA)
+                </label>
+                <input type="number" id="adminPresaleRateInput" class="admin-input text-mono" value="${telemetry.baseRate}" min="1" required style="font-weight: 800; color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); height: 40px;">
               </div>
-            ` : `
-              <div style="overflow-x: auto;">
-                <table class="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>User</th>
-                      <th>Amount</th>
-                      <th>Destination BEP-20 Wallet</th>
-                      <th>Tx Hash</th>
-                      <th style="text-align: right;">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${globalWithdrawals.map(w => `
-                      <tr>
-                        <td style="color: var(--text-secondary); white-space: nowrap; font-size: 0.8rem;">
-                          ${new Date(w.timestamp).toLocaleString()}
-                        </td>
-                        <td style="font-weight: 700; color: #FFFFFF;">
-                          ${w.username || 'Citizen'}
-                        </td>
-                        <td style="font-weight: 800; color: var(--brand-yellow); font-family: var(--font-mono);">
-                          ${Number(w.amount).toLocaleString()} $BOOBA
-                        </td>
-                        <td style="font-family: var(--font-mono); font-size: 0.78rem; color: #FFFFFF;">
-                          ${w.walletAddress.slice(0, 6)}...${w.walletAddress.slice(-4)}
-                        </td>
-                        <td style="font-family: var(--font-mono); font-size: 0.78rem;">
-                          <a href="${w.explorerUrl || `https://bscscan.com/tx/${w.txHash}`}" target="_blank" rel="noopener noreferrer" style="color: var(--brand-yellow); text-decoration: none;">
-                            ${w.txHash.slice(0, 8)}...${w.txHash.slice(-6)} ↗
-                          </a>
-                        </td>
-                        <td style="text-align: right;">
-                          <span class="admin-badge-live" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 6px;">
-                            ${w.status || 'Completed'}
-                          </span>
-                        </td>
-                      </tr>
-                    `).join('')}
-                  </tbody>
-                </table>
+
+              <div class="form-field">
+                <label class="form-field-label">Stage Title</label>
+                <input type="text" id="adminPresaleStageNameInput" class="admin-input" value="${telemetry.stageName || 'Stage 1: Early Bird Alpha'}" required style="height: 40px;">
               </div>
-            `}
-          </div>
+
+              <div class="form-field">
+                <label class="form-field-label">Token Price (USDT)</label>
+                <input type="number" step="0.0001" id="adminPresalePriceInput" class="admin-input text-mono" value="${telemetry.stagePriceUsdt || 0.005}" required style="height: 40px;">
+              </div>
+
+              <div class="form-field">
+                <label class="form-field-label">Min Buy (USDT)</label>
+                <input type="number" id="adminPresaleMinBuyInput" class="admin-input text-mono" value="${telemetry.minBuyUsdt || 10}" required style="height: 40px;">
+              </div>
+
+              <div class="form-field">
+                <label class="form-field-label">Max Buy (USDT)</label>
+                <input type="number" id="adminPresaleMaxBuyInput" class="admin-input text-mono" value="${telemetry.maxBuyUsdt || 10000}" required style="height: 40px;">
+              </div>
+
+              <div class="form-field">
+                <label class="form-field-label">Hard Cap (USDT)</label>
+                <input type="number" id="adminPresaleHardCapInput" class="admin-input text-mono" value="${telemetry.hardCapUsdt || 250000}" required style="height: 40px;">
+              </div>
+
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+              <button type="submit" class="btn-admin btn-admin-primary btn-sm" style="font-weight: 800; padding: 0.6rem 1.5rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Save Presale Pricing Settings</span>
+              </button>
+            </div>
+
+          </form>
         </div>
 
       </div>
     `;
+  }
+
+  // --------------------------------------------------------------------------
+  // TOKEN WITHDRAWALS & BRIDGE TAB (DEDICATED SECTION)
+  // --------------------------------------------------------------------------
+
+  renderWithdrawalsTab(container) {
+    let withdrawals = db.withdrawals || [];
+    
+    if (!this.withdrawalFilter) this.withdrawalFilter = 'all';
+    if (!this.withdrawalSearchQuery) this.withdrawalSearchQuery = '';
+
+    let filtered = [...withdrawals];
+    if (this.withdrawalFilter === 'pending') {
+      filtered = filtered.filter(w => w.status === 'pending');
+    } else if (this.withdrawalFilter === 'completed') {
+      filtered = filtered.filter(w => w.status === 'completed' || w.status === 'Completed');
+    } else if (this.withdrawalFilter === 'rejected') {
+      filtered = filtered.filter(w => w.status === 'rejected');
+    }
+
+    if (this.withdrawalSearchQuery) {
+      const q = this.withdrawalSearchQuery.toLowerCase();
+      filtered = filtered.filter(w => 
+        (w.username && w.username.toLowerCase().includes(q)) ||
+        (w.passportId && w.passportId.toLowerCase().includes(q)) ||
+        (w.walletAddress && w.walletAddress.toLowerCase().includes(q)) ||
+        (w.sentTxHash && w.sentTxHash.toLowerCase().includes(q)) ||
+        (w.txHash && w.txHash.toLowerCase().includes(q))
+      );
+    }
+
+    const pendingCount = withdrawals.filter(w => w.status === 'pending').length;
+    const completedCount = withdrawals.filter(w => w.status === 'completed' || w.status === 'Completed').length;
+    const rejectedCount = withdrawals.filter(w => w.status === 'rejected').length;
+    const totalRequestedTokens = withdrawals.reduce((acc, w) => acc + (Number(w.amount) || 0), 0);
+    const completedTokens = withdrawals.filter(w => w.status === 'completed' || w.status === 'Completed').reduce((acc, w) => acc + (Number(w.amount) || 0), 0);
+
+    container.innerHTML = `
+      <div class="admin-tab-pane active" id="pane-withdrawals">
+        
+        <!-- Header -->
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h1 class="page-title" style="display: flex; align-items: center; gap: 0.6rem;">
+              <span>🏦 On-Chain Token Withdrawals</span>
+            </h1>
+            <p class="page-desc">1-Click copy citizen BEP-20 destination wallets, dispatch $BOOBA tokens via your wallet app (Trust Wallet / MetaMask), upload sent screenshot proof, and verify disbursements.</p>
+          </div>
+          <div style="display: flex; gap: 0.6rem; align-items: center;">
+            <a href="withdraw.html" target="_blank" class="btn-admin btn-admin-primary btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 800;">
+              <span>View Withdrawal Page ↗</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Metric Tiles -->
+        <div class="metrics-row" style="margin-bottom: 1.75rem;">
+          <div class="metric-tile">
+            <div class="metric-tile-header">
+              <span class="metric-tile-label">Pending Deliveries</span>
+              <div class="metric-tile-icon" style="color: var(--brand-yellow);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </div>
+            </div>
+            <div class="metric-tile-value" style="color: var(--brand-yellow); font-weight: 900;">${pendingCount}</div>
+            <div class="metric-tile-sub" style="color: ${pendingCount > 0 ? 'var(--brand-yellow)' : 'var(--accent-emerald)'}; font-weight: 600;">
+              <span class="pulse-dot" style="width: 5px; height: 5px; background: ${pendingCount > 0 ? 'var(--brand-yellow)' : 'var(--accent-emerald)'};"></span>
+              ${pendingCount > 0 ? 'Requires Token Delivery' : 'All Requests Delivered'}
+            </div>
+          </div>
+
+          <div class="metric-tile">
+            <div class="metric-tile-header">
+              <span class="metric-tile-label">Tokens Dispatched</span>
+              <div class="metric-tile-icon" style="color: var(--accent-emerald);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+            </div>
+            <div class="metric-tile-value" style="color: var(--accent-emerald); font-weight: 900;">${completedTokens.toLocaleString()}</div>
+            <div class="metric-tile-sub" style="color: var(--text-secondary);">
+              ${completedCount} Withdrawals Delivered
+            </div>
+          </div>
+
+          <div class="metric-tile">
+            <div class="metric-tile-header">
+              <span class="metric-tile-label">Total Requested</span>
+              <div class="metric-tile-icon" style="color: var(--brand-yellow);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="8"></circle><line x1="12" y1="8" x2="12" y2="16"></line></svg>
+              </div>
+            </div>
+            <div class="metric-tile-value" style="color: #FFFFFF; font-weight: 900;">${totalRequestedTokens.toLocaleString()}</div>
+            <div class="metric-tile-sub" style="color: var(--text-secondary);">
+              ${withdrawals.length} Total Citizen Requests
+            </div>
+          </div>
+
+          <div class="metric-tile">
+            <div class="metric-tile-header">
+              <span class="metric-tile-label">Rejected / Refunded</span>
+              <div class="metric-tile-icon" style="color: var(--accent-ruby);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+              </div>
+            </div>
+            <div class="metric-tile-value" style="color: var(--accent-ruby); font-weight: 900;">${rejectedCount}</div>
+            <div class="metric-tile-sub" style="color: var(--text-secondary);">
+              Points Auto-Refunded
+            </div>
+          </div>
+        </div>
+
+        <!-- WITHDRAWALS MAIN TABLE PANEL -->
+        <div class="clean-panel" style="margin-bottom: 2rem;">
+          <div class="clean-panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.85rem; padding: 1.15rem 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="pulse-dot" style="width: 7px; height: 7px; background: var(--accent-emerald);"></span>
+              <h3 class="clean-panel-title" style="margin: 0; font-size: 1.05rem;">
+                Citizen Token Withdrawal Requests & On-Chain Delivery
+              </h3>
+            </div>
+
+            <!-- Search and Filter Bar -->
+            <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+              <div class="segmented-nav" style="margin-bottom: 0;">
+                <button type="button" class="segmented-btn ${this.withdrawalFilter === 'all' ? 'active' : ''}" onclick="window.adminApp.handleWithdrawalFilterChange('all')">
+                  All (${withdrawals.length})
+                </button>
+                <button type="button" class="segmented-btn ${this.withdrawalFilter === 'pending' ? 'active' : ''}" onclick="window.adminApp.handleWithdrawalFilterChange('pending')" style="${pendingCount > 0 ? 'color: var(--brand-yellow); font-weight: 800;' : ''}">
+                  Pending (${pendingCount})
+                </button>
+                <button type="button" class="segmented-btn ${this.withdrawalFilter === 'completed' ? 'active' : ''}" onclick="window.adminApp.handleWithdrawalFilterChange('completed')">
+                  Delivered (${completedCount})
+                </button>
+                <button type="button" class="segmented-btn ${this.withdrawalFilter === 'rejected' ? 'active' : ''}" onclick="window.adminApp.handleWithdrawalFilterChange('rejected')">
+                  Rejected (${rejectedCount})
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search Input -->
+          <div style="padding: 0.85rem 1.25rem 0.4rem 1.25rem;">
+            <div style="position: relative;">
+              <input type="text" class="admin-input" placeholder="Search citizen, passport, BEP-20 wallet, or TxID..." value="${this.withdrawalSearchQuery || ''}" oninput="window.adminApp.handleWithdrawalSearch(this.value)" style="height: 38px; font-size: 0.82rem; padding-left: 2.2rem; border-radius: 8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+          </div>
+
+          <!-- Desktop Table -->
+          <div class="table-scroll-container admin-desktop-only" style="padding: 0 0.5rem 0.85rem 0.5rem;">
+            ${filtered.length === 0 ? `
+              <div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary); font-size: 0.85rem;">
+                No withdrawal requests found matching your filter.
+              </div>
+            ` : `
+              <table class="clean-table">
+                <thead>
+                  <tr>
+                    <th>Time & Citizen</th>
+                    <th>$BOOBA to Send</th>
+                    <th style="min-width: 230px;">Destination BEP-20 Wallet Address</th>
+                    <th style="text-align: center;">Delivery Proof</th>
+                    <th>Tx Hash</th>
+                    <th>Status</th>
+                    <th style="text-align: right; min-width: 130px;">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${filtered.map(w => `
+                    <tr style="${w.status === 'pending' ? 'background: rgba(243, 186, 47, 0.025);' : ''}">
+                      
+                      <!-- Time & Citizen -->
+                      <td>
+                        <div style="font-weight: 800; color: #FFFFFF; font-size: 0.85rem;">
+                          ${w.username || 'Citizen'}
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                          ${w.passportId ? `<span class="text-mono" style="color: var(--brand-yellow); font-weight: 700;">${w.passportId}</span> • ` : ''}${new Date(w.timestamp).toLocaleDateString()}
+                        </div>
+                      </td>
+
+                      <!-- Amount -->
+                      <td>
+                        <div style="font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); font-size: 1.05rem;">
+                          ${Number(w.amount).toLocaleString()}
+                        </div>
+                        <div style="font-size: 0.68rem; color: var(--text-muted);">$BOOBA</div>
+                      </td>
+
+                      <!-- Destination Wallet with 1-Click Copy -->
+                      <td>
+                        <div class="dex-wallet-pill">
+                          <span class="text-mono" style="color: var(--brand-yellow); font-size: 0.76rem; font-weight: 700; flex: 1; word-break: break-all;">
+                            ${w.walletAddress || 'No Wallet Address'}
+                          </span>
+                          <button type="button" class="btn-admin btn-admin-primary btn-admin-xs" onclick="window.adminApp.copyToClipboard('${w.walletAddress}', 'Withdrawal Destination Wallet')" style="font-size: 0.7rem; padding: 0.25rem 0.55rem; white-space: nowrap; font-weight: 800;" title="Copy wallet address to paste into Trust Wallet / MetaMask">
+                            📋 Copy
+                          </button>
+                        </div>
+                      </td>
+
+                      <!-- Delivery Proof Screenshot -->
+                      <td style="text-align: center;">
+                        ${w.deliveryProofScreenshot ? `
+                          <button type="button" class="proof-thumbnail-btn" onclick="window.adminApp.openProofLightbox('${w.deliveryProofScreenshot}', 'Admin Delivery Verification Proof', 'Sent ${Number(w.amount).toLocaleString()} $BOOBA to ${w.walletAddress}')" style="border-color: rgba(16, 185, 129, 0.5);" title="Click to view delivery proof screenshot">
+                            <img src="${w.deliveryProofScreenshot}" alt="Delivery Proof" class="proof-thumbnail-img" style="border-color: var(--accent-emerald);">
+                            <span style="font-size: 0.65rem; color: var(--accent-emerald); font-weight: 800;">✓ Sent Proof</span>
+                          </button>
+                        ` : `
+                          <span style="font-size: 0.7rem; color: var(--text-muted);">No Proof</span>
+                        `}
+                      </td>
+
+                      <!-- Tx Hash Link -->
+                      <td>
+                        ${(w.sentTxHash || w.txHash) ? `
+                          <a href="${w.explorerUrl || `https://bscscan.com/tx/${w.sentTxHash || w.txHash}`}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-emerald); text-decoration: underline; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700;">
+                            ${(w.sentTxHash || w.txHash).slice(0, 8)}... ↗
+                          </a>
+                        ` : `
+                          <span style="font-size: 0.72rem; color: var(--text-muted);">—</span>
+                        `}
+                      </td>
+
+                      <!-- Status Badge -->
+                      <td>
+                        ${w.status === 'completed' || w.status === 'Completed' ? `
+                          <span class="badge-clean badge-clean-green" style="font-size: 0.72rem; padding: 0.25rem 0.55rem;">
+                            ✓ Delivered
+                          </span>
+                        ` : w.status === 'rejected' ? `
+                          <span class="badge-clean badge-clean-red" style="font-size: 0.72rem; padding: 0.25rem 0.55rem;">
+                            ✕ Rejected
+                          </span>
+                        ` : `
+                          <span class="badge-clean badge-clean-yellow" style="font-size: 0.72rem; padding: 0.25rem 0.55rem;">
+                            <span class="pulse-dot" style="width: 5px; height: 5px; background: var(--brand-yellow);"></span>
+                            Pending
+                          </span>
+                        `}
+                      </td>
+
+                      <!-- Admin Actions -->
+                      <td style="text-align: right;">
+                        <div style="display: flex; gap: 0.35rem; justify-content: flex-end;">
+                          ${w.status === 'pending' ? `
+                            <button type="button" class="btn-admin btn-admin-primary btn-admin-xs" onclick="window.adminApp.openFulfillWithdrawalModal('${w.id}')" style="font-weight: 900; background: linear-gradient(135deg, #10B981 0%, #059669 100%); padding: 0.35rem 0.65rem;" title="Send tokens, upload proof screenshot, and confirm fulfillment">
+                              🚀 Deliver & Proof
+                            </button>
+                            <button type="button" class="btn-admin btn-admin-secondary btn-admin-xs" onclick="window.adminApp.handleRejectWithdrawal('${w.id}')" style="color: var(--accent-ruby); padding: 0.35rem 0.5rem;" title="Reject request and refund points to citizen">
+                              ✕
+                            </button>
+                          ` : `
+                            <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="window.adminApp.openFulfillWithdrawalModal('${w.id}')" style="font-size: 0.72rem; padding: 0.25rem 0.5rem;">
+                              Edit
+                            </button>
+                            <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="window.adminApp.handleDeleteWithdrawal('${w.id}')" style="color: var(--text-muted); font-size: 0.72rem; padding: 0.25rem 0.4rem;" title="Delete record">
+                              🗑
+                            </button>
+                          `}
+                        </div>
+                      </td>
+
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            `}
+          </div>
+
+          <!-- Mobile Cards -->
+          <div class="mobile-card-list admin-mobile-only" style="padding: 0.75rem;">
+            ${filtered.length === 0 ? `
+              <div style="text-align: center; padding: 2rem 1rem; color: var(--text-secondary); font-size: 0.85rem;">
+                No user token withdrawals recorded yet.
+              </div>
+            ` : filtered.map(w => `
+              <div class="mobile-bounty-card" style="${w.status === 'pending' ? 'border-color: rgba(243,186,47,0.35);' : ''}">
+                <div class="mobile-card-header">
+                  <div>
+                    <div class="mobile-card-title">${w.username || 'Citizen'}</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">${new Date(w.timestamp).toLocaleDateString()}</div>
+                  </div>
+                  <div>
+                    ${w.status === 'completed' || w.status === 'Completed' ? `
+                      <span class="badge-clean badge-clean-green">✓ Delivered</span>
+                    ` : w.status === 'rejected' ? `
+                      <span class="badge-clean badge-clean-red">✕ Rejected</span>
+                    ` : `
+                      <span class="badge-clean badge-clean-yellow">🟡 Pending</span>
+                    `}
+                  </div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.35); border-radius: 8px; padding: 0.55rem 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.72rem; color: var(--text-secondary);">Amount to Send:</span>
+                  <span style="color: var(--brand-yellow); font-weight: 900; font-family: var(--font-mono); font-size: 1.1rem;">
+                    ${Number(w.amount).toLocaleString()} $BOOBA
+                  </span>
+                </div>
+
+                <!-- Destination Wallet Box -->
+                <div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(243,186,47,0.25); border-radius: 8px; padding: 0.55rem 0.75rem;">
+                  <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 0.2rem;">
+                    Destination Wallet (BEP-20):
+                  </div>
+                  <div class="text-mono" style="font-size: 0.78rem; font-weight: 800; color: var(--brand-yellow); word-break: break-all; margin-bottom: 0.35rem;">
+                    ${w.walletAddress || 'No Wallet Address'}
+                  </div>
+                  <button type="button" class="btn-admin btn-admin-primary btn-admin-xs" onclick="window.adminApp.copyToClipboard('${w.walletAddress}', 'Destination Wallet')" style="width: 100%; font-weight: 800; justify-content: center;">
+                    📋 Copy Wallet Address
+                  </button>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.35rem; border-top: 1px solid var(--admin-border-subtle); flex-wrap: wrap; gap: 0.4rem;">
+                  <div>
+                    ${w.deliveryProofScreenshot ? `
+                      <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="window.adminApp.openProofLightbox('${w.deliveryProofScreenshot}', 'Delivery Proof', 'Sent ${Number(w.amount).toLocaleString()} $BOOBA')" style="color: var(--accent-emerald); font-weight: 700;">
+                        ✓ Sent Proof
+                      </button>
+                    ` : (w.sentTxHash || w.txHash) ? `
+                      <a href="${w.explorerUrl || `https://bscscan.com/tx/${w.sentTxHash || w.txHash}`}" target="_blank" rel="noopener noreferrer" style="color: var(--text-secondary); font-size: 0.72rem; text-decoration: underline;">
+                        BscScan ↗
+                      </a>
+                    ` : ''}
+                  </div>
+
+                  <div style="display: flex; gap: 0.35rem;">
+                    ${w.status === 'pending' ? `
+                      <button type="button" class="btn-admin btn-admin-primary btn-admin-xs" onclick="window.adminApp.openFulfillWithdrawalModal('${w.id}')" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); font-weight: 800;">
+                        🚀 Deliver & Proof
+                      </button>
+                      <button type="button" class="btn-admin btn-admin-secondary btn-admin-xs" onclick="window.adminApp.handleRejectWithdrawal('${w.id}')" style="color: var(--accent-ruby);">
+                        ✕
+                      </button>
+                    ` : `
+                      <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="window.adminApp.openFulfillWithdrawalModal('${w.id}')">
+                        Edit
+                      </button>
+                    `}
+                  </div>
+                </div>
+
+              </div>
+            `).join('')}
+          </div>
+
+        </div>
+
+      </div>
+    `;
+  }
+
+  handlePresaleFilterChange(filter) {
+    this.presaleFilter = filter;
+    this.renderPresaleTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
+  }
+
+  handlePresaleSearch(query) {
+    this.presaleSearchQuery = query.trim();
+    this.renderPresaleTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
+  }
+
+  handleWithdrawalFilterChange(filter) {
+    this.withdrawalFilter = filter;
+    this.renderWithdrawalsTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
+  }
+
+  handleWithdrawalSearch(query) {
+    this.withdrawalSearchQuery = query.trim();
+    this.renderWithdrawalsTab(document.getElementById('adminWorkspace') || document.getElementById('adminContentBody'));
+  }
+
+  copyToClipboard(text, label = 'Address') {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      this.showToast(`${label} copied to clipboard!`);
+    }).catch(() => {
+      prompt(`Copy ${label}:`, text);
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // PROOF IMAGE LIGHTBOX & UPLOADER HANDLERS
+  // --------------------------------------------------------------------------
+
+  openProofLightbox(imageSrc, title = 'Verification Proof', subtitle = '') {
+    if (!imageSrc) return;
+    const existing = document.getElementById('adminUniversalProofModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'adminUniversalProofModal';
+    modal.className = 'admin-modal-backdrop active';
+    modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(20px); z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 1.5rem;';
+    modal.onclick = () => modal.remove();
+
+    modal.innerHTML = `
+      <div class="admin-card" style="max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; border: 1.5px solid var(--brand-yellow); background: var(--admin-surface);" onclick="event.stopPropagation()">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--admin-border);">
+          <div>
+            <h3 class="admin-card-title" style="margin: 0; font-size: 1.1rem;">${title}</h3>
+            ${subtitle ? `<div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.2rem;">${subtitle}</div>` : ''}
+          </div>
+          <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="document.getElementById('adminUniversalProofModal').remove()" style="font-size: 1.1rem;">
+            ✕
+          </button>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 1.25rem;">
+          <img src="${imageSrc}" alt="Proof Full" style="max-width: 100%; max-height: 60vh; border-radius: 12px; border: 1px solid var(--admin-border); object-fit: contain; box-shadow: 0 4px 20px rgba(0,0,0,0.6);">
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+          <a href="${imageSrc}" download="booba-token-proof.png" class="btn-admin btn-admin-secondary btn-admin-sm" target="_blank" rel="noopener noreferrer">
+            💾 Download Image
+          </a>
+          <button type="button" class="btn-admin btn-admin-primary btn-admin-sm" onclick="document.getElementById('adminUniversalProofModal').remove()">
+            Close
+          </button>
+        </div>
+
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
+
+  handleProofFileSelect(input, previewContainerId, previewImgId, base64InputId, dropzoneId) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    if (file.size > 8 * 1024 * 1024) {
+      this.showToast('File is too large. Please select an image under 8MB.', 'error');
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64Data = e.target.result;
+      const base64Input = document.getElementById(base64InputId);
+      const previewContainer = document.getElementById(previewContainerId);
+      const previewImg = document.getElementById(previewImgId);
+      const dropzone = document.getElementById(dropzoneId);
+
+      if (base64Input) base64Input.value = base64Data;
+      if (previewImg) previewImg.src = base64Data;
+      if (previewContainer) previewContainer.style.display = 'block';
+      if (dropzone) dropzone.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeProofFile(previewContainerId, previewImgId, base64InputId, dropzoneId, fileInputId) {
+    const base64Input = document.getElementById(base64InputId);
+    const previewContainer = document.getElementById(previewContainerId);
+    const previewImg = document.getElementById(previewImgId);
+    const dropzone = document.getElementById(dropzoneId);
+    const fileInput = document.getElementById(fileInputId);
+
+    if (base64Input) base64Input.value = '';
+    if (previewImg) previewImg.src = '';
+    if (previewContainer) previewContainer.style.display = 'none';
+    if (dropzone) dropzone.style.display = 'block';
+    if (fileInput) fileInput.value = '';
+  }
+
+  // --------------------------------------------------------------------------
+  // PRESALE FULFILLMENT MODAL & EXECUTION
+  // --------------------------------------------------------------------------
+
+  openFulfillPresaleModal(orderId) {
+    const order = (db.presalePurchases || []).find(p => p.id === orderId);
+    if (!order) return;
+
+    const existing = document.getElementById('adminFulfillPresaleModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'adminFulfillPresaleModal';
+    modal.className = 'admin-modal-backdrop active';
+    modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(20px); z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 1.5rem;';
+
+    modal.innerHTML = `
+      <div class="admin-card" style="max-width: 580px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 2rem; border: 1.5px solid rgba(16, 185, 129, 0.4); background: var(--admin-surface); box-shadow: 0 25px 70px rgba(0,0,0,0.9);" onclick="event.stopPropagation()">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--admin-border);">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-emerald);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div>
+              <h3 class="admin-card-title" style="margin: 0; font-size: 1.15rem;">Deliver Presale $BOOBA Tokens</h3>
+              <div style="font-size: 0.74rem; color: var(--text-secondary);">Transfer tokens to buyer and upload verification proof</div>
+            </div>
+          </div>
+          <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="document.getElementById('adminFulfillPresaleModal').remove()" style="font-size: 1.1rem;">
+            ✕
+          </button>
+        </div>
+
+        <!-- 1. Copy Recipient DEX Wallet & Amount -->
+        <div style="background: rgba(0,0,0,0.5); border: 1.5px solid rgba(243, 186, 47, 0.3); border-radius: 14px; padding: 1.15rem; margin-bottom: 1.25rem;">
+          <div style="margin-bottom: 0.75rem;">
+            <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">1. Copy Destination DEX Wallet Address:</div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
+              <span class="text-mono" style="font-size: 0.85rem; font-weight: 800; color: var(--brand-yellow); word-break: break-all; flex: 1;">
+                ${order.receivingWallet}
+              </span>
+              <button type="button" class="btn-admin btn-admin-primary btn-admin-xs" onclick="window.adminApp.copyToClipboard('${order.receivingWallet}', 'Trust Wallet Address')">
+                📋 Copy
+              </button>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.65rem; border-top: 1px solid rgba(255,255,255,0.06);">
+            <div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">2. Tokens to Send:</div>
+              <div style="font-size: 1.25rem; font-weight: 900; color: #FFFFFF; font-family: var(--font-mono);">
+                ${Number(order.totalTokens).toLocaleString()} $BOOBA
+              </div>
+            </div>
+            <button type="button" class="btn-admin btn-admin-secondary btn-admin-xs" onclick="window.adminApp.copyToClipboard('${order.totalTokens}', 'Token Amount')">
+              Copy Amount
+            </button>
+          </div>
+        </div>
+
+        <form id="adminFulfillForm" onsubmit="window.adminApp.handleExecutePresaleFulfillment(event, '${order.id}')">
+          
+          <!-- Hidden Base64 Storage for Admin Proof -->
+          <input type="hidden" id="fulfillPresaleProofBase64" value="${order.deliveryProofScreenshot || ''}">
+
+          <!-- 3. Upload Token Delivery Screenshot Proof -->
+          <div class="form-field" style="margin-bottom: 1.25rem;">
+            <label class="form-field-label" style="font-weight: 800; color: #FFFFFF; margin-bottom: 0.4rem; display: block;">
+              3. Upload Token Delivery Screenshot Proof (Trust Wallet / MetaMask / BscScan)
+            </label>
+
+            <!-- Dropzone -->
+            <div id="presaleProofDropzone" style="border: 2px dashed rgba(16, 185, 129, 0.4); border-radius: 12px; padding: 1.25rem 1rem; text-align: center; background: rgba(16, 185, 129, 0.04); cursor: pointer; display: ${order.deliveryProofScreenshot ? 'none' : 'block'};" onclick="document.getElementById('presaleProofFileInput').click()">
+              <input type="file" id="presaleProofFileInput" accept="image/*" style="display: none;" onchange="window.adminApp.handleProofFileSelect(this, 'presaleProofPreviewBox', 'presaleProofPreviewImg', 'fulfillPresaleProofBase64', 'presaleProofDropzone')">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="2" style="margin: 0 auto 0.5rem auto; display: block;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              <div style="font-size: 0.82rem; font-weight: 700; color: #FFFFFF;">Click or Drag to Upload Sent Token Screenshot</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">PNG, JPG, or WEBP (Max 8MB)</div>
+            </div>
+
+            <!-- Preview Box -->
+            <div id="presaleProofPreviewBox" style="display: ${order.deliveryProofScreenshot ? 'block' : 'none'}; text-align: center; background: rgba(0,0,0,0.5); border: 1.5px solid rgba(16,185,129,0.5); border-radius: 12px; padding: 0.85rem;">
+              <img id="presaleProofPreviewImg" src="${order.deliveryProofScreenshot || ''}" alt="Delivery Proof Preview" style="max-height: 160px; max-width: 100%; border-radius: 8px; object-fit: contain; margin: 0 auto 0.5rem auto; display: block;">
+              <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="window.adminApp.removeProofFile('presaleProofPreviewBox', 'presaleProofPreviewImg', 'fulfillPresaleProofBase64', 'presaleProofDropzone', 'presaleProofFileInput')" style="color: var(--accent-ruby); font-size: 0.72rem;">
+                ✕ Remove / Replace Screenshot
+              </button>
+            </div>
+          </div>
+
+          <!-- 4. BSC Transaction Hash (Optional) -->
+          <div class="form-field" style="margin-bottom: 1.15rem;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
+              <label class="form-field-label" style="margin: 0; font-weight: 700;">
+                4. BSC Transaction Hash (TxID) — Optional
+              </label>
+              <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="document.getElementById('fulfillTxHashInput').value = '0x' + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('')" style="font-size: 0.7rem; color: var(--accent-emerald);">
+                Auto-generate TxID
+              </button>
+            </div>
+            <input type="text" id="fulfillTxHashInput" class="admin-input text-mono" placeholder="0x... BSC TxID of the $BOOBA transfer" value="${order.sentTxHash || ''}" style="font-size: 0.82rem; height: 42px;">
+          </div>
+
+          <!-- 5. Admin Notes -->
+          <div class="form-field" style="margin-bottom: 1.5rem;">
+            <label class="form-field-label" style="margin-bottom: 0.35rem;">5. Admin Fulfillment Notes (Optional)</label>
+            <input type="text" id="fulfillAdminNotesInput" class="admin-input" placeholder="e.g. Sent via Core Treasury Wallet" value="${order.adminNotes || ''}" style="font-size: 0.82rem; height: 42px;">
+          </div>
+
+          <div style="display: flex; gap: 0.75rem;">
+            <button type="button" class="btn-admin btn-admin-secondary" onclick="document.getElementById('adminFulfillPresaleModal').remove()" style="flex: 1; justify-content: center;">
+              Cancel
+            </button>
+            <button type="submit" class="btn-admin btn-admin-primary" style="flex: 2; justify-content: center; font-weight: 900; background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
+              ✓ Confirm Token Delivery & Save Proof
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
+
+  async handleExecutePresaleFulfillment(e, orderId) {
+    if (e) e.preventDefault();
+    const sentTxHash = document.getElementById('fulfillTxHashInput')?.value?.trim() || '';
+    const adminNotes = document.getElementById('fulfillAdminNotesInput')?.value?.trim() || '';
+    const deliveryProofScreenshot = document.getElementById('fulfillPresaleProofBase64')?.value || '';
+
+    const res = await db.adminFulfillPresaleOrder(orderId, { sentTxHash, adminNotes, deliveryProofScreenshot });
+    const modal = document.getElementById('adminFulfillPresaleModal');
+    if (modal) modal.remove();
+
+    if (res.success) {
+      this.showToast('Presale Token Delivery Confirmed & Proof Saved!');
+      this.render();
+    } else {
+      this.showToast(res.message || 'Failed to update order', 'error');
+    }
+  }
+
+  async handleRejectPresaleOrder(orderId) {
+    const reason = prompt('Enter reason for rejecting this presale submission:', 'Invalid payment proof or unconfirmed transaction');
+    if (reason === null) return;
+
+    const res = await db.adminRejectPresaleOrder(orderId, { reason });
+    if (res.success) {
+      this.showToast('Presale submission rejected');
+      this.render();
+    } else {
+      this.showToast(res.message || 'Failed to reject order', 'error');
+    }
+  }
+
+  async handleDeletePresaleOrder(orderId) {
+    if (!confirm('Are you sure you want to delete this presale order record?')) return;
+    const res = await db.adminDeletePresaleOrder(orderId);
+    if (res.success) {
+      this.showToast('Order record deleted');
+      this.render();
+    }
   }
 
   handlePresaleAdminUsdtInput(usdtAmount) {
@@ -1857,6 +2656,92 @@ class TeamAdminApp {
     const tokensInput = document.getElementById('adminAllocTokensInput');
     if (tokensInput && usdtAmount) {
       tokensInput.value = Math.floor(Number(usdtAmount) * rate);
+    }
+  }
+
+  openTreasuryWalletModal() {
+    const telemetry = db.getPresaleTelemetry();
+    const currentAddress = telemetry.treasuryAddress || '';
+    const isExisting = Boolean(currentAddress && currentAddress.length >= 20);
+
+    const existing = document.getElementById('adminTreasuryModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'adminTreasuryModal';
+    modal.className = 'admin-modal-backdrop active';
+    modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 1.5rem;';
+    modal.onclick = () => modal.remove();
+
+    modal.innerHTML = `
+      <div class="admin-card" style="max-width: 520px; width: 100%; padding: 2rem; border: 1.5px solid var(--brand-yellow); background: var(--admin-surface); box-shadow: 0 20px 60px rgba(0,0,0,0.9);" onclick="event.stopPropagation()">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--admin-border);">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(243,186,47,0.15); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M7 15h0M2 9.5h20"></path></svg>
+            </div>
+            <div>
+              <h3 class="admin-card-title" style="margin: 0; font-size: 1.15rem; color: #FFFFFF;">
+                ${isExisting ? 'Change Treasury Wallet' : 'Add Treasury Wallet'}
+              </h3>
+              <div style="font-size: 0.72rem; color: var(--text-secondary);">The address where buyers will send USDT</div>
+            </div>
+          </div>
+          <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="document.getElementById('adminTreasuryModal').remove()" style="font-size: 1.1rem;">
+            ✕
+          </button>
+        </div>
+
+        <form onsubmit="window.adminApp.handleSaveTreasuryModal(event)">
+          <div class="form-field" style="margin-bottom: 1.5rem;">
+            <label class="form-field-label" style="font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem; display: block;">
+              BEP-20 Wallet Address (USDT Deposit Target)
+            </label>
+            <input type="text" id="modalTreasuryWalletInput" class="admin-input text-mono" placeholder="0x... Enter BEP-20 wallet address" value="${currentAddress}" required style="height: 48px; font-size: 0.88rem; font-weight: 700; color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4);">
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.4rem;">
+              All buyers on the presale page will be shown this address.
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+            <button type="button" class="btn-admin btn-admin-secondary" onclick="document.getElementById('adminTreasuryModal').remove()">
+              Cancel
+            </button>
+            <button type="submit" class="btn-admin btn-admin-primary" style="font-weight: 900; background: linear-gradient(135deg, #F3BA2F 0%, #E2A016 100%); color: #000; padding: 0.6rem 1.5rem;">
+              ${isExisting ? 'Save & Change Wallet' : 'Add Treasury Wallet'}
+            </button>
+          </div>
+        </form>
+
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    setTimeout(() => {
+      document.getElementById('modalTreasuryWalletInput')?.focus();
+    }, 100);
+  }
+
+  handleSaveTreasuryModal(e) {
+    if (e) e.preventDefault();
+    const newAddress = document.getElementById('modalTreasuryWalletInput')?.value?.trim();
+    if (!newAddress || newAddress.length < 20 || !newAddress.startsWith('0x')) {
+      this.showToast('Please enter a valid BEP-20 wallet address (starts with 0x)', 'error');
+      return;
+    }
+
+    const res = db.updatePresaleConfig({
+      treasuryAddress: newAddress
+    });
+
+    if (res.success) {
+      this.showToast(`Presale Treasury Wallet updated to ${newAddress.slice(0, 6)}...${newAddress.slice(-4)}!`);
+      const modal = document.getElementById('adminTreasuryModal');
+      if (modal) modal.remove();
+      this.render();
+    } else {
+      this.showToast(res.message || 'Failed to update treasury wallet', 'error');
     }
   }
 
@@ -1918,9 +2803,177 @@ class TeamAdminApp {
       this.render();
     }
   }
+
+  // --------------------------------------------------------------------------
+  // WITHDRAWAL BRIDGE FULFILLMENT MODAL & HANDLERS
+  // --------------------------------------------------------------------------
+
+  openFulfillWithdrawalModal(withdrawalId) {
+    const wd = (db.withdrawals || []).find(w => w.id === withdrawalId);
+    if (!wd) return;
+
+    const existing = document.getElementById('adminFulfillWithdrawalModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'adminFulfillWithdrawalModal';
+    modal.className = 'admin-modal-backdrop active';
+    modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(20px); z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 1.5rem;';
+
+    modal.innerHTML = `
+      <div class="admin-card" style="max-width: 580px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 2rem; border: 1.5px solid rgba(16, 185, 129, 0.4); background: var(--admin-surface); box-shadow: 0 25px 70px rgba(0,0,0,0.9);" onclick="event.stopPropagation()">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--admin-border);">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-emerald);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div>
+              <h3 class="admin-card-title" style="margin: 0; font-size: 1.15rem;">Deliver Withdrawal $BOOBA Tokens</h3>
+              <div style="font-size: 0.74rem; color: var(--text-secondary);">
+                Transfer tokens to ${wd.username || 'Citizen'} (${wd.passportId || 'Citizen'}) & upload proof
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="document.getElementById('adminFulfillWithdrawalModal').remove()" style="font-size: 1.1rem;">
+            ✕
+          </button>
+        </div>
+
+        <div style="background: rgba(0,0,0,0.5); border: 1.5px solid rgba(243, 186, 47, 0.3); border-radius: 14px; padding: 1.15rem; margin-bottom: 1.25rem;">
+          <div style="margin-bottom: 0.75rem;">
+            <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">1. Copy Destination BEP-20 Wallet Address:</div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
+              <span class="text-mono" style="font-size: 0.85rem; font-weight: 800; color: var(--brand-yellow); word-break: break-all; flex: 1;">
+                ${wd.walletAddress || 'No Wallet'}
+              </span>
+              <button type="button" class="btn-admin btn-admin-primary btn-admin-xs" onclick="window.adminApp.copyToClipboard('${wd.walletAddress}', 'Citizen Wallet Address')">
+                📋 Copy
+              </button>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.65rem; border-top: 1px solid rgba(255,255,255,0.06);">
+            <div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">2. Tokens to Send:</div>
+              <div style="font-size: 1.25rem; font-weight: 900; color: #FFFFFF; font-family: var(--font-mono);">
+                ${Number(wd.amount).toLocaleString()} $BOOBA
+              </div>
+            </div>
+            <button type="button" class="btn-admin btn-admin-secondary btn-admin-xs" onclick="window.adminApp.copyToClipboard('${wd.amount}', 'Token Amount')">
+              Copy Amount
+            </button>
+          </div>
+        </div>
+
+        <form id="adminFulfillWdForm" onsubmit="window.adminApp.handleExecuteWithdrawalFulfillment(event, '${wd.id}')">
+          
+          <!-- Hidden Base64 Storage for Admin Proof -->
+          <input type="hidden" id="fulfillWdProofBase64" value="${wd.deliveryProofScreenshot || ''}">
+
+          <!-- 3. Upload Token Delivery Screenshot Proof -->
+          <div class="form-field" style="margin-bottom: 1.25rem;">
+            <label class="form-field-label" style="font-weight: 800; color: #FFFFFF; margin-bottom: 0.4rem; display: block;">
+              3. Upload Token Delivery Screenshot Proof (Trust Wallet / MetaMask / BscScan)
+            </label>
+
+            <!-- Dropzone -->
+            <div id="wdProofDropzone" style="border: 2px dashed rgba(16, 185, 129, 0.4); border-radius: 12px; padding: 1.25rem 1rem; text-align: center; background: rgba(16, 185, 129, 0.04); cursor: pointer; display: ${wd.deliveryProofScreenshot ? 'none' : 'block'};" onclick="document.getElementById('wdProofFileInput').click()">
+              <input type="file" id="wdProofFileInput" accept="image/*" style="display: none;" onchange="window.adminApp.handleProofFileSelect(this, 'wdProofPreviewBox', 'wdProofPreviewImg', 'fulfillWdProofBase64', 'wdProofDropzone')">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="2" style="margin: 0 auto 0.5rem auto; display: block;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              <div style="font-size: 0.82rem; font-weight: 700; color: #FFFFFF;">Click or Drag to Upload Sent Token Screenshot</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">PNG, JPG, or WEBP (Max 8MB)</div>
+            </div>
+
+            <!-- Preview Box -->
+            <div id="wdProofPreviewBox" style="display: ${wd.deliveryProofScreenshot ? 'block' : 'none'}; text-align: center; background: rgba(0,0,0,0.5); border: 1.5px solid rgba(16,185,129,0.5); border-radius: 12px; padding: 0.85rem;">
+              <img id="wdProofPreviewImg" src="${wd.deliveryProofScreenshot || ''}" alt="Delivery Proof Preview" style="max-height: 160px; max-width: 100%; border-radius: 8px; object-fit: contain; margin: 0 auto 0.5rem auto; display: block;">
+              <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="window.adminApp.removeProofFile('wdProofPreviewBox', 'wdProofPreviewImg', 'fulfillWdProofBase64', 'wdProofDropzone', 'wdProofFileInput')" style="color: var(--accent-ruby); font-size: 0.72rem;">
+                ✕ Remove / Replace Screenshot
+              </button>
+            </div>
+          </div>
+
+          <!-- 4. BSC Transaction Hash (Optional) -->
+          <div class="form-field" style="margin-bottom: 1.15rem;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
+              <label class="form-field-label" style="margin: 0; font-weight: 700;">
+                4. BSC Transaction Hash (TxID) — Optional
+              </label>
+              <button type="button" class="btn-admin btn-admin-ghost btn-admin-xs" onclick="document.getElementById('fulfillWdTxHashInput').value = '0x' + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('')" style="font-size: 0.7rem; color: var(--accent-emerald);">
+                Auto-generate TxID
+              </button>
+            </div>
+            <input type="text" id="fulfillWdTxHashInput" class="admin-input text-mono" placeholder="0x... BSC TxID of the $BOOBA transfer" value="${wd.sentTxHash || wd.txHash || ''}" style="font-size: 0.82rem; height: 42px;">
+          </div>
+
+          <!-- 5. Admin Notes -->
+          <div class="form-field" style="margin-bottom: 1.5rem;">
+            <label class="form-field-label" style="margin-bottom: 0.35rem;">5. Admin Notes (Optional)</label>
+            <input type="text" id="fulfillWdAdminNotesInput" class="admin-input" placeholder="e.g. Sent via Core Treasury Hot Wallet" value="${wd.adminNotes || wd.notes || ''}" style="font-size: 0.82rem; height: 42px;">
+          </div>
+
+          <div style="display: flex; gap: 0.75rem;">
+            <button type="button" class="btn-admin btn-admin-secondary" onclick="document.getElementById('adminFulfillWithdrawalModal').remove()" style="flex: 1; justify-content: center;">
+              Cancel
+            </button>
+            <button type="submit" class="btn-admin btn-admin-primary" style="flex: 2; justify-content: center; font-weight: 900; background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
+              ✓ Confirm Token Delivery & Save Proof
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
+
+  async handleExecuteWithdrawalFulfillment(e, withdrawalId) {
+    if (e) e.preventDefault();
+    const sentTxHash = document.getElementById('fulfillWdTxHashInput')?.value?.trim() || '';
+    const adminNotes = document.getElementById('fulfillWdAdminNotesInput')?.value?.trim() || '';
+    const deliveryProofScreenshot = document.getElementById('fulfillWdProofBase64')?.value || '';
+
+    const res = await db.adminFulfillWithdrawal(withdrawalId, { sentTxHash, adminNotes, deliveryProofScreenshot });
+    const modal = document.getElementById('adminFulfillWithdrawalModal');
+    if (modal) modal.remove();
+
+    if (res.success) {
+      this.showToast('Withdrawal Token Delivery Confirmed & Proof Saved!');
+      this.render();
+    } else {
+      this.showToast(res.message || 'Failed to fulfill withdrawal', 'error');
+    }
+  }
+
+  async handleRejectWithdrawal(withdrawalId) {
+    const reason = prompt('Enter reason for rejecting this withdrawal request (Points will be refunded to citizen):', 'Invalid BEP-20 wallet address or unverified user');
+    if (reason === null) return;
+
+    const res = await db.adminRejectWithdrawal(withdrawalId, { reason });
+    if (res.success) {
+      this.showToast('Withdrawal rejected and points refunded to citizen.');
+      this.render();
+    } else {
+      this.showToast(res.message || 'Failed to reject withdrawal', 'error');
+    }
+  }
+
+  async handleDeleteWithdrawal(withdrawalId) {
+    if (!confirm('Are you sure you want to delete this withdrawal record?')) return;
+    const res = await db.adminDeleteWithdrawal(withdrawalId);
+    if (res.success) {
+      this.showToast('Withdrawal record deleted');
+      this.render();
+    }
+  }
 }
 
 // Attach globally
 window.adminApp = new TeamAdminApp();
+
+
 
 

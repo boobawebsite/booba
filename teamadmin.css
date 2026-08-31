@@ -636,6 +636,32 @@ textarea.admin-input {
   padding: 0.38rem 0.75rem;
   font-size: 0.75rem;
 }
+.btn-admin-xs {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  border-radius: var(--radius-xs);
+}
+.btn-admin-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-secondary);
+}
+.btn-admin-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+}
+
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(20px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
 
 /* Tables */
 .table-scroll-container {
@@ -734,6 +760,207 @@ textarea.admin-input {
 }
 
 /* --------------------------------------------------------------------------
+   3B. Dedicated Admin Presale, Bridge & Cards Pro Styling System
+   -------------------------------------------------------------------------- */
+.admin-tab-pane {
+  display: block;
+  animation: adminFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes adminFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.admin-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.admin-view-title {
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
+  line-height: 1.25;
+}
+.admin-view-subtitle {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  margin-top: 0.3rem;
+  line-height: 1.5;
+}
+
+/* Admin Stat Grid */
+.admin-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.15rem;
+}
+.admin-stat-card {
+  padding: 1.35rem;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-subtle);
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+.admin-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: var(--shadow-elevated);
+}
+.admin-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(243, 186, 47, 0.5), transparent);
+}
+.admin-stat-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+.admin-stat-value {
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+.admin-stat-meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.2rem;
+  font-weight: 500;
+}
+
+/* Admin Cards & Panels */
+.admin-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-subtle);
+  transition: border-color var(--transition);
+}
+.admin-card:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+.admin-card-header {
+  padding: 1.15rem 1.35rem;
+  border-bottom: 1px solid var(--admin-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.015);
+}
+.admin-card-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.01em;
+}
+
+/* Admin Tables */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.85rem;
+}
+.admin-table th {
+  padding: 0.85rem 1.15rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: 700;
+  border-bottom: 1px solid var(--admin-border);
+  background: rgba(255, 255, 255, 0.02);
+  white-space: nowrap;
+}
+.admin-table td {
+  padding: 0.95rem 1.15rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--admin-border-subtle);
+  vertical-align: middle;
+}
+.admin-table tr:hover td {
+  background: rgba(255, 255, 255, 0.025);
+}
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Pulse Dot */
+.pulse-dot {
+  display: inline-block;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+@keyframes pulse-glow {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; filter: drop-shadow(0 0 6px currentColor); }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+/* DEX Wallet Pill */
+.dex-wallet-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(243, 186, 47, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.75rem;
+  transition: all var(--transition);
+}
+.dex-wallet-pill:hover {
+  border-color: var(--brand-yellow);
+  background: rgba(0, 0, 0, 0.75);
+  box-shadow: 0 0 15px rgba(243, 186, 47, 0.15);
+}
+
+/* Proof Thumbnail Box */
+.proof-thumbnail-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  transition: transform var(--transition);
+}
+.proof-thumbnail-btn:hover {
+  transform: scale(1.06);
+}
+.proof-thumbnail-img {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-xs);
+  object-fit: cover;
+  border: 1.5px solid var(--brand-yellow);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* --------------------------------------------------------------------------
    4. Floating Web3 Toast System
    -------------------------------------------------------------------------- */
 .admin-toast-container {
@@ -789,7 +1016,7 @@ textarea.admin-input {
   display: block;
 }
 .admin-mobile-only {
-  display: none;
+  display: none !important;
 }
 
 /* Mobile Card Lists (Quests, Submissions, Citizens) */
@@ -902,6 +1129,10 @@ textarea.admin-input {
   }
   .admin-mobile-only {
     display: block !important;
+  }
+  .mobile-card-list.admin-mobile-only,
+  .admin-mobile-only.mobile-card-list {
+    display: flex !important;
   }
   .btn-admin {
     white-space: normal !important;

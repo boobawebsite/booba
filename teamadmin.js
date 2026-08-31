@@ -382,8 +382,8 @@ class TeamAdminApp {
         </div>
 
         <!-- Quick Navigation Panels: Presale & Withdrawals -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-bottom: 1.75rem;">
-          <div class="clean-panel" style="padding: 1.25rem; border: 1.5px solid rgba(243, 186, 47, 0.35); background: linear-gradient(135deg, rgba(243, 186, 47, 0.05) 0%, rgba(14, 18, 27, 0.9) 100%); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+          <div class="clean-panel" style="padding: 1.15rem; border: 1px solid rgba(243, 186, 47, 0.2); background: rgba(14, 18, 27, 0.85); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
             <div>
               <div style="font-size: 0.72rem; color: var(--brand-yellow); font-weight: 800; text-transform: uppercase; margin-bottom: 0.2rem;">⚡ Presale Terminal</div>
               <div style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF;">${(db.presalePurchases || []).filter(p => p.status === 'pending').length} Orders Pending Delivery</div>
@@ -394,7 +394,7 @@ class TeamAdminApp {
             </button>
           </div>
 
-          <div class="clean-panel" style="padding: 1.25rem; border: 1.5px solid rgba(16, 185, 129, 0.35); background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(14, 18, 27, 0.9) 100%); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <div class="clean-panel" style="padding: 1.15rem; border: 1px solid rgba(16, 185, 129, 0.2); background: rgba(14, 18, 27, 0.85); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
             <div>
               <div style="font-size: 0.72rem; color: var(--accent-emerald); font-weight: 800; text-transform: uppercase; margin-bottom: 0.2rem;">🏦 Token Withdrawals Bridge</div>
               <div style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF;">${(db.withdrawals || []).filter(w => w.status === 'pending').length} Withdrawals Pending Delivery</div>

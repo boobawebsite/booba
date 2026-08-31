@@ -8,25 +8,72 @@ export const SUPABASE_URL = 'https://aitjqnfliraspychotrl.supabase.co';
 export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpdGpxbmZsaXJhc3B5Y2hvdHJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NDgyMzQsImV4cCI6MjEwMjUyNDIzNH0.OqDFSeT2Olj2sAD4_Gh3prtGzvob7EX9xdChXeRVq3M';
 
 // ==========================================================================
-// ADMIN EMAIL WHITELIST
-// Add any emails here that should automatically have full Admin rights!
+// ADMIN EMAIL WHITELIST (Default & Dynamically Added Admins)
 // ==========================================================================
-export const ADMIN_EMAILS = [
+export const DEFAULT_ADMIN_EMAILS = [
   'admin@gmail.com',
   'boobawebsite@gmail.com'
 ];
+
+export function getAdminEmails() {
+  let dynamic = [];
+  try {
+    dynamic = JSON.parse(localStorage.getItem('booba_dynamic_admin_emails') || '[]');
+    if (!Array.isArray(dynamic)) dynamic = [];
+  } catch (e) {
+    dynamic = [];
+  }
+  const combined = new Set([
+    ...DEFAULT_ADMIN_EMAILS.map(e => e.toLowerCase().trim()),
+    ...dynamic.map(e => e.toLowerCase().trim())
+  ]);
+  return Array.from(combined);
+}
+
+export function addAdminEmail(email) {
+  if (!email || typeof email !== 'string') return;
+  const normalized = email.toLowerCase().trim();
+  let dynamic = [];
+  try {
+    dynamic = JSON.parse(localStorage.getItem('booba_dynamic_admin_emails') || '[]');
+    if (!Array.isArray(dynamic)) dynamic = [];
+  } catch (e) {
+    dynamic = [];
+  }
+  if (!dynamic.includes(normalized)) {
+    dynamic.push(normalized);
+    localStorage.setItem('booba_dynamic_admin_emails', JSON.stringify(dynamic));
+  }
+}
+
+export function removeAdminEmail(email) {
+  if (!email || typeof email !== 'string') return;
+  const normalized = email.toLowerCase().trim();
+  let dynamic = [];
+  try {
+    dynamic = JSON.parse(localStorage.getItem('booba_dynamic_admin_emails') || '[]');
+    if (!Array.isArray(dynamic)) dynamic = [];
+  } catch (e) {
+    dynamic = [];
+  }
+  const filtered = dynamic.filter(e => e.toLowerCase().trim() !== normalized);
+  localStorage.setItem('booba_dynamic_admin_emails', JSON.stringify(filtered));
+}
+
+export const ADMIN_EMAILS = getAdminEmails();
 
 /**
  * Checks if a given email or user object has admin privileges
  */
 export function isUserAdmin(emailOrUser) {
   if (!emailOrUser) return false;
+  const adminList = getAdminEmails();
   if (typeof emailOrUser === 'string') {
     const email = emailOrUser.toLowerCase().trim();
-    return ADMIN_EMAILS.some(e => e.toLowerCase() === email);
+    return adminList.includes(email);
   }
   if (emailOrUser.role === 'admin') return true;
-  if (emailOrUser.email && ADMIN_EMAILS.some(e => e.toLowerCase() === emailOrUser.email.toLowerCase().trim())) {
+  if (emailOrUser.email && adminList.includes(emailOrUser.email.toLowerCase().trim())) {
     return true;
   }
   return false;

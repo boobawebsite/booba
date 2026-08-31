@@ -1418,18 +1418,39 @@ class TeamAdminApp {
         
         <div class="page-header">
           <div>
-            <h1 class="page-title">Citizens & Passports</h1>
-            <p class="page-desc">Directory of all genuine community accounts, wallet links, and token balances.</p>
+            <h1 class="page-title">Citizens & Team Admins</h1>
+            <p class="page-desc">Directory of all genuine community accounts, wallet links, and administrator access controls.</p>
           </div>
 
-          <div style="display: flex; align-items: center; gap: 0.5rem; width: 100%; max-width: 320px;">
-            <input type="text" id="userSearchInput" placeholder="Search username, wallet 0x, email..." value="${this.userSearchQuery}" oninput="window.adminApp.handleUserSearch(this.value)" class="admin-input">
-            ${this.userSearchQuery ? `
-              <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.handleUserSearch('')">
-                Clear
-              </button>
-            ` : ''}
+          <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+            <button type="button" class="btn-admin btn-admin-primary btn-sm" onclick="window.adminApp.openAddAdminModal()" style="font-weight: 800; display: inline-flex; align-items: center; gap: 0.35rem;">
+              <span>👑 Grant Admin Role</span>
+            </button>
+            <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 220px; flex: 1;">
+              <input type="text" id="userSearchInput" placeholder="Search username, wallet 0x, email..." value="${this.userSearchQuery}" oninput="window.adminApp.handleUserSearch(this.value)" class="admin-input" style="height: 38px;">
+              ${this.userSearchQuery ? `
+                <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.handleUserSearch('')">
+                  Clear
+                </button>
+              ` : ''}
+            </div>
           </div>
+        </div>
+
+        <!-- ADMIN CONTROLS BANNER -->
+        <div class="clean-panel" style="margin-bottom: 1.25rem; padding: 0.95rem 1.15rem; background: rgba(14, 18, 27, 0.85); border: 1px solid rgba(243, 186, 47, 0.2); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(243,186,47,0.15); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow); font-weight: 800; font-size: 0.9rem;">
+              👑
+            </div>
+            <div>
+              <div style="font-size: 0.85rem; font-weight: 800; color: #FFFFFF;">Administrator Delegation</div>
+              <div style="font-size: 0.72rem; color: var(--text-secondary);">Any active administrator can promote accounts or grant access via email to manage quests, presale, and withdrawals.</div>
+            </div>
+          </div>
+          <button type="button" class="btn-admin btn-admin-secondary btn-sm" onclick="window.adminApp.openAddAdminModal()" style="font-weight: 700; font-size: 0.76rem;">
+            + Add Admin by Email
+          </button>
         </div>
 
         <div class="clean-panel">
@@ -1443,6 +1464,7 @@ class TeamAdminApp {
                   <th>Email Address</th>
                   <th>Wallet Address</th>
                   <th>Passport ID</th>
+                  <th>Admin Access / Role</th>
                   <th>Tier</th>
                   <th>Quests</th>
                   <th style="text-align: right;">$BOOBA Balance</th>
@@ -1451,18 +1473,19 @@ class TeamAdminApp {
               <tbody>
                 ${users.length === 0 ? `
                   <tr>
-                    <td colspan="7" style="text-align: center; padding: 4rem 2rem; color: var(--text-muted);">
+                    <td colspan="8" style="text-align: center; padding: 4rem 2rem; color: var(--text-muted);">
                       No matching citizens found in database.
                     </td>
                   </tr>
                 ` : users.map(u => {
                   const level = calculateLevel(u.boobaPoints || 0);
                   const hasWallet = u.walletAddress && u.walletAddress.startsWith('0x');
+                  const isAdmin = u.role === 'admin' || isUserAdmin(u.email);
                   return `
                     <tr>
                       <td>
                         <div style="display: flex; align-items: center; gap: 0.75rem;">
-                          <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid ${level.accentColor}; object-fit: cover; flex-shrink: 0; box-shadow: 0 0 8px ${level.glowColor};">
+                          <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid ${isAdmin ? 'var(--brand-yellow)' : level.accentColor}; object-fit: cover; flex-shrink: 0; box-shadow: 0 0 8px ${level.glowColor};">
                           <div>
                             <strong style="color: #FFFFFF; font-size: 0.88rem; display: block;">${u.username}</strong>
                             <span style="font-size: 0.72rem; color: var(--accent-emerald);">Streak: ${u.streakDays || 1}d</span>
@@ -1486,6 +1509,22 @@ class TeamAdminApp {
                       </td>
                       <td class="text-mono" style="color: ${level.accentColor}; font-weight: 700; font-size: 0.82rem;">
                         ${u.passportId || 'N/A'}
+                      </td>
+                      <td>
+                        <div style="display: flex; align-items: center; gap: 0.45rem;">
+                          ${isAdmin ? `
+                            <span class="badge-clean" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border: 1px solid rgba(243, 186, 47, 0.35); font-weight: 800; font-size: 0.72rem;">
+                              👑 Admin
+                            </span>
+                            <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.handleToggleAdminRole('${u.id}')" style="padding: 0.18rem 0.45rem; font-size: 0.68rem; color: var(--accent-ruby);" title="Revoke Admin Access">
+                              Revoke
+                            </button>
+                          ` : `
+                            <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="window.adminApp.handleToggleAdminRole('${u.id}')" style="padding: 0.22rem 0.55rem; font-size: 0.72rem; font-weight: 800; color: var(--brand-yellow); border-color: rgba(243,186,47,0.3);" title="Make this citizen an Admin">
+                              👑 Make Admin
+                            </button>
+                          `}
+                        </div>
                       </td>
                       <td>
                         <span class="badge-clean" style="background: ${level.glowColor}; color: ${level.accentColor}; border: 1px solid ${level.borderColor}; font-weight: 800; font-size: 0.72rem; text-transform: uppercase;">Lv.${level.level} ${level.title}</span>
@@ -1512,13 +1551,17 @@ class TeamAdminApp {
             ` : users.map(u => {
               const level = calculateLevel(u.boobaPoints || 0);
               const hasWallet = u.walletAddress && u.walletAddress.startsWith('0x');
+              const isAdmin = u.role === 'admin' || isUserAdmin(u.email);
               return `
                 <div class="mobile-citizen-card">
                   <div class="mobile-card-header">
                     <div style="display: flex; align-items: center; gap: 0.65rem;">
-                      <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid ${level.accentColor}; object-fit: cover; flex-shrink: 0; box-shadow: 0 0 8px ${level.glowColor};">
+                      <img src="${u.avatar || 'assets/mascot.jpg'}" style="width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid ${isAdmin ? 'var(--brand-yellow)' : level.accentColor}; object-fit: cover; flex-shrink: 0; box-shadow: 0 0 8px ${level.glowColor};">
                       <div>
-                        <strong style="color: #FFFFFF; font-size: 0.92rem; display: block;">${u.username}</strong>
+                        <div style="display: flex; align-items: center; gap: 0.35rem;">
+                          <strong style="color: #FFFFFF; font-size: 0.92rem;">${u.username}</strong>
+                          ${isAdmin ? `<span style="font-size: 0.65rem; color: var(--brand-yellow); font-weight: 800; background: rgba(243,186,47,0.15); padding: 0.1rem 0.35rem; border-radius: 4px;">ADMIN</span>` : ''}
+                        </div>
                         <span class="text-mono" style="font-size: 0.72rem; color: ${level.accentColor}; font-weight: 700;">${u.passportId || 'No Passport'}</span>
                       </div>
                     </div>
@@ -1535,9 +1578,17 @@ class TeamAdminApp {
                       </div>
                     </div>
                     <div style="text-align: right;">
-                      <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;">Quests Done</div>
-                      <div style="font-size: 0.95rem; font-weight: 700; color: #FFFFFF;">
-                        ${u.completedQuestsCount || 0}
+                      <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;">Admin Role</div>
+                      <div style="margin-top: 0.15rem;">
+                        ${isAdmin ? `
+                          <button type="button" class="btn-admin btn-admin-secondary btn-admin-xs" onclick="window.adminApp.handleToggleAdminRole('${u.id}')" style="font-size: 0.68rem; color: var(--accent-ruby); padding: 0.15rem 0.45rem;">
+                            Revoke Admin
+                          </button>
+                        ` : `
+                          <button type="button" class="btn-admin btn-admin-primary btn-admin-xs" onclick="window.adminApp.handleToggleAdminRole('${u.id}')" style="font-size: 0.68rem; padding: 0.15rem 0.45rem; font-weight: 800;">
+                            👑 Make Admin
+                          </button>
+                        `}
                       </div>
                     </div>
                   </div>
@@ -2958,6 +3009,95 @@ class TeamAdminApp {
       this.render();
     } else {
       this.showToast(res.message || 'Failed to reject withdrawal', 'error');
+    }
+  }
+
+  async handleToggleAdminRole(userId) {
+    const user = (db.users || []).find(u => u.id === userId);
+    if (!user) {
+      this.showToast('User record not found', 'error');
+      return;
+    }
+
+    const isPromoting = user.role !== 'admin' && !isUserAdmin(user.email);
+    const confirmMsg = isPromoting
+      ? `Promote "${user.username}" (${user.email || 'Citizen'}) to Administrator? They will be granted full access to the Admin Console.`
+      : `Revoke Administrator privileges from "${user.username}"?`;
+
+    if (!confirm(confirmMsg)) return;
+
+    const res = await db.toggleUserAdminRole(userId);
+    if (res.success) {
+      this.showToast(res.message, 'success');
+      this.render();
+    } else {
+      this.showToast(res.message || 'Action failed', 'error');
+    }
+  }
+
+  openAddAdminModal() {
+    const existing = document.getElementById('addAdminModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'addAdminModal';
+    modal.className = 'admin-modal-overlay';
+    modal.innerHTML = `
+      <div class="admin-modal-card" style="max-width: 460px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+          <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(243,186,47,0.15); border: 1.5px solid rgba(243,186,47,0.4); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+              👑
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #FFFFFF;">Grant Administrator Access</h3>
+              <p style="margin: 0.15rem 0 0 0; font-size: 0.75rem; color: var(--text-secondary);">Whitelist an email for team admin privileges</p>
+            </div>
+          </div>
+          <button type="button" class="btn-admin btn-admin-ghost btn-admin-sm" onclick="document.getElementById('addAdminModal').remove()" style="padding: 0.35rem 0.55rem;">✕</button>
+        </div>
+
+        <form onsubmit="window.adminApp.handleSaveAddAdminModal(event)">
+          <div class="form-field" style="margin-bottom: 1.25rem;">
+            <label class="form-field-label">Admin Email Address</label>
+            <input type="email" id="newAdminEmailInput" class="admin-input" placeholder="colleague@gmail.com" required autocomplete="off" style="font-size: 0.9rem; height: 42px;">
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.35rem;">
+              Any account registered with this email will immediately have access to the Admin Dashboard.
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+            <button type="button" class="btn-admin btn-admin-secondary" onclick="document.getElementById('addAdminModal').remove()">
+              Cancel
+            </button>
+            <button type="submit" class="btn-admin btn-admin-primary" style="font-weight: 800;">
+              👑 Grant Admin Role
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    setTimeout(() => {
+      document.getElementById('newAdminEmailInput')?.focus();
+    }, 50);
+  }
+
+  async handleSaveAddAdminModal(e) {
+    if (e) e.preventDefault();
+    const email = document.getElementById('newAdminEmailInput')?.value?.trim();
+    if (!email) return;
+
+    const res = await db.grantAdminByEmail(email);
+    const modal = document.getElementById('addAdminModal');
+    if (modal) modal.remove();
+
+    if (res.success) {
+      this.showToast(res.message, 'success');
+      this.render();
+    } else {
+      this.showToast(res.message || 'Failed to grant admin access', 'error');
     }
   }
 

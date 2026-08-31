@@ -3,7 +3,7 @@
    Single Source of Truth: Real Accounts, Secure Hashed Passwords, Live Quests
    ========================================================================== */
 
-import { supabase, isUserAdmin, ADMIN_EMAILS } from './supabaseClient.js';
+import { supabase, isUserAdmin, ADMIN_EMAILS, addAdminEmail, removeAdminEmail, getAdminEmails } from './supabaseClient.js';
 
 // Local storage session key
 const SESSION_KEY = 'booba_active_session_user';
@@ -1300,6 +1300,89 @@ class DatabaseService {
         console.warn('Supabase signOut error:', e);
       }
     }
+  }
+
+  // --------------------------------------------------------------------------
+  // ADMIN ACCESS & PRIVILEGES MANAGEMENT
+  // --------------------------------------------------------------------------
+
+  async toggleUserAdminRole(userIdOrEmail) {
+    if (!this.users || this.users.length === 0) await this.fetchUsers();
+    
+    const user = this.users.find(u => 
+      u.id === userIdOrEmail || 
+      (u.email && u.email.toLowerCase() === String(userIdOrEmail).toLowerCase().trim()) || 
+      (u.username && u.username.toLowerCase() === String(userIdOrEmail).toLowerCase().trim())
+    );
+
+    if (!user) {
+      return { success: false, message: 'User not found in system directory.' };
+    }
+
+    const isCurrentlyAdmin = user.role === 'admin' || isUserAdmin(user.email);
+    const newRole = isCurrentlyAdmin ? 'member' : 'admin';
+    user.role = newRole;
+
+    if (newRole === 'admin') {
+      if (user.email) addAdminEmail(user.email);
+    } else {
+      if (user.email) removeAdminEmail(user.email);
+    }
+
+    // Persist to Supabase if connected
+    if (supabase && user.id && !user.id.startsWith('gen-')) {
+      try {
+        await supabase.from('booba_users').update({ role: newRole }).eq('id', user.id);
+      } catch (err) {
+        console.warn('[Supabase] Failed to update user role:', err);
+      }
+    }
+
+    // If current session is this user, update active session
+    if (this.currentUser && this.currentUser.id === user.id) {
+      this.currentUser.role = newRole;
+      this.saveLocalSession(this.currentUser);
+    }
+
+    this.notify();
+
+    return {
+      success: true,
+      newRole,
+      user,
+      message: newRole === 'admin' 
+        ? `👑 Success: "${user.username}" (${user.email || 'Citizen'}) is now an Admin! They can access the team admin console.` 
+        : `Revoked Admin role from "${user.username}".`
+    };
+  }
+
+  async grantAdminByEmail(email) {
+    if (!email || !email.includes('@')) {
+      return { success: false, message: 'Please provide a valid email address.' };
+    }
+
+    const normalized = email.toLowerCase().trim();
+    addAdminEmail(normalized);
+
+    // If user already exists in database, update their role immediately
+    const user = (this.users || []).find(u => u.email && u.email.toLowerCase() === normalized);
+    if (user) {
+      user.role = 'admin';
+      if (supabase && user.id && !user.id.startsWith('gen-')) {
+        try {
+          await supabase.from('booba_users').update({ role: 'admin' }).eq('id', user.id);
+        } catch (e) {
+          console.warn('[Supabase] Role update error:', e);
+        }
+      }
+    }
+
+    this.notify();
+
+    return {
+      success: true,
+      message: `👑 Admin access granted to "${normalized}"! They can now log in to the Admin Console with their credentials.`
+    };
   }
 
   // --------------------------------------------------------------------------

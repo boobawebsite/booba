@@ -118,7 +118,7 @@ export async function hashPassword(password) {
 
 // Default Presale Launchpad Configuration
 const DEFAULT_PRESALE_CONFIG = {
-  treasuryAddress: '0xb46af5a653D60e8891cAd13AB8688138e6361821',
+  treasuryAddress: '0xB1b8618C5f4aD7154aaF60dB50ce21dd820aEA67',
   tokenAddress: '0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B',
   tokenSymbol: 'BOOBA',
   tokenDecimals: 18,
@@ -128,8 +128,8 @@ const DEFAULT_PRESALE_CONFIG = {
   stageName: 'Stage 1: Early Bird Alpha',
   stagePriceUsdt: 0.005,
   nextStagePriceUsdt: 0.0075,
-  minBuyUsdt: 10,
-  maxBuyUsdt: 10000,
+  minBuyUsdt: 25,
+  maxBuyUsdt: 25,
   softCapUsdt: 50000,
   hardCapUsdt: 250000,
   initialRaisedUsdt: 142580,

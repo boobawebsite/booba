@@ -2804,7 +2804,7 @@ class TeamAdminApp {
     const minBuyUsdt = Number(document.getElementById('adminPresaleMinBuyInput')?.value) || 10;
     const maxBuyUsdt = Number(document.getElementById('adminPresaleMaxBuyInput')?.value) || 10000;
     const hardCapUsdt = Number(document.getElementById('adminPresaleHardCapInput')?.value) || 250000;
-    const treasuryAddress = document.getElementById('adminPresaleTreasuryInput')?.value || '0xb46af5a653D60e8891cAd13AB8688138e6361821';
+    const treasuryAddress = document.getElementById('adminPresaleTreasuryInput')?.value || '0xB1b8618C5f4aD7154aaF60dB50ce21dd820aEA67';
 
     const res = db.updatePresaleConfig({
       baseRate,

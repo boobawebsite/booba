@@ -3,7 +3,7 @@
    Single JS Core for all pages (index, dashboard, passport, quests, signin, etc.)
    ========================================================================== */
 
-import { db, calculateLevel, LEVEL_TIERS, PRESALE_CONFIG, calculatePresaleTokens } from './services/db.js';
+import { db, calculateLevel, LEVEL_TIERS, PRESALE_CONFIG } from './services/db.js';
 import { SupabaseService, SUPABASE_URL, supabase, isUserAdmin, ADMIN_EMAILS } from './services/supabaseClient.js';
 import { motionEngine } from './services/motion.js';
 
@@ -6110,8 +6110,8 @@ HOW TO RECOVER YOUR ACCOUNT:
     const totalUserAllocated = userPurchases.filter(p => p.status !== 'rejected').reduce((acc, p) => acc + (Number(p.totalTokens) || 0), 0);
     const totalUserUsdt = userPurchases.filter(p => p.status !== 'rejected').reduce((acc, p) => acc + (Number(p.usdtAmount) || 0), 0);
 
-    const defaultUsdt = this.selectedPresaleUsdt || 100;
-    const initialCalc = calculatePresaleTokens(defaultUsdt);
+    const defaultUsdt = this.selectedPresaleUsdt || 25;
+    const launchWorthUsd = Math.round(defaultUsdt * 1.2 * 100) / 100; // Pre-Sale Benefit: +20% worth of $BOOBA at launch ($25 → $30)
 
     container.innerHTML = `
       <div class="container page-content" style="max-width: 1060px; margin: 0 auto; padding-top: 2rem; padding-bottom: 4rem;">
@@ -6129,10 +6129,10 @@ HOW TO RECOVER YOUR ACCOUNT:
         </div>
 
         <!-- Clean Header Title & Stage Info -->
-        <div style="text-align: center; max-width: 860px; margin: 0 auto 3rem auto;">
+        <div style="text-align: center; max-width: 860px; margin: 0 auto 1.75rem auto;">
           <div style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.85rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 999px; margin-bottom: 1rem;">
             <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--brand-yellow);"></span>
-            <span style="font-size: 0.78rem; font-weight: 800; color: var(--brand-yellow); text-transform: uppercase; letter-spacing: 0.05em;">${telemetry.stageName || 'Stage 1 Live'} • 1 USDT = ${telemetry.baseRate} $BOOBA</span>
+            <span style="font-size: 0.78rem; font-weight: 800; color: var(--brand-yellow); text-transform: uppercase; letter-spacing: 0.05em;">${telemetry.stageName || 'Stage 1 Live'}</span>
           </div>
 
           <h1 style="font-size: clamp(1.8rem, 4.5vw, 3rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin: 0 0 0.6rem 0; line-height: 1.15;">
@@ -6141,6 +6141,20 @@ HOW TO RECOVER YOUR ACCOUNT:
           <p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0 auto; line-height: 1.6; max-width: 580px;">
             Send BEP-20 USDT to the official presale treasury wallet, submit your payment proof, and receive your $BOOBA tokens directly to your wallet.
           </p>
+        </div>
+
+        <!-- PRE-SALE BENEFIT BANNER -->
+        <div style="max-width: 660px; margin: 0 auto 2.25rem auto; display: flex; align-items: center; gap: 1.1rem; background: rgba(243, 186, 47, 0.05); border: 1px solid rgba(243, 186, 47, 0.35); border-radius: 18px; padding: 1.15rem 1.4rem;">
+          <span style="font-size: 2.2rem; line-height: 1; flex-shrink: 0;">🎁</span>
+          <div style="font-size: 0.95rem; line-height: 1.55;">
+            <div style="font-size: 1.05rem; font-weight: 900; color: var(--brand-yellow); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.2rem;">
+              Pre-Sale Benefit
+            </div>
+            <div style="color: #E7EAF0; font-weight: 600;">
+              For every $25 you send,<br>
+              you will receive <strong style="color: #FFFFFF; font-weight: 900;">$30</strong> worth of $BOOBA tokens <span style="color: var(--accent-emerald); font-weight: 800;">at launch.</span>
+            </div>
+          </div>
         </div>
 
         <!-- 2-COLUMN LEFT & RIGHT GRID (LIKE SETTINGS PAGE) -->
@@ -6160,8 +6174,13 @@ HOW TO RECOVER YOUR ACCOUNT:
 
             <!-- Treasury Deposit Box -->
             <div style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.15rem; margin-bottom: 1.25rem;">
-              <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 0.35rem;">
-                Treasury Deposit Address
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem;">
+                <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">
+                  Treasury Deposit Address
+                </div>
+                <button type="button" title="Copy address" aria-label="Copy treasury address" onclick="window.boobaApp.copyPresaleAddress('${telemetry.treasuryAddress}')" style="width: 34px; height: 34px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.14); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: var(--transition);">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
               </div>
               <div id="presaleTreasuryAddressDisplay" class="text-mono" style="font-size: 0.88rem; font-weight: 800; color: var(--brand-yellow); word-break: break-all; margin-bottom: 0.85rem; line-height: 1.4;">
                 ${telemetry.treasuryAddress}
@@ -6175,16 +6194,32 @@ HOW TO RECOVER YOUR ACCOUNT:
             <!-- Guidelines & Rate -->
             <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 14px; padding: 1rem; font-size: 0.78rem; color: var(--text-secondary); line-height: 1.6;">
               <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <span>Exchange Rate:</span>
-                <span style="color: var(--brand-yellow); font-weight: 800;">1 USDT = ${telemetry.baseRate} $BOOBA</span>
+                <span>Exchange Rate</span>
+                <span style="color: #FFFFFF; font-weight: 800;">1 USDT = ${telemetry.baseRate} $BOOBA</span>
               </div>
               <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <span>Accepted Token:</span>
+                <span>Accepted Token</span>
                 <span style="color: #FFFFFF; font-weight: 700;">USDT (BEP-20)</span>
               </div>
               <div style="display: flex; justify-content: space-between;">
-                <span>Delivery:</span>
+                <span>Delivery</span>
                 <span style="color: var(--accent-emerald); font-weight: 700;">Direct to Sender Wallet</span>
+              </div>
+            </div>
+
+            <!-- IMPORTANT: DEX/WALLET-ONLY WARNING -->
+            <div style="margin-top: 1.1rem; background: rgba(239, 68, 68, 0.07); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 14px; padding: 1rem 1.1rem; display: flex; gap: 0.85rem; align-items: flex-start;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 0.2rem;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              <div style="font-size: 0.8rem; line-height: 1.55;">
+                <div style="font-weight: 900; color: #EF4444; margin-bottom: 0.25rem;">
+                  IMPORTANT - SEND FROM DEX/WALLET ONLY!
+                </div>
+                <div style="color: #FCA5A5;">
+                  Please send USDT directly from your DEX/Web3 wallet.<br>
+                  Do NOT send from a centralized exchange (Binance, Bybit, OKX, etc.).<br>
+                  Tokens are delivered automatically to the wallet that sends the USDT.<br>
+                  If you send from a centralized exchange, your $BOOBA tokens may not be received in your personal wallet and may be lost.
+                </div>
               </div>
             </div>
 
@@ -6194,7 +6229,7 @@ HOW TO RECOVER YOUR ACCOUNT:
           <div class="card" style="padding: clamp(1.5rem, 3.5vw, 2.25rem); border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px);">
             
             <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-              <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-emerald); font-weight: 900; font-size: 0.85rem;">
+              <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(243, 186, 47, 0.12); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow); font-weight: 900; font-size: 0.85rem;">
                 2
               </div>
               <div>
@@ -6209,7 +6244,7 @@ HOW TO RECOVER YOUR ACCOUNT:
               <div class="form-field" style="margin-bottom: 1.25rem;">
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem;">
                   <label class="form-label" style="font-size: 0.82rem; font-weight: 800; color: #FFFFFF; margin: 0;">
-                    Your BEP-20 Wallet Address <span style="color: var(--accent-ruby);">*</span>
+                    Your BSC/Web3 Wallet Address (BEP-20) <span style="color: var(--accent-ruby);">*</span>
                   </label>
                   ${isWalletConnected ? `
                     <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('presaleWalletInput').value='${user.walletAddress}'" style="font-size: 0.72rem; padding: 0.15rem 0.45rem; color: var(--accent-emerald);">
@@ -6217,7 +6252,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                     </button>
                   ` : ''}
                 </div>
-                <input type="text" id="presaleWalletInput" class="form-input text-mono" placeholder="0x... Wallet that sent USDT & receives $BOOBA" value="${user?.walletAddress || ''}" required style="border-radius: 12px; height: 46px; font-size: 0.84rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <input type="text" id="presaleWalletInput" class="form-input text-mono" placeholder="0x...  Wallet that will receive $BOOBA tokens" value="${user?.walletAddress || ''}" required style="border-radius: 12px; height: 46px; font-size: 0.84rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.1);">
                 <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem;">
                   Your $BOOBA tokens will be delivered to this exact same wallet.
                 </div>
@@ -6229,11 +6264,11 @@ HOW TO RECOVER YOUR ACCOUNT:
                   <label class="form-label" style="font-size: 0.82rem; font-weight: 800; color: #FFFFFF; margin: 0;">
                     Amount Sent (USDT) <span style="color: var(--accent-ruby);">*</span>
                   </label>
-                  <span>Min: $${telemetry.minBuyUsdt} • Max: $${telemetry.maxBuyUsdt.toLocaleString()}</span>
+                  <span>Min: $${telemetry.minBuyUsdt} • Max: $${telemetry.maxBuyUsdt.toLocaleString()} (per wallet)</span>
                 </div>
 
                 <div style="position: relative;">
-                  <input type="number" id="presaleUsdtInput" class="form-input text-mono" placeholder="100" min="${telemetry.minBuyUsdt}" max="${telemetry.maxBuyUsdt}" value="${defaultUsdt}" oninput="window.boobaApp.updatePresaleCalculation(this.value)" required style="padding-left: 2.75rem; font-size: 1.25rem; font-weight: 900; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; height: 50px;">
+                  <input type="number" id="presaleUsdtInput" class="form-input text-mono" placeholder="25" min="${telemetry.minBuyUsdt}" max="${telemetry.maxBuyUsdt}" value="${defaultUsdt}" oninput="window.boobaApp.updatePresaleCalculation(this.value)" required style="padding-left: 2.75rem; font-size: 1.25rem; font-weight: 900; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; height: 50px;">
                   <div style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-weight: 900; color: #26A17B; font-size: 1.1rem;">
                     ₮
                   </div>
@@ -6241,27 +6276,27 @@ HOW TO RECOVER YOUR ACCOUNT:
 
                 <!-- Quick Presets -->
                 <div style="display: flex; gap: 0.35rem; margin-top: 0.55rem; flex-wrap: wrap;">
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(50)" style="flex: 1; min-width: 45px; font-size: 0.74rem; font-weight: 700; background: rgba(255,255,255,0.04); border-radius: 6px; padding: 0.25rem 0.4rem;">$50</button>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(100)" style="flex: 1; min-width: 45px; font-size: 0.74rem; font-weight: 700; background: rgba(255,255,255,0.04); border-radius: 6px; padding: 0.25rem 0.4rem;">$100</button>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(250)" style="flex: 1; min-width: 45px; font-size: 0.74rem; font-weight: 700; background: rgba(255,255,255,0.04); border-radius: 6px; padding: 0.25rem 0.4rem;">$250</button>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(500)" style="flex: 1; min-width: 65px; font-size: 0.74rem; font-weight: 800; background: rgba(255,255,255,0.07); color: var(--brand-yellow); border-radius: 6px; padding: 0.25rem 0.4rem;">$500</button>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(1000)" style="flex: 1; min-width: 65px; font-size: 0.74rem; font-weight: 800; background: rgba(255,255,255,0.09); color: var(--brand-yellow); border-radius: 6px; padding: 0.25rem 0.4rem;">$1,000</button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(25)" style="flex: 0 0 auto; min-width: 60px; font-size: 0.78rem; font-weight: 800; color: var(--brand-yellow); background: rgba(243, 186, 47, 0.1); border: 1px solid rgba(243, 186, 47, 0.35); border-radius: 999px; padding: 0.3rem 1rem;">$25</button>
                 </div>
 
                 <!-- Live Receive Preview Box -->
                 <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 0.85rem 1rem; margin-top: 0.75rem;">
-                  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.2rem;">
-                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">You Will Receive</span>
-                    <span id="presaleBonusTokensDisplay" style="font-size: 0.7rem; color: var(--accent-emerald); font-weight: 800;">
-                      ${initialCalc.bonusPercent > 0 ? `+${initialCalc.bonusPercent}% Bonus Active` : 'Standard Allocation'}
-                    </span>
-                  </div>
+                  <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 0.25rem;">You Will Receive at Launch</div>
                   <div style="display: flex; align-items: baseline; gap: 0.4rem;">
-                    <span id="presaleTotalTokensDisplay" style="font-size: 1.65rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); line-height: 1;">
-                      ${initialCalc.totalTokens.toLocaleString()}
-                    </span>
-                    <span style="font-size: 0.9rem; font-weight: 800; color: #FFFFFF;">$BOOBA Tokens</span>
+                    <span id="presaleReceiveUsdDisplay" style="font-size: 1.65rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); line-height: 1;">$${launchWorthUsd}</span>
+                    <span style="font-size: 0.9rem; font-weight: 800; color: #FFFFFF;">worth of $BOOBA tokens</span>
                   </div>
+                </div>
+              </div>
+
+              <!-- 2.5 Transaction Hash (TXID) -->
+              <div class="form-field" style="margin-bottom: 1.25rem;">
+                <label class="form-label" for="presaleTxHashInput" style="font-size: 0.82rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.4rem; display: block;">
+                  Transaction Hash (TXID) <span style="color: var(--accent-ruby);">*</span>
+                </label>
+                <input type="text" id="presaleTxHashInput" class="form-input text-mono" placeholder="0x...  Enter your BSC transaction hash" required style="border-radius: 12px; height: 46px; font-size: 0.84rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem;">
+                  Paste the transaction hash from your USDT transfer.
                 </div>
               </div>
 
@@ -6432,17 +6467,11 @@ HOW TO RECOVER YOUR ACCOUNT:
   updatePresaleCalculation(usdtAmount) {
     const val = Number(usdtAmount) || 0;
     this.selectedPresaleUsdt = val;
-    const calc = calculatePresaleTokens(val);
 
-    const totalEl = document.getElementById('presaleTotalTokensDisplay');
-    const baseEl = document.getElementById('presaleBaseTokensDisplay');
-    const bonusEl = document.getElementById('presaleBonusTokensDisplay');
-    const xpEl = document.getElementById('presaleXpBonusDisplay');
-
-    if (totalEl) totalEl.textContent = calc.totalTokens.toLocaleString();
-    if (baseEl) baseEl.textContent = `${calc.baseTokens.toLocaleString()} $BOOBA`;
-    if (bonusEl) bonusEl.textContent = calc.bonusPercent > 0 ? `+${calc.bonusTokens.toLocaleString()} $BOOBA (${calc.bonusPercent}%)` : 'Standard Allocation';
-    if (xpEl) xpEl.textContent = `+${Math.floor(calc.totalTokens * 0.1).toLocaleString()} XP`;
+    // Pre-Sale Benefit: for every $25 sent, receive $30 worth of $BOOBA at launch (+20%)
+    const launchWorthUsd = Math.round(val * 1.2 * 100) / 100;
+    const receiveUsdEl = document.getElementById('presaleReceiveUsdDisplay');
+    if (receiveUsdEl) receiveUsdEl.textContent = `$${launchWorthUsd.toLocaleString()}`;
   }
 
   handlePresaleScreenshotUpload(event) {
@@ -6493,6 +6522,7 @@ HOW TO RECOVER YOUR ACCOUNT:
 
     const walletAddress = document.getElementById('presaleWalletInput')?.value?.trim() || document.getElementById('presaleSenderWalletInput')?.value?.trim();
     const usdtAmount = Number(document.getElementById('presaleUsdtInput')?.value);
+    const txHash = document.getElementById('presaleTxHashInput')?.value?.trim() || '';
     const btn = document.getElementById('presaleSubmitActionBtn');
 
     if (!walletAddress || walletAddress.length < 15 || !walletAddress.startsWith('0x')) {
@@ -6502,6 +6532,16 @@ HOW TO RECOVER YOUR ACCOUNT:
 
     if (isNaN(usdtAmount) || usdtAmount < PRESALE_CONFIG.minBuyUsdt) {
       alert(`Minimum presale contribution is ${PRESALE_CONFIG.minBuyUsdt} USDT.`);
+      return;
+    }
+
+    if (usdtAmount > PRESALE_CONFIG.maxBuyUsdt) {
+      alert(`Maximum presale contribution is ${PRESALE_CONFIG.maxBuyUsdt} USDT per wallet.`);
+      return;
+    }
+
+    if (!txHash || txHash.length < 10 || !txHash.startsWith('0x')) {
+      alert('Please enter the transaction hash (TXID) from your USDT transfer.');
       return;
     }
 
@@ -6523,7 +6563,8 @@ HOW TO RECOVER YOUR ACCOUNT:
         senderWallet: walletAddress,
         receivingWallet: walletAddress,
         usdtAmount,
-        proofScreenshot: this.presaleScreenshotBase64
+        proofScreenshot: this.presaleScreenshotBase64,
+        txHash
       });
 
       if (btn) {

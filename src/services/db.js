@@ -129,7 +129,8 @@ const DEFAULT_PRESALE_CONFIG = {
   stagePriceUsdt: 0.9091, // 1 / baseRate (per-token USDT price)
   nextStagePriceUsdt: 0.0075,
   minBuyUsdt: 100,
-  maxBuyUsdt: 100,
+  // No per-wallet maximum in current presale tier (kept high for safety, not enforced in UI)
+  maxBuyUsdt: 50000,
   softCapUsdt: 50000,
   hardCapUsdt: 250000,
   initialRaisedUsdt: 142580,
@@ -2389,9 +2390,6 @@ class DatabaseService {
 
     if (isNaN(usdt) || usdt < PRESALE_CONFIG.minBuyUsdt) {
       return { success: false, message: `Minimum presale contribution is ${PRESALE_CONFIG.minBuyUsdt} USDT.` };
-    }
-    if (usdt > PRESALE_CONFIG.maxBuyUsdt) {
-      return { success: false, message: `Maximum presale contribution is ${PRESALE_CONFIG.maxBuyUsdt} USDT per order.` };
     }
 
     const cleanSender = (senderWallet || user?.walletAddress || '').trim();

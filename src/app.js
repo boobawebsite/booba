@@ -6111,7 +6111,7 @@ HOW TO RECOVER YOUR ACCOUNT:
     const totalUserUsdt = userPurchases.filter(p => p.status !== 'rejected').reduce((acc, p) => acc + (Number(p.usdtAmount) || 0), 0);
 
     const defaultUsdt = this.selectedPresaleUsdt || 100;
-    const launchWorthUsd = Math.round(defaultUsdt * 1.2 * 100) / 100; // Pre-Sale Benefit: +20% worth of $BOOBA at launch ($100 → $120)
+    const launchWorthUsd = Math.round(defaultUsdt * (telemetry.baseRate || 1.1) * 100) / 100; // $100 USDT = 110 $BOOBA at current rate
 
     container.innerHTML = `
       <div class="container page-content" style="max-width: 1060px; margin: 0 auto; padding-top: 2rem; padding-bottom: 4rem;">
@@ -6152,7 +6152,7 @@ HOW TO RECOVER YOUR ACCOUNT:
             </div>
             <div style="color: #E7EAF0; font-weight: 600;">
                             For every $100 you send,<br>
-              you will receive <strong style="color: #FFFFFF; font-weight: 900;">$120</strong> worth of $BOOBA tokens <span style="color: var(--accent-emerald); font-weight: 800;">at launch.</span>
+              you will receive <strong style="color: #FFFFFF; font-weight: 900;">$110</strong> worth of $BOOBA tokens <span style="color: var(--accent-emerald); font-weight: 800;">at launch.</span>
             </div>
           </div>
         </div>
@@ -6264,11 +6264,11 @@ HOW TO RECOVER YOUR ACCOUNT:
                   <label class="form-label" style="font-size: 0.82rem; font-weight: 800; color: #FFFFFF; margin: 0;">
                     Amount Sent (USDT) <span style="color: var(--accent-ruby);">*</span>
                   </label>
-                  <span>Min: $${telemetry.minBuyUsdt} • Max: $${telemetry.maxBuyUsdt.toLocaleString()} (per wallet)</span>
+                  <span>Min: $${telemetry.minBuyUsdt} (per wallet)</span>
                 </div>
 
                 <div style="position: relative;">
-                  <input type="number" id="presaleUsdtInput" class="form-input text-mono" placeholder="100" min="${telemetry.minBuyUsdt}" max="${telemetry.maxBuyUsdt}" value="${defaultUsdt}" oninput="window.boobaApp.updatePresaleCalculation(this.value)" required style="padding-left: 2.75rem; font-size: 1.25rem; font-weight: 900; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; height: 50px;">
+                  <input type="number" id="presaleUsdtInput" class="form-input text-mono" placeholder="100" min="${telemetry.minBuyUsdt}" value="${defaultUsdt}" oninput="window.boobaApp.updatePresaleCalculation(this.value)" required style="padding-left: 2.75rem; font-size: 1.25rem; font-weight: 900; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; height: 50px;">
                   <div style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-weight: 900; color: #26A17B; font-size: 1.1rem;">
                     ₮
                   </div>
@@ -6468,8 +6468,8 @@ HOW TO RECOVER YOUR ACCOUNT:
     const val = Number(usdtAmount) || 0;
     this.selectedPresaleUsdt = val;
 
-        // Pre-Sale Benefit: for every $100 sent, receive $120 worth of $BOOBA at launch (+20%)
-    const launchWorthUsd = Math.round(val * 1.2 * 100) / 100;
+        // $100 USDT = 110 $BOOBA at the current presale rate (no per-wallet max)
+    const launchWorthUsd = Math.round(val * (PRESALE_CONFIG.baseRate || 1.1) * 100) / 100;
     const receiveUsdEl = document.getElementById('presaleReceiveUsdDisplay');
     if (receiveUsdEl) receiveUsdEl.textContent = `$${launchWorthUsd.toLocaleString()}`;
   }
@@ -6532,11 +6532,6 @@ HOW TO RECOVER YOUR ACCOUNT:
 
     if (isNaN(usdtAmount) || usdtAmount < PRESALE_CONFIG.minBuyUsdt) {
       alert(`Minimum presale contribution is ${PRESALE_CONFIG.minBuyUsdt} USDT.`);
-      return;
-    }
-
-    if (usdtAmount > PRESALE_CONFIG.maxBuyUsdt) {
-      alert(`Maximum presale contribution is ${PRESALE_CONFIG.maxBuyUsdt} USDT per wallet.`);
       return;
     }
 

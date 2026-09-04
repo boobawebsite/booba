@@ -6110,8 +6110,8 @@ HOW TO RECOVER YOUR ACCOUNT:
     const totalUserAllocated = userPurchases.filter(p => p.status !== 'rejected').reduce((acc, p) => acc + (Number(p.totalTokens) || 0), 0);
     const totalUserUsdt = userPurchases.filter(p => p.status !== 'rejected').reduce((acc, p) => acc + (Number(p.usdtAmount) || 0), 0);
 
-    const defaultUsdt = this.selectedPresaleUsdt || 25;
-    const launchWorthUsd = Math.round(defaultUsdt * 1.2 * 100) / 100; // Pre-Sale Benefit: +20% worth of $BOOBA at launch ($25 → $30)
+    const defaultUsdt = this.selectedPresaleUsdt || 100;
+    const launchWorthUsd = Math.round(defaultUsdt * 1.2 * 100) / 100; // Pre-Sale Benefit: +20% worth of $BOOBA at launch ($100 → $120)
 
     container.innerHTML = `
       <div class="container page-content" style="max-width: 1060px; margin: 0 auto; padding-top: 2rem; padding-bottom: 4rem;">
@@ -6151,8 +6151,8 @@ HOW TO RECOVER YOUR ACCOUNT:
               Pre-Sale Benefit
             </div>
             <div style="color: #E7EAF0; font-weight: 600;">
-              For every $25 you send,<br>
-              you will receive <strong style="color: #FFFFFF; font-weight: 900;">$30</strong> worth of $BOOBA tokens <span style="color: var(--accent-emerald); font-weight: 800;">at launch.</span>
+                            For every $100 you send,<br>
+              you will receive <strong style="color: #FFFFFF; font-weight: 900;">$120</strong> worth of $BOOBA tokens <span style="color: var(--accent-emerald); font-weight: 800;">at launch.</span>
             </div>
           </div>
         </div>
@@ -6195,7 +6195,7 @@ HOW TO RECOVER YOUR ACCOUNT:
             <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 14px; padding: 1rem; font-size: 0.78rem; color: var(--text-secondary); line-height: 1.6;">
               <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
                 <span>Exchange Rate</span>
-                <span style="color: #FFFFFF; font-weight: 800;">1 USDT = ${telemetry.baseRate} $BOOBA</span>
+                <span style="color: #FFFFFF; font-weight: 800;">100 USDT = ${Math.round(telemetry.baseRate * 100)} $BOOBA</span>
               </div>
               <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
                 <span>Accepted Token</span>
@@ -6268,7 +6268,7 @@ HOW TO RECOVER YOUR ACCOUNT:
                 </div>
 
                 <div style="position: relative;">
-                  <input type="number" id="presaleUsdtInput" class="form-input text-mono" placeholder="25" min="${telemetry.minBuyUsdt}" max="${telemetry.maxBuyUsdt}" value="${defaultUsdt}" oninput="window.boobaApp.updatePresaleCalculation(this.value)" required style="padding-left: 2.75rem; font-size: 1.25rem; font-weight: 900; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; height: 50px;">
+                  <input type="number" id="presaleUsdtInput" class="form-input text-mono" placeholder="100" min="${telemetry.minBuyUsdt}" max="${telemetry.maxBuyUsdt}" value="${defaultUsdt}" oninput="window.boobaApp.updatePresaleCalculation(this.value)" required style="padding-left: 2.75rem; font-size: 1.25rem; font-weight: 900; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; height: 50px;">
                   <div style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-weight: 900; color: #26A17B; font-size: 1.1rem;">
                     ₮
                   </div>
@@ -6276,7 +6276,7 @@ HOW TO RECOVER YOUR ACCOUNT:
 
                 <!-- Quick Presets -->
                 <div style="display: flex; gap: 0.35rem; margin-top: 0.55rem; flex-wrap: wrap;">
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(25)" style="flex: 0 0 auto; min-width: 60px; font-size: 0.78rem; font-weight: 800; color: var(--brand-yellow); background: rgba(243, 186, 47, 0.1); border: 1px solid rgba(243, 186, 47, 0.35); border-radius: 999px; padding: 0.3rem 1rem;">$25</button>
+                                    <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(100)" style="flex: 0 0 auto; min-width: 60px; font-size: 0.78rem; font-weight: 800; color: var(--brand-yellow); background: rgba(243, 186, 47, 0.1); border: 1px solid rgba(243, 186, 47, 0.35); border-radius: 999px; padding: 0.3rem 1rem;">$100</button>
                 </div>
 
                 <!-- Live Receive Preview Box -->
@@ -6468,7 +6468,7 @@ HOW TO RECOVER YOUR ACCOUNT:
     const val = Number(usdtAmount) || 0;
     this.selectedPresaleUsdt = val;
 
-    // Pre-Sale Benefit: for every $25 sent, receive $30 worth of $BOOBA at launch (+20%)
+        // Pre-Sale Benefit: for every $100 sent, receive $120 worth of $BOOBA at launch (+20%)
     const launchWorthUsd = Math.round(val * 1.2 * 100) / 100;
     const receiveUsdEl = document.getElementById('presaleReceiveUsdDisplay');
     if (receiveUsdEl) receiveUsdEl.textContent = `$${launchWorthUsd.toLocaleString()}`;

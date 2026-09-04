@@ -123,13 +123,13 @@ const DEFAULT_PRESALE_CONFIG = {
   tokenSymbol: 'BOOBA',
   tokenDecimals: 18,
   usdtAddress: '0x55d398326f99059fF775485246999027B3197955', // BEP-20 USDT on BSC Mainnet
-  baseRate: 200, // 1 USDT = 200 $BOOBA ($0.005 / $BOOBA)
+  baseRate: 1.1, // 100 USDT = 110 $BOOBA ($0.9091 / $BOOBA)
   stage: 1,
   stageName: 'Stage 1: Early Bird Alpha',
-  stagePriceUsdt: 0.005,
+  stagePriceUsdt: 0.9091, // 1 / baseRate (per-token USDT price)
   nextStagePriceUsdt: 0.0075,
-  minBuyUsdt: 25,
-  maxBuyUsdt: 25,
+  minBuyUsdt: 100,
+  maxBuyUsdt: 100,
   softCapUsdt: 50000,
   hardCapUsdt: 250000,
   initialRaisedUsdt: 142580,

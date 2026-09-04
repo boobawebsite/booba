@@ -2025,7 +2025,7 @@ class TeamAdminApp {
                 <label class="form-field-label" style="color: var(--brand-yellow); font-weight: 800;">
                   Tokens / 1 USDT ($BOOBA)
                 </label>
-                <input type="number" id="adminPresaleRateInput" class="admin-input text-mono" value="${telemetry.baseRate}" min="1" required style="font-weight: 800; color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); height: 40px;">
+                <input type="number" id="adminPresaleRateInput" class="admin-input text-mono" value="${telemetry.baseRate}" min="0.01" step="0.01" required style="font-weight: 800; color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); height: 40px;">
               </div>
 
               <div class="form-field">
@@ -2035,7 +2035,7 @@ class TeamAdminApp {
 
               <div class="form-field">
                 <label class="form-field-label">Token Price (USDT)</label>
-                <input type="number" step="0.0001" id="adminPresalePriceInput" class="admin-input text-mono" value="${telemetry.stagePriceUsdt || 0.005}" required style="height: 40px;">
+                <input type="number" step="0.0001" id="adminPresalePriceInput" class="admin-input text-mono" value="${telemetry.stagePriceUsdt || 0.9091}" required style="height: 40px;">
               </div>
 
               <div class="form-field">
@@ -2703,7 +2703,7 @@ class TeamAdminApp {
 
   handlePresaleAdminUsdtInput(usdtAmount) {
     const rateInput = document.getElementById('adminPresaleRateInput');
-    const rate = rateInput ? Number(rateInput.value) || 200 : 200;
+    const rate = rateInput ? Number(rateInput.value) || 1.1 : 1.1;
     const tokensInput = document.getElementById('adminAllocTokensInput');
     if (tokensInput && usdtAmount) {
       tokensInput.value = Math.floor(Number(usdtAmount) * rate);
@@ -2798,9 +2798,9 @@ class TeamAdminApp {
 
   handleSavePresaleConfig(e) {
     if (e) e.preventDefault();
-    const baseRate = Number(document.getElementById('adminPresaleRateInput')?.value) || 200;
+    const baseRate = Number(document.getElementById('adminPresaleRateInput')?.value) || 1.1;
     const stageName = document.getElementById('adminPresaleStageNameInput')?.value || 'Stage 1: Early Bird Alpha';
-    const stagePriceUsdt = Number(document.getElementById('adminPresalePriceInput')?.value) || 0.005;
+    const stagePriceUsdt = Number(document.getElementById('adminPresalePriceInput')?.value) || 0.9091;
     const minBuyUsdt = Number(document.getElementById('adminPresaleMinBuyInput')?.value) || 10;
     const maxBuyUsdt = Number(document.getElementById('adminPresaleMaxBuyInput')?.value) || 10000;
     const hardCapUsdt = Number(document.getElementById('adminPresaleHardCapInput')?.value) || 250000;
@@ -2817,7 +2817,7 @@ class TeamAdminApp {
     });
 
     if (res.success) {
-      this.showToast(`Presale Settings Saved! Rate is now 1 USDT = ${baseRate} $BOOBA`);
+      this.showToast(`Presale Settings Saved! Rate is now 100 USDT = ${Math.round(baseRate * 100)} $BOOBA`);
       this.render();
     }
   }

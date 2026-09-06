@@ -128,7 +128,7 @@ const DEFAULT_PRESALE_CONFIG = {
   stageName: 'Stage 1: Early Bird Alpha',
   stagePriceUsdt: 0.9091, // 1 / baseRate (per-token USDT price)
   nextStagePriceUsdt: 0.0075,
-  minBuyUsdt: 100,
+  minBuyUsdt: 25,
   // No per-wallet maximum in current presale tier (kept high for safety, not enforced in UI)
   maxBuyUsdt: 50000,
   softCapUsdt: 50000,

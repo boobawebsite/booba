@@ -6110,6 +6110,9 @@ HOW TO RECOVER YOUR ACCOUNT:
     const totalUserAllocated = userPurchases.filter(p => p.status !== 'rejected').reduce((acc, p) => acc + (Number(p.totalTokens) || 0), 0);
     const totalUserUsdt = userPurchases.filter(p => p.status !== 'rejected').reduce((acc, p) => acc + (Number(p.usdtAmount) || 0), 0);
 
+    // Paid users (any presale order that wasn't rejected) unlock the private Telegram group
+    const hasPaidAccess = userPurchases.some(p => p.status !== 'rejected');
+
     const defaultUsdt = this.selectedPresaleUsdt || 100;
     const launchWorthUsd = Math.round(defaultUsdt * (telemetry.baseRate || 1.1) * 100) / 100; // $100 USDT = 110 $BOOBA at current rate
 
@@ -6343,6 +6346,32 @@ HOW TO RECOVER YOUR ACCOUNT:
 
           </div>
 
+        </div>
+
+        <!-- PRIVATE TELEGRAM GROUP ACCESS (gated by presale payment) -->
+        <div class="card" style="padding: 1.15rem 1.35rem; border-radius: 20px; background: rgba(14, 18, 27, 0.88); border: 1.5px solid ${hasPaidAccess ? 'rgba(55, 174, 226, 0.4)' : 'rgba(255, 255, 255, 0.08)'}; backdrop-filter: blur(20px); margin-bottom: 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; box-shadow: ${hasPaidAccess ? '0 8px 24px rgba(0,0,0,0.45)' : 'none'};">
+          <div style="display: flex; align-items: center; gap: 0.9rem; min-width: 0; flex: 1 1 auto;">
+            <div style="width: 46px; height: 46px; border-radius: 14px; background: rgba(55, 174, 226, 0.14); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${hasPaidAccess ? '#37AEE2' : '#6B7280'}" stroke-width="1.9" style="filter: drop-shadow(0 0 6px rgba(55,174,226,0.45));"><path d="M21.6 16.9c0-.4-6.5-.9-2.6-.1-7.2-.5-2.5.2-4.9 0-4.7-4.9-2.7-3.3-1.1-4.8a2.2 2.2 0 0 1-3.9-3.8l-4.5-6 2.3v4.8a3.7 3.7 0 0 1-.2-4.2 1.5 3.4 5.2-8.3Z"></path></svg>
+            </div>
+            <div style="min-width: 0;">
+              <div style="font-size: 0.95rem; font-weight: 900; color: #FFFFFF; margin: 0;">Private Community Telegram Group</div>
+              <div style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5;">${hasPaidAccess ? 'You have paid access — welcome in!' : 'Exclusive for confirmed presale contributors. Unlocks after your payment is submitted.'}</div>
+            </div>
+          </div>
+          <div>
+            ${hasPaidAccess ? `
+              <a href="https://t.me/+Oi6fQSn2zWBiOGM0" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="font-weight: 800; display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.82rem; padding: 0.6rem 1.1rem; border-radius: 12px; background: linear-gradient(135deg, #37AEE2 0%, #2A9FD6 100%); color: #FFFFFF; box-shadow: 0 4px 18px rgba(55,174,226,0.35); white-space: nowrap;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21.6 16.9c0-.4-6.5-.9-2.6-.1-7.2-.5-2.5.2-4.9 0-4.7-4.9-2.7-3.3-1.1-4.8a2.2 2.2 0 0 1-3.9-3.8l-4.5-6 2.3v4.8a3.7 3.7 0 0 1-.2-4.2 1.5 3.4 5.2-8.3Z"></path></svg>
+                Join Telegram Group
+              </a>
+            ` : `
+              <button type="button" class="btn btn-ghost btn-sm" disabled style="font-weight: 800; display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.82rem; padding: 0.6rem 1.1rem; border-radius: 12px; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.12); cursor: not-allowed; opacity: 0.75; white-space: nowrap;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21.6 16.9c0-.4-6.5-.9-2.6-.1-7.2-.5-2.5.2-4.9 0-4.7-4.9-2.7-3.3-1.1-4.8a2.2 2.2 0 0 1-3.9-3.8l-4.5-6 2.3v4.8a3.7 3.7 0 0 1-.2-4.2 1.5 3.4 5.2-8.3Z"></path></svg>
+                🔒 Locked — Join after your presale payment
+              </button>
+            `}
+          </div>
         </div>
 
         <!-- RECENT USER PRESALE SUBMISSIONS & ORDER STATUS -->
@@ -6617,6 +6646,17 @@ HOW TO RECOVER YOUR ACCOUNT:
           Your payment proof for <strong>$${Number(order.usdtAmount).toLocaleString()} USDT</strong> has been submitted. The admin will verify your screenshot and dispatch your tokens to your DEX wallet.
         </p>
 
+        <!-- JOIN PRIVATE TELEGRAM GROUP NOTICE -->
+        <div style="background: rgba(55, 174, 226, 0.08); border: 1.5px solid rgba(55, 174, 226, 0.4); border-radius: 16px; padding: 1rem 1.15rem; margin-bottom: 1.1rem; display: flex; align-items: center; gap: 0.85rem;">
+          <div style="width: 44px; height: 44px; border-radius: 13px; background: rgba(55, 174, 226, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#37AEE2" stroke-width="1.9"><path d="M21.6 16.9c0-.4-6.5-.9-2.6-.1-7.2-.5-2.5.2-4.9 0-4.7-4.9-2.7-3.3-1.1-4.8a2.2 2.2 0 0 1-3.9-3.8l-4.5-6 2.3v4.8a3.7 3.7 0 0 1-.2-4.2 1.5 3.4 5.2-8.3Z"></path></svg>
+          </div>
+          <div style="min-width: 0; text-align: left;">
+            <div style="font-size: 0.92rem; font-weight: 900; color: #37AEE2; margin: 0;">Now join our Private Telegram Group!</div>
+            <div style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5;">Your payment is logged — tap the button below to get instant access to the exclusive paid-members group.</div>
+          </div>
+        </div>
+
         <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.15rem; margin-bottom: 1.75rem; text-align: left; font-size: 0.82rem;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
             <span style="color: var(--text-secondary);">Receiving DEX Wallet:</span>
@@ -6640,7 +6680,11 @@ HOW TO RECOVER YOUR ACCOUNT:
         </div>
 
         <div style="display: flex; gap: 0.75rem; flex-direction: column;">
-          <button type="button" class="btn btn-primary btn-block" onclick="document.getElementById('presaleSuccessModal').remove()" style="font-weight: 900;">
+          <a href="https://t.me/+Oi6fQSn2zWBiOGM0" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-block" style="font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: linear-gradient(135deg, #37AEE2 0%, #2A9FD6 100%); color: #FFFFFF; box-shadow: 0 4px 18px rgba(55,174,226,0.35);">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21.6 16.9c0-.4-6.5-.9-2.6-.1-7.2-.5-2.5.2-4.9 0-4.7-4.9-2.7-3.3-1.1-4.8a2.2 2.2 0 0 1-3.9-3.8l-4.5-6 2.3v4.8a3.7 3.7 0 0 1-.2-4.2 1.5 3.4 5.2-8.3Z"></path></svg>
+            Join Private Telegram Group
+          </a>
+          <button type="button" class="btn btn-ghost btn-block" onclick="document.getElementById('presaleSuccessModal').remove()" style="font-weight: 800;">
             Close & View Order Status
           </button>
         </div>

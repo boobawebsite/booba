@@ -3,7 +3,7 @@
    Single JS Core for all pages (index, dashboard, passport, quests, signin, etc.)
    ========================================================================== */
 
-import { db, calculateLevel, LEVEL_TIERS } from './services/db.js';
+import { db, calculateLevel, LEVEL_TIERS, PRESALE_CONFIG } from './services/db.js';
 import { SupabaseService, SUPABASE_URL, supabase, isUserAdmin, ADMIN_EMAILS } from './services/supabaseClient.js';
 import { motionEngine } from './services/motion.js';
 

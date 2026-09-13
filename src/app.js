@@ -7656,6 +7656,8 @@ HOW TO RECOVER YOUR ACCOUNT:
   }
 }
 
-// Attach globally
-window.boobaApp = new BoobaApp();
+// Attach globally - wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', () => {
+  window.boobaApp = new BoobaApp();
+});
 

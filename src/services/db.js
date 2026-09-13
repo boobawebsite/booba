@@ -116,6 +116,69 @@ export async function hashPassword(password) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Default Presale Launchpad Configuration
+const DEFAULT_PRESALE_CONFIG = {
+  treasuryAddress: '0xB1b8618C5f4aD7154aaF60dB50ce21dd820aEA67',
+  tokenAddress: '0x005f17db06AF1Dc815C84Ec656d6ed120e48B21B',
+  tokenSymbol: 'BOOBA',
+  tokenDecimals: 18,
+  usdtAddress: '0x55d398326f99059fF775485246999027B3197955', // BEP-20 USDT on BSC Mainnet
+  baseRate: 1.1, // 100 USDT = 110 $BOOBA ($0.9091 / $BOOBA)
+  stage: 1,
+  stageName: 'Stage 1: Early Bird Alpha',
+  stagePriceUsdt: 0.9091, // 1 / baseRate (per-token USDT price)
+  nextStagePriceUsdt: 0.0075,
+  minBuyUsdt: 25,
+  // No per-wallet maximum in current presale tier (kept high for safety, not enforced in UI)
+  maxBuyUsdt: 50000,
+  softCapUsdt: 50000,
+  hardCapUsdt: 250000,
+  initialRaisedUsdt: 142580,
+  bonusTiers: [
+    { minUsdt: 1000, bonusPercent: 15, label: '+15% Diamond Bonus' },
+    { minUsdt: 500, bonusPercent: 10, label: '+10% Gold Bonus' },
+    { minUsdt: 100, bonusPercent: 5, label: '+5% Silver Bonus' },
+    { minUsdt: 0, bonusPercent: 0, label: 'Standard Allocation' }
+  ]
+};
+
+let savedCustomConfig = {};
+try {
+  savedCustomConfig = JSON.parse(localStorage.getItem('booba_custom_presale_config') || '{}');
+} catch (e) {}
+
+export const PRESALE_CONFIG = {
+  ...DEFAULT_PRESALE_CONFIG,
+  ...savedCustomConfig
+};
+
+/**
+ * Calculate $BOOBA tokens and bonuses for given USDT deposit
+ */
+export function calculatePresaleTokens(usdtAmount) {
+  const amount = Math.max(0, Number(usdtAmount) || 0);
+  const baseTokens = Math.floor(amount * PRESALE_CONFIG.baseRate);
+  
+  let bonusPercent = 0;
+  for (const tier of PRESALE_CONFIG.bonusTiers) {
+    if (amount >= tier.minUsdt) {
+      bonusPercent = tier.bonusPercent;
+      break;
+    }
+  }
+
+  const bonusTokens = Math.floor(baseTokens * (bonusPercent / 100));
+  const totalTokens = baseTokens + bonusTokens;
+
+  return {
+    usdtAmount: amount,
+    baseTokens,
+    bonusPercent,
+    bonusTokens,
+    totalTokens,
+    tokenPrice: PRESALE_CONFIG.stagePriceUsdt
+  };
+}
 
 // Level definitions with comprehensive color and theme metadata
 export const LEVEL_TIERS = [
@@ -301,6 +364,7 @@ class DatabaseService {
     this.submissions = [];
     this.referrals = [];
     this.airdropLogs = [];
+    this.presalePurchases = [];
     this.withdrawals = [];
     this.listeners = [];
     this.isInitialized = false;
@@ -365,6 +429,7 @@ class DatabaseService {
       submissions: this.submissions,
       referrals: this.referrals,
       airdropLogs: this.airdropLogs,
+      presalePurchases: this.presalePurchases,
       withdrawals: this.withdrawals,
       stats: this.getStats()
     };
@@ -379,11 +444,13 @@ class DatabaseService {
 
   async refreshAll() {
     await Promise.all([
+      this.fetchPresaleConfig(),
       this.fetchUsers(),
       this.fetchQuests(),
       this.fetchSubmissions(),
       this.fetchReferrals(),
       this.fetchAirdropLogs(),
+      this.fetchPresalePurchases(),
       this.fetchWithdrawals()
     ]);
 
@@ -410,10 +477,34 @@ class DatabaseService {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_users' }, () => this.fetchUsers())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_submissions' }, () => this.fetchSubmissions())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_airdrop_logs' }, () => this.fetchAirdropLogs())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_presale_purchases' }, () => this.fetchPresalePurchases())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_withdrawals' }, () => this.fetchWithdrawals())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'booba_stats' }, () => this.fetchPresaleConfig())
         .subscribe();
     } catch (e) {
       console.warn('Realtime subscription skipped:', e);
+    }
+  }
+
+  async fetchPresaleConfig() {
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('booba_stats')
+          .select('value')
+          .eq('key', 'presale_config')
+          .maybeSingle();
+
+        if (!error && data && data.value) {
+          Object.assign(PRESALE_CONFIG, data.value);
+          try {
+            localStorage.setItem('booba_custom_presale_config', JSON.stringify(PRESALE_CONFIG));
+          } catch (e) {}
+          this.notify();
+        }
+      } catch (e) {
+        console.warn('fetchPresaleConfig notice:', e);
+      }
     }
   }
 
@@ -2224,7 +2315,490 @@ class DatabaseService {
   // PRESALE & USDT DEPOSIT ENGINE (WITH DEX RECEIVING WALLET & SCREENSHOT PROOF)
   // --------------------------------------------------------------------------
 
+  async fetchPresalePurchases() {
+    let list = [];
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('booba_presale_purchases')
+          .select('*')
+          .order('created_at', { ascending: false });
 
+        if (!error && data) {
+          list = data.map(p => ({
+            id: p.id,
+            userId: p.user_id,
+            username: p.username,
+            passportId: p.passport_id,
+            senderWallet: p.sender_wallet || p.wallet_address || '',
+            receivingWallet: p.receiving_wallet || p.wallet_address || '',
+            usdtAmount: Number(p.usdt_amount) || 0,
+            baseTokens: Number(p.base_tokens) || 0,
+            bonusPercent: Number(p.bonus_percent) || 0,
+            bonusTokens: Number(p.bonus_tokens) || 0,
+            totalTokens: Number(p.total_tokens || p.booba_tokens) || 0,
+            proofScreenshot: p.proof_screenshot || '',
+            deliveryProofScreenshot: p.delivery_proof_screenshot || '',
+            adminNotes: p.admin_notes || '',
+            method: p.method || 'manual_proof',
+            txHash: p.tx_hash || '',
+            explorerUrl: p.explorer_url || (p.tx_hash ? `https://bscscan.com/tx/${p.tx_hash}` : ''),
+            notes: p.notes || '',
+            sentTxHash: p.sent_tx_hash || '',
+            sentAt: p.sent_at || null,
+            status: p.status || 'pending',
+            timestamp: p.created_at || new Date().toISOString()
+          }));
+        }
+      } catch (e) {
+        console.warn('fetchPresalePurchases Supabase error:', e);
+      }
+    }
+
+    // Merge with local storage logs without duplicates
+    let localLogs = [];
+    try {
+      localLogs = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+    } catch (e) {}
+
+    const combined = [...list];
+    localLogs.forEach(loc => {
+      const existing = combined.find(p => p.id === loc.id || (loc.txHash && loc.txHash === p.txHash));
+      if (!existing) {
+        combined.push(loc);
+      } else {
+        // Prefer more updated status
+        if (loc.status && loc.status !== 'pending' && existing.status === 'pending') {
+          existing.status = loc.status;
+          existing.sentTxHash = loc.sentTxHash || existing.sentTxHash;
+          existing.sentAt = loc.sentAt || existing.sentAt;
+          existing.deliveryProofScreenshot = loc.deliveryProofScreenshot || existing.deliveryProofScreenshot;
+        }
+      }
+    });
+
+    this.presalePurchases = combined.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    return this.presalePurchases;
+  }
+
+  /**
+   * User Submits Presale Payment Form with Sender Wallet, DEX Receiving Wallet, and Screenshot Proof
+   */
+  async submitPresalePaymentForm({ senderWallet, receivingWallet, usdtAmount, proofScreenshot = '', txHash = '', notes = '' }) {
+    const user = this.currentUser;
+    const usdt = Number(usdtAmount);
+
+    if (isNaN(usdt) || usdt < PRESALE_CONFIG.minBuyUsdt) {
+      return { success: false, message: `Minimum presale contribution is ${PRESALE_CONFIG.minBuyUsdt} USDT.` };
+    }
+
+    const cleanSender = (senderWallet || user?.walletAddress || '').trim();
+    if (!cleanSender || cleanSender.length < 15) {
+      return { success: false, message: 'Please provide the valid wallet address that sent the USDT payment.' };
+    }
+
+    const cleanReceiver = (receivingWallet || cleanSender).trim();
+    if (!cleanReceiver || cleanReceiver.length < 15) {
+      return { success: false, message: 'Please provide your DEX token receiving wallet address (e.g. Trust Wallet, MetaMask).' };
+    }
+
+    const calc = calculatePresaleTokens(usdt);
+    const orderId = 'pre_ord_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+    const now = new Date().toISOString();
+    const cleanTxHash = (txHash || '').trim();
+
+    const orderReceipt = {
+      id: orderId,
+      userId: user ? user.id : 'guest_' + cleanSender.slice(-6),
+      username: user ? user.username : ('Citizen_' + cleanReceiver.slice(-4)),
+      passportId: user ? user.passportId : ('BB-' + Math.floor(100000 + Math.random() * 900000)),
+      senderWallet: cleanSender,
+      receivingWallet: cleanReceiver,
+      usdtAmount: usdt,
+      baseTokens: calc.baseTokens,
+      bonusPercent: calc.bonusPercent,
+      bonusTokens: calc.bonusTokens,
+      totalTokens: calc.totalTokens,
+      tokenRate: PRESALE_CONFIG.baseRate,
+      pricePerToken: PRESALE_CONFIG.stagePriceUsdt,
+      proofScreenshot: proofScreenshot || '',
+      deliveryProofScreenshot: '',
+      adminNotes: '',
+      method: 'manual_proof',
+      txHash: cleanTxHash,
+      explorerUrl: cleanTxHash ? `https://bscscan.com/tx/${cleanTxHash}` : '',
+      notes: notes.trim(),
+      sentTxHash: '',
+      sentAt: null,
+      status: 'pending', // 'pending' | 'completed' | 'rejected'
+      timestamp: now
+    };
+
+    // Update in-memory presale purchases
+    this.presalePurchases.unshift(orderReceipt);
+
+    // Save to local storage
+    try {
+      const globalPresale = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+      globalPresale.unshift(orderReceipt);
+      localStorage.setItem('booba_global_presale_logs', JSON.stringify(globalPresale.slice(0, 200)));
+    } catch (e) {}
+
+    // Update current user session
+    if (this.currentUser) {
+      if (!Array.isArray(this.currentUser.presalePurchases)) {
+        this.currentUser.presalePurchases = [];
+      }
+      this.currentUser.presalePurchases.unshift(orderReceipt);
+      this.saveLocalSession(this.currentUser);
+    }
+
+    // Persist to Supabase
+    if (supabase) {
+      try {
+        await supabase
+          .from('booba_presale_purchases')
+          .insert([{
+            id: orderId,
+            user_id: orderReceipt.userId,
+            username: orderReceipt.username,
+            passport_id: orderReceipt.passportId,
+            sender_wallet: cleanSender,
+            receiving_wallet: cleanReceiver,
+            usdt_amount: usdt,
+            base_tokens: calc.baseTokens,
+            bonus_percent: calc.bonusPercent,
+            bonus_tokens: calc.bonusTokens,
+            total_tokens: calc.totalTokens,
+            proof_screenshot: proofScreenshot || null,
+            delivery_proof_screenshot: null,
+            admin_notes: null,
+            method: 'manual_proof',
+            tx_hash: cleanTxHash || null,
+            explorer_url: cleanTxHash ? `https://bscscan.com/tx/${cleanTxHash}` : null,
+            notes: notes || null,
+            status: 'pending',
+            created_at: now
+          }]);
+      } catch (err) {
+        console.warn('Supabase presale payment insert notice:', err);
+      }
+    }
+
+    this.notify();
+
+    return {
+      success: true,
+      order: orderReceipt,
+      totalTokens: calc.totalTokens,
+      message: 'Presale payment proof submitted successfully!'
+    };
+  }
+
+  /**
+   * Admin Dispatches Tokens, Uploads Verification Screenshot Proof, & Fulfills Presale Order
+   */
+  async adminFulfillPresaleOrder(orderId, { sentTxHash = '', adminNotes = '', deliveryProofScreenshot = '' }) {
+    let order = this.presalePurchases.find(p => p.id === orderId);
+    if (!order) {
+      let localLogs = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+      order = localLogs.find(p => p.id === orderId);
+    }
+
+    if (!order) return { success: false, message: 'Order not found.' };
+
+    const dispatchTx = sentTxHash.trim();
+    const nowIso = new Date().toISOString();
+
+    order.status = 'completed';
+    order.sentTxHash = dispatchTx;
+    order.sentAt = nowIso;
+    if (deliveryProofScreenshot) order.deliveryProofScreenshot = deliveryProofScreenshot;
+    if (adminNotes) {
+      order.adminNotes = adminNotes;
+      order.notes = (order.notes ? order.notes + ' | ' : '') + 'Admin: ' + adminNotes;
+    }
+
+    // Update target user allocation & points if registered
+    const targetUser = this.users.find(u => u.id === order.userId || u.username === order.username || (u.walletAddress && u.walletAddress.toLowerCase() === order.receivingWallet.toLowerCase()));
+    if (targetUser) {
+      targetUser.presaleTokensAllocated = (Number(targetUser.presaleTokensAllocated) || 0) + order.totalTokens;
+      targetUser.boobaPoints = (Number(targetUser.boobaPoints) || 0) + order.totalTokens;
+      
+      if (this.currentUser && this.currentUser.id === targetUser.id) {
+        this.currentUser = { ...targetUser };
+        this.saveLocalSession(this.currentUser);
+      }
+    }
+
+    // Update global local storage
+    try {
+      const globalPresale = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+      const idx = globalPresale.findIndex(p => p.id === orderId);
+      if (idx !== -1) {
+        globalPresale[idx] = { ...globalPresale[idx], ...order };
+      } else {
+        globalPresale.unshift(order);
+      }
+      localStorage.setItem('booba_global_presale_logs', JSON.stringify(globalPresale));
+    } catch (e) {}
+
+    // Persist to Supabase
+    if (supabase) {
+      try {
+        await supabase
+          .from('booba_presale_purchases')
+          .update({
+            status: 'completed',
+            sent_tx_hash: dispatchTx || null,
+            sent_at: nowIso,
+            delivery_proof_screenshot: deliveryProofScreenshot || order.deliveryProofScreenshot || null,
+            admin_notes: adminNotes || order.adminNotes || null,
+            notes: order.notes
+          })
+          .eq('id', orderId);
+
+        if (targetUser && targetUser.id && !targetUser.id.startsWith('guest_')) {
+          await supabase
+            .from('booba_users')
+            .update({
+              booba_points: targetUser.boobaPoints
+            })
+            .eq('id', targetUser.id);
+        }
+      } catch (err) {
+        console.warn('Supabase presale fulfillment sync notice:', err);
+      }
+    }
+
+    this.notify();
+    return { success: true, order, sentTxHash: dispatchTx };
+  }
+
+  /**
+   * Admin Rejects Invalid Presale Submission
+   */
+  async adminRejectPresaleOrder(orderId, { reason = 'Invalid payment proof or unconfirmed transaction' }) {
+    const order = this.presalePurchases.find(p => p.id === orderId);
+    if (!order) return { success: false, message: 'Order not found.' };
+
+    order.status = 'rejected';
+    order.notes = (order.notes ? order.notes + ' | ' : '') + 'Rejected: ' + reason;
+
+    // Update global local storage
+    try {
+      const globalPresale = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+      const idx = globalPresale.findIndex(p => p.id === orderId);
+      if (idx !== -1) {
+        globalPresale[idx] = { ...globalPresale[idx], ...order };
+      }
+      localStorage.setItem('booba_global_presale_logs', JSON.stringify(globalPresale));
+    } catch (e) {}
+
+    // Persist to Supabase
+    if (supabase) {
+      try {
+        await supabase
+          .from('booba_presale_purchases')
+          .update({
+            status: 'rejected',
+            notes: order.notes
+          })
+          .eq('id', orderId);
+      } catch (err) {
+        console.warn('Supabase presale reject sync notice:', err);
+      }
+    }
+
+    this.notify();
+    return { success: true, order };
+  }
+
+  /**
+   * Admin Deletes Presale Order Record
+   */
+  async adminDeletePresaleOrder(orderId) {
+    this.presalePurchases = this.presalePurchases.filter(p => p.id !== orderId);
+
+    try {
+      let globalPresale = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+      globalPresale = globalPresale.filter(p => p.id !== orderId);
+      localStorage.setItem('booba_global_presale_logs', JSON.stringify(globalPresale));
+    } catch (e) {}
+
+    if (supabase) {
+      try {
+        await supabase.from('booba_presale_purchases').delete().eq('id', orderId);
+      } catch (err) {
+        console.warn('Supabase presale delete sync notice:', err);
+      }
+    }
+
+    this.notify();
+    return { success: true };
+  }
+
+  getUserPresalePurchases() {
+    if (!this.currentUser) {
+      // Return any purchases submitted in this browser session
+      try {
+        return JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    const uid = this.currentUser.id;
+    const uname = this.currentUser.username?.toLowerCase();
+    const uwallet = this.currentUser.walletAddress?.toLowerCase();
+
+    return this.presalePurchases.filter(p => 
+      (uid && p.userId === uid) ||
+      (uname && p.username?.toLowerCase() === uname) ||
+      (uwallet && p.receivingWallet && p.receivingWallet.toLowerCase() === uwallet) ||
+      (uwallet && p.senderWallet && p.senderWallet.toLowerCase() === uwallet)
+    );
+  }
+
+  getPresaleTelemetry() {
+    const list = this.presalePurchases || [];
+    const validPurchases = list.filter(p => p.status !== 'rejected');
+
+    const additionalUsdt = validPurchases.reduce((acc, p) => acc + (Number(p.usdtAmount) || 0), 0);
+    const additionalTokens = validPurchases.reduce((acc, p) => acc + (Number(p.totalTokens) || 0), 0);
+
+    const totalUsdtRaised = PRESALE_CONFIG.initialRaisedUsdt + additionalUsdt;
+    const progressPercent = Math.min(100, Math.round((totalUsdtRaised / PRESALE_CONFIG.hardCapUsdt) * 100));
+    const totalParticipants = 1420 + validPurchases.length;
+    const pendingOrdersCount = list.filter(p => p.status === 'pending').length;
+    const completedOrdersCount = list.filter(p => p.status === 'completed').length;
+
+    return {
+      ...PRESALE_CONFIG,
+      totalUsdtRaised,
+      totalTokensSold: Math.floor(totalUsdtRaised * PRESALE_CONFIG.baseRate) + additionalTokens,
+      progressPercent,
+      totalParticipants,
+      pendingOrdersCount,
+      completedOrdersCount,
+      recentPurchases: list
+    };
+  }
+
+  // --------------------------------------------------------------------------
+  // ADMIN PRESALE RATE & TOKEN ALLOCATION MANAGEMENT
+  // --------------------------------------------------------------------------
+
+  updatePresaleConfig(newConfig) {
+    if (!newConfig || typeof newConfig !== 'object') return { success: false, message: 'Invalid configuration' };
+    
+    // Update active config in memory
+    Object.assign(PRESALE_CONFIG, newConfig);
+
+    // Save to local storage
+    try {
+      localStorage.setItem('booba_custom_presale_config', JSON.stringify(PRESALE_CONFIG));
+    } catch (e) {}
+
+    // Async sync to Supabase
+    if (supabase) {
+      supabase.from('booba_stats').upsert({
+        key: 'presale_config',
+        value: PRESALE_CONFIG,
+        updated_at: new Date().toISOString()
+      }).catch(err => console.warn('[Supabase] Presale config sync error:', err));
+    }
+
+    this.notify();
+    return { success: true, config: PRESALE_CONFIG };
+  }
+
+  adminCreditPresaleTokens({ userId, walletAddress, usdtAmount, customBoobaTokens, txHash, notes }) {
+    let targetUser = null;
+    if (userId) {
+      targetUser = this.users.find(u => u.id === userId || u.username === userId || u.passportId === userId);
+    } else if (walletAddress) {
+      targetUser = this.users.find(u => u.walletAddress && u.walletAddress.toLowerCase() === walletAddress.toLowerCase());
+    }
+
+    const calculatedTokens = calculatePresaleTokens(usdtAmount).totalTokens;
+    const tokensToCredit = (customBoobaTokens !== undefined && customBoobaTokens !== null && customBoobaTokens !== '') 
+      ? Number(customBoobaTokens) 
+      : calculatedTokens;
+
+    const receipt = {
+      id: 'presale_admin_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+      userId: targetUser ? targetUser.id : (walletAddress || 'custom_citizen'),
+      username: targetUser ? targetUser.username : (walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Manual Citizen'),
+      passportId: targetUser ? targetUser.passportId : 'BB-MANUAL',
+      senderWallet: 'Admin Allocation',
+      receivingWallet: walletAddress || (targetUser ? targetUser.walletAddress : '') || 'DEX Wallet',
+      usdtAmount: Number(usdtAmount) || 0,
+      baseTokens: tokensToCredit,
+      bonusPercent: 0,
+      bonusTokens: 0,
+      totalTokens: tokensToCredit,
+      proofScreenshot: '',
+      method: 'admin_allocation',
+      txHash: txHash || ('0x' + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('')),
+      explorerUrl: txHash ? `https://bscscan.com/tx/${txHash}` : null,
+      sentTxHash: txHash || '',
+      sentAt: new Date().toISOString(),
+      status: 'completed',
+      notes: notes || 'Admin assigned allocation',
+      timestamp: new Date().toISOString()
+    };
+
+    if (targetUser) {
+      targetUser.presalePurchases = targetUser.presalePurchases || [];
+      targetUser.presalePurchases.unshift(receipt);
+      targetUser.presaleTokensAllocated = (targetUser.presaleTokensAllocated || 0) + tokensToCredit;
+      targetUser.boobaPoints = (targetUser.boobaPoints || 0) + tokensToCredit;
+      
+      if (this.currentUser && this.currentUser.id === targetUser.id) {
+        this.currentUser = { ...targetUser };
+        this.saveLocalSession(this.currentUser);
+      }
+    }
+
+    this.presalePurchases.unshift(receipt);
+
+    // Save to global presale logs
+    let globalPurchases = [];
+    try {
+      globalPurchases = JSON.parse(localStorage.getItem('booba_global_presale_logs') || '[]');
+    } catch (e) {}
+    globalPurchases.unshift(receipt);
+    try {
+      localStorage.setItem('booba_global_presale_logs', JSON.stringify(globalPurchases));
+    } catch (e) {}
+
+    // Async sync to Supabase
+    if (supabase) {
+      supabase.from('booba_presale_purchases').insert({
+        id: receipt.id,
+        user_id: receipt.userId,
+        username: receipt.username,
+        passport_id: receipt.passportId,
+        sender_wallet: receipt.senderWallet,
+        receiving_wallet: receipt.receivingWallet,
+        usdt_amount: receipt.usdtAmount,
+        base_tokens: receipt.baseTokens,
+        bonus_percent: 0,
+        bonus_tokens: 0,
+        total_tokens: receipt.totalTokens,
+        method: 'admin_allocation',
+        tx_hash: receipt.txHash,
+        explorer_url: receipt.explorerUrl,
+        sent_tx_hash: receipt.sentTxHash,
+        sent_at: receipt.sentAt,
+        status: 'completed'
+      }).catch(err => console.warn('[Supabase] Presale admin insert error:', err));
+    }
+
+    this.notify();
+    return { success: true, receipt, tokensCredited: tokensToCredit };
+  }
 
   // --------------------------------------------------------------------------
   // AGGREGATE STATS

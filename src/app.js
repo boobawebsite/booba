@@ -17,6 +17,7 @@ class BoobaApp {
     this.selectedQuestForSocial = null;
     this.eip6963Providers = new Map();
     this.wcProvider = null;
+    this.selectedPresaleUsdt = 100;
 
     this.initEIP6963();
     this.init();
@@ -48,6 +49,7 @@ class BoobaApp {
     const last = segments[segments.length - 1] || '';
 
     // 2. Direct path matching (supports .html and clean Vercel/production URLs)
+    if (last === 'presale.html' || last === 'presale' || last === 'launchpad' || last === 'ico') return 'presale';
     if (last === 'about.html' || last === 'about' || last === 'tokenomics') return 'about';
     if (last === 'signin.html' || last === 'signin' || last === 'login' || last === 'signup') return 'signin';
     if (last === 'dashboard.html' || last === 'dashboard' || last === 'overview') return 'dashboard';
@@ -60,6 +62,7 @@ class BoobaApp {
     if (last === 'settings.html' || last === 'settings') return 'settings';
     
     // 3. Sub-path matching (e.g. /dashboard/leaderboard or /dashboard/quests)
+    if (rawPath.includes('/presale') || rawPath.includes('/launchpad')) return 'presale';
     if (rawPath.includes('/about') || rawPath.includes('/tokenomics')) return 'about';
     if (rawPath.includes('/signin')) return 'signin';
     if (rawPath.includes('/passport')) return 'passport';
@@ -73,6 +76,7 @@ class BoobaApp {
 
     // 4. Hash routing fallback
     const hash = (window.location.hash || '').replace(/^#/, '').toLowerCase();
+    if (hash === 'presale' || hash === 'launchpad' || hash.startsWith('dashboard/presale')) return 'presale';
     if (hash === 'about' || hash === 'tokenomics') return 'about';
     if (hash === 'signin' || hash === 'login' || hash === 'signup' || hash === 'auth') return 'signin';
     if (hash.startsWith('dashboard/passport') || hash === 'passport') return 'passport';
@@ -423,6 +427,9 @@ class BoobaApp {
     if (!mainContainer) return;
 
     switch (this.pageName) {
+      case 'presale':
+        this.renderPresaleView(mainContainer);
+        break;
       case 'about':
         this.renderAboutView(mainContainer);
         break;
@@ -2162,6 +2169,10 @@ HOW TO RECOVER YOUR ACCOUNT:
             </p>
 
             <div class="hero-actions">
+              <a href="presale.html" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #F3BA2F 0%, #E2A016 100%); color: #000; font-weight: 800; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 0 25px rgba(243, 186, 47, 0.4);">
+                <span class="pulse-dot" style="width: 7px; height: 7px; background: #000;"></span>
+                <span>⚡ Join Presale (Stage 1 Live)</span>
+              </a>
               ${user ? `
                 <a href="withdraw.html" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 0.45rem;">
                   <span>Withdraw</span>
@@ -5590,6 +5601,17 @@ HOW TO RECOVER YOUR ACCOUNT:
 
             ${isDefaultWalletName ? `
               <button type="button" class="btn btn-secondary" onclick="window.boobaApp.openAddUsernameModal()" style="display: inline-flex; align-items: center; gap: 0.45rem; background: rgba(255,255,255,0.06); border: 1.5px solid var(--border-medium); color: #FFFFFF; font-weight: 700; font-size: 0.85rem; border-radius: 12px; padding: 0.65rem 1.15rem;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span>+ Add Username</span>
+              </button>
+            ` : ''}
+
+            <a href="presale.html" class="btn" style="display: inline-flex; align-items: center; gap: 0.45rem; background: linear-gradient(135deg, #F3BA2F 0%, #E2A016 100%); color: #000; font-weight: 800; font-size: 0.85rem; border-radius: 12px; padding: 0.65rem 1.25rem; box-shadow: 0 0 20px rgba(243,186,47,0.4); text-decoration: none;">
+              <span class="pulse-dot" style="width: 6px; height: 6px; background: #000;"></span>
+              <span>⚡ Presale (Stage 1)</span>
+            </a>
+
+            <a href="withdraw.html" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.45rem; text-decoration: none; border: 1.5px solid var(--border-medium); background: rgba(255,255,255,0.06); color: #FFFFFF; font-size: 0.85rem; font-weight: 700; border-radius: 12px; padding: 0.65rem 1.25rem;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
               <span>Withdraw $BOOBA</span>
             </a>
@@ -5777,6 +5799,9 @@ HOW TO RECOVER YOUR ACCOUNT:
             <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.addTokenToWallet()" style="font-size: 0.78rem; padding: 0.35rem 0.75rem; color: var(--brand-yellow); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 10px;">
               + Add to Wallet
             </button>
+            <a href="presale.html" class="btn btn-ghost btn-sm" style="font-size: 0.78rem; padding: 0.35rem 0.75rem; color: #FFFFFF; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 10px;">
+              Presale Hub →
+            </a>
           </div>
         </div>
 
@@ -6072,6 +6097,603 @@ HOW TO RECOVER YOUR ACCOUNT:
     document.body.appendChild(modal);
   }
 
+  // --------------------------------------------------------------------------
+  // 2C. OFFICIAL PRESALE & LAUNCHPAD VIEW (presale.html)
+  // --------------------------------------------------------------------------
+
+  renderPresaleView(container) {
+    const user = db.currentUser;
+    const telemetry = db.getPresaleTelemetry();
+    const isWalletConnected = Boolean(user && user.walletAddress && user.walletAddress.startsWith('0x') && user.walletAddress.length >= 35 && !user.walletAddress.includes('...'));
+    const userPurchases = db.getUserPresalePurchases();
+
+    const totalUserAllocated = userPurchases.filter(p => p.status !== 'rejected').reduce((acc, p) => acc + (Number(p.totalTokens) || 0), 0);
+    const totalUserUsdt = userPurchases.filter(p => p.status !== 'rejected').reduce((acc, p) => acc + (Number(p.usdtAmount) || 0), 0);
+
+    // Paid users (any presale order that wasn't rejected) unlock the private Telegram group
+    const hasPaidAccess = userPurchases.some(p => p.status !== 'rejected');
+
+    const defaultUsdt = this.selectedPresaleUsdt || 100;
+    const launchWorthUsd = Math.round(defaultUsdt * (telemetry.baseRate || 1.1) * 100) / 100; // $100 USDT = 110 $BOOBA at current rate
+
+    container.innerHTML = `
+      <div class="container page-content" style="max-width: 1060px; margin: 0 auto; padding-top: 2rem; padding-bottom: 4rem;">
+        
+        <!-- Header & Back Navigation -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+          <a href="dashboard.html" class="back-dashboard-btn" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span>Dashboard</span>
+          </a>
+
+          <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.addTokenToWallet()" style="font-size: 0.78rem; padding: 0.35rem 0.75rem; color: var(--brand-yellow); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 10px;">
+            + Add $BOOBA to Wallet
+          </button>
+        </div>
+
+        <!-- Clean Header Title & Stage Info -->
+        <div style="text-align: center; max-width: 860px; margin: 0 auto 1.75rem auto;">
+          <div style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.85rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 999px; margin-bottom: 1rem;">
+            <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--brand-yellow);"></span>
+            <span style="font-size: 0.78rem; font-weight: 800; color: var(--brand-yellow); text-transform: uppercase; letter-spacing: 0.05em;">${telemetry.stageName || 'Stage 1 Live'}</span>
+          </div>
+
+          <h1 style="font-size: clamp(1.8rem, 4.5vw, 3rem); font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; margin: 0 0 0.6rem 0; line-height: 1.15;">
+            $BOOBA Token Presale
+          </h1>
+          <p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0 auto; line-height: 1.6; max-width: 580px;">
+            Send BEP-20 USDT to the official presale treasury wallet, submit your payment proof, and receive your $BOOBA tokens directly to your wallet.
+          </p>
+        </div>
+
+        <!-- PRE-SALE BENEFIT BANNER -->
+        <div style="max-width: 660px; margin: 0 auto 2.25rem auto; display: flex; align-items: center; gap: 1.1rem; background: rgba(243, 186, 47, 0.05); border: 1px solid rgba(243, 186, 47, 0.35); border-radius: 18px; padding: 1.15rem 1.4rem;">
+          <span style="font-size: 2.2rem; line-height: 1; flex-shrink: 0;">🎁</span>
+          <div style="font-size: 0.95rem; line-height: 1.55;">
+            <div style="font-size: 1.05rem; font-weight: 900; color: var(--brand-yellow); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.2rem;">
+              Pre-Sale Benefit
+            </div>
+            <div style="color: #E7EAF0; font-weight: 600;">
+                            For every $100 you send,<br>
+              you will receive <strong style="color: #FFFFFF; font-weight: 900;">$110</strong> worth of $BOOBA tokens <span style="color: var(--accent-emerald); font-weight: 800;">at launch.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-COLUMN LEFT & RIGHT GRID (LIKE SETTINGS PAGE) -->
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 2.5rem; align-items: start;">
+          
+          <!-- LEFT BOX: OFFICIAL TREASURY WALLET & INFO -->
+          <div class="card" style="padding: clamp(1.5rem, 3.5vw, 2.25rem); border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px);">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(243,186,47,0.12); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow); font-weight: 900; font-size: 0.85rem;">
+                1
+              </div>
+              <div>
+                <h3 style="font-size: 1.1rem; font-weight: 800; color: #FFFFFF; margin: 0;">Deposit USDT to Presale</h3>
+                <div style="font-size: 0.72rem; color: var(--text-secondary);">Official BNB Smart Chain (BEP-20) Destination</div>
+              </div>
+            </div>
+
+            <!-- Treasury Deposit Box -->
+            <div style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.15rem; margin-bottom: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem;">
+                <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">
+                  Treasury Deposit Address
+                </div>
+                <button type="button" title="Copy address" aria-label="Copy treasury address" onclick="window.boobaApp.copyPresaleAddress('${telemetry.treasuryAddress}')" style="width: 34px; height: 34px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.14); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: var(--transition);">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+              </div>
+              <div id="presaleTreasuryAddressDisplay" class="text-mono" style="font-size: 0.88rem; font-weight: 800; color: var(--brand-yellow); word-break: break-all; margin-bottom: 0.85rem; line-height: 1.4;">
+                ${telemetry.treasuryAddress}
+              </div>
+              <button type="button" id="copyPresaleTreasuryBtn" class="btn btn-primary btn-block btn-sm" onclick="window.boobaApp.copyPresaleAddress('${telemetry.treasuryAddress}')" style="font-size: 0.82rem; font-weight: 800; padding: 0.55rem 1rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; border-radius: 10px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <span>Copy Treasury Address</span>
+              </button>
+            </div>
+
+            <!-- Guidelines & Rate -->
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 14px; padding: 1rem; font-size: 0.78rem; color: var(--text-secondary); line-height: 1.6;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <span>Exchange Rate</span>
+                <span style="color: #FFFFFF; font-weight: 800;">100 USDT = ${Math.round(telemetry.baseRate * 100)} $BOOBA</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <span>Accepted Token</span>
+                <span style="color: #FFFFFF; font-weight: 700;">USDT (BEP-20)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span>Delivery</span>
+                <span style="color: var(--accent-emerald); font-weight: 700;">Direct to Sender Wallet</span>
+              </div>
+            </div>
+
+            <!-- IMPORTANT: DEX/WALLET-ONLY WARNING -->
+            <div style="margin-top: 1.1rem; background: rgba(239, 68, 68, 0.07); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 14px; padding: 1rem 1.1rem; display: flex; gap: 0.85rem; align-items: flex-start;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 0.2rem;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              <div style="font-size: 0.8rem; line-height: 1.55;">
+                <div style="font-weight: 900; color: #EF4444; margin-bottom: 0.25rem;">
+                  IMPORTANT - SEND FROM DEX/WALLET ONLY!
+                </div>
+                <div style="color: #FCA5A5;">
+                  Please send USDT directly from your DEX/Web3 wallet.<br>
+                  Do NOT send from a centralized exchange (Binance, Bybit, OKX, etc.).<br>
+                  Tokens are delivered automatically to the wallet that sends the USDT.<br>
+                  If you send from a centralized exchange, your $BOOBA tokens may not be received in your personal wallet and may be lost.
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT BOX: PRESALE PAYMENT PROOF FORM -->
+          <div class="card" style="padding: clamp(1.5rem, 3.5vw, 2.25rem); border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px);">
+            
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(243, 186, 47, 0.12); display: flex; align-items: center; justify-content: center; color: var(--brand-yellow); font-weight: 900; font-size: 0.85rem;">
+                2
+              </div>
+              <div>
+                <h3 style="font-size: 1.1rem; font-weight: 800; color: #FFFFFF; margin: 0;">Payment Proof Submission</h3>
+                <div style="font-size: 0.72rem; color: var(--text-secondary);">Submit transfer receipt to receive your $BOOBA</div>
+              </div>
+            </div>
+
+            <form id="presalePaymentForm" onsubmit="window.boobaApp.handlePresalePaymentSubmit(event)">
+              
+              <!-- 1. Your Wallet Address -->
+              <div class="form-field" style="margin-bottom: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem;">
+                  <label class="form-label" style="font-size: 0.82rem; font-weight: 800; color: #FFFFFF; margin: 0;">
+                    Your BSC/Web3 Wallet Address (BEP-20) <span style="color: var(--accent-ruby);">*</span>
+                  </label>
+                  ${isWalletConnected ? `
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('presaleWalletInput').value='${user.walletAddress}'" style="font-size: 0.72rem; padding: 0.15rem 0.45rem; color: var(--accent-emerald);">
+                      Use Connected
+                    </button>
+                  ` : ''}
+                </div>
+                <input type="text" id="presaleWalletInput" class="form-input text-mono" placeholder="0x...  Wallet that will receive $BOOBA tokens" value="${user?.walletAddress || ''}" required style="border-radius: 12px; height: 46px; font-size: 0.84rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem;">
+                  Your $BOOBA tokens will be delivered to this exact same wallet.
+                </div>
+              </div>
+
+              <!-- 2. Amount Sent (USDT) + Live Calculator -->
+              <div class="form-field" style="margin-bottom: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.4rem;">
+                  <label class="form-label" style="font-size: 0.82rem; font-weight: 800; color: #FFFFFF; margin: 0;">
+                    Amount Sent (USDT) <span style="color: var(--accent-ruby);">*</span>
+                  </label>
+                  <span>Min: $${telemetry.minBuyUsdt} (per wallet)</span>
+                </div>
+
+                <div style="position: relative;">
+                  <input type="number" id="presaleUsdtInput" class="form-input text-mono" placeholder="100" min="${telemetry.minBuyUsdt}" value="${defaultUsdt}" oninput="window.boobaApp.updatePresaleCalculation(this.value)" required style="padding-left: 2.75rem; font-size: 1.25rem; font-weight: 900; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; height: 50px;">
+                  <div style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-weight: 900; color: #26A17B; font-size: 1.1rem;">
+                    ₮
+                  </div>
+                </div>
+
+                <!-- Quick Presets -->
+                <div style="display: flex; gap: 0.35rem; margin-top: 0.55rem; flex-wrap: wrap;">
+                                    <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.setPresalePreset(100)" style="flex: 0 0 auto; min-width: 60px; font-size: 0.78rem; font-weight: 800; color: var(--brand-yellow); background: rgba(243, 186, 47, 0.1); border: 1px solid rgba(243, 186, 47, 0.35); border-radius: 999px; padding: 0.3rem 1rem;">$100</button>
+                </div>
+
+                <!-- Live Receive Preview Box -->
+                <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 0.85rem 1rem; margin-top: 0.75rem;">
+                  <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 0.25rem;">You Will Receive at Launch</div>
+                  <div style="display: flex; align-items: baseline; gap: 0.4rem;">
+                    <span id="presaleReceiveUsdDisplay" style="font-size: 1.65rem; font-weight: 900; color: var(--brand-yellow); font-family: var(--font-mono); line-height: 1;">$${launchWorthUsd}</span>
+                    <span style="font-size: 0.9rem; font-weight: 800; color: #FFFFFF;">worth of $BOOBA tokens</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2.5 Transaction Hash (TXID) -->
+              <div class="form-field" style="margin-bottom: 1.25rem;">
+                <label class="form-label" for="presaleTxHashInput" style="font-size: 0.82rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.4rem; display: block;">
+                  Transaction Hash (TXID) <span style="color: var(--accent-ruby);">*</span>
+                </label>
+                <input type="text" id="presaleTxHashInput" class="form-input text-mono" placeholder="0x...  Enter your BSC transaction hash" required style="border-radius: 12px; height: 46px; font-size: 0.84rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem;">
+                  Paste the transaction hash from your USDT transfer.
+                </div>
+              </div>
+
+              <!-- 3. Screenshot of Payment Proof Upload -->
+              <div class="form-field" style="margin-bottom: 1.5rem;">
+                <label class="form-label" style="font-size: 0.82rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.4rem; display: block;">
+                  Screenshot of Payment Proof <span style="color: var(--accent-ruby);">*</span>
+                </label>
+
+                <div id="presaleScreenshotUploadArea" style="border: 2px dashed rgba(255, 255, 255, 0.15); border-radius: 14px; padding: 1.25rem 1rem; text-align: center; background: rgba(0,0,0,0.3); cursor: pointer; transition: var(--transition);" onclick="document.getElementById('presaleScreenshotFileInput').click()">
+                  <input type="file" id="presaleScreenshotFileInput" accept="image/*" style="display: none;" onchange="window.boobaApp.handlePresaleScreenshotUpload(event)">
+                  
+                  <div id="presaleScreenshotPlaceholder">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem auto; color: var(--text-secondary);">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    </div>
+                    <div style="font-size: 0.82rem; font-weight: 700; color: #FFFFFF; margin-bottom: 0.2rem;">
+                      Click or Drag to Upload Screenshot
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">
+                      Trust Wallet / Binance / Exchange transfer receipt
+                    </div>
+                  </div>
+
+                  <!-- Active Image Preview Container -->
+                  <div id="presaleScreenshotPreviewContainer" style="display: none; position: relative;">
+                    <img id="presaleScreenshotPreviewImg" src="" alt="Payment Proof Preview" style="max-height: 180px; max-width: 100%; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 20px rgba(0,0,0,0.6); object-fit: contain; margin: 0 auto 0.6rem auto; display: block;">
+                    <div style="display: flex; justify-content: center; gap: 0.5rem;">
+                      <button type="button" class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); window.boobaApp.removePresaleScreenshot()" style="color: var(--accent-ruby); font-size: 0.72rem; background: rgba(244,63,94,0.1); border-radius: 6px; padding: 0.2rem 0.6rem;">
+                        Remove / Replace Screenshot
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" id="presaleSubmitActionBtn" class="btn btn-primary btn-lg btn-block" style="height: 50px; font-size: 1rem; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: 12px; background: linear-gradient(135deg, #F3BA2F 0%, #E2A016 100%); color: #000; box-shadow: 0 4px 20px rgba(243, 186, 47, 0.3);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Submit Payment Proof</span>
+              </button>
+
+            </form>
+
+          </div>
+
+        </div>
+
+        <!-- PRIVATE TELEGRAM GROUP ACCESS (gated by presale payment) -->
+        <div class="card" style="padding: 1.15rem 1.35rem; border-radius: 20px; background: rgba(14, 18, 27, 0.88); border: 1.5px solid ${hasPaidAccess ? 'rgba(55, 174, 226, 0.4)' : 'rgba(255, 255, 255, 0.08)'}; backdrop-filter: blur(20px); margin-bottom: 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; box-shadow: ${hasPaidAccess ? '0 8px 24px rgba(0,0,0,0.45)' : 'none'};">
+          <div style="display: flex; align-items: center; gap: 0.9rem; min-width: 0; flex: 1 1 auto;">
+            <div style="width: 46px; height: 46px; border-radius: 14px; background: rgba(55, 174, 226, 0.14); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${hasPaidAccess ? '#37AEE2' : '#6B7280'}" stroke-width="1.9" style="filter: drop-shadow(0 0 6px rgba(55,174,226,0.45));"><path d="M21.6 16.9c0-.4-6.5-.9-2.6-.1-7.2-.5-2.5.2-4.9 0-4.7-4.9-2.7-3.3-1.1-4.8a2.2 2.2 0 0 1-3.9-3.8l-4.5-6 2.3v4.8a3.7 3.7 0 0 1-.2-4.2 1.5 3.4 5.2-8.3Z"></path></svg>
+            </div>
+            <div style="min-width: 0;">
+              <div style="font-size: 0.95rem; font-weight: 900; color: #FFFFFF; margin: 0;">Private Community Telegram Group</div>
+              <div style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5;">${hasPaidAccess ? 'You have paid access — welcome in!' : 'Exclusive for confirmed presale contributors. Unlocks after your payment is submitted.'}</div>
+            </div>
+          </div>
+          <div>
+            ${hasPaidAccess ? `
+              <a href="https://t.me/+Oi6fQSn2zWBiOGM0" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="font-weight: 800; display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.82rem; padding: 0.6rem 1.1rem; border-radius: 12px; background: linear-gradient(135deg, #37AEE2 0%, #2A9FD6 100%); color: #FFFFFF; box-shadow: 0 4px 18px rgba(55,174,226,0.35); white-space: nowrap;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21.6 16.9c0-.4-6.5-.9-2.6-.1-7.2-.5-2.5.2-4.9 0-4.7-4.9-2.7-3.3-1.1-4.8a2.2 2.2 0 0 1-3.9-3.8l-4.5-6 2.3v4.8a3.7 3.7 0 0 1-.2-4.2 1.5 3.4 5.2-8.3Z"></path></svg>
+                Join Telegram Group
+              </a>
+            ` : `
+              <button type="button" class="btn btn-ghost btn-sm" disabled style="font-weight: 800; display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.82rem; padding: 0.6rem 1.1rem; border-radius: 12px; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.12); cursor: not-allowed; opacity: 0.75; white-space: nowrap;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21.6 16.9c0-.4-6.5-.9-2.6-.1-7.2-.5-2.5.2-4.9 0-4.7-4.9-2.7-3.3-1.1-4.8a2.2 2.2 0 0 1-3.9-3.8l-4.5-6 2.3v4.8a3.7 3.7 0 0 1-.2-4.2 1.5 3.4 5.2-8.3Z"></path></svg>
+                🔒 Locked — Join after your presale payment
+              </button>
+            `}
+          </div>
+        </div>
+
+        <!-- RECENT USER PRESALE SUBMISSIONS & ORDER STATUS -->
+        ${userPurchases.length > 0 ? `
+          <div class="card" style="padding: clamp(1.25rem, 3vw, 1.75rem); border-radius: 24px; background: rgba(14, 18, 27, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+              <h4 style="font-size: 1rem; font-weight: 800; color: #FFFFFF; margin: 0;">Your Presale Orders & Delivery Status</h4>
+              <span class="badge-tag" style="background: rgba(255, 255, 255, 0.06); color: var(--text-secondary); font-size: 0.72rem;">
+                ${userPurchases.length} ${userPurchases.length === 1 ? 'Order' : 'Orders'}
+              </span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              ${userPurchases.map(p => `
+                <div style="padding: 0.95rem 1.15rem; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                      <div style="font-weight: 900; color: var(--brand-yellow); font-size: 1.05rem; font-family: var(--font-mono);">
+                        ${Number(p.totalTokens).toLocaleString()} $BOOBA
+                      </div>
+                      <div style="font-size: 0.72rem; color: var(--text-muted);">
+                        ${new Date(p.timestamp).toLocaleDateString()} • Paid $${Number(p.usdtAmount).toLocaleString()} USDT
+                      </div>
+                    </div>
+
+                    <div>
+                      ${p.status === 'completed' ? `
+                        <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); font-weight: 800; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          Tokens Dispatched
+                        </span>
+                      ` : p.status === 'rejected' ? `
+                        <span class="badge-tag" style="background: rgba(244, 63, 94, 0.15); color: var(--accent-ruby); border-color: rgba(244, 63, 94, 0.3); font-weight: 800; font-size: 0.72rem;">
+                          Order Rejected
+                        </span>
+                      ` : `
+                        <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.3); font-weight: 800; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+                          <span class="pulse-dot" style="width: 5px; height: 5px; background: var(--brand-yellow);"></span>
+                          Pending Admin Delivery
+                        </span>
+                      `}
+                    </div>
+                  </div>
+
+                  <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; border: 1px solid rgba(255,255,255,0.04);">
+                    <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 0.2rem;">Your BEP-20 Wallet Address:</div>
+                    <div class="text-mono" style="color: var(--brand-yellow); font-size: 0.78rem; word-break: break-all; font-weight: 700;">
+                      ${p.receivingWallet || p.walletAddress || p.senderWallet || 'Registered Wallet'}
+                    </div>
+                  </div>
+
+                  <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                      ${p.proofScreenshot ? `
+                        <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.openImageLightbox('${p.proofScreenshot}')" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;">
+                          📷 Payment Receipt
+                        </button>
+                      ` : '<span style="color: var(--text-muted);">No receipt attached</span>'}
+                      
+                      ${p.deliveryProofScreenshot ? `
+                        <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.openImageLightbox('${p.deliveryProofScreenshot}')" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; color: var(--accent-emerald); background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; font-weight: 700;">
+                          ✓ Admin Delivery Proof
+                        </button>
+                      ` : ''}
+                    </div>
+
+                    <div>
+                      ${p.sentTxHash ? `
+                        <a href="https://bscscan.com/tx/${p.sentTxHash}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-emerald); font-weight: 700; text-decoration: underline;">
+                          Tx: ${p.sentTxHash.slice(0, 6)}...${p.sentTxHash.slice(-4)} ↗
+                        </a>
+                      ` : ''}
+                    </div>
+                  </div>
+
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+      </div>
+    `;
+  }
+
+  // --------------------------------------------------------------------------
+  // 2D. PRESALE INTERACTION CONTROLLERS & FORM HANDLERS
+  // --------------------------------------------------------------------------
+
+  copyPresaleAddress(address) {
+    if (!address) return;
+    navigator.clipboard.writeText(address).then(() => {
+      const btn = document.getElementById('copyPresaleTreasuryBtn');
+      if (btn) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = `<span>✓ Copied!</span>`;
+        setTimeout(() => { btn.innerHTML = orig; }, 2000);
+      }
+      alert('Official Presale Treasury Address copied to clipboard!\n' + address);
+    }).catch(() => {
+      alert('Presale Address: ' + address);
+    });
+  }
+
+  copySenderToReceiver() {
+    const sender = document.getElementById('presaleSenderWalletInput')?.value || '';
+    const receiverInput = document.getElementById('presaleReceivingWalletInput');
+    if (receiverInput && sender) {
+      receiverInput.value = sender;
+    }
+  }
+
+  setPresalePreset(amount) {
+    this.selectedPresaleUsdt = amount;
+    const input = document.getElementById('presaleUsdtInput');
+    if (input) {
+      input.value = amount;
+      this.updatePresaleCalculation(amount);
+    }
+  }
+
+  updatePresaleCalculation(usdtAmount) {
+    const val = Number(usdtAmount) || 0;
+    this.selectedPresaleUsdt = val;
+
+        // $100 USDT = 110 $BOOBA at the current presale rate (no per-wallet max)
+    const launchWorthUsd = Math.round(val * (PRESALE_CONFIG.baseRate || 1.1) * 100) / 100;
+    const receiveUsdEl = document.getElementById('presaleReceiveUsdDisplay');
+    if (receiveUsdEl) receiveUsdEl.textContent = `$${launchWorthUsd.toLocaleString()}`;
+  }
+
+  handlePresaleScreenshotUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file (.png, .jpg, .jpeg, .webp).');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size exceeds 10MB limit. Please upload a smaller screenshot.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.presaleScreenshotBase64 = e.target.result;
+
+      const placeholder = document.getElementById('presaleScreenshotPlaceholder');
+      const previewContainer = document.getElementById('presaleScreenshotPreviewContainer');
+      const previewImg = document.getElementById('presaleScreenshotPreviewImg');
+
+      if (placeholder) placeholder.style.display = 'none';
+      if (previewContainer) previewContainer.style.display = 'block';
+      if (previewImg) previewImg.src = this.presaleScreenshotBase64;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removePresaleScreenshot() {
+    this.presaleScreenshotBase64 = null;
+    const fileInput = document.getElementById('presaleScreenshotFileInput');
+    if (fileInput) fileInput.value = '';
+
+    const placeholder = document.getElementById('presaleScreenshotPlaceholder');
+    const previewContainer = document.getElementById('presaleScreenshotPreviewContainer');
+    const previewImg = document.getElementById('presaleScreenshotPreviewImg');
+
+    if (placeholder) placeholder.style.display = 'block';
+    if (previewContainer) previewContainer.style.display = 'none';
+    if (previewImg) previewImg.src = '';
+  }
+
+  async handlePresalePaymentSubmit(e) {
+    if (e) e.preventDefault();
+
+    const walletAddress = document.getElementById('presaleWalletInput')?.value?.trim() || document.getElementById('presaleSenderWalletInput')?.value?.trim();
+    const usdtAmount = Number(document.getElementById('presaleUsdtInput')?.value);
+    const txHash = document.getElementById('presaleTxHashInput')?.value?.trim() || '';
+    const btn = document.getElementById('presaleSubmitActionBtn');
+
+    if (!walletAddress || walletAddress.length < 15 || !walletAddress.startsWith('0x')) {
+      alert('Please enter a valid BEP-20 wallet address (starts with 0x).');
+      return;
+    }
+
+    if (isNaN(usdtAmount) || usdtAmount < PRESALE_CONFIG.minBuyUsdt) {
+      alert(`Minimum presale contribution is ${PRESALE_CONFIG.minBuyUsdt} USDT.`);
+      return;
+    }
+
+    if (!txHash || txHash.length < 10 || !txHash.startsWith('0x')) {
+      alert('Please enter the transaction hash (TXID) from your USDT transfer.');
+      return;
+    }
+
+    if (!this.presaleScreenshotBase64) {
+      alert('Please upload a screenshot of your payment receipt as proof of transfer.');
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `
+        <span class="pulse-dot" style="width: 8px; height: 8px; background: #000;"></span>
+        <span>Submitting Payment Proof...</span>
+      `;
+    }
+
+    try {
+      const res = await db.submitPresalePaymentForm({
+        senderWallet: walletAddress,
+        receivingWallet: walletAddress,
+        usdtAmount,
+        proofScreenshot: this.presaleScreenshotBase64,
+        txHash
+      });
+
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>Submit Payment Proof</span>
+        `;
+      }
+
+      if (res.success) {
+        this.presaleScreenshotBase64 = null;
+        this.showPresaleSuccessModal(res.order);
+        this.renderPresaleView(document.getElementById('app'));
+        this.updateNavState();
+      } else {
+        alert(res.message || 'Payment submission failed.');
+      }
+    } catch (err) {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<span>Submit Presale Payment Proof</span>`;
+      }
+      alert('Submission error: ' + err.message);
+    }
+  }
+
+  showPresaleSuccessModal(order) {
+    const existing = document.getElementById('presaleSuccessModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'presaleSuccessModal';
+    modal.className = 'modal-backdrop open active';
+    modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(20px); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1rem;';
+
+    modal.innerHTML = `
+      <div class="card" style="max-width: 520px; width: 100%; padding: 2.5rem 2rem; border-radius: 28px; border: 1.5px solid rgba(243, 186, 47, 0.5); background: linear-gradient(180deg, rgba(20, 26, 38, 0.98) 0%, rgba(10, 13, 20, 0.99) 100%); text-align: center; box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 50px rgba(243, 186, 47, 0.3); animation: popInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        
+        <div style="width: 70px; height: 70px; border-radius: 22px; background: rgba(243, 186, 47, 0.15); border: 1.5px solid rgba(243, 186, 47, 0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto; color: var(--brand-yellow);">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.65rem;">
+          <span class="badge-tag" style="background: rgba(243, 186, 47, 0.15); color: var(--brand-yellow); border-color: rgba(243, 186, 47, 0.4); font-weight: 800; font-size: 0.75rem;">
+            PAYMENT SUBMITTED TO ADMIN
+          </span>
+        </div>
+
+        <h3 style="font-size: 1.5rem; font-weight: 900; color: #FFFFFF; margin-bottom: 0.6rem;">
+          ${Number(order.totalTokens).toLocaleString()} $BOOBA Order Logged!
+        </h3>
+
+        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;">
+          Your payment proof for <strong>$${Number(order.usdtAmount).toLocaleString()} USDT</strong> has been submitted. The admin will verify your screenshot and dispatch your tokens to your DEX wallet.
+        </p>
+
+        <!-- JOIN PRIVATE TELEGRAM GROUP NOTICE -->
+        <div style="background: rgba(55, 174, 226, 0.08); border: 1.5px solid rgba(55, 174, 226, 0.4); border-radius: 16px; padding: 1rem 1.15rem; margin-bottom: 1.1rem; display: flex; align-items: center; gap: 0.85rem;">
+          <div style="width: 44px; height: 44px; border-radius: 13px; background: rgba(55, 174, 226, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#37AEE2" stroke-width="1.9"><path d="M21.6 16.9c0-.4-6.5-.9-2.6-.1-7.2-.5-2.5.2-4.9 0-4.7-4.9-2.7-3.3-1.1-4.8a2.2 2.2 0 0 1-3.9-3.8l-4.5-6 2.3v4.8a3.7 3.7 0 0 1-.2-4.2 1.5 3.4 5.2-8.3Z"></path></svg>
+          </div>
+          <div style="min-width: 0; text-align: left;">
+            <div style="font-size: 0.92rem; font-weight: 900; color: #37AEE2; margin: 0;">Now join our Private Telegram Group!</div>
+            <div style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5;">Your payment is logged — tap the button below to get instant access to the exclusive paid-members group.</div>
+          </div>
+        </div>
+
+        <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.15rem; margin-bottom: 1.75rem; text-align: left; font-size: 0.82rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-secondary);">Receiving DEX Wallet:</span>
+            <strong class="text-mono" style="color: var(--brand-yellow);">${order.receivingWallet.slice(0, 6)}...${order.receivingWallet.slice(-4)}</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-secondary);">Sender Wallet:</span>
+            <strong class="text-mono" style="color: #FFFFFF;">${order.senderWallet.slice(0, 6)}...${order.senderWallet.slice(-4)}</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-secondary);">Status:</span>
+            <strong style="color: var(--brand-yellow);">🟡 Pending Token Distribution</strong>
+          </div>
+          ${order.proofScreenshot ? `
+            <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="window.boobaApp.openImageLightbox('${order.proofScreenshot}')" style="font-size: 0.74rem; color: var(--brand-yellow);">
+                📷 View Uploaded Screenshot Proof
+              </button>
+            </div>
+          ` : ''}
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; flex-direction: column;">
+          <a href="https://t.me/+Oi6fQSn2zWBiOGM0" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-block" style="font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: linear-gradient(135deg, #37AEE2 0%, #2A9FD6 100%); color: #FFFFFF; box-shadow: 0 4px 18px rgba(55,174,226,0.35);">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21.6 16.9c0-.4-6.5-.9-2.6-.1-7.2-.5-2.5.2-4.9 0-4.7-4.9-2.7-3.3-1.1-4.8a2.2 2.2 0 0 1-3.9-3.8l-4.5-6 2.3v4.8a3.7 3.7 0 0 1-.2-4.2 1.5 3.4 5.2-8.3Z"></path></svg>
+            Join Private Telegram Group
+          </a>
+          <button type="button" class="btn btn-ghost btn-block" onclick="document.getElementById('presaleSuccessModal').remove()" style="font-weight: 800;">
+            Close & View Order Status
+          </button>
+        </div>
+
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
 
   openImageLightbox(imageUrl) {
     const existing = document.getElementById('imageLightboxModal');

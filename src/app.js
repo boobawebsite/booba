@@ -2169,10 +2169,6 @@ HOW TO RECOVER YOUR ACCOUNT:
             </p>
 
             <div class="hero-actions">
-              <a href="presale.html" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #F3BA2F 0%, #E2A016 100%); color: #000; font-weight: 800; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 0 25px rgba(243, 186, 47, 0.4);">
-                <span class="pulse-dot" style="width: 7px; height: 7px; background: #000;"></span>
-                <span>⚡ Join Presale (Stage 1 Live)</span>
-              </a>
               ${user ? `
                 <a href="withdraw.html" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 0.45rem;">
                   <span>Withdraw</span>

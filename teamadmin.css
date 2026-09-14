@@ -759,9 +759,6 @@ textarea.admin-input {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* --------------------------------------------------------------------------
-   3B. Dedicated Admin Presale, Bridge & Cards Pro Styling System
-   -------------------------------------------------------------------------- */
 .admin-tab-pane {
   display: block;
   animation: adminFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
